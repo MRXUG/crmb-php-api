@@ -98,6 +98,8 @@ class ReceiveCoupon extends BaseController
                 'stock_id'    => $stockId,
                 'start_at'    => $start,
                 'end_at'      => $end,
+                'appid'      => $params["appId"],
+                'mch_id'      => $params["mch_id"],
                 'create_time' => date('Y-m-d H:i:s'),
             ];
 
