@@ -24,24 +24,21 @@ class CouponStocksUserDao extends BaseDao
         $query->hasWhere('stockDetail', function ($query) use ($where) {
             if (isset($where['stock_name']) && $where['stock_name'] != '') {
                 $query->where('stock_name', 'LIKE', "%{$where['stock_name']}%");
+            } elseif (isset($where['nickname']) && $where['nickname'] != '') {
+                $query->where('nickname', 'LIKE', "%{$where['nickname']}%");
+            }elseif(isset($where['stock_id']) && $where['stock_id'] != '') {
+                $query->where('stock_id', (int)$where['stock_id']);
             } else {
                 $query->where(true);
             }
         });
-         $query->hasWhere('userDetail', function ($query) use ($where) {
-             if (isset($where['nickname']) && $where['nickname'] != '') {
-                 $query->where('nickname', 'LIKE', "%{$where['nickname']}%");
-             } else {
-                 $query->where(true);
-             }
-         });
 
         $query->when(isset($where['written_off']) && $where['written_off'] !== '', function ($query) use ($where) {
             $query->where('written_off', (int)$where['written_off']);
         })
-            ->when(isset($where['stock_id']) && $where['stock_id'] !== '', function ($query) use ($where) {
-                $query->where('stockDetail.stock_id', (int)$where['stock_id']);
-            })
+//            ->when(isset($where['stock_id']) && $where['stock_id'] !== '', function ($query) use ($where) {
+//                $query->where('stockDetail.stock_id', (int)$where['stock_id']);
+//            })
             ->when(isset($where['coupon_user_id']) && $where['coupon_user_id'] !== '', function ($query) use ($where) {
                 $query->where('coupon_user_id', (int)$where['coupon_user_id']);
             })
