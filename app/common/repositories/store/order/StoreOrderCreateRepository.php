@@ -1293,12 +1293,15 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 'is_pay' => 1
             ]);
 
-            // 核销商家券
-            /**
-             * @var CouponStocksUserRepository $couponUserRepository
-             */
-            $couponUserRepository = app()->make(CouponStocksUserRepository::class);
-//            $couponUserRepository->use($marketingDiscount);
+            if ($orderTotalMarketingDiscount >= $groupOrder["total_price"]){
+                // 核销商家券
+                /**
+                 * @var CouponStocksUserRepository $couponUserRepository
+                 */
+                $couponUserRepository = app()->make(CouponStocksUserRepository::class);
+                $couponUserRepository->use($marketingDiscount);
+            }
+
 
             //使用优惠券
             if (count($allUseCoupon)) {
