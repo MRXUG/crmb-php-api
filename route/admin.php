@@ -17,12 +17,12 @@ use app\common\middleware\LogMiddleware;
 use app\common\middleware\RequestLockMiddleware;
 use think\facade\Route;
 
-/*Route::group(config('admin.admin_prefix'), function () {
-    Route::miss(function () {
-        $DB = DIRECTORY_SEPARATOR;
-        return view(app()->getRootPath() . 'public' . $DB . 'system.html');
-    });
-})->middleware(InstallMiddleware::class);*/
+//Route::group(config('admin.admin_prefix'), function () {
+//    Route::miss(function () {
+//        $DB = DIRECTORY_SEPARATOR;
+//        return view(app()->getRootPath() . 'public' . $DB . 'system.html');
+//    });
+//})->middleware(InstallMiddleware::class);
 
 Route::group(config('admin.api_admin_prefix') . '/', function () {
 
