@@ -1298,7 +1298,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
              * @var CouponStocksUserRepository $couponUserRepository
              */
             $couponUserRepository = app()->make(CouponStocksUserRepository::class);
-            $couponUserRepository->use($marketingDiscount);
+//            $couponUserRepository->use($marketingDiscount);
 
             //使用优惠券
             if (count($allUseCoupon)) {

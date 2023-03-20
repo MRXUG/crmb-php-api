@@ -20,6 +20,7 @@ use app\common\model\system\merchant\MerchantGoodsPayment;
 use app\common\model\system\merchant\MerchantProfitRecord;
 use app\common\model\user\User;
 use app\common\repositories\BaseRepository;
+use app\common\repositories\coupon\CouponStocksUserRepository;
 use app\common\repositories\delivery\DeliveryOrderRepository;
 use app\common\repositories\store\coupon\StoreCouponRepository;
 use app\common\repositories\store\coupon\StoreCouponUserRepository;
@@ -249,6 +250,15 @@ class StoreOrderRepository extends BaseRepository
                     $order->verify_code = $this->verifyCode();
                 // 上面的活动在千流暂时没有 或者后期根据付款情况记录appid
                 $order->save();
+
+
+                if ($order->coupon_code && $order->stock_id){
+                    //核销券
+                    $couponUserRepository = app()->make(CouponStocksUserRepository::class);
+                    $couponUserRepository->use(['coupon_code'=>$order->coupon_code,'stock_id'=>$order->stock_id]);
+                }
+
+
                 $orderStatus[] = [
                     'order_id' => $order->order_id,
                     'change_message' => '订单支付成功',
@@ -398,6 +408,9 @@ class StoreOrderRepository extends BaseRepository
                 //自动打印订单
                 $this->autoPrinter($order->order_id, $order->mer_id);
             }
+
+
+
             if ($groupOrder->user->spread_uid) {
                 Queue::push(UserBrokerageLevelJob::class, ['uid' => $groupOrder->user->spread_uid, 'type' => 'spread_pay_num', 'inc' => 1]);
                 Queue::push(UserBrokerageLevelJob::class, ['uid' => $groupOrder->user->spread_uid, 'type' => 'spread_money', 'inc' => $groupOrder->pay_price]);
