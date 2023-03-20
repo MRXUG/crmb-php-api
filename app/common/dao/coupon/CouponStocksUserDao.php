@@ -20,7 +20,8 @@ class CouponStocksUserDao extends BaseDao
     public function search(?int $mchId, array $where)
     {
         $query = ($this->getModel()::getDB());
-        $query->hasWhere('stockDetail', function ($query) use($where) {
+        $query->with(['stockDetail']);
+        $query->hasWhere('stockDetail', function ($query) use ($where) {
             if (isset($where['stock_name']) && $where['stock_name'] != '') {
                 $query->where('stock_name', 'LIKE', "%{$where['stock_name']}%");
             } else {
