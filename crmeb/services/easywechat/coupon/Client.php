@@ -202,7 +202,7 @@ class Client extends BaseClient
 
         $jsonBody = json_encode($body);
         $result =  $this->request('/v3/marketing/busifavor/coupons/use', 'POST', ['sign_body' => $jsonBody]);
-        if (!empty($result['code'])) {
+        if (isset($result['code']) && !empty($result['code'])) {
             throw new WechatException($this->wechatError($result));
         }
         return $result;

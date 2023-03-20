@@ -220,7 +220,7 @@ class CouponStocksUserRepository extends BaseRepository
     {
         if (!empty($params['coupon_code']) && !empty($params['stock_id'])) {
             try {
-                MerchantCouponService::create(MerchantCouponService::USE_COUPON, [], $merchantConfig)->coupon()->use($params);
+                MerchantCouponService::create(MerchantCouponService::USE_COUPON, $params, $merchantConfig)->coupon()->use($params);
                 $where = [
                     'coupon_code' => $params['coupon_code'],
                     'written_off' => 0,

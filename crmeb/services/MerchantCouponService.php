@@ -200,8 +200,8 @@ class MerchantCouponService
         }
 
         // 商户信息
-        $merchantById = $platformMerchantRepository->formatMerchantByMchId();
-        $payment = $merchantById[$mchId];
+        $merchantById = $platformMerchantRepository->formatMerchantByMchId($mchId);
+        $payment = $merchantById;
         return self::formatMerchantConfig($payment);
     }
 
