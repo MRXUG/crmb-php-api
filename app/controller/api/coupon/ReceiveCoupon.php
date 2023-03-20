@@ -89,6 +89,14 @@ class ReceiveCoupon extends BaseController
             $where = [
                 'coupon_code' => $item['coupon_code'],
             ];
+            if (!$item["out_request_no"]){
+                throw new ValidateException('商户号不存在');
+            }
+            $out_request_no = explode("_",$item["out_request_no"]);
+
+            if (count($out_request_no) < 2){
+                throw new ValidateException('商户号不存在');
+            }
             $data = [
                 'mer_id'      => $stockInfo['mer_id'] ?? 0,
                 'ad_id'       => $item['ad_id'] ?? 0,
@@ -98,8 +106,8 @@ class ReceiveCoupon extends BaseController
                 'stock_id'    => $stockId,
                 'start_at'    => $start,
                 'end_at'      => $end,
-                'appid'      => $params["appId"],
-                'mch_id'      => $params["mch_id"],
+                'appid'      => $out_request_no[0],
+                'mch_id'      => $out_request_no[1],
                 'create_time' => date('Y-m-d H:i:s'),
             ];
 
