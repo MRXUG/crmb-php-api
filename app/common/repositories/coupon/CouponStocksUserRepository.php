@@ -260,7 +260,7 @@ class CouponStocksUserRepository extends BaseRepository
                 'coupon_code' => $order->coupon_code,
             ];
             try {
-                MerchantCouponService::create(MerchantCouponService::RETURN_COUPON)->coupon()->return($params);
+                MerchantCouponService::create(MerchantCouponService::RETURN_COUPON, $params)->coupon()->return($params);
                 $where = [
                     'coupon_code' => $params['coupon_code'],
                     'written_off' => 1,

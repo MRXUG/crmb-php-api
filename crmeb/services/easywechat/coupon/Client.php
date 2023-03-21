@@ -148,7 +148,7 @@ class Client extends BaseClient
         $body = [
             'stock_id'       => $params['stock_id'],
             'coupon_code'    => $params['coupon_code'],
-            'use_request_no' => $this->generateOutRequestNo($appId, $mchId),
+            'return_request_no' => $this->generateOutRequestNo($appId, $mchId),
         ];
 
         $jsonBody = json_encode($body);

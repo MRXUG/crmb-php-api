@@ -251,14 +251,6 @@ class StoreOrderRepository extends BaseRepository
                 // 上面的活动在千流暂时没有 或者后期根据付款情况记录appid
                 $order->save();
 
-
-                if (!empty(['$order->coupon_code']) && !empty($order['stock_id'])){
-                    //核销券
-                    $couponUserRepository = app()->make(CouponStocksUserRepository::class);
-                    $couponUserRepository->use(['coupon_code'=>$order->coupon_code,'stock_id'=>$order->stock_id]);
-                }
-
-
                 $orderStatus[] = [
                     'order_id' => $order->order_id,
                     'change_message' => '订单支付成功',
