@@ -252,11 +252,11 @@ class StoreOrderRepository extends BaseRepository
                 $order->save();
 
 
-                if ($order->coupon_code && $order->stock_id){
-                    //核销券
-                    $couponUserRepository = app()->make(CouponStocksUserRepository::class);
-                    $couponUserRepository->use(['coupon_code'=>$order->coupon_code,'stock_id'=>$order->stock_id]);
-                }
+//                if ($order->coupon_code && $order->stock_id){
+//                    //核销券
+//                    $couponUserRepository = app()->make(CouponStocksUserRepository::class);
+//                    $couponUserRepository->use(['coupon_code'=>$order->coupon_code,'stock_id'=>$order->stock_id]);
+//                }
 
 
                 $orderStatus[] = [
