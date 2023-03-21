@@ -185,6 +185,7 @@ class Product extends BaseController
         $merData= merchantConfig($this->request->merId(),['mer_integral_status','mer_integral_rate','mer_svip_status','svip_store_rate']);
         $svip_store_rate = $merData['svip_store_rate'] > 0 ? bcdiv($merData['svip_store_rate'],100,2) : 0;
         $data['mer_svip_status'] = ($data['svip_switch_status']  && $merData['mer_svip_status'] != 0 ) ? 1 : 0;
+//        $data['mer_svip_status'] = (int) $merData['mer_svip_status'];
         $data['svip_store_rate'] = $svip_store_rate;
         $data['integral_status'] = $data['integral_status'] && $merData['mer_integral_status'] ? 1 : 0;
         $data['integral_rate'] = $merData['mer_integral_rate'] ?: 0;

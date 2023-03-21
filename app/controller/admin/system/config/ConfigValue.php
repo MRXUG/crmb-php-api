@@ -59,7 +59,7 @@ class ConfigValue extends BaseController
     {
         $formData = $this->request->post();
         if (!count($formData)) return app('json')->fail('保存失败');
-        
+
         // 服务方式 0-线上客服 1-拨打电话
         if (isset($formData['services_type'])) {
             if (isset($formData['mer_contact_address']) && empty($formData['mer_contact_address'])) {
@@ -74,7 +74,7 @@ class ConfigValue extends BaseController
         } elseif (isset($formData['platform_qy_customer_chat_url']) && !preg_match("/https:\/\//", $formData['platform_qy_customer_chat_url'])) {
             return app('json')->fail('联系客服地址错误');
         }
-
+//        dd($formData);
         /** @var ConfigClassifyRepository $make */
         $make = app()->make(ConfigClassifyRepository::class);
         if (!($cid = $make->keyById($key))) return app('json')->fail('保存失败');

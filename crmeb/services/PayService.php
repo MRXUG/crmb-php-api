@@ -71,6 +71,7 @@ class PayService
         if (!$openId)
             throw new ValidateException('请关联微信小程序或稍后再试!');
         $config = MiniProgramService::create($this->options['mer_id'])->jsPay($openId, $this->options['order_sn'], $this->options['pay_price'], $this->options['attach'], $this->options['body']);
+        Log::info("支付配置 " . json_encode($config));
         return compact('config');
     }
 

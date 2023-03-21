@@ -15,9 +15,11 @@ namespace app\common\repositories\store\order;
 
 
 use app\common\dao\store\order\StoreRefundOrderDao;
+use app\common\model\store\order\StoreGroupOrder;
 use app\common\model\store\order\StoreOrder;
 use app\common\model\store\order\StoreRefundOrder;
 use app\common\repositories\BaseRepository;
+use app\common\repositories\coupon\CouponStocksUserRepository;
 use app\common\repositories\store\product\ProductRepository;
 use app\common\repositories\system\merchant\FinancialRecordRepository;
 use app\common\repositories\system\merchant\MerchantRepository;
@@ -1035,6 +1037,20 @@ class StoreRefundOrderRepository extends BaseRepository
                 'balance' => $userIntegral,
                 'mer_id' => $refundOrder->mer_id
             ]);
+        }
+
+        $groupOrder = StoreGroupOrder::getDB()->alias("go")
+            ->field(["go.*"])
+            ->leftJoin('eb_store_order so', 'go.group_order_id = so.group_order_id')
+            ->where('so.order_id', '=', $refundOrder->order_id)
+            ->find();
+        // 退券
+        if (!empty($groupOrder->coupon_code)) {
+            /**
+             * @var CouponStocksUserRepository $couponStocksUserRepository
+             */
+            $couponStocksUserRepository = app()->make(CouponStocksUserRepository::class);
+            $couponStocksUserRepository->return($groupOrder);
         }
 
         //退还赠送积分
