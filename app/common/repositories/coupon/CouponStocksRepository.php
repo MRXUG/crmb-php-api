@@ -60,7 +60,7 @@ class CouponStocksRepository extends BaseRepository
      */
     public function list($page, $limit, $where, $mchId): array
     {
-        $query = $this->dao->search($mchId, $where);
+        $query = $this->dao->search($mchId, $where)->where('end_at', '>', date("Y-m-d H:i:s"));
         $count = $query->count();
         $list = $query->page($page, $limit)->select();
         foreach ($list as &$item) {

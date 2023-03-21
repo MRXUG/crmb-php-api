@@ -188,6 +188,7 @@ class MenuDao extends BaseDao
             $ids = array_merge($ids, explode('/', trim($path, '/')));
             array_push($ids, $id);
         }
+
         return Menu::getDB()->where('is_menu', 1)->where('is_show', 1)->order('sort DESC,menu_id ASC')->where('is_mer', 1)
             ->whereIn('menu_id', array_unique(array_filter($ids)))
             ->column('menu_name,route,params,icon,pid,menu_id');

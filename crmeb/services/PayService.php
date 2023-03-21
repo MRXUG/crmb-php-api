@@ -18,6 +18,7 @@ use app\common\repositories\wechat\UserOpenidRelationRepository;
 use app\common\repositories\wechat\WechatUserRepository;
 use think\exception\ValidateException;
 use think\facade\Cache;
+use think\facade\Log;
 
 class PayService
 {
@@ -38,6 +39,7 @@ class PayService
         if (!method_exists($this, $method)) {
             throw new ValidateException('不支持该支付方式');
         }
+        Log::info("支付的类型 " . $method . json_encode($user));
         return $this->{$method}($user);
     }
 
