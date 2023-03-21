@@ -52,12 +52,12 @@ class CouponStocksUserDao extends BaseDao
                 $query->where('CouponStocks.mer_id', (int)$where['mer_id']);
             })
             ->when(isset($where['time']), function ($query) use ($where) {
-                $query->where('start_at', '<=', $where['time'])
-                    ->where('end_at', '>', $where['time']);
+                $query->where('CouponStocksUser.start_at', '<=', $where['time'])
+                    ->where('CouponStocksUser.end_at', '>', $where['time']);
             })
             ->where('CouponStocksUser.is_del', WxAppletModel::IS_DEL_NO);
 
-        return $query->order('coupon_user_id DESC');
+        return $query->order('sss DESC');
     }
 
     /**
