@@ -16,6 +16,7 @@ namespace app\common\dao\store\coupon;
 
 use app\common\dao\BaseDao;
 use app\common\model\BaseModel;
+use app\common\model\coupon\CouponStocks;
 use app\common\model\store\coupon\StoreCoupon;
 use app\common\model\store\coupon\StoreCouponUser;
 use app\common\repositories\store\coupon\StoreCouponRepository;
@@ -55,6 +56,7 @@ class StoreCouponDao extends BaseDao
      */
     public function search(?int $merId, array $where)
     {
+        return $this->newSearch($merId, $where);
         if(isset($where['is_trader']) && $where['is_trader'] !== ''){
             $query = StoreCoupon::hasWhere('merchant',function($query)use($where){
                 $query->where('is_trader',$where['is_trader']);
@@ -78,6 +80,32 @@ class StoreCouponDao extends BaseDao
             $query->where('type', '<', 10);
         });
         return $query->where('StoreCoupon.is_del', 0)->order(($merId ? 'StoreCoupon.sort DESC,' : '') . 'coupon_id DESC');
+    }
+
+    public function newSearch(?int $merId, array $where): BaseQuery
+    {
+        $query = isset($where['is_reader']) && $where['is_trader'] !== ''
+            ? CouponStocks::hasWhere('merchant',function($query)use($where){
+                    $query->where('is_trader',$where['is_trader']);
+                })
+            : CouponStocks::getDB()->alias('StoreCoupon');
+
+        $query->when(isset($where['status']) && $where['status'] !== '', function ($query) use ($where) {
+            $query->where('StoreCoupon.status', (int)$where['status']);
+        })->when(isset($where['coupon_name']) && $where['coupon_name'] !== '', function ($query) use ($where) {
+            $query->whereLike('title', "%{$where['coupon_name']}%");
+        })->when(isset($where['coupon_id']) && $where['coupon_id'] !== '', function ($query) use ($where) {
+            $query->where('StoreCoupon.id', (int)$where['coupon_id']);
+        })->when(isset($where['send_type']) && $where['send_type'] !== '', function ($query) use ($where) {
+            $query->where('send_type', (int)$where['send_type']);
+        })->when(isset($where['type']) && $where['type'] !== '', function ($query) use ($where) {
+            $query->where('type', (int)$where['type']);
+        })->when($merId !== null, function ($query) use ($merId) {
+            $query->where('StoreCoupon.mer_id', $merId);
+        })->when(isset($where['is_mer']) &&  $where['is_mer'] !== '', function ($query) use ($merId) {
+            $query->where('type', '<', 10);
+        });
+        return $query->where('StoreCoupon.is_del', 0)->order(($merId ? 'StoreCoupon.sort DESC,' : '') . 'StoreCoupon.id DESC');
     }
 
     /**

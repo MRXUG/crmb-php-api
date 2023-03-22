@@ -26,6 +26,7 @@ use app\common\repositories\store\StoreCategoryRepository;
 use app\common\repositories\store\StoreSeckillActiveRepository;
 use app\common\repositories\user\UserVisitRepository;
 use think\facade\Queue;
+use think\model\Collection;
 
 class SpuRepository extends BaseRepository
 {
@@ -440,40 +441,29 @@ class SpuRepository extends BaseRepository
 
     public function getApiSearchByCoupon($where, $page, $limit, $userInfo)
     {
-        $coupon = app()->make(StoreCouponRepository::class)->search(null, [
-            'status' => 1,
+        /** @var StoreCouponRepository $couponRepository */
+        $couponRepository = app()->make(StoreCouponRepository::class);
+        $coupon = $couponRepository->search(null, [
+            'status' => 2,
             'coupon_id' => $where['coupon_id']
-        ])->find();
+        ])->with(['product'])->find();
+        /** @var Collection $productList */
+        $productList = $coupon->getRelation('product');
         $data['coupon'] = $coupon;
         if ($coupon) {
-            switch ($coupon['type']) {
-                case 0:
-                    $where['mer_id'] = $coupon['mer_id'];
-                    break;
-                case 1:
-                    $where['product_ids'] = app()->make(StoreCouponProductRepository::class)->search([
-                        'coupon_id' => $where['coupon_id']
-                    ])->column('product_id');
-                    break;
-                case 11:
-                    $ids = app()->make(StoreCouponProductRepository::class)->search([
-                        'coupon_id' => $where['coupon_id']
-                    ])->column('product_id');
-                    $where['cate_pid'] = $ids;
-                    break;
-                case 10:
-                    break;
-                case 12:
-                    $ids = app()->make(StoreCouponProductRepository::class)->search([
-                        'coupon_id' => $where['coupon_id']
-                    ])->column('product_id');
-                    $where['mer_ids'] = $ids;
-                    break;
+            // 店铺获取模式
+            if ($coupon->getAttr('scope') == 1) {
+                $where['mer_id'] = $coupon->getAttr('mer_id');
             }
-            $where['is_coupon'] = 1;
+            // 商品获取模式
+            if ($coupon->getAttr('scope') == 2) {
+                $where['product_ids'] = [];
+                if ($productList) {
+                    $where['product_ids'] = array_unique(array_column($productList->toArray() ?? [], 'product_id'));
+                }
+            }
             $where['order'] = 'star';
-            $where['common'] = 1;
-            $where['svip'] = ($coupon['send_type'] == StoreCouponRepository::GET_COUPON_TYPE_SVIP) ? 1 : '';
+            $where['is_coupon'] = 1;
             $product = $this->getApiSearch($where, $page, $limit, $userInfo);
         }
 

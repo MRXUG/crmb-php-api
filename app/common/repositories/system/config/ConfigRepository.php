@@ -158,6 +158,7 @@ class ConfigRepository extends BaseRepository
     public function cidByFormRule(SystemConfigClassify $configClassify, int $merId)
     {
         $config = $this->dao->cidByConfig($configClassify->config_classify_id, $merId == 0 ? 0 : 1);
+//        var_dump($config);die;
         $keys = $config->column('config_key');
         return $this->formRule($merId, $configClassify, $config->toArray(), app()->make(ConfigValueRepository::class)->more($keys, $merId));
     }
@@ -240,6 +241,7 @@ class ConfigRepository extends BaseRepository
 
     public function tabForm($group, $merId)
     {
+        /** @var ConfigClassifyRepository $make */
         $make = app()->make(ConfigClassifyRepository::class);
         $list = $make->children($group->config_classify_id, 'config_classify_id,classify_key,classify_name,info');
         $children = [];

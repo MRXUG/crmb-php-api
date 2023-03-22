@@ -6,6 +6,7 @@
 namespace app\common\model\coupon;
 
 use app\common\model\BaseModel;
+use app\common\model\system\merchant\Merchant;
 use think\model\relation\HasMany;
 
 class CouponStocks extends BaseModel
@@ -131,6 +132,12 @@ class CouponStocks extends BaseModel
     public function couponStocksUser(): HasMany
     {
         return $this->hasMany(CouponStocksUser::class, 'stock_id', 'stock_id');
+    }
+
+
+    public function merchant()
+    {
+        return $this->hasOne(Merchant::class, 'mer_id', 'mer_id');
     }
 
 }
