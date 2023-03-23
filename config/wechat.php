@@ -19,7 +19,7 @@ return [
      */
     'plugin_setting' => [
         [
-            'plugin_appid' => 'wxf3f436ba9bd4be7b',
+            'plugin_appid' => '',
             'reason' => '向指定用户发放指定批次的商家券/支付券。'
         ]
     ],
@@ -28,7 +28,7 @@ return [
      */
     'privacy_setting' => [
         "owner_setting" => [
-            "contact_email" => "wangpengpeng@vchangyi.com",
+            "contact_email" => "",
             "notice_method" => "contact_email"
         ],
         "setting_list" => [
@@ -210,20 +210,20 @@ return [
         "uploaddomain" => ["https://" . $url],
         "downloaddomain" => [
             "https://" . $url,
-            "https://img-qianliu.haowuji123.com",
-            "https://dg-mall-dev-1251064102.cos.ap-shanghai.myqcloud.com"
+            "",
+            ""
         ],
         "udpdomain" => [
             "udp://" . $url,
-            "udp://p.qlogo.cn",
-            "udp://wework.qpic.cn",
-            "udp://dg-mall-dev-1251064102.cos.ap-shanghai.myqcloud.com",
+            "",
+            "",
+            "",
         ],
         "tcpdomain" => [
             "tcp://" . $url,
-            "tcp://p.qlogo.cn",
-            "tcp://wework.qpic.cn",
-            "tcp://dg-mall-dev-1251064102.cos.ap-shanghai.myqcloud.com",
+            "",
+            "",
+            "",
         ]
     ],
     /*

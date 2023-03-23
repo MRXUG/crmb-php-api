@@ -11,12 +11,12 @@ return [
     'block_puzzle' => [
         /*背景图片路径， 不填使用默认值， 支持string与array两种数据结构。string为默认图片的目录，array索引数组则为具体图片的地址*/
         'backgrounds' => [
-            "https://dg-mall-dev-1251064102.cos.ap-shanghai.myqcloud.com/qianliu_dev/ajcaptcha/1.jpg",
-            "https://dg-mall-dev-1251064102.cos.ap-shanghai.myqcloud.com/qianliu_dev/ajcaptcha/2.jpg",
-            "https://dg-mall-dev-1251064102.cos.ap-shanghai.myqcloud.com/qianliu_dev/ajcaptcha/3.jpg",
-            "https://dg-mall-dev-1251064102.cos.ap-shanghai.myqcloud.com/qianliu_dev/ajcaptcha/4.jpg",
-            "https://dg-mall-dev-1251064102.cos.ap-shanghai.myqcloud.com/qianliu_dev/ajcaptcha/5.jpg",
-            "https://dg-mall-dev-1251064102.cos.ap-shanghai.myqcloud.com/qianliu_dev/ajcaptcha/6.jpg",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
         ],
         /*模板图,格式同上支持string与array*/
         'templates' => [],
