@@ -39,9 +39,10 @@ class MerchantCheckBaseInfoMiddleware extends BaseMiddleware
         $cache = Cache::store('file');
         $merchant = $request->merchant();
 
+        if (in_array($name, ['createCorrelation', 'merConfigUploadLicense'])) return;
+
         $key = 'mer_valid_' . $merchant->mer_id;
         if ($cache->has($key)) return;
-
 
         if (!$merchant->mer_avatar || !$merchant->mer_banner || !$merchant->mer_info || !$merchant->service_phone || !$merchant->mer_address) {
             throw new ValidateException('您好，请前往左侧菜单【设置】-【商户基本信息】完善商户基本信息。');
