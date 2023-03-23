@@ -956,7 +956,7 @@ class ExcelService
         $filename = '商户收益_' . date('Y-m-d H:i:s', time());
         $export = [];
         $query = app()->make(MerchantProfitRecordDao::class)
-            ->search()->with([
+            ->search('*')->with([
                 'storeOrder'     => function ($query) {
                     $query->field('order_id,order_sn');
                 },
