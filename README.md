@@ -18,16 +18,19 @@ php think route:list
 ```
 #### 4. 伪静态
 ```
-// 系统后台
+# 系统后台
 location /admin {
-  index index.html;
   alias /www/service/ncrmeb/public/system;
-}
-```
-```
-// 商户后台
-location /merchant {
+  try_files $uri $uri/ /index.html last;
   index index.html;
+}
+
+```
+```
+# 商户后台
+location /merchant {
   alias /www/service/ncrmeb/public/mer;
+  try_files $uri $uri/ /index.html last;
+  index index.html;
 }
 ```
