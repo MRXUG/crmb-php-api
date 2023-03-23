@@ -37,7 +37,7 @@ Route::group(function () {
         Route::get('cancelled/:id', '/cancelled')->name('systemStoreCouponLst')->option([
             '_alias' => '优惠券取消',
         ]);
-        Route::get('delete/:id', '/delete')->name('systemStoreCouponLst')->option([
+        Route::delete('delete/:id', '/delete')->name('systemStoreCouponLst')->option([
             '_alias' => '删除优惠券',
         ]);
     })->prefix('merchant.coupon.CouponStock')->option([
