@@ -47,5 +47,5 @@ return [
     // 项目名称
     'app_name'   => env('app_name', 'unknown'),
     // 企微告警群地址
-    'qw_robot'   => env('qw_robot', 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=6a394167-65f0-4d7c-bcd4-815da8c730d0'),
+    'qw_robot'   => env('qw_robot', ''),
 ];

@@ -1353,6 +1353,7 @@ if (!function_exists('sendMessageToWorkBot')) {
      */
     function sendMessageToWorkBot(array $params)
     {
+        return;
         $env = env('app_name', 'unknown'). '@' . env('app_server.run_server', 'unknown');
 
         $time = date('Y-m-d H:i:s');
@@ -1363,7 +1364,6 @@ if (!function_exists('sendMessageToWorkBot')) {
         $module = $params['module'] ?? '未知模块';// 业务模块
         $content = "
                 ### 千流业务告警<font color=\"warning\">[ $module ]</font>
-                
                 > 环境：`$env`
                 > 时间：$time
                 > 日志链路：$requestId
