@@ -16,13 +16,16 @@ namespace app\common\repositories\coupon;
 
 use app\common\dao\coupon\CouponStocksDao;
 use app\common\dao\coupon\CouponStocksUserDao;
+use app\common\dao\store\product\ProductDao;
 use app\common\model\coupon\CouponStocks;
+use app\common\model\store\product\ProductAttrValue;
 use app\common\repositories\BaseRepository;
 use crmeb\jobs\ChangeBatchStatusJob;
 use crmeb\jobs\SendSvipCouponJob;
 use think\facade\Cache;
 use think\facade\Log;
 use think\facade\Queue;
+use think\Model;
 
 
 class CouponStocksRepository extends BaseRepository
@@ -251,5 +254,52 @@ class CouponStocksRepository extends BaseRepository
     public function getValue($where, $filed)
     {
         return $this->dao->getValue($where, $filed);
+    }
+
+    /**
+     * 获取推荐的优惠券信息
+     *
+     * @param int $productId 商品id
+     * @throws null
+     * @return null|array{coupon:Model, minPriceSku: Model, discount_num: string, price: string, sub: float}
+     */
+    public function getRecommendCoupon(int $productId): ?array
+    {
+        // 获取最小的商品sku
+        $minPriceSku = ProductAttrValue::getDB()->where('product_id', $productId)->order('price', 'asc')->find();
+        if (!$minPriceSku) return null;
+        $coupon = $this->getRecommendCouponFormProductId($productId, true);
+
+        $discount_num = $coupon['discount_num'] ?? 0;
+        $price = $minPriceSku['price'] ?? 0;
+        $sub = bcsub($price, $discount_num, 2);
+
+        return [
+            'coupon' => $coupon,
+            'minPriceSku' => $minPriceSku,
+            'discount_num' => $discount_num,
+            'price' => $price,
+            'sub' => max($sub, 0),
+        ];
+    }
+
+
+    /**
+     * 根据商品id获取推荐的优惠券
+     *
+     * @param int $productId 商品id
+     * @param bool $isFirst 是否获取单个数据
+     * @return mixed
+     * @throws null
+     */
+    public function getRecommendCouponFormProductId(int $productId, bool $isFirst)
+    {
+        // 获取这个商品所属的商户id
+        /** @var ProductDao $productRep */
+        $productRep = app()->make(ProductDao::class);
+        $merId = $productRep->getMerIdFormProductId($productId);
+        /** @var StockProductRepository $stockProductRep */
+        $stockProductRep = app()->make(StockProductRepository::class);
+        return $stockProductRep->productBestOffer($productId, $merId, $isFirst);
     }
 }

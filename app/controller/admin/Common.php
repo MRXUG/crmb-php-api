@@ -400,6 +400,7 @@ class Common extends BaseController
     public function setChangeColor()
     {
         $data = $this->request->params(['global_theme']);
+        /** @var ConfigValueRepository $make */
         $make = app()->make(ConfigValueRepository::class);
         $make->setFormData($data, 0);
         return app('json')->success('修改成功');

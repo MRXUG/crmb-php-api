@@ -10,6 +10,7 @@ namespace app\common\model\system\merchant;
 use app\common\model\BaseModel;
 use think\model\relation\HasMany;
 use app\common\model\coupon\CouponStocks;
+use think\model\relation\HasOne;
 
 class MerchantAdCoupon extends BaseModel
 {
@@ -34,5 +35,10 @@ class MerchantAdCoupon extends BaseModel
     public function couponList() : HasMany
     {
         return $this->hasMany(CouponStocks::class, 'stock_id', 'stock_id');
+    }
+
+    public function couponInfo(): HasOne
+    {
+        return $this->hasOne(CouponStocks::class, 'stock_id', 'stock_id');
     }
 }

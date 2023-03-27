@@ -645,4 +645,17 @@ class ProductDao extends BaseDao
             });
         return $query->page($page, $limit)->select()->toArray();
     }
+
+    /**
+     * 根据商品id获取商户id
+     *
+     * @param int $productId
+     * @return int|null
+     */
+    public function getMerIdFormProductId(int $productId): ?int
+    {
+        $v = $this->getModel()::getDb()->where('product_id', $productId)->value('mer_id');
+        if (empty($v)) return null;
+        return (int) $v;
+    }
 }
