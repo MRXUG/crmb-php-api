@@ -232,6 +232,12 @@ class MerchantDao extends BaseDao
         return Merchant::getDB()->whereIn('mer_id',$ids)->column('mer_name');
     }
 
+
+    public static function getMerchantAllIds()
+    {
+        return Merchant::getDB()->where('is_del',0)->column('id');
+    }
+
     /**
      * TODO 增加商户余额
      * @param int $merId
