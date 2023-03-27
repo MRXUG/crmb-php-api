@@ -24,6 +24,6 @@ class BestOfferCoupon extends BaseController
     {
         $params = $this->request->params(['mer_id']);
 
-        return app('json')->success($productRepository->productBestOffer($id, $params['mer_id']));
+        return app('json')->success($productRepository->productBestOffer($id, $params['mer_id'], false));
     }
 }

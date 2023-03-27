@@ -55,7 +55,7 @@ class StockProductDao extends BaseDao
      * @author  wanglei <wanglei@vchangyi.com>
      * @date    2023/3/7 15:57
      */
-    public function productBestOffer($productId, $merId)
+    public function productBestOffer($productId, $merId, $isFirst = true)
     {
         // 全场券
         $where['scope'] = CouponStocks::SCOPE_YES;
@@ -80,8 +80,10 @@ class StockProductDao extends BaseDao
 
         $bestOffer = $this->dao
             ->whereIn('id', array_column(array_merge($fullCourt, $specify), 'id'))
-            ->order('discount_num DESC')
-            ->find();
+            ->order('discount_num DESC');
+
+        $bestOffer = $isFirst ? $bestOffer->find(): $bestOffer->select();
+
         if ($bestOffer) {
             return $bestOffer->toArray();
         } else {
