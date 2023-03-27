@@ -263,7 +263,19 @@ class Common extends BaseController
             $visitList = $visitRepository->dateVisitNumGroup($date)->toArray();
             $visitList = array_combine(array_column($visitList, 'time'), array_column($visitList, 'total'));
             $base = $repository->beforeUserNum(getStartModelTime($date));
-            $time = getDatesBetweenTwoDays(getStartModelTime($date), date('Y-m-d'));
+//            $time = getDatesBetweenTwoDays(getStartModelTime($date), date('Y-m-d'));
+
+            if ($date == 'year') {
+                $m = date('m',time());
+                $time[] = $m;
+                do{
+                    $time[] = '0'. ($m - 1);
+                    $m--;
+                }while($m > 1);
+                $time = array_reverse($time);
+            } else {
+                $time = getDatesBetweenTwoDays(getStartModelTime($date), date('Y-m-d'));
+            }
             $userList = [];
             $before = $base;
             foreach ($time as $item) {
