@@ -257,7 +257,7 @@ class Common extends BaseController
     public function userData(UserRepository $repository, UserVisitRepository $visitRepository)
     {
         $date = $this->request->param('date') ?: 'lately7';
-        $res = Cache::store('file')->remember(self::class . '@userData' . $date, function () use ($visitRepository, $repository, $date) {
+//        $res = Cache::store('file')->remember(self::class . '@userData' . $date, function () use ($visitRepository, $repository, $date) {
             $newUserList = $repository->userNumGroup($date)->toArray();
             $newUserList = array_combine(array_column($newUserList, 'time'), array_column($newUserList, 'new'));
             $visitList = $visitRepository->dateVisitNumGroup($date)->toArray();
@@ -288,10 +288,10 @@ class Common extends BaseController
                     'day' => $item
                 ];
             }
-            return $userList;
-        }, 2000 + random_int(600, 1200));
+//            return $userList;
+//        }, 2000 + random_int(600, 1200));
 
-        return app('json')->success($res);
+        return app('json')->success($userList);
     }
 
     /**
