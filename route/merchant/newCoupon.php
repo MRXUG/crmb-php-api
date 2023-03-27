@@ -22,6 +22,11 @@ Route::group(function () {
         Route::get('list', '/list')->name('systemStoreCouponLst')->option([
             '_alias' => '列表',
         ]);
+
+        Route::get('getMinAmountSku/:id', '/getMinAmountSku')->name('systemStoreCouponLst')->option([
+            '_alias' => '获取最小金额SKU',
+        ]);
+
         Route::get('receiveList', '/receiveList')->name('systemStoreCouponLst')->option([
             '_alias' => '领取列表',
         ]);

@@ -91,7 +91,7 @@ class StoreImport extends BaseController
         $data = [];
         switch ($type){
              case 'delivery' :
-                 SpreadsheetExcelService::instance()->checkImport($path,['E3' => '物流单号']);
+                 SpreadsheetExcelService::instance()->checkImport($path,['D3' => '物流单号']);
                  $data = [
                      'mer_id' => $this->request->merId(),
                      'data' => [
