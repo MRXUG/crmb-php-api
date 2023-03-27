@@ -2,6 +2,8 @@
 
 namespace app\controller\merchant\coupon;
 
+use app\common\model\store\product\ProductAttrValue;
+use app\common\model\store\product\ProductSku;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\coupon\CouponStocksUserRepository;
 use app\common\repositories\coupon\StockProductRepository;
@@ -50,6 +52,15 @@ class CouponStock extends BaseController
         $params['mer_id'] = $this->request->merId();
 
         return app('json')->success($this->repository->list($page, $limit, $params, 0));
+    }
+
+    public function getMinAmountSku($id)
+    {
+        $minPrice = ProductAttrValue::getDB()->where('product_id', $id)->order('price', 'asc')->find();
+
+        return app('json')->success([
+            $minPrice
+        ]);
     }
 
     /**

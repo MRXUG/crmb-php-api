@@ -78,7 +78,7 @@ class StoreOrder extends BaseController
             return app('json')->fail('数据无效');
 
         $orderInfo = $orderCreateRepository->v2CartIdByOrderInfo($user, $cartId, $takes, $couponIds, $useIntegral, $addressId, false, $marketingDiscount);
-
+        $orderInfo['auto_check_purchase_protection'] = (int)(systemConfig('auto_check_purchase_protection') ?? 0);
         return app('json')->success($orderInfo);
     }
 
