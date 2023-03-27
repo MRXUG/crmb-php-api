@@ -472,6 +472,7 @@ if (!function_exists('merchantConfig')) {
     function merchantConfig(int $merId, $key)
     {
         $request = request();
+        /** @var ConfigValueRepository $make */
         $make = app()->make(ConfigValueRepository::class);
         if (is_array($key)) {
             $_key = [];

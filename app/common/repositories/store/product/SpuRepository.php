@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 namespace app\common\repositories\store\product;
 
+use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\coupon\StoreCouponProductRepository;
 use app\common\repositories\store\coupon\StoreCouponRepository;
 use app\common\repositories\store\StoreActivityRepository;
@@ -160,10 +161,15 @@ class SpuRepository extends BaseRepository
 
     public function getBorderList($list)
     {
+        /** @var StoreActivityRepository $make */
         $make = app()->make(StoreActivityRepository::class);
-        foreach ($list as $item) {
+        /** @var CouponStocksRepository $couponStockRep */
+        $couponStockRep = app()->make(CouponStocksRepository::class);
+        foreach ($list as &$item) {
             $act = $make->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_BORDER,$item['spu_id'],$item['cate_id'],$item['mer_id']);
             $item['border_pic'] = $act['pic'] ?? '';
+            $couponInfo = $couponStockRep->getRecommendCoupon($item['product_id']);
+            $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
         }
         return $list;
     }

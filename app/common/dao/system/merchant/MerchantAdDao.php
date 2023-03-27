@@ -4,6 +4,7 @@ namespace app\common\dao\system\merchant;
 
 use app\common\dao\BaseDao;
 use app\common\model\BaseModel;
+use think\db\BaseQuery;
 use think\db\exception\DbException;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
@@ -28,7 +29,9 @@ class MerchantAdDao extends BaseDao
      */
     public function getInfo($id)
     {
-        $result = ($this->getModel())::getDB()->with(['couponIds'])->find($id);
+        $result = ($this->getModel())::getDB()->with(['couponIds' => function (BaseQuery  $query) {
+            $query->with(['couponInfo']);
+        }])->find($id);
         return method_exists($result, 'toArray') ? $result->toArray() : [];
     }
 }
