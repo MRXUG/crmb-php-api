@@ -176,9 +176,15 @@ class MerchantDao extends BaseDao
 
     public function dateMerchantNum($date)
     {
-        return Merchant::getDB()->where('is_del', 0)->when($date, function ($query, $date) {
+        $sql = Merchant::getDB()->where('is_del', 0);
+        if ($date == "today") return $sql->count();
+
+        if ($date == "yesterday") return $sql->where("create_time","<",date('Y-m-d H:i:s', strtotime('today -1second')))->count();
+
+        return $sql->when($date, function ($query, $date) {
             getModelTime($query, $date);
         })->count();
+
     }
 
     /**
