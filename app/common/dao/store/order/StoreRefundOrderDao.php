@@ -81,6 +81,10 @@ class StoreRefundOrderDao extends BaseDao
         return $query;
     }
 
+    public function getOrderIdRefunId($orderId){
+        return $this->getModel()::where("order_id",$orderId)->find();
+    }
+
     /**
      * @param $id
      * @return mixed

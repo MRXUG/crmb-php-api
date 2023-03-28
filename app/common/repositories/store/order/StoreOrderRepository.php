@@ -12,6 +12,7 @@
 namespace app\common\repositories\store\order;
 
 use app\common\dao\store\order\StoreOrderDao;
+use app\common\dao\store\order\StoreRefundOrderDao;
 use app\common\model\store\order\OrderFlow;
 use app\common\model\store\order\StoreGroupOrder;
 use app\common\model\store\order\StoreOrder;
@@ -594,6 +595,13 @@ class StoreOrderRepository extends BaseRepository
                 $order->presell_price = bcadd($order->pay_price, $order->presellOrder->pay_price, 2);
             } else {
                 $order->presell_price = $order->pay_price;
+            }
+        }
+        $order->refund_order_id = 0;
+        if ($order->is_refund > 0){
+            $refundOrder = (new StoreRefundOrderDao)->getOrderIdRefunId($order->order_id);
+            if ($refundOrder){
+                $order->refund_order_id = $refundOrder["refund_order_id"];
             }
         }
         return $order;
