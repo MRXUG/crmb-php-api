@@ -305,7 +305,7 @@ class CouponStocksUserRepository extends BaseRepository
         $productAmount = $productInfo['origin_amount'];
         $couponList = $this->selectWhere($where)->toArray();
         $stockIdList = array_column($couponList, 'stock_id');
-        dump($couponList);
+        var_dump($couponList);
         /**
          * @var CouponStocksRepository $couponStockRepository
          */
@@ -348,7 +348,7 @@ class CouponStocksUserRepository extends BaseRepository
                 ];
             }
         }
-        dump($checkCouponList);
+        var_dump($checkCouponList);
 
         foreach ($checkCouponList as &$item) {
             if ($item['coupon_code'] == $maxCouponCode) {
@@ -357,7 +357,7 @@ class CouponStocksUserRepository extends BaseRepository
         }
 
         array_multisort(array_column($checkCouponList, 'discount_num'), SORT_DESC, $checkCouponList);
-        dump($checkCouponList);
+        var_dump($checkCouponList);
 
         return $checkCouponList;
     }
