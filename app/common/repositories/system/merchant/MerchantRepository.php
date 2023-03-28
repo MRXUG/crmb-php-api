@@ -19,6 +19,7 @@ use app\common\dao\system\merchant\RelatedBusinessDao;
 use app\common\model\store\order\StoreOrder;
 use app\common\model\store\product\ProductReply;
 use app\common\repositories\BaseRepository;
+use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\coupon\StoreCouponRepository;
 use app\common\repositories\store\coupon\StoreCouponUserRepository;
 use app\common\repositories\store\product\ProductCopyRepository;
@@ -293,8 +294,12 @@ class MerchantRepository extends BaseRepository
         $query = $this->dao->search($where)->with(['type_name']);
         $count = $query->count();
         $status = systemConfig('mer_location');
+
+
+        /** @var CouponStocksRepository $couponStockRep */
+        $couponStockRep = app()->make(CouponStocksRepository::class);
         $list = $query->page($page, $limit)->setOption('field', [])->field($field)->select()
-            ->each(function ($item) use ($status, $where) {
+            ->each(function ($item) use ($status, $where, $couponStockRep) {
                 if ($status && $item['lat'] && $item['long'] && isset($where['location']['lat'], $where['location']['long'])) {
                     $distance = getDistance($where['location']['lat'], $where['location']['long'], $item['lat'], $item['long']);
                     if ($distance < 0.9) {
@@ -307,7 +312,17 @@ class MerchantRepository extends BaseRepository
                     }
                     $item['distance'] = $distance;
                 }
-                $item['recommend'] = isset($where['delivery_way']) ? $item['CityRecommend'] : $item['AllRecommend'];
+
+                $recommendArr = [];
+
+                foreach (isset($where['delivery_way']) ? $item['CityRecommend'] : $item['AllRecommend'] as $k => $v) {
+                    $recommendArr[$k] = $v;
+                    $couponInfo = $couponStockRep->getRecommendCoupon($v['product_id']);
+                    $recommendArr[$k]['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+                }
+
+                $item['recommend'] = $recommendArr;
+//                $item['recommend'] = isset($where['delivery_way']) ? $item['CityRecommend'] : $item['AllRecommend'];
                 return  $item;
             });
 

@@ -16,6 +16,7 @@ namespace app\common\repositories\store\product;
 use app\common\model\store\product\ProductLabel;
 use app\common\model\user\User;
 use app\common\repositories\community\CommunityRepository;
+use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\coupon\StoreCouponRepository;
 use app\common\repositories\store\GuaranteeRepository;
 use app\common\repositories\store\GuaranteeTemplateRepository;
@@ -1234,7 +1235,10 @@ class ProductRepository extends BaseRepository
             $active =  app()->make(StoreActivityRepository::class)->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_ATMOSPHERE,$res['spu_id'],$res['cate_id'],$res['mer_id']);
             if ($active) $res['atmosphere_pic'] = $active['pic'];
         }
-
+        /** @var CouponStocksRepository $couponStockRep */
+        $couponStockRep = app()->make(CouponStocksRepository::class);
+        $couponInfo = $couponStockRep->getRecommendCoupon($res['product_id']);
+        $res['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
         return $res;
     }
 
