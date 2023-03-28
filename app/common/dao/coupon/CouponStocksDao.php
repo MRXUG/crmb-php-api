@@ -57,6 +57,10 @@ class CouponStocksDao extends BaseDao
             ->when(isset($where['mer_id']) && $where['mer_id'] > 0, function ($query) use ($where) {
                 $query->where('mer_id', (int)$where['mer_id']);
             })
+
+            ->when(isset($where['time']) && $where['time'], function ($query) use ($where) {
+                $query->where('start_at', '<', $where['time'])->where('end_at', '>', $where['time']);
+            })
             ->where('is_del', WxAppletModel::IS_DEL_NO);
         return $query->order('id DESC');
     }
