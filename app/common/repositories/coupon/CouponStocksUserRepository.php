@@ -298,8 +298,8 @@ class CouponStocksUserRepository extends BaseRepository
             ['is_del', '=', 0],
             ['uid', '=', $uid],
             ['mer_id', '=', $merId],
-            ['end_at', '<=', $today],
-            ['start_at', '>', $today],
+            ['end_at', '>=', $today],
+            ['start_at', '<', $today],
         ];
 
         $productAmount = $productInfo['origin_amount'];
