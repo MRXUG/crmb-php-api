@@ -200,10 +200,7 @@ class MerchantCouponService
         }
 
         // 商户信息
-        $merchantById = $platformMerchantRepository->formatMerchantByMchId();
-        Log::info("商户信息" . base64_encode(json_encode($merchantById)));
-        $payment = $merchantById[$mchId];
-        return self::formatMerchantConfig($payment);
+        return self::formatMerchantConfig($platformMerchantRepository->formatMerchantByMchId($mchId));
     }
 
     /**
