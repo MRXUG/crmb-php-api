@@ -32,7 +32,7 @@ class AllowOriginMiddleware extends BaseMiddleware
      */
     protected $header = [
         'Access-Control-Allow-Origin' => '*',
-        'Access-Control-Allow-Headers' => 'X-Token, Content-Type, If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since, X-Requested-With,Form-type,Referer,Connection,Content-Length,Host,Origin,Authorization,Authori-zation,Accept,Accept-Encoding',
+        'Access-Control-Allow-Headers' => 'X-Token, Content-Type, If-Match, If-Modified-Since, If-None-Match, If-Unmodified-Since, X-Requested-With,Form-type,Referer,Connection,Content-Length,Host,Origin,Authorization,Authori-zation,Accept,Accept-Encoding,appid',
         //,Host,Origin,Authorization,Authori-zation,Accept,Accept-Encoding
         //'Access-Control-Allow-Headers' => '*',
         'Access-Control-Allow-Methods' => 'GET,POST,PATCH,PUT,DELETE,OPTIONS',
