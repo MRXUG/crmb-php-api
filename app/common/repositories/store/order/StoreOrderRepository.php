@@ -597,13 +597,15 @@ class StoreOrderRepository extends BaseRepository
                 $order->presell_price = $order->pay_price;
             }
         }
+
         $order->refund_order_id = 0;
-        if ($order->is_refund > 0){
-            $refundOrder = (new StoreRefundOrderDao)->getOrderIdRefunId($order->order_id);
-            if ($refundOrder){
-                $order->refund_order_id = $refundOrder["refund_order_id"];
-            }
+
+        $refundOrder = (new StoreRefundOrderDao)->getOrderIdRefunId($order->order_id);
+
+        if ($refundOrder){
+            $order->refund_order_id = $refundOrder["refund_order_id"];
         }
+
         return $order;
     }
 
