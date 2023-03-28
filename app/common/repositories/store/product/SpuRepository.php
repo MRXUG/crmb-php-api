@@ -170,6 +170,7 @@ class SpuRepository extends BaseRepository
             $item['border_pic'] = $act['pic'] ?? '';
             $couponInfo = $couponStockRep->getRecommendCoupon($item['product_id']);
             $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+            $item['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
         }
         return $list;
     }

@@ -405,12 +405,12 @@ class MiniProgramService
             /** @var DeliveryProfitSharingStatusRepository $make */
             $make = app()->make(DeliveryProfitSharingStatusRepository::class);
             $info = $make->getProfitSharingStatus($order->order->order_id);
-            // 检查是否分过帐  
+            // 检查是否分过帐
             if (!empty($info)) {
                 $this->checkOrderProfitSharingStatus($order, $info);
             }
         }
-        
+
         try {
             $res = ($this->refund($orderNo, $refundNo, $totalFee, $refundFee, $opUserId, $refundReason, $type, $refundAccount));
             if ($res->return_code == 'FAIL') throw new ValidateException('退款失败:' . $res->return_msg);
@@ -535,12 +535,12 @@ class MiniProgramService
         $res = WechatService::getMerPayObj($order->order->mer_id, $order->order->appid)
             ->profitSharing()
             ->profitSharingReturn($params);
-        
+
         $update = [
             'profit_sharing_status' => DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_ING,
             'return_amount' => $info['amount'],
         ];
-        
+
         if ($res && $res['result'] == 'PROCESSING') {
             $update['profit_sharing_status'] = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_ING;
         } elseif ($res && $res['result'] == 'FAILED') {
@@ -562,7 +562,7 @@ class MiniProgramService
             //         'remark' => OrderFlow::PROFIT_SHARING_RETURN_CN
             //     ]);
             // }
-            
+
             // 记录分账回退日志
             app()->make(DeliveryProfitSharingLogsRepository::class)->create([
                 'type' => DeliveryProfitSharingLogs::RETURN_ORDERS_TYPE,
@@ -594,11 +594,9 @@ class MiniProgramService
         ])) {
             return true;
         }
-
-        $log = current(app()
-            ->make(DeliveryProfitSharingLogsRepository::class)
-            ->getProfitSharingOrder('order_id', [$order->order->order_id]));
-        
+        /** @var DeliveryProfitSharingLogsRepository $logRes */
+        $logRes = current(app()->make(DeliveryProfitSharingLogsRepository::class));
+        $log = $logRes->getProfitSharingOrder('order_id', [$order->order->order_id]);
         // 请求解冻
         $res = [];
         $update = [
@@ -621,7 +619,7 @@ class MiniProgramService
                 'profit_sharing_error' => $exception->getMessage()
             ];
         }
-        
+
         Db::transaction(function () use ($params, $res, $update, $log) {
             app()->make(DeliveryProfitSharingStatusRepository::class)->updateByWhere([
                 'order_id' => $log['order_id']

@@ -1213,7 +1213,16 @@ class ProductRepository extends BaseRepository
             $res['content']['content'] = json_decode($res['content']['content']);
         }
 
-        $res['merchant']['recommend'] = $this->getRecommend($res['product_id'], $res['mer_id']);
+        /** @var CouponStocksRepository $couponStockRep */
+        $couponStockRep = app()->make(CouponStocksRepository::class);
+
+        $recommend = $this->getRecommend($res['product_id'], $res['mer_id']);
+        foreach ($recommend as &$item) {
+            $couponInfo = $couponStockRep->getRecommendCoupon($item['product_id']);
+            $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+            $item['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
+        }
+        $res['merchant']['recommend'] = $recommend;
         $spu = app()->make(SpuRepository::class)->getSpuData(
             $activityId ?: $res['product_id'],
             $productType,
@@ -1239,6 +1248,7 @@ class ProductRepository extends BaseRepository
         $couponStockRep = app()->make(CouponStocksRepository::class);
         $couponInfo = $couponStockRep->getRecommendCoupon($res['product_id']);
         $res['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+        $res['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
         return $res;
     }
 
