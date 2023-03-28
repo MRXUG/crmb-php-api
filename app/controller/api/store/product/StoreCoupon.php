@@ -168,6 +168,7 @@ class StoreCoupon extends BaseController
         [$page, $limit] = $this->getPage();
         $params = $this->request->params(['status', 'stock_name', 'type', 'stock_id', 'mch_id', 'is_public', 'mer_id']);
         $params['mch_id'] = !empty($params['mch_id']) ? $params['mch_id'] : 0;
+        $params["time"] = date("Y-m-d H:i:s");
 
         return app('json')->success($repository->list($page, $limit, $params, $params['mch_id']));
     }
