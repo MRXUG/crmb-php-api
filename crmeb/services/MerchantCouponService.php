@@ -48,20 +48,20 @@ class MerchantCouponService
     /**
      * 处理领券回调
      *
-     {
-        "id": "a9b16735-fabf-583b-87c5-20e86da23fb6",
-        "create_time": "2023-03-08T10:26:18+08:00",
-        "resource_type": "encrypt-resource",
-        "event_type": "COUPON.SEND",
-        "summary": "\u5546\u5bb6\u5238\u9886\u5238\u901a\u77e5",
-        "resource": {
-            "original_type": "coupon",
-            "algorithm": "AEAD_AES_256_GCM",
-            "ciphertext": "WDuRUCDpiv4f4tFDX3lmhNUcD37l+C0n+hjooMaReNHLKGknsQar7N+yTo890YmNcoCE+memqBDp9hhJjukJVsoU9BndvE7ma9OYUJdFCrmtZyyGVOCqYIMLt6TKjxvmC16ib\/3PTs8GZBWkNKW3wU3\/NjPIMc8scX7sZU7BBIrgZAm\/LzJdbrsNLMP6iffRcQDHMmaXX4K7XU1rjTDfpxM5mJ5t47K4B9bjSOM4NejLh07+pf57I4c95gZBE\/nWmBgTtI5l00qZVTmyin88CayADnmghlr1nNETRVhBCF2P+5LmAWTHUqnSQQVSh5udehntlrBIKGP2ohSRVW2ixr0pEyZ1vwZMJ\/fjdD3FGeYp\/vTy+PNZDQMJXB\/rDB0HCsQ0rpsl9XOscZxGMOUU9LI\/+yTyxR\/Ib4tdevq0nQk3Q4W+WKZt0YpNw2bDYlkEag==",
-            "associated_data": "coupon",
-            "nonce": "ecCNx5xNYwQp"
-        }
-     }
+    {
+    "id": "a9b16735-fabf-583b-87c5-20e86da23fb6",
+    "create_time": "2023-03-08T10:26:18+08:00",
+    "resource_type": "encrypt-resource",
+    "event_type": "COUPON.SEND",
+    "summary": "\u5546\u5bb6\u5238\u9886\u5238\u901a\u77e5",
+    "resource": {
+    "original_type": "coupon",
+    "algorithm": "AEAD_AES_256_GCM",
+    "ciphertext": "WDuRUCDpiv4f4tFDX3lmhNUcD37l+C0n+hjooMaReNHLKGknsQar7N+yTo890YmNcoCE+memqBDp9hhJjukJVsoU9BndvE7ma9OYUJdFCrmtZyyGVOCqYIMLt6TKjxvmC16ib\/3PTs8GZBWkNKW3wU3\/NjPIMc8scX7sZU7BBIrgZAm\/LzJdbrsNLMP6iffRcQDHMmaXX4K7XU1rjTDfpxM5mJ5t47K4B9bjSOM4NejLh07+pf57I4c95gZBE\/nWmBgTtI5l00qZVTmyin88CayADnmghlr1nNETRVhBCF2P+5LmAWTHUqnSQQVSh5udehntlrBIKGP2ohSRVW2ixr0pEyZ1vwZMJ\/fjdD3FGeYp\/vTy+PNZDQMJXB\/rDB0HCsQ0rpsl9XOscZxGMOUU9LI\/+yTyxR\/Ib4tdevq0nQk3Q4W+WKZt0YpNw2bDYlkEag==",
+    "associated_data": "coupon",
+    "nonce": "ecCNx5xNYwQp"
+    }
+    }
      *
      * @param $rawCallbackData
      *
@@ -200,9 +200,7 @@ class MerchantCouponService
         }
 
         // 商户信息
-        $merchantById = $platformMerchantRepository->formatMerchantByMchId($mchId);
-        $payment = $merchantById;
-        return self::formatMerchantConfig($payment);
+        return self::formatMerchantConfig($platformMerchantRepository->formatMerchantByMchId($mchId));
     }
 
     /**
