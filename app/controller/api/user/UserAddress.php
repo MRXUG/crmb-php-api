@@ -126,8 +126,8 @@ class UserAddress extends BaseController
     {
         $data = $this->request->params(['address_id', 'real_name', 'phone', 'area', 'detail', 'post_code', 'is_default']);
         $validate->check($data);
-        [$province, $city, $district, $street] = ((array)$data['area']) + [null, null, null, null];
-        $last = $street ?? $district ?? $city ?? $province;
+        [$province, $city, $district] = ((array)$data['area']) + [null, null, null];
+        $last =  $district ?? $city ?? $province;
         if (!$last) {
             throw new ValidateException('请选择正确的收货地址');
         }
