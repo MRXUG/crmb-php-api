@@ -31,7 +31,21 @@ class CityAreaRepository extends BaseRepository
 
     public function getChildren($pid)
     {
-        return $this->search(['pid' => $pid])->select();
+
+        //查询pid等级
+        $list = $this->search(['pid' => $pid])->select();
+
+        $cityInfo = $this->search(['pid' => $pid])->find();
+
+        if ($cityInfo["level"] == 3){
+
+            foreach ($list as $k=>$v){
+                $list[$k]['snum'] = 0;
+            }
+        }
+
+        return $list;
+
     }
 
     public function getList($where)
