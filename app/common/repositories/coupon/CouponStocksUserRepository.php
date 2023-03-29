@@ -337,7 +337,7 @@ class CouponStocksUserRepository extends BaseRepository
 
                 //查询优惠券是否绑定指定商品
                 $couponInfo = $stockProduct->getStockIdInfo($item["stock_id"]);
-                if ($couponInfo && $couponInfo["product_id"] != $productInfo["id"]){
+                if ($couponInfo && $couponInfo["product_id"] != $productInfo["goods_id"]){
                     continue;
                 }
 
