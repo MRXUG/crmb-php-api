@@ -3,6 +3,7 @@
 namespace app\common\repositories\coupon;
 
 use app\common\dao\coupon\CouponStocksUserDao;
+use app\common\dao\coupon\StockProductDao;
 use app\common\model\coupon\CouponStocks;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\store\coupon\StoreCouponProductRepository;
@@ -314,12 +315,12 @@ class CouponStocksUserRepository extends BaseRepository
 //            'status' => CouponStocks::STATUS_ING,
             'mer_id' => $merId,
         ];
-        $field = 'type, stock_id, scope, discount_num, stock_name, transaction_minimum,id';
+        $field = 'type, stock_id, scope, discount_num, stock_name, transaction_minimum';
         $stockListCollect = $couponStockRepository->selectPageWhere($whereStock, $stockIdList, 1, 100, $field);
         $stockList = $stockListCollect->toArray();
         $stockListByStockId = array_column($stockList, null, 'stock_id');
 
-        $storeCouponProduct = app()->make(StoreCouponProductRepository::class);
+        $stockProduct = app()->make(StockProductDao::class);
         $checkCouponList = [];
         $maxCouponCode = '';
         $maxDiscount = 0;
@@ -335,10 +336,12 @@ class CouponStocksUserRepository extends BaseRepository
                 }
 
                 //查询优惠券是否绑定指定商品
-                $couponInfo = $storeCouponProduct->getIdInfo($item["id"]);
-                if ($couponInfo && $couponInfo["product_id"] != $productInfo["goods_id"]){
+                $couponInfo = $stockProduct->getStockIdInfo($item["stock_id"]);
+                if ($couponInfo && $couponInfo["product_id"] != $productInfo["id"]){
                     continue;
                 }
+
+
 
                 $checkCouponList[] = [
                     'stock_id'            => $stockId,

@@ -107,4 +107,8 @@ class StockProductDao extends BaseDao
         ($this->getModel()::getDB())
             ->where($where)->update(['is_del' => 1]);
     }
+
+    public function getStockIdInfo($stockId){
+       return ($this->getModel()::getDB())->where("stock_id",$stockId)->find();
+    }
 }
