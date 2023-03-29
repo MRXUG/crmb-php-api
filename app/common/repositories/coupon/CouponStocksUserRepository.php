@@ -31,8 +31,8 @@ class CouponStocksUserRepository extends BaseRepository
         $count = $query->count();
         $list = $query->page($page, $limit)->select();
         foreach ($list as $k=>$v){
-            if (isset($v["transaction_minimum"]) && isset($v["discount_num"]) && ($v["transaction_minimum"] == 0)){
-                $list[$k]["transaction_minimum"] = $v["discount_num"]+0.01;
+            if (isset($v["stockDetail"]["transaction_minimum"]) && isset($v["stockDetail"]["discount_num"]) && ($v["stockDetail"]["transaction_minimum"] == 0)){
+                $list[$k]["stockDetail"]["transaction_minimum"] = $v["stockDetail"]["discount_num"]+0.01;
             }
         }
 

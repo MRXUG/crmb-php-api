@@ -52,8 +52,8 @@ class MerchantAdRepository extends BaseRepository
        $info =  $this->dao->getInfo($id);
 
        if ($info){
-           if (isset($info["transaction_minimum"]) && isset($info["discount_num"]) && ($info["transaction_minimum"] == 0)){
-               $info["transaction_minimum"] = $info["discount_num"]+0.01;
+           if (isset($info["couponInfo"]["transaction_minimum"]) && isset($info["couponInfo"]["discount_num"]) && ($info["couponInfo"]["transaction_minimum"] == 0)){
+               $info["couponInfo"]["transaction_minimum"] = $info["couponInfo"]["discount_num"]+0.01;
            }
        }
 
