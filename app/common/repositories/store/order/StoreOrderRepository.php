@@ -1319,6 +1319,7 @@ class StoreOrderRepository extends BaseRepository
     public function getOne($id, ?int $merId)
     {
         $where = [$this->getPk() => $id];
+//        $where = ['order_sn' => $id];
         if ($merId) {
             $whre['mer_id'] = $merId;
             $whre['is_system_del'] = 0;

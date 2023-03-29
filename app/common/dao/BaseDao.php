@@ -339,8 +339,8 @@ abstract class BaseDao
     {
         return ($this->getModel()::getDB())->where($where)->update($update);
     }
-    
-    
+
+
     public function whereIn($field, $values)
     {
         return ($this->getModel()::getDB())->whereIn($field, $values);

@@ -14,7 +14,7 @@ class DeliveryProfitSharingLogsDao extends BaseDao
     {
         return DeliveryProfitSharingLogs::class;
     }
-    
+
     public function getProfitSharingOrder($key, $values)
     {
         return DeliveryProfitSharingLogs::getDB()->whereIn($key, $values)
@@ -48,7 +48,7 @@ class DeliveryProfitSharingLogsDao extends BaseDao
 
     /**
      * 获取解冻中的日志
-     * 
+     *
      * @param $key
      * @param $values
      *

@@ -447,6 +447,8 @@ class StoreRefundOrderRepository extends BaseRepository
             $product->save();
             $statusRepository = app()->make(StoreRefundStatusRepository::class);
             $statusRepository->status($refund->refund_order_id, $statusRepository::CHANGE_CREATE, '创建退款单');
+            $order->setAttr('status', 4);
+            $order->save();
             $this->applyRefundAfter($refund, $order);
             return $refund;
         });
@@ -1207,7 +1209,7 @@ class StoreRefundOrderRepository extends BaseRepository
                         }
                     }
                 } catch (Exception $e) {
-                    throw new ValidateException($e->getMessage());
+                    throw new ValidateException($e->getMessage() . "地址: ". base64_encode(json_encode($e->getTrace())));
                 }
             }
         }
