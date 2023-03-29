@@ -132,9 +132,9 @@ class UserAddress extends BaseController
             throw new ValidateException('请选择正确的收货地址');
         }
         $make = app()->make(CityAreaRepository::class);
-        if (!$make->existsWhere(['id' => $last['id'], 'snum' => 0])) {
-            throw new ValidateException('请手动选择所在地区');
-        }
+//        if (!$make->existsWhere(['id' => $last['id'], 'snum' => 0])) {
+//            throw new ValidateException('请手动选择所在地区');
+//        }
         if ($make->search([])->where('id', 'in', array_column($data['area'], 'id'))->count() !== count($data['area'])) {
             throw new ValidateException('请选择正确的收货地址');
         }
