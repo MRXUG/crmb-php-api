@@ -89,9 +89,20 @@ class StoreOrder extends BaseController
      * @return mixed
      */
     public function getUserBeforeOneCoupon(){
-        $money = (array)$this->request->param('money', 0);
-        $productId = (array)$this->request->param('productId', 0);
-        $merId = (array)$this->request->param('merId', 0);
+        $money = (int)$this->request->param('money', 0);
+        if ($money == 0){
+            return app('json')->success([]);
+        }
+        $productId = (int)$this->request->param('productId', 0);
+        if ($productId == 0){
+            return app('json')->fail('数据无效');
+        }
+        $merId = (int)$this->request->param('merId', 0);
+
+        if ($productId == 0){
+            return app('json')->fail('数据无效');
+        }
+
         $user = $this->request->userInfo();
         $uid = $user->uid;
         $goodsInfo = [
