@@ -32,6 +32,7 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
 
     public function handle($params): void
     {
+//        echo '分账检测已开启' . PHP_EOL;
         $this->tick(1000 * 60 * 1, function () {
               \think\facade\Log::info($this->name.'_start：'.date('Y-m-d H:i:s'));
             //     request()->clearCache();
@@ -58,7 +59,7 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
                         'change_time',
                         '<',
                         //date('Y-m-d H:i:s', time() - 86400)
-                        date('Y-m-d H:i:s', time() - 300)
+                        date('Y-m-d H:i:s', time() - 10)
                     ]
                 ];
                 if ($maxOrderId) {
@@ -71,6 +72,7 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
                 }
 
                 $dataByKeys = array_column($data, null, 'order_id');
+                Log::info("获取到分账订单: " . json_encode($dataByKeys));
                 //查询订单
                 /** @var StoreOrderRepository $ordersRep */
                 $ordersRep = app()->make(StoreOrderRepository::class);

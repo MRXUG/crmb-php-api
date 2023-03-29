@@ -16,7 +16,6 @@ namespace crmeb\listens;
 use crmeb\interfaces\ListenerInterface;
 use Swoole\Process;
 use Swoole\Server;
-use think\facade\Log;
 
 class CreateTimerListen implements ListenerInterface
 {
@@ -26,7 +25,7 @@ class CreateTimerListen implements ListenerInterface
         $process = new Process(function () use ($event) {
             app()->event->trigger('create_timer');
         }, false, 0, true);
-
-        app()->make(Server::class)->addProcess($process);
+        $process->start();
+//        app()->make(Server::class)->addProcess($process);
     }
 }
