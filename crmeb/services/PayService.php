@@ -39,7 +39,7 @@ class PayService
         if (!method_exists($this, $method)) {
             throw new ValidateException('不支持该支付方式');
         }
-        Log::info("支付的类型 " . $method . json_encode($user));
+//        Log::info("支付的类型 " . $method . json_encode($user));
         return $this->{$method}($user);
     }
 
@@ -70,7 +70,9 @@ class PayService
         $openId = $relationInfo->routine_openid ?? "";
         if (!$openId)
             throw new ValidateException('请关联微信小程序或稍后再试!');
-        $config = MiniProgramService::create($this->options['mer_id'])->jsPay($openId, $this->options['order_sn'], $this->options['pay_price'], $this->options['attach'], $this->options['body']);
+//        var_dump($this->options);die;
+        $config = MiniProgramService::create($this->options['mer_id'])
+            ->jsPay($openId, $this->options['order_sn'], $this->options['pay_price'], $this->options['attach'], $this->options['body']);
         Log::info("支付配置 " . json_encode($config));
         return compact('config');
     }

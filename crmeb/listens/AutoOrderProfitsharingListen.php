@@ -15,26 +15,16 @@ namespace crmeb\listens;
 
 use app\common\model\delivery\DeliveryProfitSharingLogs;
 use app\common\model\delivery\DeliveryProfitSharingStatus;
-use app\common\model\store\order\OrderFlow;
-use app\common\model\store\order\StoreOrder;
 use app\common\repositories\delivery\DeliveryProfitSharingLogsRepository;
 use app\common\repositories\delivery\DeliveryProfitSharingStatusRepository;
-use app\common\repositories\store\order\OrderFlowRepository;
-use app\common\repositories\store\order\StoreOrderProfitsharingRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
-use app\common\repositories\system\merchant\MerchantGoodsPaymentRepository;
-use app\common\repositories\system\merchant\PlatformMerchantRepository;
 use crmeb\interfaces\ListenerInterface;
-use crmeb\jobs\OrderProfitsharingJob;
 use crmeb\services\TimerService;
 use crmeb\services\WechatService;
 use think\db\exception\DbException;
-use think\Exception;
-use think\exception\InvalidArgumentException;
 use think\exception\ValidateException;
 use think\facade\Db;
-use think\facade\Queue;
-use think\Log;
+use think\facade\Log;
 
 class AutoOrderProfitsharingListen extends TimerService implements ListenerInterface
 {
@@ -55,7 +45,6 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
 
 
             $maxOrderId = 0;
-
             // 新的分佣逻辑-订单发货后+24小时发起70%分佣
             $limit = 50;
             /**
@@ -73,9 +62,8 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
                     ]
                 ];
                 if ($maxOrderId) {
-                    array_push($where, ['order_id', '>', $maxOrderId]);
+                    $where[] = ['order_id', '>', $maxOrderId];
                 }
-
                 // 查询已发货的订单
                 $data = $repository->getDeliveryPrepareProfitSharingOrder($limit, $where);
                 if (empty($data)) {
@@ -84,13 +72,14 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
 
                 $dataByKeys = array_column($data, null, 'order_id');
                 //查询订单
-                $orders = app()
-                    ->make(StoreOrderRepository::class)
-                    ->getStoreOrderByWhereIn('order_id', array_keys($dataByKeys));
+                /** @var StoreOrderRepository $ordersRep */
+                $ordersRep = app()->make(StoreOrderRepository::class);
+                $orders = $ordersRep->getStoreOrderByWhereIn('order_id', array_keys($dataByKeys));
+
                 if (empty($orders)) {
                     break;
                 }
-                
+
                 foreach ($orders as $order) {
                     $item = $dataByKeys[$order['order_id']];
                     if ($item['amount'] > 0) {
@@ -104,7 +93,7 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
                     $maxOrderId = $order['order_id'];
                 };
             }
-             \think\facade\Log::info( $this->name.'_end：'.date('Y-m-d H:i:s'));
+            Log::info( $this->name.'_end：'.date('Y-m-d H:i:s'));
         });
     }
 
@@ -129,7 +118,7 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
             'out_order_no' => $order['order_sn'],
             'description' => '解冻全部剩余资金'
         ];
-        
+
         $res = [];
         try {
             $make = WechatService::getMerPayObj($order['mer_id'], $order['appid']);
@@ -240,7 +229,7 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
                     ]
                 ]
             ];
-            
+
             \think\facade\Log::info($this->name.json_encode($params));
             // 请求分账
             $res = $make->profitSharing()->profitSharingOrders($params);

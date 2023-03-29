@@ -117,7 +117,8 @@ class StoreOrderRepository extends BaseRepository
             $type .= 'App';
         }
         event('order.pay.before', compact('groupOrder', 'type', 'isApp'));
-        if (in_array($type, ['weixin', 'weixinApp', 'routine', 'h5', 'weixinQr'], true) && systemConfig('open_wx_combine')) {
+//        if (in_array($type, ['weixin', 'weixinApp', 'routine', 'h5', 'weixinQr'], true) && systemConfig('open_wx_combine')) {
+        if (false) {
             $service = new CombinePayService($type, $groupOrder->getCombinePayParams());
         } else {
             $service = new PayService($type, $groupOrder->getPayParams($type === 'alipay' ? $return_url : ''));

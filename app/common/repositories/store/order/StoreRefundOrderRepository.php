@@ -447,8 +447,6 @@ class StoreRefundOrderRepository extends BaseRepository
             $product->save();
             $statusRepository = app()->make(StoreRefundStatusRepository::class);
             $statusRepository->status($refund->refund_order_id, $statusRepository::CHANGE_CREATE, '创建退款单');
-            $order->setAttr('status', 4);
-            $order->save();
             $this->applyRefundAfter($refund, $order);
             return $refund;
         });
@@ -496,6 +494,8 @@ class StoreRefundOrderRepository extends BaseRepository
             'agree' => $this->dao->getWhereCount(['is_system_del' => 0, 'mer_id' => $where['mer_id'], 'status' => 1]),
             'backgood' => $this->dao->getWhereCount(['is_system_del' => 0, 'mer_id' => $where['mer_id'], 'status' => 2]),
             'end' => $this->dao->getWhereCount(['is_system_del' => 0, 'mer_id' => $where['mer_id'], 'status' => 3]),
+            'refund_number' => $this->dao->getWhereCount(['is_system_del' => 0, 'mer_id' => $where['mer_id'], 'status' => 4]),
+            'refund_failed_number' => $this->dao->getWhereCount(['is_system_del' => 0, 'mer_id' => $where['mer_id'], 'status' => 5]),
         ];
         return compact('count', 'list', 'stat');
     }
@@ -1209,7 +1209,7 @@ class StoreRefundOrderRepository extends BaseRepository
                         }
                     }
                 } catch (Exception $e) {
-                    throw new ValidateException($e->getMessage() . "地址: ". base64_encode(json_encode($e->getTrace())));
+                    throw new ValidateException($e->getMessage());
                 }
             }
         }
