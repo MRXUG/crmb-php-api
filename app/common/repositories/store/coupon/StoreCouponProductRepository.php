@@ -46,4 +46,9 @@ class StoreCouponProductRepository extends BaseRepository
         $list = $query->page($page, $limit)->select();
         return compact('count', 'list');
     }
+
+
+    public function getIdInfo($couponId){
+        return $this->dao->search(["coupon_id"=>$couponId])->find();
+    }
 }

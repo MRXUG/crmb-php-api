@@ -5,6 +5,7 @@ namespace app\common\repositories\coupon;
 use app\common\dao\coupon\CouponStocksUserDao;
 use app\common\model\coupon\CouponStocks;
 use app\common\repositories\BaseRepository;
+use app\common\repositories\store\coupon\StoreCouponProductRepository;
 use app\common\repositories\user\UserRepository;
 use app\common\repositories\wechat\WechatUserRepository;
 use crmeb\services\MerchantCouponService;
@@ -313,11 +314,12 @@ class CouponStocksUserRepository extends BaseRepository
 //            'status' => CouponStocks::STATUS_ING,
             'mer_id' => $merId,
         ];
-        $field = 'type, stock_id, scope, discount_num, stock_name, transaction_minimum';
+        $field = 'type, stock_id, scope, discount_num, stock_name, transaction_minimum,id';
         $stockListCollect = $couponStockRepository->selectPageWhere($whereStock, $stockIdList, 1, 100, $field);
         $stockList = $stockListCollect->toArray();
         $stockListByStockId = array_column($stockList, null, 'stock_id');
 
+        $storeCouponProduct = app()->make(StoreCouponProductRepository::class);
         $checkCouponList = [];
         $maxCouponCode = '';
         $maxDiscount = 0;
@@ -330,6 +332,12 @@ class CouponStocksUserRepository extends BaseRepository
                 if ($discountNum > $maxDiscount) {
                     $maxCouponCode = $couponCode;
                     $maxDiscount = $discountNum;
+                }
+
+                //查询优惠券是否绑定指定商品
+                $couponInfo = $storeCouponProduct->getIdInfo($item["id"]);
+                if ($couponInfo && $couponInfo["product_id"] != $productInfo["goods_id"]){
+                    continue;
                 }
 
                 $checkCouponList[] = [
