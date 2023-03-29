@@ -15,6 +15,7 @@ namespace app\controller\api\store\order;
 
 
 use app\common\model\system\merchant\MerchantProfitRecord;
+use app\common\repositories\coupon\CouponStocksUserRepository;
 use app\common\repositories\delivery\DeliveryOrderRepository;
 use app\common\repositories\store\order\StoreOrderCreateRepository;
 use app\common\repositories\store\order\StoreOrderReceiptRepository;
@@ -80,6 +81,29 @@ class StoreOrder extends BaseController
         $orderInfo = $orderCreateRepository->v2CartIdByOrderInfo($user, $cartId, $takes, $couponIds, $useIntegral, $addressId, false, $marketingDiscount);
         $orderInfo['auto_check_purchase_protection'] = (int)(systemConfig('auto_check_purchase_protection') ?? 0);
         return app('json')->success($orderInfo);
+    }
+
+
+    /**
+     * 查询可用优惠券
+     * @return mixed
+     */
+    public function getUserBeforeOneCoupon(){
+        $money = (array)$this->request->param('money', 0);
+        $productId = (array)$this->request->param('productId', 0);
+        $merId = (array)$this->request->param('merId', 0);
+        $user = $this->request->userInfo();
+        $uid = $user->uid;
+        $goodsInfo = [
+            "origin_amount"=>$money,
+            "goods_id"=>$productId,
+        ];
+
+        $couponUser = app()->make(CouponStocksUserRepository::class);
+        $checkCouponList = $couponUser->best($uid, $merId, $goodsInfo);
+
+        return app('json')->success($checkCouponList);
+
     }
 
     /**
