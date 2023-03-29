@@ -88,7 +88,15 @@ class StockProductDao extends BaseDao
         $bestOffer = $isFirst ? $bestOffer->find(): $bestOffer->select();
 
         if ($bestOffer) {
-            return $bestOffer->toArray();
+            $bestOffer = $bestOffer->toArray();
+
+            foreach ($bestOffer as &$item){
+                if (isset($item["transaction_minimum"]) && isset($item["discount_num"]) && ($item["transaction_minimum"] == 0)){
+                    $item["transaction_minimum"] = $item["discount_num"]+0.01;
+                }
+            }
+
+            return $bestOffer;
         } else {
             return [];
         }

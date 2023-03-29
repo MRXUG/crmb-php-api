@@ -49,7 +49,15 @@ class MerchantAdRepository extends BaseRepository
      */
     public function getInfo($id)
     {
-        return $this->dao->getInfo($id);
+       $info =  $this->dao->getInfo($id);
+
+       if ($info){
+           if (isset($info["transaction_minimum"]) && isset($info["discount_num"]) && ($info["transaction_minimum"] == 0)){
+               $info["transaction_minimum"] = $info["discount_num"]+0.01;
+           }
+       }
+
+       return $info;
     }
 
     /**

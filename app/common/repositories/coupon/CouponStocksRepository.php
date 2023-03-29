@@ -74,6 +74,10 @@ class CouponStocksRepository extends BaseRepository
                 $this->userDao->couponWrittenOffNum($item['stock_id'], CouponStocks::WRITTEN_OFF_YES)->count();
             $item['max_coupons'] = $item['is_limit'] == CouponStocks::IS_LIMIT_NO ? '不限量' : $item['max_coupons'];
             $item['sended'] = count($item['couponStocksUser']);
+
+            if (isset($item["transaction_minimum"]) && isset($item["discount_num"]) && ($item["transaction_minimum"] == 0)){
+                $item["transaction_minimum"] = $item["discount_num"]+0.01;
+            }
         }
 
         return compact('count', 'list');

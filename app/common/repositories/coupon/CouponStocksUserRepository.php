@@ -27,9 +27,14 @@ class CouponStocksUserRepository extends BaseRepository
 
     public function list($page, $limit, $where, $mchId): array
     {
-        $query = $this->dao->search($mchId, $where)->where("is_del",0);
+        $query = $this->dao->search($mchId, $where);
         $count = $query->count();
         $list = $query->page($page, $limit)->select();
+        foreach ($list as $k=>$v){
+            if (isset($v["transaction_minimum"]) && isset($v["discount_num"]) && ($v["transaction_minimum"] == 0)){
+                $list[$k]["transaction_minimum"] = $v["discount_num"]+0.01;
+            }
+        }
 
         return compact('count', 'list');
     }
@@ -341,8 +346,9 @@ class CouponStocksUserRepository extends BaseRepository
                     continue;
                 }
 
-
-
+                if ($stockData['transaction_minimum'] == 0){
+                    $stockData['transaction_minimum'] = $discountNum+0.01;
+                }
                 $checkCouponList[] = [
                     'stock_id'            => $stockId,
                     'coupon_code'         => $couponCode,
