@@ -33,6 +33,6 @@ class SaveMerchantCouponValidate extends Validate
         'max_coupons_per_user|每人限量'              => 'integer|min:1|max:100',
         'is_limit|是否限量'                          => 'in:0,1',
         'is_user_limit|每人是否限量'                 => 'in:0,1',
-        'type_date|使用有效期tab'                    => 'integer|in:1,2,3',
+        'type_date|使用有效期tab'                    => 'integer|in:1,2,3,4',
     ];
 }
