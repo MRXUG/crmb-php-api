@@ -110,6 +110,7 @@ class CouponStocks extends BaseModel
     const DATE_NOW = 1;
     const DATE_RANGE = 2;
     const DATE_N = 3;
+    const DATE_H = 4;
 
 
     public static function tablePk(): ?string

@@ -355,12 +355,12 @@ class Client extends BaseClient
 
         $couponAvailableTime = &$couponData['coupon_use_rule']['coupon_available_time'];
         $typeDate = $params['type_date'];
-        // 使用有效期,1==立即生效，2=时间段，2=N天后
+        // 使用有效期,1==立即生效，2=时间段，3=N天后 4 领券时间内均可用(与2相同)
         if ($typeDate == CouponStocks::DATE_NOW) {
             // 立即生效 wait_days_after_receive 不传
             $couponAvailableTime['available_day_after_receive'] = $params['available_day_after_receive'];
 
-        } elseif ($params['type_date'] == CouponStocks::DATE_RANGE) {
+        } elseif ($params['type_date'] == CouponStocks::DATE_RANGE  || $params['type_date'] == CouponStocks::DATE_H) {
             // 无规律的有效时间，多个无规律时间段，用户自定义字段。
             $dateRange = json_decode($params['date_range'] ?? [], true);
             [$beginTime, $endTime] = $dateRange;
