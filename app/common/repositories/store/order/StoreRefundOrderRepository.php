@@ -793,12 +793,12 @@ class StoreRefundOrderRepository extends BaseRepository
             $this->getProductRefundNumber($res, 1);
             $refund = $res;
             if ($res['refund_type'] == 1) {
-                //TODO 退款单同意退款
-                $refund = $this->doRefundPrice($id, $_refund_price);
-                $data['status'] = 3;
-                $statusRepository = app()->make(StoreRefundStatusRepository::class);
-                $statusRepository->status($id, $statusRepository::CHANGE_REFUND_PRICE, '退款成功');
-                $this->refundAfter($refund);
+//                $refund = $this->doRefundPrice($id, $_refund_price);
+                $data['status'] = 4;
+                ProfitSharing::refund($id, true);
+//                $statusRepository = app()->make(StoreRefundStatusRepository::class);
+//                $statusRepository->status($id, $statusRepository::CHANGE_REFUND_PRICE, '退款成功');
+//                $this->refundAfter($refund);
             }
             if ($res['refund_type'] == 2) {
                 $data['status'] = 1;
