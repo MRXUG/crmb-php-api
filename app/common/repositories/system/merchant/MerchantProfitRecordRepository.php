@@ -3,6 +3,7 @@
 namespace app\common\repositories\system\merchant;
 
 use app\common\dao\system\merchant\MerchantProfitDao;
+use app\common\dao\system\merchant\MerchantProfitDayLogDao;
 use app\common\dao\system\merchant\MerchantProfitRecordDao;
 use app\common\model\system\merchant\MerchantProfitDayLog;
 use app\common\model\system\merchant\MerchantProfitRecord;
@@ -52,7 +53,7 @@ class MerchantProfitRecordRepository extends BaseRepository
         $records = $this->dao->query(['status' => MerchantProfitRecord::STATUS_NOT_VALID,'profit_mer_id'=>$mId])->select()->toArray();
 
 
-        $profitDayLogDao = app()->make(MerchantProfitDayLog::class);
+        $profitDayLogDao = app()->make(MerchantProfitDayLogDao::class);
 
         if (!$records) {
 
@@ -86,9 +87,9 @@ class MerchantProfitRecordRepository extends BaseRepository
             foreach ($orderIdsFitCondition as $orderId) {
                 $merId = 0;
                 try {
-                    Db::transaction(function () use ($orderId, $orderIds2MerIds, $profitDayLogDao,$today) {
+                    Db::transaction(function () use ($orderId, $orderIds2MerIds, $profitDayLogDao,$today,$mId) {
                         // 更新明细记录为有效
-                        $this->dao->query(["order_id"=>$orderId])->update([
+                        MerchantProfitRecord::getDB()->where(["order_id"=>$orderId,"profit_mer_id"=>$mId])->update([
                             'status'             => MerchantProfitRecord::STATUS_VALID,
                             'profit_affect_time' => date('Y-m-d H:i:s')
                         ]);
@@ -97,6 +98,7 @@ class MerchantProfitRecordRepository extends BaseRepository
                         $profitMoney = MerchantProfitRecord::getDB()
                             ->where([
                                 'order_id' => $orderId,
+                                'profit_mer_id' => $mId,
                             ])
                             ->value('profit_money');
 
@@ -117,7 +119,7 @@ class MerchantProfitRecordRepository extends BaseRepository
                             ->where([
                                 'mer_id' => $merId,
                             ])->count();
-                        if ($have){
+                        if ($have > 0){
                             MerchantProfitRecord::getDB()->where(["mer_id"=>$merId])->inc("total_money",$profitMoney)->update();
                         }else{
                             MerchantProfitRecord::getDB()->insert([
