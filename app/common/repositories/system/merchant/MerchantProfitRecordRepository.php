@@ -54,13 +54,20 @@ class MerchantProfitRecordRepository extends BaseRepository
         $profitDao = app()->make(MerchantProfitDao::class);
 
         if (!$records) {
-            $profitDao->create(
-                [
-                    'mer_id'      => $mId,
-                    'total_money' => 0,
-                    'update_time' => date('Y-m-d')." 00:00:00"
-                ]
-            );
+
+            $profitDaoInfo = $profitDao->getWhere(['update_time'=>$today,"mer_id"=>$mId],"profit_id");
+            if (!$profitDaoInfo){
+                $profitDao->create(
+                    [
+                        'mer_id'      => $mId,
+                        'total_money' => 0,
+                        'update_time' => date('Y-m-d')." 00:00:00"
+                    ]
+                );
+            }
+
+
+
             return;
         }
 
