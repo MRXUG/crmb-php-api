@@ -22,7 +22,7 @@ class Profit extends BaseController
         [$page, $limit] = $this->getPage();
         $where = $this->request->params([]);
         $where['mer_id'] = $this->request->merId();
-        $fields = 'profit_id,mer_id,total_money,update_time';
+        $fields = 'profit_id,mer_id,total_money as profit_money,update_time as profit_affect_time';
 
         $serv = app()->make(MerchantProfitDayLogRepository::class);
         $list = $serv->getPagedListSimple($fields,$where, $page, $limit);
