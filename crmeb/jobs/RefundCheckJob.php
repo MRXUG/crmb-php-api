@@ -2,8 +2,10 @@
 
 namespace crmeb\jobs;
 
+use app\common\dao\store\order\StoreRefundOrderDao;
 use app\common\model\store\order\StoreRefundOrder;
 use app\common\model\store\RefundTask;
+use app\common\repositories\store\order\StoreRefundOrderRepository;
 use crmeb\interfaces\JobInterface;
 use crmeb\services\MiniProgramService;
 use think\facade\Db;
@@ -36,7 +38,10 @@ class RefundCheckJob implements JobInterface
                 $refundOrderTask = RefundTask::getDB()->where('refund_task_id', $data['refund_task_id'])->find();
                 if (!$refundOrderTask) { $job->delete();return; }
                 # 获取退款订单模型
-                $refundOrder = StoreRefundOrder::getDB()->where('refund_order_id', $refundOrderTask->getAttr('refund_order_id'))->find();
+                /** @var StoreRefundOrderDao $refundOrderDao */
+                $refundOrderDao = app()->make(StoreRefundOrderDao::class);
+                /** @var StoreRefundOrder $refundOrder */
+                $refundOrder = $refundOrderDao->getWhere(['refund_order_id' => $refundOrderTask->getAttr('refund_order_id')], '*', ['refundProduct.product']);
                 if (!$refundOrder) { $job->delete();return; }
                 # 发起查询接口
                 $res = MiniProgramService::create($refundOrderTask->getAttr('mer_id'), $refundOrderTask->getAttr('app_id'))
@@ -60,6 +65,9 @@ class RefundCheckJob implements JobInterface
 
                 $refundOrder->setAttr('status', 3);
                 $refundOrder->save();
+                /** @var StoreRefundOrderRepository $refundOrderRep */
+                $refundOrderRep = app()->make(StoreRefundOrderRepository::class);
+                $refundOrderRep->refundAfter($refundOrder);
             });
         } catch (Exception|Throwable|ValueError $e) {
             Log::error("确认提款成功队列出错 id:{$data['refund_task_id']}");

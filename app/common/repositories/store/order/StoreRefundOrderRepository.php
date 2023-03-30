@@ -798,7 +798,7 @@ class StoreRefundOrderRepository extends BaseRepository
                 ProfitSharing::refund($id, true);
 //                $statusRepository = app()->make(StoreRefundStatusRepository::class);
 //                $statusRepository->status($id, $statusRepository::CHANGE_REFUND_PRICE, '退款成功');
-//                $this->refundAfter($refund);
+                $this->refundAfter($refund);
             }
             if ($res['refund_type'] == 2) {
                 $data['status'] = 1;
