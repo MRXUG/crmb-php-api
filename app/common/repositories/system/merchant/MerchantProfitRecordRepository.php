@@ -87,7 +87,7 @@ class MerchantProfitRecordRepository extends BaseRepository
                 try {
                     Db::transaction(function () use ($orderId, $orderIds2MerIds, $profitDao,$today) {
                         // 更新明细记录为有效
-                        $this->dao->query([])->where('order_id', $orderId)->update([
+                        $this->dao->query(["order_id"=>$orderId])->update([
                             'status'             => MerchantProfitRecord::STATUS_VALID,
                             'profit_affect_time' => date('Y-m-d H:i:s')
                         ]);
