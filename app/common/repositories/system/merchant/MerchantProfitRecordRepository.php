@@ -11,6 +11,7 @@ use app\common\repositories\BaseRepository;
 use app\common\repositories\store\order\StoreOrderStatusRepository;
 use think\facade\Db;
 use think\facade\Log;
+use app\common\model\system\merchant\MerchantProfit as MerchantProfitModel;
 
 /**
  * Class MerchantProfitRecordRepository
@@ -115,14 +116,14 @@ class MerchantProfitRecordRepository extends BaseRepository
                                 ]
                             );
                         }
-                        $have = MerchantProfitRecord::getDB()
+                        $have = MerchantProfitModel::getDB()
                             ->where([
                                 'mer_id' => $mId,
                             ])->count();
                         if ($have > 0){
-                            MerchantProfitRecord::getDB()->where(["mer_id"=>$mId])->inc("total_money",$profitMoney)->update();
+                            MerchantProfitModel::getDB()->where(["mer_id"=>$mId])->inc("total_money",$profitMoney)->update();
                         }else{
-                            MerchantProfitRecord::getDB()->insert([
+                            MerchantProfitModel::getDB()->insert([
                                 'mer_id'      => $mId,
                                 'total_money' => $profitMoney,
                                 'update_time' => date('Y-m-d H:i:s')
