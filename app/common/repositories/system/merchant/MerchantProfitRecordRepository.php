@@ -103,13 +103,13 @@ class MerchantProfitRecordRepository extends BaseRepository
                             ->value('profit_money');
 
                         //查询商户今日收益是否有数据
-                        $profitDaoInfo = $profitDayLogDao->getWhere(['update_time'=>$today,"mer_id"=>$merId],"profit_id,total_money");
+                        $profitDaoInfo = $profitDayLogDao->getWhere(['update_time'=>$today,"mer_id"=>$mId],"profit_id,total_money");
                         if ($profitDaoInfo){
                             $profitDayLogDao->incField($profitDaoInfo["profit_id"],"total_money",$profitMoney);
                         }else{
                             $profitDayLogDao->create(
                                 [
-                                    'mer_id'      => $merId,
+                                    'mer_id'      => $mId,
                                     'total_money' => $profitMoney,
                                     'update_time' => $today
                                 ]
@@ -117,13 +117,13 @@ class MerchantProfitRecordRepository extends BaseRepository
                         }
                         $have = MerchantProfitRecord::getDB()
                             ->where([
-                                'mer_id' => $merId,
+                                'mer_id' => $mId,
                             ])->count();
                         if ($have > 0){
-                            MerchantProfitRecord::getDB()->where(["mer_id"=>$merId])->inc("total_money",$profitMoney)->update();
+                            MerchantProfitRecord::getDB()->where(["mer_id"=>$mId])->inc("total_money",$profitMoney)->update();
                         }else{
                             MerchantProfitRecord::getDB()->insert([
-                                'mer_id'      => $merId,
+                                'mer_id'      => $mId,
                                 'total_money' => $profitMoney,
                                 'update_time' => date('Y-m-d H:i:s')
                             ]);
