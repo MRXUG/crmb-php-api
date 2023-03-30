@@ -48,7 +48,7 @@ class MerchantProfitRecordRepository extends BaseRepository
     public function setRecordsValidAndUpdateProfit($mId): void
     {
         $today = date('Y-m-d')." 00:00:00";
-        $records = $this->dao->query(['status' => MerchantProfitRecord::STATUS_NOT_VALID,'mer_id'=>$mId])->select()->toArray();
+        $records = $this->dao->query(['status' => MerchantProfitRecord::STATUS_NOT_VALID,'profit_mer_id'=>$mId])->select()->toArray();
 
 
         $profitDao = app()->make(MerchantProfitDao::class);
@@ -86,22 +86,21 @@ class MerchantProfitRecordRepository extends BaseRepository
                         ]);
                         $merId = $orderIds2MerIds[$orderId];
                         // 创建或更新商户收益账号金额
-                        $sum = MerchantProfitRecord::getDB()
+                        $profitMoney = MerchantProfitRecord::getDB()
                             ->where([
-                                'profit_mer_id' => $merId,
-                                'status'        => MerchantProfitRecord::STATUS_VALID
+                                'order_id' => $orderId,
                             ])
-                            ->sum('profit_money');
+                            ->value('profit_money');
 
                         //查询商户今日收益是否有数据
-                        $profitDaoId = $profitDao->getWhere(['update_time'=>$today,"mer_id"=>$merId],"profit_id,total_money");
-                        if ($profitDaoId){
-                            $profitDao->incField($profitDaoId,"total_money");
+                        $profitDaoInfo = $profitDao->getWhere(['update_time'=>$today,"mer_id"=>$merId],"profit_id,total_money");
+                        if ($profitDaoInfo){
+                            $profitDao->incField($profitDaoInfo["profit_id"],"total_money",$profitMoney);
                         }else{
                             $profitDao->create(
                                 [
                                     'mer_id'      => $merId,
-                                    'total_money' => $sum,
+                                    'total_money' => $profitMoney,
                                     'update_time' => $today
                                 ]
                             );
