@@ -32,6 +32,7 @@ return [
         'create_timer' => env("app_server.run_server") == 'job' ? [
             \crmeb\listens\LiveStatusCheckListen::class, //
             \crmeb\listens\AutoOrderProfitsharingListen::class, // 自动分账
+            \crmeb\listens\OrderRefundListen::class, // 用户退款 分账回退
             \crmeb\listens\AuthTakeOrderListen::class, // 自动收货
             \crmeb\listens\AutoCancelGroupOrderListen::class, // 自动关闭订单
             \crmeb\listens\AuthCancelPresellOrderListen::class,

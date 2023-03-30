@@ -25,12 +25,24 @@ location /admin {
   index index.html;
 }
 
-```
-```
+# 资源地址
+location /resource {
+  alias /www/resource;
+}
+
+# 系统后台
+location /h5 {
+  alias /www/service/ncrmeb/public/h5;
+  try_files $uri $uri/ /index.html last;
+  index index.html;
+}
+
+
 # 商户后台
 location /merchant {
   alias /www/service/ncrmeb/public/mer;
   try_files $uri $uri/ /index.html last;
   index index.html;
 }
+
 ```

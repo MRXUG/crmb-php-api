@@ -28,7 +28,7 @@ class TimerService
                 $_SERVER['x_request_id'] = mini_unique_id();
                 $fn();
             } catch (\Throwable $e) {
-                $msg = '定时器报错[' . class_basename($this) . ']';
+                $msg = '定时器报错[' . class_basename($this) . ']' . $e;
                 Log::error($msg);
                 sendMessageToWorkBot([
                     'msg' => $msg,

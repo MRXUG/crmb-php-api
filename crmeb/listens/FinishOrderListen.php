@@ -65,7 +65,7 @@ class FinishOrderListen extends TimerService implements ListenerInterface
                     ->where('profit_sharing_status', DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_SUCCESS)
                     ->select()
                     ->toArray();
-                
+
                 if (empty($data)) {
                     break;
                 }

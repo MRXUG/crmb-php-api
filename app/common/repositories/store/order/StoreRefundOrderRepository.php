@@ -31,6 +31,7 @@ use crmeb\services\ExpressService;
 use crmeb\services\MiniProgramService;
 use crmeb\services\SwooleTaskService;
 use crmeb\services\WechatService;
+use crmeb\utils\wechat\ProfitSharing;
 use Exception;
 use FormBuilder\Factory\Elm;
 use FormBuilder\Form;
@@ -1100,15 +1101,17 @@ class StoreRefundOrderRepository extends BaseRepository
     public function adminRefund($id, $admin)
     {
         Db::transaction(function () use ($admin, $id) {
-            $data['status'] = 3;
+            $data['status'] = 4;
             $data['status_time'] = date('Y-m-d H:i:s');
             $statusRepository = app()->make(StoreRefundStatusRepository::class);
             $statusRepository->status($id, $statusRepository::CHANGE_REFUND_PRICE, '退款成功' . ($admin ? '' : '[自动]'));
             $this->dao->update($id, $data);
             $res = $this->dao->getWhere(['refund_order_id' => $id], '*', ['refundProduct.product']);
             $this->getProductRefundNumber($res, 1, true);
-            $refund = $this->doRefundPrice($id, 0);
-            if ($refund) $this->refundAfter($refund);
+            # 调用退款函数
+            ProfitSharing::refund($id);
+//            $refund = $this->doRefundPrice($id, 0);
+//            if ($refund) $this->refundAfter($refund);
         });
     }
 
