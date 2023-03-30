@@ -1,6 +1,7 @@
 <?php
 namespace app\controller\merchant\system\finance;
 
+use app\common\repositories\system\merchant\MerchantProfitDayLogRepository;
 use app\common\repositories\system\merchant\MerchantProfitRecordRepository;
 use app\common\repositories\system\merchant\MerchantProfitRepository;
 use crmeb\basic\BaseController;
@@ -20,9 +21,13 @@ class Profit extends BaseController
     {
         [$page, $limit] = $this->getPage();
         $where = $this->request->params([]);
-        $where['profit_mer_id'] = $this->request->merId();
-        $fields = 'profit_record_id,profit_affect_time,profit_money,profit_mer_id,status';
-        return app('json')->success($this->recordRepo->getPagedListSimple($fields,$where, $page, $limit));
+        $where['mer_id'] = $this->request->merId();
+        $fields = 'profit_id,mer_id,total_money,update_time';
+
+        $serv = app()->make(MerchantProfitDayLogRepository::class);
+        $list = $serv->getPagedListSimple($fields,$where, $page, $limit);
+
+        return app('json')->success($list);
     }
 
     public function export()

@@ -4,6 +4,7 @@ namespace app\common\repositories\system\merchant;
 
 use app\common\dao\system\merchant\MerchantProfitDao;
 use app\common\dao\system\merchant\MerchantProfitRecordDao;
+use app\common\model\system\merchant\MerchantProfitDayLog;
 use app\common\model\system\merchant\MerchantProfitRecord;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\store\order\StoreOrderStatusRepository;
@@ -51,13 +52,13 @@ class MerchantProfitRecordRepository extends BaseRepository
         $records = $this->dao->query(['status' => MerchantProfitRecord::STATUS_NOT_VALID,'profit_mer_id'=>$mId])->select()->toArray();
 
 
-        $profitDao = app()->make(MerchantProfitDao::class);
+        $profitDayLogDao = app()->make(MerchantProfitDayLog::class);
 
         if (!$records) {
 
-            $profitDaoInfo = $profitDao->getWhere(['update_time'=>$today,"mer_id"=>$mId],"profit_id");
+            $profitDaoInfo = $profitDayLogDao->getWhere(['update_time'=>$today,"mer_id"=>$mId],"profit_id");
             if (!$profitDaoInfo){
-                $profitDao->create(
+                $profitDayLogDao->create(
                     [
                         'mer_id'      => $mId,
                         'total_money' => 0,
@@ -85,14 +86,14 @@ class MerchantProfitRecordRepository extends BaseRepository
             foreach ($orderIdsFitCondition as $orderId) {
                 $merId = 0;
                 try {
-                    Db::transaction(function () use ($orderId, $orderIds2MerIds, $profitDao,$today) {
+                    Db::transaction(function () use ($orderId, $orderIds2MerIds, $profitDayLogDao,$today) {
                         // 更新明细记录为有效
                         $this->dao->query(["order_id"=>$orderId])->update([
                             'status'             => MerchantProfitRecord::STATUS_VALID,
                             'profit_affect_time' => date('Y-m-d H:i:s')
                         ]);
                         $merId = $orderIds2MerIds[$orderId];
-                        // 创建或更新商户收益账号金额
+
                         $profitMoney = MerchantProfitRecord::getDB()
                             ->where([
                                 'order_id' => $orderId,
@@ -100,11 +101,11 @@ class MerchantProfitRecordRepository extends BaseRepository
                             ->value('profit_money');
 
                         //查询商户今日收益是否有数据
-                        $profitDaoInfo = $profitDao->getWhere(['update_time'=>$today,"mer_id"=>$merId],"profit_id,total_money");
+                        $profitDaoInfo = $profitDayLogDao->getWhere(['update_time'=>$today,"mer_id"=>$merId],"profit_id,total_money");
                         if ($profitDaoInfo){
-                            $profitDao->incField($profitDaoInfo["profit_id"],"total_money",$profitMoney);
+                            $profitDayLogDao->incField($profitDaoInfo["profit_id"],"total_money",$profitMoney);
                         }else{
-                            $profitDao->create(
+                            $profitDayLogDao->create(
                                 [
                                     'mer_id'      => $merId,
                                     'total_money' => $profitMoney,
@@ -112,13 +113,19 @@ class MerchantProfitRecordRepository extends BaseRepository
                                 ]
                             );
                         }
-//                        $profitDao->createOrUpdate([
-//                            'mer_id' => $merId
-//                        ], [
-//                            'mer_id'      => $merId,
-//                            'total_money' => $sum,
-//                            'update_time' => date('Y-m-d H:i:s')
-//                        ]);
+                        $have = MerchantProfitRecord::getDB()
+                            ->where([
+                                'mer_id' => $merId,
+                            ])->count();
+                        if ($have){
+                            MerchantProfitRecord::getDB()->where(["mer_id"=>$merId])->inc("total_money",$profitMoney)->update();
+                        }else{
+                            MerchantProfitRecord::getDB()->insert([
+                                'mer_id'      => $merId,
+                                'total_money' => $profitMoney,
+                                'update_time' => date('Y-m-d H:i:s')
+                            ]);
+                        }
                     });
                 } catch (\Exception $e) {
                     Log::error(sprintf('更新收益明细和账户失败,商户：%s,订单：%s,错误：%s', $merId, $orderId,

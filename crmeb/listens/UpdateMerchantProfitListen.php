@@ -19,7 +19,7 @@ class UpdateMerchantProfitListen extends TimerService implements ListenerInterfa
 //        }else{
 //            $intervalSec = 300;
 //        }
-        $intervalSec = 60*3;
+        $intervalSec = 60*60*24;
         $this->tick(1000 * $intervalSec, function () {
             Log::info("执行开始：处理商户收益");
             try {
