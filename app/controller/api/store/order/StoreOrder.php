@@ -138,6 +138,7 @@ class StoreOrder extends BaseController
         $mark = (array)$this->request->param('mark', []);
         $payType = $this->request->param('pay_type');
         $post = (array)$this->request->param('post');
+        $clipCoupons = (int)$this->request->param('clipCoupons',1);
         // 营销页优惠
         $marketingDiscount = (array)$this->request->param('marketing_discount', []);
 
@@ -161,8 +162,8 @@ class StoreOrder extends BaseController
 //        if (!$addressId)
 //            return app('json')->fail('请选择地址');
 
-        $groupOrder = app()->make(LockService::class)->exec('order.create', function () use ($orderCreateRepository, $receipt_data, $mark, $extend, $cartId, $payType, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount) {
-            return $orderCreateRepository->v2CreateOrder(array_search($payType, StoreOrderRepository::PAY_TYPE), $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount);
+        $groupOrder = app()->make(LockService::class)->exec('order.create', function () use ($orderCreateRepository, $receipt_data, $mark, $extend, $cartId, $payType, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons) {
+            return $orderCreateRepository->v2CreateOrder(array_search($payType, StoreOrderRepository::PAY_TYPE), $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons);
         });
 
         if ($groupOrder['pay_price'] == 0) {

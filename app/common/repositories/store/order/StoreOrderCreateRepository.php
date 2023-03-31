@@ -66,7 +66,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         return [$storeCouponDiscountByCode, $productCouponDiscountByCode];
     }
 
-    public function v2CartIdByOrderInfo($user, array $cartId, array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null, $createOrder = false, $marketingDiscount = [],$clipCoupons)
+    public function v2CartIdByOrderInfo($user, array $cartId, array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null, $createOrder = false, $marketingDiscount = [],$clipCoupons = 1)
     {
         $uid = $user->uid;
         $userIntegral = $user->integral;
@@ -1000,10 +1000,10 @@ class StoreOrderCreateRepository extends StoreOrderRepository
      * @param  array  $marketingDiscount
      * @return mixed
      */
-    public function v2CreateOrder(int $pay_type, $user, array $cartId, array $extend, array $mark, array $receipt_data, array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null, array $post, array $marketingDiscount = [])
+    public function v2CreateOrder(int $pay_type, $user, array $cartId, array $extend, array $mark, array $receipt_data, array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null, array $post, array $marketingDiscount = [],$clipCoupons = 1)
     {
         $uid = $user->uid;
-        $orderInfo = $this->v2CartIdByOrderInfo($user, $cartId, $takes, $useCoupon, $useIntegral, $addressId, true, $marketingDiscount);
+        $orderInfo = $this->v2CartIdByOrderInfo($user, $cartId, $takes, $useCoupon, $useIntegral, $addressId, true, $marketingDiscount,$clipCoupons);
         $marketingData = $orderInfo['marketing_data'];
         $orderMerchantCoupon = $marketingData['merchant_coupon'][0] ?? [];
 //        $storeMerchantCoupon = $productMerchantCoupon = [];
