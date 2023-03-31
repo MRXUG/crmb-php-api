@@ -66,7 +66,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         return [$storeCouponDiscountByCode, $productCouponDiscountByCode];
     }
 
-    public function v2CartIdByOrderInfo($user, array $cartId, array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null, $createOrder = false, $marketingDiscount = [])
+    public function v2CartIdByOrderInfo($user, array $cartId, array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null, $createOrder = false, $marketingDiscount = [],$clipCoupons)
     {
         $uid = $user->uid;
         $userIntegral = $user->integral;
@@ -483,11 +483,16 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             if ($merchantCoupon && $coupon) {
                 // 商家券
                 $discountAmount = $coupon['discount_num'];
-                $pay_price = max(bcsub($valid_total_price, $coupon['discount_num'], 2), 0);
+                if ($clipCoupons == 1){
+                    $pay_price = max(bcsub($valid_total_price, $coupon['discount_num'], 2), 0);
+                }
             } elseif(!empty($marketingDiscount['ad_id'])) {
                 // 营销优惠
                 $discount = $discountAmount = $marketing_data['discount_total'];
-                $pay_price = max(bcsub($valid_total_price, $discount, 2), 0);
+                if ($clipCoupons == 1){
+                    $pay_price = max(bcsub($valid_total_price, $discount, 2), 0);
+                }
+
             }
 
             $_pay_price = $pay_price;

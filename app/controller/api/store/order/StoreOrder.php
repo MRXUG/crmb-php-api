@@ -71,6 +71,7 @@ class StoreOrder extends BaseController
         $couponIds = (array)$this->request->param('use_coupon', []);
         $takes = (array)$this->request->param('takes', []);
         $useIntegral = (bool)$this->request->param('use_integral', false);
+        $clipCoupons = (int)$this->request->param('clipCoupons', 1);
         $user = $this->request->userInfo();
         $uid = $user->uid;
         // 营销页优惠
@@ -78,7 +79,7 @@ class StoreOrder extends BaseController
         if (!($count = count($cartId)) || $count != count($cartRepository->validIntersection($cartId, $uid)))
             return app('json')->fail('数据无效');
 
-        $orderInfo = $orderCreateRepository->v2CartIdByOrderInfo($user, $cartId, $takes, $couponIds, $useIntegral, $addressId, false, $marketingDiscount);
+        $orderInfo = $orderCreateRepository->v2CartIdByOrderInfo($user, $cartId, $takes, $couponIds, $useIntegral, $addressId, false, $marketingDiscount,$clipCoupons);
         $orderInfo['auto_check_purchase_protection'] = (int)(systemConfig('auto_check_purchase_protection') ?? 0);
         return app('json')->success($orderInfo);
     }
