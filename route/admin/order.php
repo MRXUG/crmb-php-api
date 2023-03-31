@@ -19,6 +19,7 @@ Route::group(function () {
 
     Route::group('store', function () {
         Route::get('refundorder/detail/:id', 'RefundOrder/detail');
+        Route::get('refundorder/log/:id', 'RefundOrder/log');
     })->prefix('admin.order.')->option([
         '_auth' => true,
     ]);

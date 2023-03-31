@@ -13,6 +13,7 @@
 namespace app\controller\admin\order;
 
 use app\common\repositories\store\ExcelRepository;
+use app\common\repositories\store\order\StoreRefundStatusRepository;
 use crmeb\basic\BaseController;
 use app\common\repositories\store\order\MerchantReconciliationorderRepository;
 use app\common\repositories\store\order\MerchantReconciliationRepository;
@@ -86,5 +87,12 @@ class RefundOrder extends BaseController
     public function detail($id)
     {
         return app('json')->success($this->repository->getOne($id));
+    }
+
+    public function log($id)
+    {
+        list($page,$limit) = $this->getPage();
+        $make = app()->make(StoreRefundStatusRepository::class);
+        return app('json')->success($make->search($id,$page,$limit));
     }
 }
