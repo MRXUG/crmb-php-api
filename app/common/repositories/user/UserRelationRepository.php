@@ -128,14 +128,16 @@ class UserRelationRepository extends BaseRepository
                 $item['merchant']['showProduct'] = $item['merchant']['AllRecommend'];
             }
 
+            $showProduct = [];
             foreach ($item['merchant']["showProduct"] as $k=>$v){
                 $act = $make->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_BORDER,0,$v['cate_id'],$v['mer_id']);
-                $list[$key]["merchant"]["showProduct"][$k]['border_pic'] = $act['pic'] ?? '';
+                $v['border_pic'] = $act['pic'] ?? '';
                 $couponInfo = $couponStockRep->getRecommendCoupon($v['product_id']);
-                $list[$key]["merchant"]["showProduct"][$k]['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
-                $list[$key]["merchant"]["showProduct"][$k]['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
+                $v['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+                $v['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
+                $showProduct[] = $v;
             }
-
+            $list[$key]['merchant']['showProduct']  = $showProduct;
 
 
         }
