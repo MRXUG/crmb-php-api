@@ -15,11 +15,13 @@ namespace app\common\repositories\user;
 
 use app\common\dao\user\UserRelationDao as dao;
 use app\common\repositories\BaseRepository;
+use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\product\ProductAssistRepository;
 use app\common\repositories\store\product\ProductGroupRepository;
 use app\common\repositories\store\product\ProductPresellRepository;
 use app\common\repositories\store\product\ProductRepository;
 use app\common\repositories\store\product\SpuRepository;
+use app\common\repositories\store\StoreActivityRepository;
 use app\common\repositories\system\merchant\MerchantRepository;
 use think\exception\ValidateException;
 use think\facade\Db;
@@ -112,7 +114,12 @@ class UserRelationRepository extends BaseRepository
         $count = $query->count();
         $list = $query->page($page, $limit)->select();
         $make = app()->make(ProductRepository::class);
-        foreach ($list as $item) {
+
+        /** @var StoreActivityRepository $make */
+        $make = app()->make(StoreActivityRepository::class);
+        /** @var CouponStocksRepository $couponStockRep */
+        $couponStockRep = app()->make(CouponStocksRepository::class);
+        foreach ($list as $key=>$item) {
             if(isset($item['spu']['product_type']) && $item['spu']['product_type'] == 1){
                 $item['spu']['stop_time'] = $item->stop_time;
                 unset($item['spu']['seckillActive']);
@@ -120,6 +127,19 @@ class UserRelationRepository extends BaseRepository
             if (isset($item['merchant']) && $item['merchant'] ) {
                 $item['merchant']['showProduct'] = $item['merchant']['AllRecommend'];
             }
+
+            $showProduct = [];
+            foreach ($item['merchant']["showProduct"] as $k=>$v){
+                $act = $make->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_BORDER,0,$v['cate_id'],$v['mer_id']);
+                $v['border_pic'] = $act['pic'] ?? '';
+                $couponInfo = $couponStockRep->getRecommendCoupon($v['product_id']);
+                $v['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+                $v['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
+                $showProduct[] = $v;
+            }
+            $list[$key]['merchant']['showProduct']  = $showProduct;
+
+
         }
         return compact('count', 'list');
     }

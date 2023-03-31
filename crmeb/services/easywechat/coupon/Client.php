@@ -343,7 +343,7 @@ class Client extends BaseClient
                 'mini_programs_info' => [
                     'entrance_words'      => $params['entrance_words'],
                     'guiding_words'       => $params['guiding_words'],
-                    'mini_programs_path'  => 'pages/index/index', //小程序首页
+                    'mini_programs_path'  => 'pages/columnGoods/goods_coupon_list/index', //小程序首页
                     'mini_programs_appid' => $appId,
                 ],
 //                'appid' => 'wxee403b4ddd3978bd',  // TODO 公众号appid，提示与商户没有关联
