@@ -1568,7 +1568,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
 //                throw new ValidateException('优惠券信息异常,请重新加购');
 //            }
             $couponUserData = [];
-            if (!empty($stock) && $stock['discount_num'] < $originAmount) {
+            if (!empty($stock) && ($stock['discount_num'] < $originAmount)) {
                 // 存在优惠券
                 $whereCouponUser = [
                     ['written_off', '=', 0], // written_off，0=未核销
@@ -1610,6 +1610,8 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     ],
                 ];
                 $hasDiscount = boolval($discountNum);
+            }else{
+                $stock = [];
             }
 
 
@@ -1674,7 +1676,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         [$platformSource, $merchantSource] = $this->tellOrderSource($adId, $adInfo, $goodsInfo, $hasDiscount, $isCardPackage);
 
         $bestCoupon = [];
-        if ($couponCode && $couponChecked && $stock && $couponUserData) {
+        if ($couponCode && $couponChecked && !empty($stock) && !empty($couponUserData)) {
             $bestCoupon = [
                 [
                     'stock_id'            => $stockId,

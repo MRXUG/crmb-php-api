@@ -167,8 +167,10 @@ class StoreOrder extends BaseController
         });
 
         if ($groupOrder['pay_price'] == 0) {
-            $this->repository->paySuccess($groupOrder);
-            return app('json')->status('success', '支付成功', ['order_id' => $groupOrder['group_order_id']]);
+            return app('json')->status('error', "支付金额不能为0", ['order_id' => $groupOrder->group_order_id]);
+
+//            $this->repository->paySuccess($groupOrder);
+//            return app('json')->status('success', '支付成功', ['order_id' => $groupOrder['group_order_id']]);
         }
         if ($isPc) {
             return app('json')->success(['order_id' => $groupOrder->group_order_id]);
