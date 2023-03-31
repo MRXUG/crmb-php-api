@@ -100,7 +100,7 @@ class StockProductDao extends BaseDao
                 }
             }
 
-            return $bestOffer;
+            return array_merge($bestOffer, []);
         } else {
             return [];
         }
