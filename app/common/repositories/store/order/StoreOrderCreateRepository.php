@@ -1552,11 +1552,14 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $couponStockRepository = app()->make(CouponStocksRepository::class);
             $productId = $productInfo['goods_id'];
             $originAmount = $productInfo['origin_amount'];
+            $today = date('Y-m-d H:i:s');
 
             $whereStock = [
-                'stock_id' => $stockId ,
-                'mer_id' => $merId,
-//                'status' => CouponStocks::STATUS_ING  //TODO
+                ['stock_id',"=",$stockId],
+                ['mer_id',"=",$merId],
+                ['end_at', '>=', $today],
+                ['start_at', '<', $today],
+                ['status' ,'=', CouponStocks::STATUS_ING]
             ];
             $stockCollect = $couponStockRepository->selectPageWhere($whereStock, [], 1, 1);
             $stock = $stockCollect->toArray()[0] ?? [];
@@ -1567,7 +1570,6 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $couponUserData = [];
             if (!empty($stock) && $stock['discount_num'] < $originAmount) {
                 // 存在优惠券
-                $today = date('Y-m-d H:i:s');
                 $whereCouponUser = [
                     ['written_off', '=', 0], // written_off，0=未核销
                     ['is_del', '=', 0],
