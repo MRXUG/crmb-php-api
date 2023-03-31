@@ -1550,52 +1550,56 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $stockCollect = $couponStockRepository->selectPageWhere($whereStock, [], 1, 1);
             $stock = $stockCollect->toArray()[0] ?? [];
 
-            if (empty($stock) || $stock['discount_num'] >= $originAmount) {
-                throw new ValidateException('优惠券信息异常,请重新加购');
+//            if (empty($stock) || $stock['discount_num'] >= $originAmount) {
+//                throw new ValidateException('优惠券信息异常,请重新加购');
+//            }
+            $couponUserData = [];
+            if (!empty($stock) && $stock['discount_num'] < $originAmount) {
+                // 存在优惠券
+                $today = date('Y-m-d H:i:s');
+                $whereCouponUser = [
+                    ['written_off', '=', 0], // written_off，0=未核销
+                    ['is_del', '=', 0],
+                    ['uid', '=', $uid],
+                    ['coupon_code', '=', $couponCode],
+                    ['stock_id', '=', $stockId],
+                    ['mer_id', '=', $merId],
+                    ['end_at', '>=', $today],
+                    ['start_at', '<', $today],
+                ];
+
+                /**
+                 * @var StockProductRepository $stockProductRepository
+                 */
+                $stockProductRepository = app()->make(StockProductRepository::class);
+                $couponProductExists = $stockProductRepository->existsWhere(['stock_id' => $stockId, 'product_id' => $productId]);
+                $couponUserData = $couponUser->getOne($whereCouponUser);
+
+                if (empty($couponUserData) || ($stock['scope'] == CouponStocks::SCOPE_NO && !$couponProductExists)) {
+                    throw new ValidateException('优惠券信息异常,请重新加购');
+                }
+
+                $discountTotal = $discountNum = $stock['discount_num']; // 券面额单位：元
+                // 商家券推优。已领，进行中，店铺券、商品券
+                $currentMerchantCoupon = [
+                    [
+                        'stock_id'            => $stockId,
+                        'coupon_code'         => $couponCode,
+                        'discount_num'        => $discountNum,
+                        'scope'               => $stock['scope'],
+                        'type'                => $stock['type'],
+                        'checked'             => true,
+                        'stock_name'          => $stock['stock_name'],
+                        'transaction_minimum' => $stock['transaction_minimum'],
+                        'start_at'            => '有效时间',
+                        'end_at'              => '有效时间',
+                        'mer_id'              => $merId,
+                    ],
+                ];
+                $hasDiscount = boolval($discountNum);
             }
 
-            // 存在优惠券
-            $today = date('Y-m-d H:i:s');
-            $whereCouponUser = [
-                ['written_off', '=', 0], // written_off，0=未核销
-                ['is_del', '=', 0],
-                ['uid', '=', $uid],
-                ['coupon_code', '=', $couponCode],
-                ['stock_id', '=', $stockId],
-                ['mer_id', '=', $merId],
-                ['end_at', '>=', $today],
-                ['start_at', '<', $today],
-            ];
 
-            /**
-             * @var StockProductRepository $stockProductRepository
-             */
-            $stockProductRepository = app()->make(StockProductRepository::class);
-            $couponProductExists = $stockProductRepository->existsWhere(['stock_id' => $stockId, 'product_id' => $productId]);
-            $couponUserData = $couponUser->getOne($whereCouponUser);
-
-            if (empty($couponUserData) || ($stock['scope'] == CouponStocks::SCOPE_NO && !$couponProductExists)) {
-                throw new ValidateException('优惠券信息异常,请重新加购');
-            }
-
-            $discountTotal = $discountNum = $stock['discount_num']; // 券面额单位：元
-            // 商家券推优。已领，进行中，店铺券、商品券
-            $currentMerchantCoupon = [
-                [
-                    'stock_id'            => $stockId,
-                    'coupon_code'         => $couponCode,
-                    'discount_num'        => $discountNum,
-                    'scope'               => $stock['scope'],
-                    'type'                => $stock['type'],
-                    'checked'             => true,
-                    'stock_name'          => $stock['stock_name'],
-                    'transaction_minimum' => $stock['transaction_minimum'],
-                    'start_at'            => '有效时间',
-                    'end_at'              => '有效时间',
-                    'mer_id'              => $merId,
-                ],
-            ];
-            $hasDiscount = boolval($discountNum);
         } elseif($adId) {
             $adMarketingDiscountAmount = $adInfo['marketing_discount_amount'];
             $adFissionAmount = $adInfo['fission_amount'];
@@ -1657,7 +1661,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         [$platformSource, $merchantSource] = $this->tellOrderSource($adId, $adInfo, $goodsInfo, $hasDiscount, $isCardPackage);
 
         $bestCoupon = [];
-        if ($couponCode && $couponChecked) {
+        if ($couponCode && $couponChecked && $stock && $couponUserData) {
             $bestCoupon = [
                 [
                     'stock_id'            => $stockId,
