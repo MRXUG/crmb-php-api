@@ -163,6 +163,9 @@ Route::group(function () {
         Route::post('status/:id', '/switchStatus')->name('merchantStoreRefundOrderSwitchStatus')->option([
             '_alias' => '审核',
         ]);
+        Route::post('reRefund/:id', '/reRefund')->name('merchantStoreRefundOrderReRefund')->option([
+            '_alias' => '重新退款',
+        ]);
         Route::post('refund/:id', '/refundPrice')->name('merchantStoreRefundOrderRefund')->option([
             '_alias' => '收到退回商品后确认退款',
         ]);

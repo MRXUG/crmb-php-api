@@ -95,6 +95,17 @@ class RefundOrder extends BaseController
     }
 
     /**
+     * 重新退款
+     *
+     * @return void
+     */
+    public function reRefund(int $id)
+    {
+        $this->repository->reRefund($id);
+        return app('json')->success('重新退款发起成功');
+    }
+
+    /**
      * TODO 收货后确定退款
      * @param $id
      * @return mixed

@@ -816,6 +816,27 @@ class StoreRefundOrderRepository extends BaseRepository
     }
 
     /**
+     * 重新发起退款
+     *
+     * @param int $id StoreRefundOrder 的 id
+     * @throws null
+     * @return void
+     */
+    public function reRefund(int $id)
+    {
+        Db::transaction(function () use($id) {
+            # 获取操作模型
+            /** @var StoreRefundOrder $refundOrder */
+            $refundOrder = $this->dao->getWhere(['refund_order_id' => $id]);
+            # 将状态变更为 4 退款中
+            $refundOrder->setAttr('status', 4);
+            $refundOrder->save();
+            # 重新发布退款
+            ProfitSharing::refund($id, [1 => true, 2 => false][$refundOrder->getAttr('refund_type')]);
+        });
+    }
+
+    /**
      * @Author:Qinii
      * @Date: 2020/8/29
      * @param $res
