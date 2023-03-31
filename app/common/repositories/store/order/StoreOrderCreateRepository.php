@@ -1550,7 +1550,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $stockCollect = $couponStockRepository->selectPageWhere($whereStock, [], 1, 1);
             $stock = $stockCollect->toArray()[0] ?? [];
 
-            if (empty($stock) || $stock['transaction_minimum'] >= $originAmount) {
+            if (empty($stock) || $stock['discount_num'] >= $originAmount) {
                 throw new ValidateException('优惠券信息异常,请重新加购');
             }
 
