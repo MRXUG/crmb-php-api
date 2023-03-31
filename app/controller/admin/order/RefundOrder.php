@@ -82,4 +82,11 @@ class RefundOrder extends BaseController
         $data = app()->make(ExcelService::class)->refundOrder($where, $page, $limit);
         return app('json')->success($data);
     }
+
+    public function detail($id)
+    {
+        if(!$this->repository->getExistsById($this->request->merId(),$id))
+            return app('json')->fail('数据不存在');
+        return app('json')->success($this->repository->getOne($id));
+    }
 }

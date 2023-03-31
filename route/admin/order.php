@@ -17,6 +17,12 @@ use app\common\middleware\LogMiddleware;
 
 Route::group(function () {
 
+    Route::group('store', function () {
+        Route::get('refundorder/detail/:id', 'RefundOrder/detail');
+    })->prefix('admin.order.')->option([
+        '_auth' => true,
+    ]);
+
     Route::group('order', function () {
         Route::get('lst', 'Order/getAllList')->name('systemOrderLst')->option([
             '_alias' => '列表',
@@ -111,6 +117,7 @@ Route::group(function () {
             ],
         ]
     ]);
+
 
 
 })->middleware(AllowOriginMiddleware::class)
