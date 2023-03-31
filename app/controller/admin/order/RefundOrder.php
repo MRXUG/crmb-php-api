@@ -95,4 +95,9 @@ class RefundOrder extends BaseController
         $make = app()->make(StoreRefundStatusRepository::class);
         return app('json')->success($make->search($id,$page,$limit));
     }
+
+    public function express($id)
+    {
+        return app('json')->success($this->repository->express($id));
+    }
 }
