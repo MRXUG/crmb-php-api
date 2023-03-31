@@ -119,7 +119,7 @@ class UserRelationRepository extends BaseRepository
         $make = app()->make(StoreActivityRepository::class);
         /** @var CouponStocksRepository $couponStockRep */
         $couponStockRep = app()->make(CouponStocksRepository::class);
-        foreach ($list as $item) {
+        foreach ($list as $key=>$item) {
             if(isset($item['spu']['product_type']) && $item['spu']['product_type'] == 1){
                 $item['spu']['stop_time'] = $item->stop_time;
                 unset($item['spu']['seckillActive']);
@@ -130,10 +130,10 @@ class UserRelationRepository extends BaseRepository
 
             foreach ($item['merchant']["showProduct"] as $k=>$v){
                 $act = $make->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_BORDER,0,$v['cate_id'],$v['mer_id']);
-                $list["merchant"]["showProduct"][$k]['border_pic'] = $act['pic'] ?? '';
+                $list[$key]["merchant"]["showProduct"][$k]['border_pic'] = $act['pic'] ?? '';
                 $couponInfo = $couponStockRep->getRecommendCoupon($v['product_id']);
-                $list["merchant"]["showProduct"][$k]['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
-                $list["merchant"]["showProduct"][$k]['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
+                $list[$key]["merchant"]["showProduct"][$k]['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+                $list[$key]["merchant"]["showProduct"][$k]['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
             }
 
 
