@@ -79,7 +79,7 @@ class BuildCouponRepository extends BaseRepository
             'type' => $params['type'],
             'scope' => $params['scope'],
             'discount_num' => (int)$params['discount_num'],
-            'transaction_minimum' => ((int)$params['transaction_minimum']) <= 0 ? $params['transaction_minimum'] + 0.01 : (int)$params['transaction_minimum'],
+            'transaction_minimum' => (int)$params['transaction_minimum'],
             'wait_days_after_receive' => (int)$params['wait_days_after_receive'],
             'available_day_after_receive' => (int)$params['available_day_after_receive'],
             'start_at' => $params['available_begin_time'],
