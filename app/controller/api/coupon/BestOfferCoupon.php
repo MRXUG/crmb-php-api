@@ -31,6 +31,6 @@ class BestOfferCoupon extends BaseController
 
         $price = $minPriceSku['price'] ?? 0;
 
-        return app('json')->success($productRepository->productBestOffer($id, $params['mer_id'], false, $price));
+        return app('json')->success($productRepository->productBestOffer($id, $params['mer_id'], false, $price, true));
     }
 }
