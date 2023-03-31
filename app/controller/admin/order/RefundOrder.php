@@ -85,8 +85,6 @@ class RefundOrder extends BaseController
 
     public function detail($id)
     {
-        if(!$this->repository->getExistsById($this->request->merId(),$id))
-            return app('json')->fail('数据不存在');
         return app('json')->success($this->repository->getOne($id));
     }
 }
