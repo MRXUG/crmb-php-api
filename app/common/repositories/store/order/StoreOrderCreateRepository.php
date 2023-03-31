@@ -951,7 +951,13 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         $order = $merchantCartList;
         $total_price = $order_total_price;
         $openIntegral = $merIntegralFlag && !$order_type && $sysIntegralConfig['integral_status'] && $sysIntegralConfig['integral_money'] > 0;
-        $total_coupon = bcadd($order_svip_discount, bcadd(bcadd($total_platform_coupon_price, $order_coupon_price, 2), $order_total_integral_price, 2), 2);
+
+        if ($clipCoupons == 1){
+            $total_coupon = bcadd($order_svip_discount, bcadd(bcadd($total_platform_coupon_price, $order_coupon_price, 2), $order_total_integral_price, 2), 2);
+        }else{
+            $total_coupon = 0;
+        }
+
         return compact(
             'marketing_data',
                 'order_type',

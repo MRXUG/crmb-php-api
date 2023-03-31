@@ -272,10 +272,12 @@ class CouponStocksRepository extends BaseRepository
         // 获取最小的商品sku
         $minPriceSku = ProductAttrValue::getDB()->where('product_id', $productId)->order('price', 'asc')->find();
         if (!$minPriceSku) return null;
-        $coupon = $this->getRecommendCouponFormProductId($productId, true);
+
+        $price = $minPriceSku['price'] ?? 0;
+
+        $coupon = $this->getRecommendCouponFormProductId($productId, true,$price);
 
         $discount_num = $coupon['discount_num'] ?? 0;
-        $price = $minPriceSku['price'] ?? 0;
         $sub = bcsub($price, $discount_num, 2);
 
         return [
@@ -296,7 +298,7 @@ class CouponStocksRepository extends BaseRepository
      * @return mixed
      * @throws null
      */
-    public function getRecommendCouponFormProductId(int $productId, bool $isFirst)
+    public function getRecommendCouponFormProductId(int $productId, bool $isFirst,$price = 0)
     {
         // 获取这个商品所属的商户id
         /** @var ProductDao $productRep */
@@ -304,6 +306,6 @@ class CouponStocksRepository extends BaseRepository
         $merId = $productRep->getMerIdFormProductId($productId);
         /** @var StockProductRepository $stockProductRep */
         $stockProductRep = app()->make(StockProductRepository::class);
-        return $stockProductRep->productBestOffer($productId, $merId, $isFirst);
+        return $stockProductRep->productBestOffer($productId, $merId, $isFirst,$price);
     }
 }

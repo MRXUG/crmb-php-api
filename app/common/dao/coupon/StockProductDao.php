@@ -55,7 +55,7 @@ class StockProductDao extends BaseDao
      * @author  wanglei <wanglei@vchangyi.com>
      * @date    2023/3/7 15:57
      */
-    public function productBestOffer($productId, $merId, $isFirst = true)
+    public function productBestOffer($productId, $merId, $isFirst = true,$price = 0)
     {
         // 全场券
         $where['scope'] = CouponStocks::SCOPE_YES;
@@ -93,6 +93,10 @@ class StockProductDao extends BaseDao
             foreach ($bestOffer as &$item){
                 if (isset($item["transaction_minimum"]) && isset($item["discount_num"]) && ($item["transaction_minimum"] == 0)){
                     $item["transaction_minimum"] = $item["discount_num"]+0.01;
+                }
+
+                if (isset($item["discount_num"]) && $item["discount_num"] <= $price){
+                    unset($item);
                 }
             }
 

@@ -11,6 +11,8 @@
 
 namespace app\common\repositories\user;
 
+use app\common\repositories\coupon\CouponStocksRepository;
+use app\common\repositories\store\StoreActivityRepository;
 use think\facade\Log;
 use app\common\repositories\BaseRepository;
 use app\common\dao\user\UserHistoryDao;
@@ -40,12 +42,23 @@ class UserHistoryRepository extends BaseRepository
         $count = $query->count();
         $data = $query->page($page,$limit)->select();
         $res = [];
+        $make = app()->make(StoreActivityRepository::class);
+        $couponStockRep = app()->make(CouponStocksRepository::class);
         foreach ($data as $item) {
+
+            $act = $make->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_BORDER,$item["spu"]['spu_id'],0,$item["spu"]['mer_id']);
+            $item['border_pic'] = $act['pic'] ?? '';
+            $couponInfo = $couponStockRep->getRecommendCoupon($item["spu"]['product_id']);
+            $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+            $item['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
 
             if ($item['spu']) {
                 $time = date('m月d日',strtotime($item['update_time']));
                 $res[$time][] = $item;
             }
+
+
+
         }
         $list = [];
         foreach ($res as $k => $v) {
