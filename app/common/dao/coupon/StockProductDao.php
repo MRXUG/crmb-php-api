@@ -90,13 +90,13 @@ class StockProductDao extends BaseDao
         if ($bestOffer) {
             $bestOffer = $bestOffer->toArray();
 
-            foreach ($bestOffer as &$item){
+            foreach ($bestOffer as $k=>$item){
                 if (isset($item["transaction_minimum"]) && isset($item["discount_num"]) && ($item["transaction_minimum"] == 0)){
-                    $item["transaction_minimum"] = $item["discount_num"]+0.01;
+                    $bestOffer[$k]["transaction_minimum"] = $item["discount_num"]+0.01;
                 }
 
-                if (isset($item["discount_num"]) && $item["discount_num"] <= $price){
-                    unset($item);
+                if (isset($item["discount_num"]) && $item["discount_num"] >= $price){
+                    unset($bestOffer[$k]);
                 }
             }
 
