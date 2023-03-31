@@ -107,7 +107,7 @@ class StoreOrder extends BaseController
         $user = $this->request->userInfo();
         $uid = $user->uid;
         $goodsInfo = [
-            "origin_amount"=>$money,
+            "price"=>$money,
             "goods_id"=>$productId,
         ];
 

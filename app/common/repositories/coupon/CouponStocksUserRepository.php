@@ -309,7 +309,7 @@ class CouponStocksUserRepository extends BaseRepository
             ['start_at', '<', $today],
         ];
 
-        $productAmount = $productInfo['origin_amount'];
+        $productAmount = $productInfo['price'];
         $couponList = $this->selectWhere($where)->toArray();
         $stockIdList = array_column($couponList, 'stock_id');
         /**

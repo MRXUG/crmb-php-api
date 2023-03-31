@@ -1519,6 +1519,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     'number'        => $cart['cart_num'],
                     'origin_amount' => bcmul($cart['cart_num'], $cart['productAttr']['ot_price'], 2),
                     'ot_price'      => $cart['productAttr']['ot_price'],
+                    'price'      => bcmul($cart['cart_num'], $cart['productAttr']['price'], 2),
                 ];
             }
         }
