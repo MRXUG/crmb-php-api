@@ -15,8 +15,10 @@ namespace app\common\model\store\order;
 
 
 use app\common\model\BaseModel;
+use app\common\model\store\RefundTask;
 use app\common\model\system\merchant\Merchant;
 use app\common\model\user\User;
+use think\model\relation\HasOne;
 
 class StoreRefundOrder extends BaseModel
 {
@@ -76,6 +78,11 @@ class StoreRefundOrder extends BaseModel
     public function order()
     {
         return $this->hasOne(StoreOrder::class, 'order_id', 'order_id');
+    }
+
+    public function refundTask(): HasOne
+    {
+        return $this->hasOne(RefundTask::class, 'refund_order_id', 'refund_order_id');
     }
 
     public function searchDataAttr($query, $value)

@@ -35,6 +35,7 @@ use crmeb\utils\wechat\ProfitSharing;
 use Exception;
 use FormBuilder\Factory\Elm;
 use FormBuilder\Form;
+use think\db\BaseQuery;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
@@ -482,6 +483,9 @@ class StoreRefundOrderRepository extends BaseRepository
                 $query->field('order_id,order_sn,activity_type,real_name,user_address,status,order_type,is_del');
             },
             'refundProduct.product',
+            'refundTask' => function (BaseQuery $query) {
+                $query->where('status', 1)->field('err_msg')->order('refund_task_id', 'desc');
+            },
             'user' => function ($query) {
                 $query->field('uid,nickname,phone');
             }])

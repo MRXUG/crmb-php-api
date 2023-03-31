@@ -89,7 +89,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
             ]);
         }
         # 处理错误信息
-        if ($this->profitSharingErrHandler($task, $errArr)) return;
+        if ($task->profitSharingErrHandler($errArr)) return;
         # 将处理后的param存储
         $this->saveTaskParam($task, $newParam);
         # 判断数据库中数据是否还存在未退回的
@@ -132,7 +132,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
                 'description' => '用户退款解冻全部剩余资金',
             ]);
         } catch (Exception $e) {
-            $this->profitSharingErrHandler($task, ['解冻分账失败' . $e->getMessage()]);
+            $task->profitSharingErrHandler(['解冻分账失败' . $e->getMessage()]);
             return;
         }
         /** @var StoreRefundOrderDao $refundOrderResp */
@@ -157,11 +157,11 @@ class OrderRefundListen extends TimerService implements ListenerInterface
             );
         # 处理退款失败
         if ($res->return_code == 'FAIL') {
-            $this->profitSharingErrHandler($task, ['发起退款失败 ' . $res->return_msg ?? '']);
+            $task->profitSharingErrHandler(['发起退款失败 ' . $res->return_msg ?? '']);
             return;
         }
         if (isset($res->err_code)) {
-            $this->profitSharingErrHandler($task, ['发起退款失败 错误码:' . $res->err_code_des ?? '']);
+            $task->profitSharingErrHandler(['发起退款失败 错误码:' . $res->err_code_des ?? '']);
             return;
         }
 
@@ -181,23 +181,6 @@ class OrderRefundListen extends TimerService implements ListenerInterface
     {
         $newTask = clone $task;
         $newTask->setAttr('param', json_encode($param, JSON_UNESCAPED_UNICODE));
-        $newTask->save();
-    }
-
-    /**
-     * 返回错误集中处理
-     *
-     * @param RefundTask $task
-     * @param array $errArr
-     * @return bool
-     */
-    private function profitSharingErrHandler(RefundTask $task, array $errArr): bool
-    {
-        # 如果没有错误的话那么返回false继续向下执行
-        if (empty($errArr)) return false;
-        # 解析先前存在的错误
-        $newTask = clone $task;
-        $newTask->setAttr('err_msg',  implode(";", array_merge(explode(";", $newTask->getAttr('err_msg')), $errArr)));
         $newTask->save();
     }
 

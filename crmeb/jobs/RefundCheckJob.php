@@ -48,7 +48,7 @@ class RefundCheckJob implements JobInterface
                     ->paymentService()->queryRefund($refundOrder->getAttr('refund_order_sn'), 'out_refund_no');
 
                 if ($res->return_code == 'FAIL') {
-                    $this->profitSharingErrHandler($refundOrderTask, ['发起退款失败 ' . $res->return_msg ?? '']);
+                    $refundOrderTask->profitSharingErrHandler(['发起退款失败 ' . $res->return_msg ?? '']);
                     return;
                 }
 
@@ -59,7 +59,7 @@ class RefundCheckJob implements JobInterface
                 }
 
                 if (isset($res->err_code)) {
-                    $this->profitSharingErrHandler($refundOrderTask, ['发起退款失败 错误码:' . $res->err_code_des ?? '']);
+                    $refundOrderTask->profitSharingErrHandler(['发起退款失败 错误码:' . $res->err_code_des ?? '']);
                     return;
                 }
 
@@ -79,22 +79,5 @@ class RefundCheckJob implements JobInterface
     public function failed($data)
     {
 
-    }
-
-    /**
-     * 返回错误集中处理
-     *
-     * @param RefundTask $task
-     * @param array $errArr
-     * @return bool
-     */
-    private function profitSharingErrHandler(RefundTask $task, array $errArr): bool
-    {
-        # 如果没有错误的话那么返回false继续向下执行
-        if (empty($errArr)) return false;
-        # 解析先前存在的错误
-        $newTask = clone $task;
-        $newTask->setAttr('err_msg',  implode(";", array_merge(explode(";", $newTask->getAttr('err_msg')), $errArr)));
-        $newTask->save();
     }
 }
