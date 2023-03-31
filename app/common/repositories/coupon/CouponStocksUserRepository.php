@@ -332,7 +332,7 @@ class CouponStocksUserRepository extends BaseRepository
         foreach ($couponList as $item) {
             $stockId = $item['stock_id'];
             $stockData = $stockListByStockId[$stockId];
-            if ($productAmount >  $stockData['discount_num']) {
+            if ($stockData && ($productAmount >  $stockData['discount_num'])) {
                 $discountNum = $stockData['discount_num'];
                 $couponCode = $item['coupon_code'];
                 if ($discountNum > $maxDiscount) {
