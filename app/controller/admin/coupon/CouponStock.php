@@ -52,7 +52,7 @@ class CouponStock extends BaseController
     public function receiveList()
     {
         [$page, $limit] = $this->getPage();
-        $params = $this->request->params(['stock_name', 'nickname','written_off', 'coupon_user_id', 'stock_id', 'mch_id']);
+        $params = $this->request->params(['stock_name', 'nickname','written_off', 'coupon_user_id', 'stock_id', 'mch_id','coupon_code']);
         $params['mch_id'] = !empty($params['mch_id']) ? $params['mch_id'] : 0;
         return app('json')->success($this->userRepository->list($page, $limit, $params, $params['mch_id']));
     }

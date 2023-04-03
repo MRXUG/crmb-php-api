@@ -67,12 +67,12 @@ class CouponStocksUserDao extends BaseDao
             ->when(isset($where['mer_id']) && $where['mer_id'] > 0, function ($query) use ($where) {
                 $query->where('CouponStocks.mer_id', (int)$where['mer_id']);
             })
-            ->when(isset($where['time']), function ($query) use ($where) {
+            ->when(isset($where['time']) && $where['time'], function ($query) use ($where) {
                 $query->where('CouponStocksUser.start_at', '<=', $where['time'])
                     ->where('CouponStocksUser.end_at', '>', $where['time']);
-            })->when(isset($where['coupon_code']), function ($query) use ($where) {
+            })->when(isset($where['coupon_code']) && $where['coupon_code'], function ($query) use ($where) {
                 $query->where('CouponStocksUser.coupon_code', '=', $where['coupon_code']);
-            })->when(isset($where['stock_id']), function ($query) use ($where) {
+            })->when(isset($where['stock_id']) && $where['stock_id'], function ($query) use ($where) {
                 $query->where('CouponStocksUser.stock_id', '=', $where['stock_id']);
             })
             ->where('CouponStocksUser.is_del', WxAppletModel::IS_DEL_NO);
