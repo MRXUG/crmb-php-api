@@ -319,7 +319,7 @@ class MerchantRepository extends BaseRepository
                     $recommendArr[$k] = $v;
                     $couponInfo = $couponStockRep->getRecommendCoupon($v['product_id']);
                     $recommendArr[$k]['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
-                    $recommendArr[$k]['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
+                    $recommendArr[$k]['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
                 }
 
                 $item['recommend'] = $recommendArr;

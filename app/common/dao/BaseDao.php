@@ -48,6 +48,12 @@ abstract class BaseDao
         return ($this->getModel())::tablePk();
     }
 
+    public function getModelObj(): Model
+    {
+        $class = $this->getModel();
+        return new $class;
+    }
+
     /**
      * @param int $id
      * @return bool

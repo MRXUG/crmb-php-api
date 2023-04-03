@@ -297,20 +297,28 @@ class CouponStocksUserRepository extends BaseRepository
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
      */
-    public function best($uid, $merId, $productInfo)
+    public function best($uid, $merId, $productInfo, $orderPrice)
     {
         $today = date('Y-m-d H:i:s');
-        $where = [
-            ['written_off', '=', 0],
-            ['is_del', '=', 0],
-            ['uid', '=', $uid],
-            ['mer_id', '=', $merId],
-            ['end_at', '>=', $today],
-            ['start_at', '<', $today],
-        ];
+        $productAmount = $productInfo['origin_amount'];
 
-        $productAmount = $productInfo['price'];
-        $couponList = $this->selectWhere($where)->toArray();
+        $couponList = $this->dao->getModelObj()
+            ->alias('a')
+            ->leftJoin('eb_coupon_stocks b', 'a.stock_id = b.stock_id')
+            ->field(['a.*', 'b.discount_num'])
+            ->where([
+                ['a.written_off', '=', 0],
+                ['a.is_del', '=', 0],
+                ['a.uid', '=', $uid],
+                ['a.mer_id', '=', $merId],
+                ['a.end_at', '>=', $today],
+                ['a.start_at', '<', $today],
+            ])
+            ->select()->toArray();
+        # 删除掉不符合规则的优惠券
+        foreach ($couponList as $k => $v) {
+            if ($v['discount_num'] >= $orderPrice) unset($couponList[$k]);
+        }
         $stockIdList = array_column($couponList, 'stock_id');
         /**
          * @var CouponStocksRepository $couponStockRepository
@@ -318,11 +326,22 @@ class CouponStocksUserRepository extends BaseRepository
         $couponStockRepository = app()->make(CouponStocksRepository::class);
         $whereStock = [
 //            'status' => CouponStocks::STATUS_ING,
-            'mer_id' => $merId,
+            ['mer_id', '=', $merId],
         ];
         $field = 'type, stock_id, scope, discount_num, stock_name, transaction_minimum';
         $stockListCollect = $couponStockRepository->selectPageWhere($whereStock, $stockIdList, 1, 100, $field);
         $stockList = $stockListCollect->toArray();
+        # 优惠券新逻辑限制
+        foreach ($stockList as $k => &$item) {
+            $item['no_threshold'] = 0;
+            if (isset($item["transaction_minimum"]) && isset($item["discount_num"]) && ($item["transaction_minimum"] == 0)){
+                $item["transaction_minimum"] = $item["discount_num"]+0.01;
+            }
+            if (isset($item["discount_num"]) && $item["discount_num"] >= $orderPrice){
+                unset($stockList[$k]);
+            }
+        }
+
         $stockListByStockId = array_column($stockList, null, 'stock_id');
 
         $stockProduct = app()->make(StockProductDao::class);
@@ -332,7 +351,7 @@ class CouponStocksUserRepository extends BaseRepository
         foreach ($couponList as $item) {
             $stockId = $item['stock_id'];
             $stockData = $stockListByStockId[$stockId];
-            if ($stockData && ($productAmount >  $stockData['discount_num'])) {
+            if ($productAmount >  $stockData['discount_num']) {
                 $discountNum = $stockData['discount_num'];
                 $couponCode = $item['coupon_code'];
                 if ($discountNum > $maxDiscount) {

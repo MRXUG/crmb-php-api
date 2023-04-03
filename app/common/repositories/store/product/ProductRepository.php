@@ -1220,7 +1220,7 @@ class ProductRepository extends BaseRepository
         foreach ($recommend as &$item) {
             $couponInfo = $couponStockRep->getRecommendCoupon($item['product_id']);
             $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
-            $item['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
+            $item['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
         }
         $res['merchant']['recommend'] = $recommend;
         $spu = app()->make(SpuRepository::class)->getSpuData(
@@ -1248,7 +1248,7 @@ class ProductRepository extends BaseRepository
         $couponStockRep = app()->make(CouponStocksRepository::class);
         $couponInfo = $couponStockRep->getRecommendCoupon($res['product_id']);
         $res['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
-        $res['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
+        $res['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
         return $res;
     }
 

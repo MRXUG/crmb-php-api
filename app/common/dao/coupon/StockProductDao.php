@@ -84,16 +84,27 @@ class StockProductDao extends BaseDao
         $bestOffer = $this->dao
             ->whereIn('id', array_column(array_merge($fullCourt, $specify), 'id'))
             ->order('discount_num DESC');
+        // 获取单个时返回优惠券金额小于传入金额
+        $bestOffer = $isFirst ? $bestOffer->where([
+            ['discount_num', '<', $price]
+        ])->find(): $bestOffer->select();
 
-        $bestOffer = $isFirst ? $bestOffer->find(): $bestOffer->select();
         if ($bestOffer) {
             $bestOffer = $bestOffer->toArray();
+            # 向前端添加数据是否有门槛
+            if ($isFirst) {
+                $bestOffer['no_threshold'] = $bestOffer['transaction_minimum'] == 0 ? 1 : 0;
+            } else {
+                foreach ($bestOffer as $k => $item) {$bestOffer[$k]['no_threshold'] = $item['transaction_minimum'] == 0 ? 1 : 0;}
+            }
+            # 是否返回所有的数据
             if ($returnAll) {
                 return $bestOffer;
             }
-
+            # 处理优惠券基本信息 如果不满足规则条件那么删除掉
             if (!$isFirst) {
                 foreach ($bestOffer as $k=>$item) {
+                    $bestOffer[$k]['no_threshold'] = 0;
                     if (isset($item["transaction_minimum"]) && isset($item["discount_num"]) && ($item["transaction_minimum"] == 0)){
                         $bestOffer[$k]["transaction_minimum"] = $item["discount_num"]+0.01;
                     }

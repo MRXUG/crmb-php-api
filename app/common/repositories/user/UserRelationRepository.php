@@ -134,7 +134,7 @@ class UserRelationRepository extends BaseRepository
                 $v['border_pic'] = $act['pic'] ?? '';
                 $couponInfo = $couponStockRep->getRecommendCoupon($v['product_id']);
                 $v['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
-                $v['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];
+                $v['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
                 $showProduct[] = $v;
             }
             $list[$key]['merchant']['showProduct']  = $showProduct;

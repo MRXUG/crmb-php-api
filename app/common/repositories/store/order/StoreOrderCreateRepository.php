@@ -78,11 +78,11 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $addressRepository = app()->make(UserAddressRepository::class);
             $address = $addressRepository->getWhere(['uid' => $uid, 'address_id' => $addressId]);
         }
-
+        /** @var StoreCartRepository $storeCartRepository */
         $storeCartRepository = app()->make(StoreCartRepository::class);
-        $res = $storeCartRepository->checkCartList($storeCartRepository->cartIbByData($cartId, $uid, $address), 0, $user);
+        $res = $storeCartRepository->checkCartList($storeCartRepository->cartIbByData($cartId, $uid, $address), $clipCoupons == 1 ? 1 : 0, $user);
         $merchantCartList = $res['list'];
-        // [$storeCouponDiscountByCode, $productCouponDiscountByCode] = $this->merchantCoupon($marketing_data, $merchantCartList);
+//         [$storeCouponDiscountByCode, $productCouponDiscountByCode] = $this->merchantCoupon($marketing_data, $merchantCartList);
 
         $fail = $res['fail'];
 
@@ -477,6 +477,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             // 商家券、营销页优惠
             $merId = $merchantCart['mer_id'];
             $marketing_data = $this->validateMarketingDiscount($uid, $merId, $marketingDiscount, $merchantCartList);
+
             $merchantCoupon = $marketing_data['merchant_coupon'] ?? [];
             $coupon = $merchantCoupon[0] ?? []; // 只有一张券
             $discountAmount = 0;
@@ -591,7 +592,6 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $cart['coupon_price'] = bcsub($cart['coupon_price'], $discountAmount, 2);
             $cart['true_price'] = bcsub($cart['true_price'], $discountAmount, 2);
             $coupon_price = bcadd($coupon_price, $discountAmount, 2);
-
             unset($cart, $_k);
             $total_true_price = bcadd($_pay_price, $total_true_price, 2);
             if(count($merchantCartList) > 1 || count($merchantCart['list']) > 1){
@@ -805,7 +805,6 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         $order_total_integral_price = 0;
         $order_total_give_integral = 0;
         $allow_no_address = true;
-
         foreach ($merchantCartList as &$merchantCart) {
             $merchantCart['take'] = [
                 'mer_integral_rate' => 0,
@@ -918,10 +917,10 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $merchantCart['order']['coupon_price'] = $coupon_price;
 
             // TODO 处理商家券、营销优惠
-
             $order_price = bcadd($order_price, $pay_price, 2);
             $order_total_price = bcadd($order_total_price, $total_price, 2);
         }
+//        dd($order_price, $order_total_price);
         unset($merchantCart);
 
         if ($order_model) {
@@ -957,7 +956,6 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         }else{
             $total_coupon = 0;
         }
-
         return compact(
             'marketing_data',
                 'order_type',
@@ -1517,12 +1515,15 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     'mer_id'        => $orderItem['mer_id'],
                     'goods_id'      => $cart['productAttr']['product_id'],
                     'number'        => $cart['cart_num'],
+                    'goods_price' => $cart['productAttr']['price'],
                     'origin_amount' => bcmul($cart['cart_num'], $cart['productAttr']['ot_price'], 2),
                     'ot_price'      => $cart['productAttr']['ot_price'],
-                    'price'      => bcmul($cart['cart_num'], $cart['productAttr']['price'], 2),
+                    'goods_total_price' => bcmul($cart['productAttr']['price'], $cart['cart_num'], 2),
                 ];
             }
         }
+        // 计算总价
+        $sumPrice = array_sum(array_column($productInfoList, 'goods_total_price'));
         // 此处仅考虑购买一个商品的情况
         $productInfo = $productInfoList[0];
 
@@ -1677,27 +1678,27 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         [$platformSource, $merchantSource] = $this->tellOrderSource($adId, $adInfo, $goodsInfo, $hasDiscount, $isCardPackage);
 
         $bestCoupon = [];
-        if ($couponCode && $couponChecked && !empty($stock) && !empty($couponUserData)) {
-            $bestCoupon = [
-                [
-                    'stock_id'            => $stockId,
-                    'coupon_code'         => $couponCode,
-                    'discount_num'        => $discountNum,
-                    'scope'               => $stock['scope'],
-                    'type'                => $stock['type'],
-                    'checked'             => true,
-                    'stock_name'          => $stock['stock_name'],
-                    'transaction_minimum' => $stock['transaction_minimum'],
-                    'start_at'            => $couponUserData->start_at,
-                    'end_at'              => $couponUserData->end_at,
-                    'mer_id'              => $merId,
-                ],
-            ];
-        }
+//        if ($couponCode && $couponChecked && !empty($stock) && !empty($couponUserData)) {
+//            $bestCoupon = [
+//                [
+//                    'stock_id'            => $stockId,
+//                    'coupon_code'         => $couponCode,
+//                    'discount_num'        => $discountNum,
+//                    'scope'               => $stock['scope'],
+//                    'type'                => $stock['type'],
+//                    'checked'             => true,
+//                    'stock_name'          => $stock['stock_name'],
+//                    'transaction_minimum' => $stock['transaction_minimum'],
+//                    'start_at'            => $couponUserData->start_at,
+//                    'end_at'              => $couponUserData->end_at,
+//                    'mer_id'              => $merId,
+//                ],
+//            ];
+//        }
 
-        if (empty($bestCoupon) && (($adId && $adInfo['goods_id'] != $goodsInfo['goods_id']) || $step == 8 || empty($adId))) {
+        if (empty($bestCoupon)/* && (($adId && $adInfo['goods_id'] != $goodsInfo['goods_id']) || $step == 8 || empty($adId))*/) {
             // 商家券推优（单商品）. 有广告未购买广告商品，则推优
-            $bestCoupon = $couponUser->best($uid, $merId, $goodsInfo);
+            $bestCoupon = $couponUser->best($uid, $merId, $goodsInfo, $sumPrice);
         }
 
         return [
