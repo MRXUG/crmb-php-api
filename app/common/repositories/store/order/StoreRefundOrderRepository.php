@@ -110,7 +110,7 @@ class StoreRefundOrderRepository extends BaseRepository
             'id' => $id,
             'uid' => $uid,
             'is_del' => 0,
-        ])->with('refundProduct.product')->append(['auto_refund_time'])->find();
+        ])->with(['refundProduct.product', 'order'])->append(['auto_refund_time'])->find();
     }
 
     /**
