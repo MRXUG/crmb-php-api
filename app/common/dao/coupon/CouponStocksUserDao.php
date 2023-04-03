@@ -7,6 +7,7 @@ use app\common\dao\BaseDao;
 use app\common\model\applet\WxAppletModel;
 use app\common\model\coupon\CouponStocks;
 use app\common\model\coupon\CouponStocksUser;
+use app\common\model\user\User;
 use think\db\Query;
 
 class CouponStocksUserDao extends BaseDao
@@ -20,30 +21,31 @@ class CouponStocksUserDao extends BaseDao
     public function search(?int $mchId, array $where)
     {
         $query = ($this->getModel()::getDB());
+        $query->with(['stockDetail',"userDetail"]);
+        $query->hasWhere('stockDetail', function ($query) use ($where) {
+            if (isset($where['stock_name']) && $where['stock_name'] != '') {
+                $query->where('stock_name', 'LIKE', "%{$where['stock_name']}%");
+            } elseif(isset($where['stock_id']) && $where['stock_id'] != '') {
+                $query->where('stock_id', (int)$where['stock_id']);
+            } else {
+                $query->where(true);
+            }
+        });
 
-        $query->with([
-            'stockDetail'=>function ($query) use ($where) {
-                if (isset($where['stock_name']) && $where['stock_name'] != '') {
-                    $query->where('stockDetail.stock_name', 'LIKE', "%{$where['stock_name']}%");
-                } elseif(isset($where['stock_id']) && $where['stock_id'] != '') {
-                    $query->where('stock_id', (int)$where['stock_id']);
-                } else {
-                    $query->where(true);
-                }
-            },
-            'userDetail'=>function ($query)use ($where){
-                if (isset($where['nickname']) && $where['nickname'] != '') {
-                    $query->where('nickname', 'LIKE', "%{$where['nickname']}%");
-                }
-            },
+        $query->hasWhere("userDetail",function ($query)use ($where){
+            if (isset($where['nickname']) && $where['nickname'] != '') {
+                $query->where('nickname', 'LIKE', "%{$where['nickname']}%");
+            }else{
+                $query->where(true);
+            }
+        });
 
-        ]);
 
         if(isset($where['status'])) {
-            if ($where['status'] == 1) $query->where('written_off', 1);
-            if ($where['status'] == 0) $query->where('written_off', 0);
-            if ($where['status'] == 2) {
-                $query->where('end_at', '<',date("Y-m-d H:i:s"));
+            if ($where['status'] === 1) $query->where('written_off', 1);
+            if ($where['status'] === 0) $query->where('written_off', 0);
+            if ($where['status'] === 2) {
+                $query->where('CouponStocksUser.end_at', '<',date("Y-m-d H:i:s"));
             }
        }
 
@@ -68,8 +70,12 @@ class CouponStocksUserDao extends BaseDao
             ->when(isset($where['time']), function ($query) use ($where) {
                 $query->where('CouponStocksUser.start_at', '<=', $where['time'])
                     ->where('CouponStocksUser.end_at', '>', $where['time']);
-            });
-            $query->where('is_del', WxAppletModel::IS_DEL_NO);
+            })->when(isset($where['coupon_code']), function ($query) use ($where) {
+                $query->where('CouponStocksUser.coupon_code', '=', $where['coupon_code']);
+            })->when(isset($where['stock_id']), function ($query) use ($where) {
+                $query->where('CouponStocksUser.stock_id', '=', $where['stock_id']);
+            })
+            ->where('CouponStocksUser.is_del', WxAppletModel::IS_DEL_NO);
 
         return $query->order('sss DESC');
     }
