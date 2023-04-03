@@ -147,7 +147,7 @@ class WechatUserRepository extends BaseRepository
                 'appid' => $appid,
                 'wechat_user_id' => $wechatUser->wechat_user_id,
             ];
-            (new UserOpenIdRelationDao())->findOrCreateByData(
+            (new UserOpenIdRelationDao())->createOrUpdate(
                 [
                     'routine_openid' => $routineInfo['routine_openid'],
                     'appid' => $appid,
