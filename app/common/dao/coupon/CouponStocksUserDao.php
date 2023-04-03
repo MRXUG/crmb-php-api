@@ -24,14 +24,26 @@ class CouponStocksUserDao extends BaseDao
         $query->hasWhere('stockDetail', function ($query) use ($where) {
             if (isset($where['stock_name']) && $where['stock_name'] != '') {
                 $query->where('stock_name', 'LIKE', "%{$where['stock_name']}%");
-            } elseif (isset($where['nickname']) && $where['nickname'] != '') {
-                $query->where('nickname', 'LIKE', "%{$where['nickname']}%");
-            }elseif(isset($where['stock_id']) && $where['stock_id'] != '') {
+            } elseif(isset($where['stock_id']) && $where['stock_id'] != '') {
                 $query->where('stock_id', (int)$where['stock_id']);
             } else {
                 $query->where(true);
             }
         });
+
+        $query->hasWhere('userDetail',function ($query)use ($where){
+            if (isset($where['nickname']) && $where['nickname'] != '') {
+                $query->where('nickname', 'LIKE', "%{$where['nickname']}%");
+            }
+        });
+
+        if(isset($where['status'])) {
+            if ($where['status'] == 1) $query->where('written_off', 1);
+            if ($where['status'] == 0) $query->where('written_off', 0);
+            if ($where['status'] == 2) {
+                $query->where('end_at', '<',date("Y-m-d H:i:s"));
+            }
+       }
 
         $query->when(isset($where['written_off']) && $where['written_off'] !== '', function ($query) use ($where) {
             $query->where('written_off', (int)$where['written_off']);
