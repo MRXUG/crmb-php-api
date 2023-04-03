@@ -40,15 +40,6 @@ class CouponStocksUserDao extends BaseDao
             }
         });
 
-
-        if(isset($where['status'])) {
-            if ($where['status'] === 1) $query->where('written_off', 1);
-            if ($where['status'] === 0) $query->where('written_off', 0);
-            if ($where['status'] === 2) {
-                $query->where('CouponStocksUser.end_at', '<',date("Y-m-d H:i:s"));
-            }
-       }
-
         $query->when(isset($where['written_off']) && $where['written_off'] !== '', function ($query) use ($where) {
             $query->where('written_off', (int)$where['written_off']);
         })
@@ -74,6 +65,12 @@ class CouponStocksUserDao extends BaseDao
                 $query->where('CouponStocksUser.coupon_code', '=', $where['coupon_code']);
             })->when(isset($where['stock_id']) && $where['stock_id'], function ($query) use ($where) {
                 $query->where('CouponStocksUser.stock_id', '=', $where['stock_id']);
+            })->when(isset($where['status']), function ($query) use ($where) {
+                if (intval($where['status']) === 1) $query->where('written_off', $where['status']);
+                if (intval($where['status']) === 0) $query->where('written_off', $where['status']);
+                if (intval($where['status']) === 2) {
+                    $query->where('CouponStocksUser.end_at', '<',date("Y-m-d H:i:s"));
+                }
             })
             ->where('CouponStocksUser.is_del', WxAppletModel::IS_DEL_NO);
 
