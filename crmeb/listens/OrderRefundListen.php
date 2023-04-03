@@ -3,6 +3,7 @@
 namespace crmeb\listens;
 
 use app\common\dao\store\order\StoreRefundOrderDao;
+use app\common\dao\store\RefundTaskDao;
 use app\common\model\delivery\DeliveryProfitSharingStatus;
 use app\common\model\store\RefundTask;
 use crmeb\interfaces\ListenerInterface;
@@ -38,7 +39,6 @@ class OrderRefundListen extends TimerService implements ListenerInterface
                     foreach ($task as $item) {
                         $this->runner($item);
                     }
-
                 });
             } catch (Exception|ValueError|Throwable $e) {
                 Log::error("运行出错 {$this->name} ". date("Y-m-d H:i:s") . $e->getMessage() . '   [[' . serialize($e->getTrace()) . ']]');
@@ -164,6 +164,9 @@ class OrderRefundListen extends TimerService implements ListenerInterface
             $task->profitSharingErrHandler(['发起退款失败 错误码:' . $res->err_code_des ?? '']);
             return;
         }
+        /** @var RefundTaskDao $refundTaskDao */
+        $refundTaskDao = app()->make(RefundTaskDao::class);
+        $refundTaskDao->upRefundTime($task->getAttr('refund_task_id'));
 
         Queue::later(60, RefundCheckJob::class, [
             'refund_task_id' => $task->getAttr('refund_task_id')

@@ -37,6 +37,12 @@ class RefundCheckJob implements JobInterface
                 # 查询需要处理的模型
                 $refundOrderTask = RefundTask::getDB()->where('refund_task_id', $data['refund_task_id'])->find();
                 if (!$refundOrderTask) { $job->delete();return; }
+                # 发起退款 2 分钟后查询状态
+                if (strtotime($refundOrderTask->getAttr('refund_time')) + 60 * 2 > time()) {
+                    $job->delete();
+                    Queue::later(60, RefundCheckJob::class, $data);
+                    return;
+                }
                 # 获取退款订单模型
                 /** @var StoreRefundOrderDao $refundOrderDao */
                 $refundOrderDao = app()->make(StoreRefundOrderDao::class);
