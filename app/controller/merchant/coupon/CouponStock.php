@@ -77,7 +77,7 @@ class CouponStock extends BaseController
             $this->request->params(['stock_name', 'nickname', 'written_off', 'coupon_user_id', 'stock_id', 'mch_id','coupon_code','status']);
         $params['mer_id'] = $this->request->merId();
 
-        return app('json')->success($this->userRepository->list($page, $limit, $params, 0));
+        return app('json')->success($this->userRepository->list($page, $limit, $params, $params['mer_id']));
     }
 
     /**
