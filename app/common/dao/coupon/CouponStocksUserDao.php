@@ -35,7 +35,6 @@ class CouponStocksUserDao extends BaseDao
             if (isset($where['nickname']) && $where['nickname'] != '') {
                 $query->where('nickname', 'LIKE', "%{$where['nickname']}%");
             }
-            $query->field("nickname");
         });
 
         if(isset($where['status'])) {
