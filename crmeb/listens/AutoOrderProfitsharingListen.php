@@ -58,8 +58,8 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
                     [
                         'change_time',
                         '<',
-                        date('Y-m-d H:i:s', time() - 86400)
-//                        date('Y-m-d H:i:s', time() - 10)
+//                        date('Y-m-d H:i:s', time() - 86400)
+                        date('Y-m-d H:i:s', time() - 30)
                     ]
                 ];
                 if ($maxOrderId) {
