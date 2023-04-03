@@ -18,7 +18,7 @@ class CouponStocksUserDao extends BaseDao
     }
 
 
-    public function search(?int $mchId, array $where)
+    public function search(?int $merId, array $where)
     {
         $query = ($this->getModel()::getDB());
         $query->with(['stockDetail',"userDetail"]);
@@ -49,14 +49,14 @@ class CouponStocksUserDao extends BaseDao
             ->when(isset($where['coupon_user_id']) && $where['coupon_user_id'] !== '', function ($query) use ($where) {
                 $query->where('coupon_user_id', (int)$where['coupon_user_id']);
             })
-//            ->when($mchId > 0, function ($query) use ($mchId) {
-//                $query->where('stockDetail.mch_id', $mchId);
-//            })
+            ->when($merId > 0, function ($query) use ($merId) {
+                $query->where('CouponStocksUser.mer_id', $merId); //建券商户id
+            })
             ->when(isset($where['uid']) && $where['uid'] > 0, function ($query) use ($where) {
                 $query->where('uid', $where['uid']);
             })
             ->when(isset($where['mch_id']) && $where['mch_id'] > 0, function ($query) use ($where) {
-                $query->where('CouponStocksUser.mch_id', (int)$where['mch_id']); //发券商户
+                $query->where('CouponStocksUser.mch_id', (int)$where['mch_id']); //发券商户号
             })
             ->when(isset($where['time']) && $where['time'], function ($query) use ($where) {
                 $query->where('CouponStocksUser.start_at', '<=', $where['time'])
