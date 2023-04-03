@@ -30,6 +30,8 @@ class StoreRefundOrder extends BaseModel
     const PENDING_RETURN = 1;
     const TO_BE_RECEIVED = 2;
     const REFUNDED = 3;
+    const REFUNDING = 4;
+    const REFUND_FAILED = 5;
 
     const REFUND_ORDER_STATUS = [
         self::CHECK_PENDING => '待审核' ,
@@ -37,6 +39,8 @@ class StoreRefundOrder extends BaseModel
         self::PENDING_RETURN => '待退货',
         self::TO_BE_RECEIVED => '待收货',
         self::REFUNDED => '已退款',
+        self::REFUNDING => '退款中',
+        self::REFUND_FAILED => '退款失败'
     ];
 
 

@@ -194,9 +194,10 @@ class StoreOrder extends BaseController
     {
         [$page, $limit] = $this->getPage();
         $where['status'] = $this->request->param('status');
+        if ($where['status'] == -2) unset($where['status']);
         $where['search'] = $this->request->param('store_name');
         $where['uid'] = $this->request->uid();
-        $where['paid'] = 1;
+//        $where['paid'] = 1;
         $where['is_user'] = 1;
         return app('json')->success($this->repository->getList($where, $page, $limit));
     }
