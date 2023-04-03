@@ -74,7 +74,7 @@ class CouponStock extends BaseController
     {
         [$page, $limit] = $this->getPage();
         $params =
-            $this->request->params(['stock_name', 'nickname', 'written_off', 'coupon_user_id', 'stock_id', 'mch_id','status']);
+            $this->request->params(['stock_name', 'nickname', 'written_off', 'coupon_user_id', 'stock_id', 'mch_id','coupon_code','status']);
         $params['mer_id'] = $this->request->merId();
 
         return app('json')->success($this->userRepository->list($page, $limit, $params, 0));
