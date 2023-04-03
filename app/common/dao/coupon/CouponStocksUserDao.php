@@ -20,22 +20,24 @@ class CouponStocksUserDao extends BaseDao
     public function search(?int $mchId, array $where)
     {
         $query = ($this->getModel()::getDB());
-        $query->with(['stockDetail']);
-        $query->hasWhere('stockDetail', function ($query) use ($where) {
-            if (isset($where['stock_name']) && $where['stock_name'] != '') {
-                $query->where('stock_name', 'LIKE', "%{$where['stock_name']}%");
-            } elseif(isset($where['stock_id']) && $where['stock_id'] != '') {
-                $query->where('stock_id', (int)$where['stock_id']);
-            } else {
-                $query->where(true);
-            }
-        });
 
-        $query->hasWhere('userDetail',function ($query)use ($where){
-            if (isset($where['nickname']) && $where['nickname'] != '') {
-                $query->where('nickname', 'LIKE', "%{$where['nickname']}%");
-            }
-        });
+        $query->with([
+            'stockDetail'=>function ($query) use ($where) {
+                if (isset($where['stock_name']) && $where['stock_name'] != '') {
+                    $query->where('stockDetail.stock_name', 'LIKE', "%{$where['stock_name']}%");
+                } elseif(isset($where['stock_id']) && $where['stock_id'] != '') {
+                    $query->where('stock_id', (int)$where['stock_id']);
+                } else {
+                    $query->where(true);
+                }
+            },
+            'userDetail'=>function ($query)use ($where){
+                if (isset($where['nickname']) && $where['nickname'] != '') {
+                    $query->where('nickname', 'LIKE', "%{$where['nickname']}%");
+                }
+            },
+
+        ]);
 
         if(isset($where['status'])) {
             if ($where['status'] == 1) $query->where('written_off', 1);
@@ -66,8 +68,8 @@ class CouponStocksUserDao extends BaseDao
             ->when(isset($where['time']), function ($query) use ($where) {
                 $query->where('CouponStocksUser.start_at', '<=', $where['time'])
                     ->where('CouponStocksUser.end_at', '>', $where['time']);
-            })
-            ->where('CouponStocksUser.is_del', WxAppletModel::IS_DEL_NO);
+            });
+            $query->where('is_del', WxAppletModel::IS_DEL_NO);
 
         return $query->order('sss DESC');
     }
