@@ -49,14 +49,14 @@ class CouponStocksUserDao extends BaseDao
             ->when(isset($where['coupon_user_id']) && $where['coupon_user_id'] !== '', function ($query) use ($where) {
                 $query->where('coupon_user_id', (int)$where['coupon_user_id']);
             })
-            ->when($mchId > 0, function ($query) use ($mchId) {
-                $query->where('stockDetail.mch_id', $mchId);
-            })
+//            ->when($mchId > 0, function ($query) use ($mchId) {
+//                $query->where('stockDetail.mch_id', $mchId);
+//            })
             ->when(isset($where['uid']) && $where['uid'] > 0, function ($query) use ($where) {
                 $query->where('uid', $where['uid']);
             })
-            ->when(isset($where['mer_id']) && $where['mer_id'] > 0, function ($query) use ($where) {
-                $query->where('CouponStocks.mer_id', (int)$where['mer_id']);
+            ->when(isset($where['mch_id']) && $where['mch_id'] > 0, function ($query) use ($where) {
+                $query->where('CouponStocksUser.mch_id', (int)$where['mch_id']); //发券商户
             })
             ->when(isset($where['time']) && $where['time'], function ($query) use ($where) {
                 $query->where('CouponStocksUser.start_at', '<=', $where['time'])
