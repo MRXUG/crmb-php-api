@@ -606,6 +606,8 @@ class ExcelService
         ];
         $count = $query->count();
         $data = $query->page($page, $limit)->select()->toArray();
+
+        $export = [];
         foreach ($data as $datum) {
             $product = '';
             foreach ($datum['refundProduct'] as $value) {
