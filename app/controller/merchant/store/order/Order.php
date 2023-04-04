@@ -424,7 +424,28 @@ class Order extends BaseController
     public function excel()
     {
         [$page, $limit] = $this->getPage();
-        $where = $this->request->params(['status', 'date', 'order_sn', 'order_type', 'username', 'keywords', 'take_order']);
+        $where = $this->request->params(
+            [
+                'status',
+                'date',
+                'order_sn',
+                'username',
+                'order_type',
+                'keywords',
+                'order_id',
+                'activity_type',
+                'group_order_sn',
+                'store_name',
+                'platform_source',
+                'merchant_source',
+                'transaction_id',
+                'appid',
+                'ad_channel_id',
+                'ad_account_id',
+                'ad_id',
+                'mer_name',
+            ]
+        );
         if ($where['take_order']) {
             $where['status'] = -1;
             $where['verify_date'] = $where['date'];
