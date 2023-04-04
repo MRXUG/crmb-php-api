@@ -210,7 +210,7 @@ class RefundOrder extends BaseController
 
     public function createExcel()
     {
-        $where = $this->request->params(['refund_order_sn','status','refund_type','date','order_sn','id']);
+        $where = $this->request->params(['refund_order_sn','status','refund_type','date','order_sn','id','delivery_id']);
         $where['mer_id'] = $this->request->merId();
         [$page, $limit] = $this->getPage();
         $data = app()->make(ExcelService::class)->refundOrder($where, $page, $limit);
