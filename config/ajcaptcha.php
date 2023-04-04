@@ -11,12 +11,12 @@ return [
     'block_puzzle' => [
         /*背景图片路径， 不填使用默认值， 支持string与array两种数据结构。string为默认图片的目录，array索引数组则为具体图片的地址*/
         'backgrounds' => [
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
+            "public/uploads/ajcaptcha/1.jpg",
+            "public/uploads/ajcaptcha/2.jpg",
+            "public/uploads/ajcaptcha/3.jpg",
+            "public/uploads/ajcaptcha/4.jpg",
+            "public/uploads/ajcaptcha/5.jpg",
+            "public/uploads/ajcaptcha/6.jpg",
         ],
         /*模板图,格式同上支持string与array*/
         'templates' => [],

@@ -555,6 +555,7 @@ class ProductRepository extends BaseRepository
         $price = $stock = $ot_price = $cost = $svip_price = 0;
         try {
             foreach ($data['attrValue'] as $value) {
+                $value['cost'] = isset($value['cost'])?$value['cost']:0;
                 $sku = '';
                 if (isset($value['detail']) && !empty($value['detail']) && is_array($value['detail'])) {
                     $sku = implode(',', $value['detail']);
