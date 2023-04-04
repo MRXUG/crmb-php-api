@@ -601,6 +601,7 @@ class ExcelService
             2  => '待收货',
             3  => '已退款',
             -1 => '审核未通过',
+            5 => '待发货',
         ];
         $count = $query->count();
         $data = $query->page($page, $limit)->select()->toArray();
