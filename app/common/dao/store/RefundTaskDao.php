@@ -18,9 +18,8 @@ class RefundTaskDao extends BaseDao
      * 更新 退款时间
      *
      * @param int $refundTaskId
-     * @return Model
      */
-    public function upRefundTime(int $refundTaskId): Model
+    public function upRefundTime(int $refundTaskId)
     {
         return $this->getModelObj()->where('refund_task_id', '=', $refundTaskId)->update([
             'refund_time' => date("Y-m-d H:i:s")

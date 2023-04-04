@@ -82,6 +82,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         $storeCartRepository = app()->make(StoreCartRepository::class);
         $res = $storeCartRepository->checkCartList($storeCartRepository->cartIbByData($cartId, $uid, $address), $clipCoupons == 1 ? 1 : 0, $user);
         $merchantCartList = $res['list'];
+//        dd($merchantCartList);
 //         [$storeCouponDiscountByCode, $productCouponDiscountByCode] = $this->merchantCoupon($marketing_data, $merchantCartList);
 
         $fail = $res['fail'];
@@ -478,8 +479,13 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $merId = $merchantCart['mer_id'];
             $marketing_data = $this->validateMarketingDiscount($uid, $merId, $marketingDiscount, $merchantCartList);
 
-            $merchantCoupon = $marketing_data['merchant_coupon'] ?? [];
-            $coupon = $merchantCoupon[0] ?? []; // 只有一张券
+            $merchantCoupon = array_column($marketing_data['merchant_coupon'] ?? [], null, 'stock_id');
+            # 选取优惠券操作
+            if (empty($marketingDiscount)) {
+                $coupon = []; // 只有一张券
+            } else {
+                $coupon = $merchantCoupon[$marketingDiscount['stock_id']] ?? [];
+            }
             $discountAmount = 0;
             if ($merchantCoupon && $coupon) {
                 // 商家券
@@ -490,11 +496,15 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             } elseif(!empty($marketingDiscount['ad_id'])) {
                 // 营销优惠
                 $discount = $discountAmount = $marketing_data['discount_total'];
-                if ($clipCoupons == 1){
-                    $pay_price = max(bcsub($valid_total_price, $discount, 2), 0);
-                }
+                $merchantCartList[0]['list'][0]['productAttr']['discounted_price'] = bcsub(
+                    $merchantCartList[0]['list'][0]['productAttr']['price'],
+                    $discountAmount,
+                    2
+                );
 
+                $pay_price = max(bcsub($valid_total_price, $discount, 2), 0);
             }
+
 
             $_pay_price = $pay_price;
             //计算店铺券
@@ -881,7 +891,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             if ($presellType == 2) {
                 $org_price = max(bcsub($org_price, $final_price, 2), $down_price);
             }
-
+//            dd($coupon_price, $total_price, $down_price);
             //获取可优惠金额
             $coupon_price = min($coupon_price, bcsub($total_price, $down_price, 2));
             $order_coupon_price = bcadd($coupon_price, $order_coupon_price, 2);
@@ -950,7 +960,6 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         $order = $merchantCartList;
         $total_price = $order_total_price;
         $openIntegral = $merIntegralFlag && !$order_type && $sysIntegralConfig['integral_status'] && $sysIntegralConfig['integral_money'] > 0;
-
         if ($clipCoupons == 1){
             $total_coupon = bcadd($order_svip_discount, bcadd(bcadd($total_platform_coupon_price, $order_coupon_price, 2), $order_total_integral_price, 2), 2);
         }else{
@@ -1220,6 +1229,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $totalCost = bcadd($totalCost, $cost, 2);
             $totalNum += $merchantCart['order']['total_num'];
         }
+//        dd($orderInfo['total_platform_coupon_price'], $orderInfo['order_coupon_price']);
         $groupOrder = [
             'uid' => $uid,
             'appid' => request()->appid(),
@@ -1244,6 +1254,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             'stock_id' => $orderMerchantCoupon['stock_id'] ?? '',
             'marketing_discount' => $orderTotalMarketingDiscount,
         ];
+
         event('order.create.before', compact('groupOrder', 'orderList'));
         $group = Db::transaction(function () use ($ex, $user, $topUid, $spreadUid, $uid, $receipt_data, $cartIds, $allUseCoupon, $groupOrder, $orderList, $orderInfo, $marketingDiscount, $orderTotalMarketingDiscount) {
             $storeGroupOrderRepository = app()->make(StoreGroupOrderRepository::class);
@@ -1695,8 +1706,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
 //                ],
 //            ];
 //        }
-
-        if (empty($bestCoupon)/* && (($adId && $adInfo['goods_id'] != $goodsInfo['goods_id']) || $step == 8 || empty($adId))*/) {
+        if (empty($bestCoupon) && !isset($marketingDiscount['ad_id'])/* && (($adId && $adInfo['goods_id'] != $goodsInfo['goods_id']) || $step == 8 || empty($adId))*/) {
             // 商家券推优（单商品）. 有广告未购买广告商品，则推优
             $bestCoupon = $couponUser->best($uid, $merId, $goodsInfo, $sumPrice);
         }

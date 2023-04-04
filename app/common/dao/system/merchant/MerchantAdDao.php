@@ -29,9 +29,25 @@ class MerchantAdDao extends BaseDao
      */
     public function getInfo($id)
     {
-        $result = ($this->getModel())::getDB()->with(['couponIds' => function (BaseQuery  $query) {
+        $nowUnixTime = time();
+
+        $result = $this->getModelObj()->with(['couponIds' => function (BaseQuery  $query)  {
             $query->with(['couponInfo']);
         }])->find($id);
-        return method_exists($result, 'toArray') ? $result->toArray() : [];
+
+        $res = [];
+        if (method_exists($result, 'toArray')) {
+            $res = $result->toArray();
+
+            foreach ($res['couponIds'] as $k => $v) {
+                if (!empty($v['couponInfo']) && strtotime($v['couponInfo']['end_at']) <= $nowUnixTime) {
+                    unset($res['couponIds'][$k]);
+                }
+            }
+
+            $res['couponIds'] = array_merge($res['couponIds'], []);
+        }
+
+        return $res;
     }
 }
