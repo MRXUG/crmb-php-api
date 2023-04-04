@@ -75,7 +75,12 @@ class StoreOrder extends BaseController
         $user = $this->request->userInfo();
         $uid = $user->uid;
         // 营销页优惠
-        $marketingDiscount = (array)$this->request->param('marketing_discount', []);
+        $marketingDiscount = (array) $this->request->param('marketing_discount', []);
+
+        if ($clipCoupons == 2) {
+            $couponIds = [];
+        }
+
         if (!($count = count($cartId)) || $count != count($cartRepository->validIntersection($cartId, $uid)))
             return app('json')->fail('数据无效');
 
@@ -141,6 +146,10 @@ class StoreOrder extends BaseController
         $clipCoupons = (int)$this->request->param('clipCoupons',1);
         // 营销页优惠
         $marketingDiscount = (array)$this->request->param('marketing_discount', []);
+
+        if ($clipCoupons == 2) {
+            $couponIds = [];
+        }
 
         $isPc = $payType === 'pc';
         if ($isPc) {

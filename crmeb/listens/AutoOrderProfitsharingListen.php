@@ -33,7 +33,7 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
     public function handle($params): void
     {
 //        echo '分账检测已开启' . PHP_EOL;
-        $this->tick(1000 * 60 * 1, function () {
+        $this->tick(1000 * 15 * 1, function () {
               \think\facade\Log::info($this->name.'_start：'.date('Y-m-d H:i:s'));
             //     request()->clearCache();
             // crmeb的分佣
