@@ -54,7 +54,7 @@ class RefundCheckJob implements JobInterface
                     ->paymentService()->queryRefund($refundOrder->getAttr('refund_order_sn'), 'out_refund_no');
 
                 if ($res->return_code == 'FAIL') {
-                    $refundOrderTask->profitSharingErrHandler(['发起退款失败 ' . $res->return_msg ?? '']);
+                    $refundOrderTask->profitSharingErrHandler(['发起退款失败 ' . ($res->return_msg ?? '')]);
                     return;
                 }
 
@@ -65,7 +65,7 @@ class RefundCheckJob implements JobInterface
                 }
 
                 if (isset($res->err_code)) {
-                    $refundOrderTask->profitSharingErrHandler(['发起退款失败 错误码:' . $res->err_code_des ?? '']);
+                    $refundOrderTask->profitSharingErrHandler(['发起退款失败 错误码:' . ($res->err_code_des ?? '')]);
                     return;
                 }
 
