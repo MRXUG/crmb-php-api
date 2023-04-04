@@ -127,7 +127,9 @@ class TemplateMessageRepository extends BaseRepository
      */
     public function syncMinSubscribe()
     {
-        if (!systemConfig('routine_appId') || !systemConfig('routine_appsecret')) {
+        $appId = systemConfig('routine_appId');
+        $appsecret = systemConfig('routine_appsecret');
+        if (!$appId || !$appsecret) {
             throw new ValidateException('请先配置小程序appid、appSecret等参数');
         }
 
@@ -158,7 +160,7 @@ class TemplateMessageRepository extends BaseRepository
                     }
                     $works = [];
                     try {
-                        $works = MiniProgramService::create()->getSubscribeTemplateKeyWords($template['tempkey']);
+                        $works = MiniProgramService::create(0,$appId)->getSubscribeTemplateKeyWords($template['tempkey']);
                     } catch (\Throwable $e) {
                         $wechatErr = $e->getMessage();
                         if (is_string($wechatErr))
@@ -182,7 +184,7 @@ class TemplateMessageRepository extends BaseRepository
                     if ($kid && isset($template['kid']) && !$template['kid']) {
                         $tempid = '';
                         try {
-                            $tempid = MiniProgramService::create()->addSubscribeTemplate($template['tempkey'], $kid, $template['name']);
+                            $tempid = MiniProgramService::create(0,$appId)->addSubscribeTemplate($template['tempkey'], $kid, $template['name']);
                         } catch (\Throwable $e) {
                             $wechatErr = $e->getMessage();
                             if ($wechatErr->getCode() == 200022) continue;
