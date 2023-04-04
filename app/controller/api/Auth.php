@@ -13,6 +13,7 @@
 namespace app\controller\api;
 
 
+use app\common\model\store\RefundTask;
 use app\common\repositories\store\order\StoreOrderRepository;
 use app\common\repositories\store\order\StoreRefundOrderRepository;
 use app\common\repositories\system\notice\SystemNoticeConfigRepository;
@@ -52,21 +53,6 @@ class Auth extends BaseController
 {
     public function test()
     {
-//        $data = [
-//            'tempId' => '',
-//            'id' => '',
-//        ];
-//        Queue::push(SendSmsJob::class,$data);
-//        $status = app()->make(SystemNoticeConfigRepository::class)->getNoticeStatusByConstKey($data['tempId']);
-//        if ($status['notice_sms'] == 1) {
-//            SmsService::sendMessage($data);
-//        }
-//        if ($status['notice_wechat'] == 1) {
-//            app()->make(WechatTemplateMessageService::class)->sendTemplate($data);
-//        }
-//        if ($status['notice_routine'] == 1) {
-//            app()->make(WechatTemplateMessageService::class)->subscribeSendTemplate($data);
-//        }
     }
 
     /**

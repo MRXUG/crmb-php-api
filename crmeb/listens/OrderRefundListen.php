@@ -157,11 +157,11 @@ class OrderRefundListen extends TimerService implements ListenerInterface
             );
         # 处理退款失败
         if ($res->return_code == 'FAIL') {
-            $task->profitSharingErrHandler(['发起退款失败 ' . $res->return_msg ?? '']);
+            $task->profitSharingErrHandler(['发起退款失败 ' . ($res->return_msg ?? '')]);
             return;
         }
         if (isset($res->err_code)) {
-            $task->profitSharingErrHandler(['发起退款失败 错误码:' . $res->err_code_des ?? '']);
+            $task->profitSharingErrHandler(['发起退款失败 错误码:' . ($res->err_code_des ?? '')]);
             return;
         }
         /** @var RefundTaskDao $refundTaskDao */
