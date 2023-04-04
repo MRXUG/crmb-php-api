@@ -53,6 +53,7 @@ class Auth extends BaseController
 {
     public function test()
     {
+        var_dump(public_path());
     }
 
     /**

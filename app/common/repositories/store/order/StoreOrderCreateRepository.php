@@ -484,7 +484,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             if (empty($marketingDiscount)) {
                 $coupon = []; // 只有一张券
             } else {
-                $coupon = $merchantCoupon[$marketingDiscount['stock_id']] ?? [];
+                $coupon = isset($marketingDiscount['stock_id']) ? ($merchantCoupon[$marketingDiscount['stock_id']] ?? []) : [];
             }
             $discountAmount = 0;
             if ($merchantCoupon && $coupon) {

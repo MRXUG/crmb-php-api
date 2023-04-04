@@ -165,8 +165,8 @@ class MerchantRepository extends BaseRepository
             Elm::number('sort', '排序', 0)->precision(0)->max(99999),
             $id ? Elm::hidden('status', 1) : Elm::switches('status', '是否开启', 1)->activeValue(1)->inactiveValue(0)->inactiveText('关')->activeText('开')->col(12),
             // Elm::switches('is_bro_room', '直播间审核', $config['broadcast_room_type'] == 1 ? 0 : 1)->activeValue(1)->inactiveValue(0)->inactiveText('关')->activeText('开')->col(12),
-            Elm::hidden('is_audit', 0), // 无需审核 默认不用审核
-            // Elm::switches('is_audit', '产品审核', 0)->activeValue(1)->inactiveValue(0)->inactiveText('关')->activeText('开')->col(12),
+//            Elm::hidden('is_audit', 0), // 无需审核 默认不用审核
+             Elm::switches('is_audit', '产品审核', 0)->activeValue(1)->inactiveValue(0)->inactiveText('关')->activeText('开')->col(12),
             // Elm::switches('is_bro_goods', '直播间商品审核', $config['broadcast_goods_type'] == 1 ? 0 : 1)->activeValue(1)->inactiveValue(0)->inactiveText('关')->activeText('开')->col(12),
             Elm::switches('is_best', '是否推荐')->activeValue(1)->inactiveValue(0)->inactiveText('关')->activeText('开')->col(12),
             Elm::switches('is_trader', '是否自营')->activeValue(1)->inactiveValue(0)->inactiveText('关')->activeText('开')->col(12),

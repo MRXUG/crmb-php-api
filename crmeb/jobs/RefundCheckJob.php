@@ -51,20 +51,20 @@ class RefundCheckJob implements JobInterface
                 if (!$refundOrder) { $job->delete();return; }
                 # 发起查询接口
                 $res = MiniProgramService::create($refundOrderTask->getAttr('mer_id'), $refundOrderTask->getAttr('app_id'))
-                    ->paymentService()->queryRefund($refundOrder->getAttr('refund_order_sn'), 'out_refund_no');
+                    ->paymentService()
+                    ->queryRefund($refundOrder->getAttr('refund_order_sn'), 'out_refund_no');
 
                 if ($res->return_code == 'FAIL') {
-                    $refundOrderTask->profitSharingErrHandler(['发起退款失败 ' . ($res->return_msg ?? '')]);
-                    return;
-                }
-
-                if ($res->err_code == 'SYSTEMERROR') {
-                    $job->delete();
-                    Queue::push(self::class, $data);
+                    $refundOrderTask->profitSharingErrHandler([$refundOrder->getAttr('refund_order_sn') . '发起退款失败 ' . ($res->return_msg ?? '')]);
                     return;
                 }
 
                 if (isset($res->err_code)) {
+                    if ($res->err_code == 'SYSTEMERROR') {
+                        $job->delete();
+                        Queue::later(15, RefundCheckJob::class, $data);
+                        return;
+                    }
                     $refundOrderTask->profitSharingErrHandler(['发起退款失败 错误码:' . ($res->err_code_des ?? '')]);
                     return;
                 }

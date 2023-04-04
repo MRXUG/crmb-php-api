@@ -31,6 +31,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
             Log::info("开始运行 {$this->name} ". date("Y-m-d H:i:s"));
             try {
                 Db::transaction(function () {
+                    $nowTime = time();
                     # 查询获取任务信息·
                     /** @var RefundTask[] $task */
                     $task = RefundTask::getDB()->where('status', 0)->select();
@@ -162,6 +163,8 @@ class OrderRefundListen extends TimerService implements ListenerInterface
         }
         if (isset($res->err_code)) {
             $task->profitSharingErrHandler(['发起退款失败 错误码:' . ($res->err_code_des ?? '')]);
+            sleep(5);
+            $this->runner($task);
             return;
         }
         /** @var RefundTaskDao $refundTaskDao */

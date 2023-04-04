@@ -31,11 +31,11 @@ class RefundTask extends BaseModel
         # 如果没有错误的话那么返回false继续向下执行
         if (empty($errArr)) return false;
         # 解析先前存在的错误
-        $newTask = clone $this;
-        $newTask->setAttr('err_msg',  implode(";", array_merge(explode(";", $newTask->getAttr('err_msg')), $errArr)));
-        $newTask->save();
+        RefundTask::getDB()->where('refund_task_id', $this->getAttr('refund_task_id'))->update([
+            'err_msg',  implode(";", array_merge(explode(";", $this->getAttr('err_msg')), $errArr))
+        ]);
         # 变更退款状态
-        StoreRefundOrder::getDB()->where('refund_order_id', $newTask->getAttr('refund_order_id'))->update([
+        StoreRefundOrder::getDB()->where('refund_order_id', $this->getAttr('refund_order_id'))->update([
             'status' => 5
         ]);
 
