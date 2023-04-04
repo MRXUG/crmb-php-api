@@ -229,10 +229,11 @@ class Order extends BaseController
                 'mer_name',
             ]
         );
-        if($where['take_order']){
-            $where['verify_date'] = $where['date'];
-            unset($where['date']);
-        }
+        //没有这个参数
+//        if($where['take_order']){
+//            $where['verify_date'] = $where['date'];
+//            unset($where['date']);
+//        }
         [$page, $limit] = $this->getPage();
         $data = app()->make(ExcelService::class)->order($where, $page, $limit);
         return app('json')->success($data);

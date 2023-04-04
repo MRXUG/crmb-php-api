@@ -446,12 +446,13 @@ class Order extends BaseController
                 'mer_name',
             ]
         );
-        if ($where['take_order']) {
-            $where['status'] = -1;
-            $where['verify_date'] = $where['date'];
-            unset($where['date']);
-            unset($where['order_type']);
-        }
+        //没有这个参数
+//        if ($where['take_order']) {
+//            $where['status'] = -1;
+//            $where['verify_date'] = $where['date'];
+//            unset($where['date']);
+//            unset($where['order_type']);
+//        }
         $where['mer_id'] = $this->request->merId();
         $data = app()->make(ExcelService::class)->order($where,$page,$limit);
         return app('json')->success($data);
