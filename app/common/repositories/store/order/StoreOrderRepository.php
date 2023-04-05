@@ -546,7 +546,7 @@ class StoreOrderRepository extends BaseRepository
     {
         $noPay = app()->make(StoreGroupOrderRepository::class)->orderNumber($uid);
         $noPostage = $this->dao->search(['uid' => $uid, 'status' => 0, 'paid' => 1,'is_user' => 1])->where('StoreOrder.is_del', 0)->count();
-        $all = $noPay + $this->dao->search(['uid' => $uid/*, 'status' => -2*/,'is_user' => 1])/*->where('StoreOrder.is_del', 0)*/->count();
+        $all = $this->dao->search(['uid' => $uid/*, 'status' => -2*/,'is_user' => 1])/*->where('StoreOrder.is_del', 0)*/->count();
         $noDeliver = $this->dao->search(['uid' => $uid, 'status' => 1, 'paid' => 1])->where('StoreOrder.is_del', 0)->count();
         $noComment = $this->dao->search(['uid' => $uid, 'status' => 2, 'paid' => 1,'is_user' => 1])->where('StoreOrder.is_del', 0)->count();
         $done = $this->dao->search(['uid' => $uid, 'status' => 3, 'paid' => 1,'is_user' => 1])->where('StoreOrder.is_del', 0)->count();
