@@ -586,7 +586,7 @@ class StoreOrderRepository extends BaseRepository
                 return $query->field('uid,nickname');
             };
         }
-        $order = $this->dao->search($where)->where('order_id', $id)->where('StoreOrder.is_del', 0)->with($with)->append(['refund_status'])->find();
+        $order = $this->dao->search($where)->where('order_id', $id)/*->where('StoreOrder.is_del', 0)*/->with($with)->append(['refund_status'])->find();
         if (!$order) {
             return null;
         }
