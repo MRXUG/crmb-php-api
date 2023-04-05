@@ -314,7 +314,7 @@ class Client extends BaseClient
             'coupon_use_rule'      => [
                 'use_method'            => CouponStocks::COUPON_USE_ONLINE,
                 'mini_programs_appid'   => $appId,
-                'mini_programs_path'    => "/pages/index/index?type={$params['type']}&mer_id={$params['mer_id']}",//需要携参券类型
+                'mini_programs_path'    => "/pages/columnGoods/goods_coupon_list/index?type={$params['type']}&mer_id={$params['mer_id']}",//需要携参券类型
                 'coupon_available_time' => [
                     'available_begin_time'        => date(DATE_RFC3339, strtotime($params['start_at'])),
                     'available_end_time'          => date(DATE_RFC3339, strtotime($params['end_at'])),
