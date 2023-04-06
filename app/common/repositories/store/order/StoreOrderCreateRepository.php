@@ -1605,6 +1605,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 if (empty($couponUserData) || ($stock['scope'] == CouponStocks::SCOPE_NO && !$couponProductExists)) {
                     throw new ValidateException('优惠券信息异常,请重新加购');
                 }
+                $isCardPackage = $stock["type"]==2;
 
                 $discountTotal = $discountNum = $stock['discount_num']; // 券面额单位：元
                 // 商家券推优。已领，进行中，店铺券、商品券
@@ -1737,7 +1738,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         if ($adId && $adInfo && $adInfo['goods_id'] == $goodsInfo['goods_id'] && !$isUseDiscount && !$isCardPackage) { // 广告流量
             $source = StoreOrder::PLATFORM_SOURCE_AD;
             $storeSource = StoreOrder::MERCHANT_SOURCE_AD;
-        } elseif (empty($adId) || ($adId && $adInfo && $goodsInfo['mer_id'] != $adInfo['mer_id'])) { // 自然流量
+        } elseif ((empty($adId) || ($adId && $adInfo && $goodsInfo['mer_id'] != $adInfo['mer_id'])) && !$isCardPackage) { // 自然流量
             $source = StoreOrder::PLATFORM_SOURCE_NATURE;
             $storeSource = StoreOrder::MERCHANT_SOURCE_NATURE;
         } else { // 回流流量
