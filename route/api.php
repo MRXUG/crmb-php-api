@@ -538,6 +538,8 @@ Route::group('api/', function () {
 
     })->middleware(UserTokenMiddleware::class, false);
 
+    //归因转化回传
+    Route::post('applets/senddata','api.applets.Applets/sendData')->name('sendData');
     //微信支付回调
     Route::any('notice/wechat_pay', 'api.Common/wechatNotify')->name('wechatNotify');
     //微信支付回调
