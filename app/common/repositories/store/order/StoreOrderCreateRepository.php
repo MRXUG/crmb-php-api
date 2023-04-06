@@ -948,9 +948,9 @@ class StoreOrderCreateRepository extends StoreOrderRepository
 
             $merchantCart['order']['total_price'] = bcadd($merchantCart['order']['total_price'], $merchantCart['order']['svip_discount'], 2);
 
-            foreach ($merchantCart['order'] as $orderItem) {
-
-            }
+//            foreach ($merchantCart['order'] as $orderItem) {
+//
+//            }
 
             $order_total_price = bcadd($order_total_price, $merchantCart['order']['svip_discount'], 2);
         }
