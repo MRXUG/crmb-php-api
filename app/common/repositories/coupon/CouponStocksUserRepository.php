@@ -364,9 +364,8 @@ class CouponStocksUserRepository extends BaseRepository
                 if ($couponInfo && $couponInfo["product_id"] != $productInfo["goods_id"]){
                     continue;
                 }
-                $no_threshold = 0;
+
                 if ($stockData['transaction_minimum'] == 0){
-                    $no_threshold = 1;
                     $stockData['transaction_minimum'] = $discountNum+0.01;
                 }
                 $checkCouponList[] = [
@@ -378,7 +377,7 @@ class CouponStocksUserRepository extends BaseRepository
                     'checked'             => false,
                     'stock_name'          => $stockData['stock_name'],
                     'transaction_minimum' => $stockData['transaction_minimum'],
-                    'no_threshold'        => $no_threshold,
+                    'no_threshold'        => $stockData['no_threshold'],
                     'start_at'            => $item['start_at'],
                     'end_at'              => $item['end_at'],
                     'mer_id'              => $merId,
