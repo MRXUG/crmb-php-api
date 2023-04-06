@@ -117,7 +117,7 @@ class StoreOrder extends BaseController
         ];
 
         $couponUser = app()->make(CouponStocksUserRepository::class);
-        $checkCouponList = $couponUser->best($uid, $merId, $goodsInfo);
+        $checkCouponList = $couponUser->best($uid, $merId, $goodsInfo,$money);
 
         return app('json')->success($checkCouponList);
 
