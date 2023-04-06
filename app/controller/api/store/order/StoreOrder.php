@@ -208,6 +208,11 @@ class StoreOrder extends BaseController
         $where['uid'] = $this->request->uid();
 //        $where['paid'] = 1;
         $where['is_user'] = 1;
+
+        if ($where['status'] == 0){
+            $where["paid"] = 1;
+        }
+
         return app('json')->success($this->repository->getList($where, $page, $limit));
     }
 

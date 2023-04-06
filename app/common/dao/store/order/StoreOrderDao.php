@@ -112,7 +112,11 @@ class StoreOrderDao extends BaseDao
             ->when(isset($where['status']) && $where['status'] !== '', function ($query) use ($where) {
                 switch ($where['status']) {
                     case 0 :
-                        $query->whereIn('StoreOrder.status', [0, 9]);
+                        if (isset($where["paid"]) && $where["paid"] == 1){
+                            $query->where("StoreOrder.paid",1)->whereIn('StoreOrder.status', [0, 9]);
+                        }else{
+                            $query->whereIn('StoreOrder.status', [0, 9]);
+                        }
                         break;
                     case -2 :
                         $query->where('StoreOrder.paid', 1)->whereNotIn('StoreOrder.status', [10, 11]);
