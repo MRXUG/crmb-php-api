@@ -36,8 +36,8 @@ class FinishOrderListen extends TimerService implements ListenerInterface
                 [
                     'verify_time',
                     '<',
-                    date('Y-m-d H:i:s', time() - 86400 * 15)
-//                    date('Y-m-d H:i:s', time() - 600)
+//                    date('Y-m-d H:i:s', time() - 86400 * 15)
+                    date('Y-m-d H:i:s', time() - 60 * 5)
                 ]
             ];
 
