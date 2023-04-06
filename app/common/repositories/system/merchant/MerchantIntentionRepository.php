@@ -129,7 +129,8 @@ class MerchantIntentionRepository extends BaseRepository
                 'is_bro_goods' => $config['broadcast_goods_type'] == 1 ? 0 : 1,
                 'mer_password' => $password,
                 'is_margin' => $margin['is_margin'] ?? -1,
-                'margin' => $margin['margin'] ?? 0
+                'margin' => $margin['margin'] ?? 0,
+                'business_license' => $intention['images'],
             ];
             if ($data['status'] == 1) {
                 $data['fail_msg'] = '';
