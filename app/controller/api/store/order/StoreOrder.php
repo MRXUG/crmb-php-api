@@ -114,6 +114,7 @@ class StoreOrder extends BaseController
         $goodsInfo = [
             "price"=>$money,
             "goods_id"=>$productId,
+            "origin_amount"=>$money,
         ];
 
         $couponUser = app()->make(CouponStocksUserRepository::class);
