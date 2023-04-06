@@ -1127,8 +1127,6 @@ class StoreRefundOrderRepository extends BaseRepository
         Db::transaction(function () use ($admin, $id) {
             $data['status'] = 4;
             $data['status_time'] = date('Y-m-d H:i:s');
-            $statusRepository = app()->make(StoreRefundStatusRepository::class);
-            $statusRepository->status($id, $statusRepository::CHANGE_REFUND_PRICE, '退款成功' . ($admin ? '' : '[自动]'));
             $this->dao->update($id, $data);
             $res = $this->dao->getWhere(['refund_order_id' => $id], '*', ['refundProduct.product']);
             $this->getProductRefundNumber($res, 1, true);
