@@ -300,7 +300,7 @@ class CouponStocksUserRepository extends BaseRepository
     public function best($uid, $merId, $productInfo, $orderPrice)
     {
         $today = date('Y-m-d H:i:s');
-        $productAmount = $productInfo['origin_amount'];
+        $productAmount = $productInfo['price'];
 
         $couponList = $this->dao->getModelObj()
             ->alias('a')
