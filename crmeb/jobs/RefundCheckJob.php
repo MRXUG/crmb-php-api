@@ -6,6 +6,7 @@ use app\common\dao\store\order\StoreRefundOrderDao;
 use app\common\model\store\order\StoreRefundOrder;
 use app\common\model\store\RefundTask;
 use app\common\repositories\store\order\StoreRefundOrderRepository;
+use app\common\repositories\store\order\StoreRefundStatusRepository;
 use crmeb\interfaces\JobInterface;
 use crmeb\services\MiniProgramService;
 use think\facade\Db;
@@ -73,6 +74,14 @@ class RefundCheckJob implements JobInterface
                 $refundOrder->save();
                 /** @var StoreRefundOrderRepository $refundOrderRep */
                 $refundOrderRep = app()->make(StoreRefundOrderRepository::class);
+                /** @var StoreRefundStatusRepository $statusRepository */
+                $statusRepository = app()->make(StoreRefundStatusRepository::class);
+                $statusRepository->status(
+                    $refundOrderTask->getAttr('refund_order_id'),
+                    $statusRepository::CHANGE_REFUND_PRICE,
+                    '退款成功'
+                );
+
                 $refundOrderRep->refundAfter($refundOrder);
             });
         } catch (Exception|Throwable|ValueError $e) {
