@@ -46,7 +46,6 @@ class CreateCoupon extends BaseController
         if (strtotime($params['start_at']) < time()) {
             return app('json')->fail('领取时间的开始时间必须大于当前时间，请重新编辑时间');
         }
-
         $buildCouponRepository->createCoupon($params, $this->request->adminId(), $id);
         // 触发券开始
         $changeBatchStatusRepository->changeStatus($id, 'in_progress');

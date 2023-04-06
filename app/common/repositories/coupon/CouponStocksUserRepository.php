@@ -333,7 +333,7 @@ class CouponStocksUserRepository extends BaseRepository
         $stockList = $stockListCollect->toArray();
         # 优惠券新逻辑限制
         foreach ($stockList as $k => &$item) {
-            $item['no_threshold'] = 0;
+            $item['no_threshold'] = isset($item["transaction_minimum"]) && $item["transaction_minimum"] == 0 ? 1 : 0;
             if (isset($item["transaction_minimum"]) && isset($item["discount_num"]) && ($item["transaction_minimum"] == 0)){
                 $item["transaction_minimum"] = $item["discount_num"]+0.01;
             }
@@ -377,6 +377,7 @@ class CouponStocksUserRepository extends BaseRepository
                     'checked'             => false,
                     'stock_name'          => $stockData['stock_name'],
                     'transaction_minimum' => $stockData['transaction_minimum'],
+                    'no_threshold'        => $stockData["transaction_minimum"] == 0 ? 1 : 0,
                     'start_at'            => $item['start_at'],
                     'end_at'              => $item['end_at'],
                     'mer_id'              => $merId,
