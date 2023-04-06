@@ -119,6 +119,7 @@ class UserRelationRepository extends BaseRepository
         $make = app()->make(StoreActivityRepository::class);
         /** @var CouponStocksRepository $couponStockRep */
         $couponStockRep = app()->make(CouponStocksRepository::class);
+
         foreach ($list as $key=>$item) {
             if(isset($item['spu']['product_type']) && $item['spu']['product_type'] == 1){
                 $item['spu']['stop_time'] = $item->stop_time;
@@ -128,18 +129,18 @@ class UserRelationRepository extends BaseRepository
                 $item['merchant']['showProduct'] = $item['merchant']['AllRecommend'];
             }
 
-            $showProduct = [];
-            foreach ($item['merchant']["showProduct"] as $k=>$v){
-                $act = $make->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_BORDER,0,$v['cate_id'],$v['mer_id']);
-                $v['border_pic'] = $act['pic'] ?? '';
-                $couponInfo = $couponStockRep->getRecommendCoupon($v['product_id']);
-                $v['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
-                $v['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
-                $showProduct[] = $v;
+            if ($where['type'] == 10) {
+                $showProduct = [];
+                foreach ($item['merchant']["showProduct"] as $k=>$v){
+                    $act = $make->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_BORDER,0,$v['cate_id'],$v['mer_id']);
+                    $v['border_pic'] = $act['pic'] ?? '';
+                    $couponInfo = $couponStockRep->getRecommendCoupon($v['product_id']);
+                    $v['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+                    $v['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
+                    $showProduct[] = $v;
+                }
+                $list[$key]['merchant']['showProduct']  = $showProduct;
             }
-            $list[$key]['merchant']['showProduct']  = $showProduct;
-
-
         }
         return compact('count', 'list');
     }
