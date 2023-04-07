@@ -449,10 +449,10 @@ class SpuRepository extends BaseRepository
     public function getApiSearchByCoupon($where, $page, $limit, $userInfo)
     {
         /** @var StoreCouponRepository $couponRepository */
-        $couponRepository = app()->make(StoreCouponRepository::class);
+        $couponRepository = app()->make(CouponStocksRepository::class);
         $coupon = $couponRepository->search(null, [
             'status' => 2,
-            'coupon_id' => $where['coupon_id']
+            'id' => $where['coupon_id']
         ])->with(['product'])->find();
         /** @var Collection $productList */
         $productList = $coupon->getRelation('product');

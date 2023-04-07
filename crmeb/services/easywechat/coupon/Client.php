@@ -321,7 +321,7 @@ class Client extends BaseClient
                 ],
                 'fixed_normal_coupon' => [
                     'discount_amount'     => (int)(bcmul($params['discount_num'], 100)), // 参数使用的单位是：元
-                    'transaction_minimum' => empty($params['transaction_minimum']) ? 1 : (int)(bcmul($params['transaction_minimum'],  100)),
+                    'transaction_minimum' => empty($params['transaction_minimum']) ? (int)(bcmul($params['discount_num'], 100)) +1 : (int)(bcmul($params['transaction_minimum'],  100)),
                 ],
             ],
             'stock_send_rule' => [
