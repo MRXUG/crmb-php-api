@@ -366,10 +366,10 @@ class Common extends BaseController
     {
         $sys_open_version = systemConfig('sys_open_version');
         $data = [
-            'version' => get_crmeb_version('未知'),
+            'version' => get_crmeb_version('万对科技提供技术支持'),
             'year' => '© 2014-' . date('Y', time()),
             'beian_sn' => systemConfig('beian_sn'),
-            'url' => 'www.crmeb.com',
+            'url' => '',
             'Copyright' => 'Copyright',
             'sys_open_version' => $sys_open_version === '' ? '1' : $sys_open_version,
         ];
