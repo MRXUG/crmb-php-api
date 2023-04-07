@@ -87,7 +87,7 @@ class BuildCouponRepository extends BaseRepository
 //            'available_begin_time' => date(DATE_RFC3339, strtotime($params['available_begin_time'])),
 //            'available_end_time' => date(DATE_RFC3339, strtotime($params['available_end_time'])),
             'max_coupons' => $params['is_limit'] == CouponStocks::IS_LIMIT_NO ? CouponStocks::MAX_COUPONS : (int)$params['max_coupons'],
-            'max_coupons_per_user' => $params['is_limit'] == CouponStocks::IS_USER_LIMIT_NO ? CouponStocks::MAX_COUPONS_PER_USER :(int)$params['max_coupons_per_user'],
+            'max_coupons_per_user' => $params['max_coupons_per_user'] == CouponStocks::IS_USER_LIMIT_NO ? CouponStocks::MAX_COUPONS_PER_USER :(int)$params['max_coupons_per_user'],
             'stock_type' => CouponStocks::STOCK_TYPE_REDUCE,
             'coupon_code_mode' => CouponStocks::WECHATPAY_MODE,
             'max_coupons_by_day' => $params['is_limit'] == CouponStocks::IS_LIMIT_NO ? CouponStocks::MAX_COUPONS : (int)$params['max_coupons'],
