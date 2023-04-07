@@ -455,7 +455,6 @@ class SpuRepository extends BaseRepository
 //        dd($where['coupon_id']);
         /** @var CouponStocks $coupon */
         $coupon = $couponDao->getModelObj()->with(['product'])->where([
-            'status' => 2,
             'id' => $where['coupon_id']
         ])->find();
         $data['coupon'] = $coupon;

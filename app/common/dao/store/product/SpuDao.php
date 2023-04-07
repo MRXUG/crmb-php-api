@@ -107,7 +107,7 @@ class SpuDao extends  BaseDao
                 $query->where('P.stock','>',0);
             })
             ->when(isset($where['is_coupon']) && !empty($where['is_coupon']), function ($query) use ($where) {
-                $query->whereIn('P.product_type','0,2');
+                $query->whereIn('P.product_type',[0,2]);
             })
             ->when(isset($where['common']) && $where['common'] !== '', function ($query) use ($where) {
                 $query->whereIn('S.product_type', [0, 1]);
