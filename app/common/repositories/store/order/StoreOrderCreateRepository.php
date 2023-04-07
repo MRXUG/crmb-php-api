@@ -1550,7 +1550,6 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         $fissionAmount           = $marketingDiscount['fission_amount'] ?? 0; // 涨红包金额
         $marketingDiscountAmount = $marketingDiscount['marketing_discount_amount'] ?? 0; // 优惠金额
         $failureDiscount         = $marketingDiscount['pay_failure_discount_amount'] ?? 0; // 支付失败优惠金额
-
         /**
          * @var CouponStocksUserRepository $couponUser
          */
@@ -1667,10 +1666,10 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     if ($adInfo['discount_fission_switch'] == 1) {
                         $maxCurrentDiscount = bcadd($adFissionAmount, $adMarketingDiscountAmount, 2);
                     }
-
+//                    var_dump([$failureDiscount, $adFailureDiscountAmount, $failureDiscount, $maxCurrentDiscount]);die;
                     if (($failureDiscount != $adFailureDiscountAmount) || ($failureDiscount < $maxCurrentDiscount)) {
                         // 当前优惠是否比支付失败优惠大
-                        $hasError = true;
+                        $hasError = false;
                     }
                     $discountTotal = $adFailureDiscountAmount;
                     break;
