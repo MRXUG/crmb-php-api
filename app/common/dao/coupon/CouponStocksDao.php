@@ -113,8 +113,8 @@ class CouponStocksDao extends BaseDao
             })
             ->field($field)
             ->with(['product'])
-            ->page($page, $limit)
             ->where('is_del', 0)
+            ->page($page, $limit)
             ->select();
     }
 

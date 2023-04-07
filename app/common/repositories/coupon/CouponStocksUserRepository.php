@@ -307,7 +307,7 @@ class CouponStocksUserRepository extends BaseRepository
             ->field(['a.*', 'b.discount_num'])
             ->where([
                 ['a.written_off', '=', 0],
-                ['a.is_del', '=', 0],
+                ['b.is_del', '=', 0],
                 ['a.uid', '=', $uid],
                 ['a.mer_id', '=', $merId],
                 ['a.end_at', '>=', $today],
@@ -315,7 +315,7 @@ class CouponStocksUserRepository extends BaseRepository
             ])
             ->order('b.discount_num', 'desc')
             ->select()->toArray();
-
+//        dd($couponList);
         # 删除掉不符合规则的优惠券
         foreach ($couponList as $k => $v) {
             if ($v['discount_num'] >= $orderPrice) unset($couponList[$k]);
@@ -330,8 +330,10 @@ class CouponStocksUserRepository extends BaseRepository
 //            'status' => CouponStocks::STATUS_ING,
             ['mer_id', '=', $merId],
         ];
+        $stockIdList = array_unique($stockIdList);
         $field = 'type, stock_id, scope, discount_num, stock_name, transaction_minimum';
         $stockListCollect = $couponStockRepository->selectPageWhere($whereStock, $stockIdList, 1, 100, $field);
+//        dd($stockListCollect);
         $stockList = $stockListCollect->toArray();
         # 优惠券新逻辑限制
         foreach ($stockList as $k => &$item) {
