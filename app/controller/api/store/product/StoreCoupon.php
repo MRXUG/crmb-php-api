@@ -14,6 +14,7 @@
 namespace app\controller\api\store\product;
 
 
+use app\common\dao\coupon\CouponStocksDao;
 use crmeb\services\MerchantCouponService;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\coupon\CouponStocksUserRepository;
@@ -177,10 +178,19 @@ class StoreCoupon extends BaseController
     public function decrypt(CouponStocksUserRepository $repository, CouponStocksRepository $couponStocksRepository)
     {
         $raw = request()->get();
+        /** @var CouponStocksDao $orderStockDao */
+        $orderStockDao = app()->make(CouponStocksDao::class);
+        $orderStock = $orderStockDao->getModelObj()->where('stock_id', $raw['stock_id'])->value('id');
         $mchId = $couponStocksRepository->getValue(['stock_id' => $raw['stock_id']], 'mch_id');
         $couponCode = MerchantCouponService::create(MerchantCouponService::CALLBACK_COUPON, ['mch_id' => $mchId])->decrypt($raw);
         $adId = $repository->getValue(['coupon_code' => $couponCode], 'ad_id');
 
-        return app('json')->success(['ad_id' => $adId, 'coupon_code' => $couponCode, 'stock_id' => $raw['stock_id']]);
+        return app('json')->success([
+            'ad_id' => $adId,
+            'coupon_code' => $couponCode,
+            'stock_id' => $raw['stock_id'],
+            'mchId' => $mchId,
+            'couponId' => $orderStock
+        ]);
     }
 }
