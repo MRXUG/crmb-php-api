@@ -145,4 +145,17 @@ class StoreOrderProductDao extends BaseDao
         return  $query;
     }
 
+    /**
+     * 修改是否退款状态
+     *
+     * @param int $orderId
+     * @param int $isRefund
+     * @return void
+     */
+    public function updateIsRefund(int $orderId, int $isRefund): void
+    {
+        $this->getModelObj()->where('order_id', $orderId)->update([
+            'is_refund' => $isRefund
+        ]);
+    }
 }

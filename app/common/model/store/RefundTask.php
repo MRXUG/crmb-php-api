@@ -2,6 +2,7 @@
 
 namespace app\common\model\store;
 
+use app\common\dao\store\order\StoreOrderDao;
 use app\common\model\BaseModel;
 use app\common\model\store\order\StoreRefundOrder;
 use think\db\exception\DbException;
@@ -38,6 +39,8 @@ class RefundTask extends BaseModel
         StoreRefundOrder::getDB()->where('refund_order_id', $this->getAttr('refund_order_id'))->update([
             'status' => 5
         ]);
+        /** @var StoreOrderDao $orderDao */
+        $orderDao = app()->make(StoreOrderDao::class);
 
         return true;
     }

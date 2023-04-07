@@ -792,6 +792,27 @@ class StoreOrderDao extends BaseDao
         return $query->count();
     }
 
+    /**
+     * 修改订单状态
+     *
+     * @param int $orderId
+     * @param int $status
+     * @return void
+     */
+    public function updateOrderStatus(int $orderId, int $status)
+    {
+        $this->getModelObj()->where('order_id', $orderId)->update([
+            'status' => $status
+        ]);
+        /** @var StoreOrderProductDao $orderProductDao */
+        $orderProductDao = app()->make(StoreOrderProductDao::class);
+        if ($status == 4) {
+            $orderProductDao->updateIsRefund($orderId, 1);
+        }
+        if ($status == -1) {
+            $orderProductDao->updateIsRefund($orderId, 3);
+        }
+    }
 
     /**
      * TODO 用户的某个商品购买数量

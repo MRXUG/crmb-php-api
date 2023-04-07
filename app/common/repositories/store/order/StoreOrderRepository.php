@@ -64,6 +64,7 @@ use crmeb\services\SwooleTaskService;
 use Exception;
 use FormBuilder\Factory\Elm;
 use FormBuilder\Form;
+use think\db\BaseQuery;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
@@ -1374,6 +1375,7 @@ class StoreOrderRepository extends BaseRepository
      */
     public function adminMerGetList($where, $page, $limit)
     {
+        dd($where, $page, $limit);
         $where['paid'] = 1;
         $query = $this->dao->search($where, null);
         $count = $query->count();
@@ -1628,11 +1630,13 @@ class StoreOrderRepository extends BaseRepository
      */
     public function getList(array $where, $page, $limit)
     {
+//        dd($where);
         $query = $this->dao->search($where);/*->where('StoreOrder.is_del', 0);*/
         $count = $query->count();
         $list = $query->with([
             'orderProduct',
             'presellOrder',
+            'refundOrder',
             'merchant' => function ($query) {
                 return $query->field('mer_id,mer_name');
             },

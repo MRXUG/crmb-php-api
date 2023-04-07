@@ -2,6 +2,7 @@
 
 namespace crmeb\jobs;
 
+use app\common\dao\store\order\StoreOrderDao;
 use app\common\dao\store\order\StoreRefundOrderDao;
 use app\common\model\store\order\StoreRefundOrder;
 use app\common\model\store\RefundTask;
@@ -81,7 +82,9 @@ class RefundCheckJob implements JobInterface
                     $statusRepository::CHANGE_REFUND_PRICE,
                     '退款成功'
                 );
-
+                /** @var StoreOrderDao $orderDao */
+                $orderDao = app()->make(StoreOrderDao::class);
+                $orderDao->updateOrderStatus($refundOrder->getAttr('order_id'), -1);
                 $refundOrderRep->refundAfter($refundOrder);
             });
         } catch (Exception|Throwable|ValueError $e) {

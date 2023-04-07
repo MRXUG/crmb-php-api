@@ -2,6 +2,7 @@
 
 namespace crmeb\utils\wechat;
 
+use app\common\dao\store\order\StoreOrderDao;
 use app\common\model\delivery\DeliveryProfitSharingStatus;
 use app\common\model\store\order\StoreRefundOrder;
 use app\common\model\store\RefundTask;
@@ -35,6 +36,10 @@ class ProfitSharing
             ->leftJoin('eb_store_order b', 'a.order_id = b.order_id')
             ->where('a.refund_order_id', $refundOrderId)
             ->find();
+        # 修改订单状态
+        /** @var StoreOrderDao $orderDao */
+        $orderDao = app()->make(StoreOrderDao::class);
+        $orderDao->updateOrderStatus($refundOrder->getAttr('order_id'), 4);
         # 创建用来定时循环获取回退分账结果的基础数据
         $refundBaseData = [];
         # 判断是否立即付款
