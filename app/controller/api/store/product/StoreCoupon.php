@@ -181,6 +181,6 @@ class StoreCoupon extends BaseController
         $couponCode = MerchantCouponService::create(MerchantCouponService::CALLBACK_COUPON, ['mch_id' => $mchId])->decrypt($raw);
         $adId = $repository->getValue(['coupon_code' => $couponCode], 'ad_id');
 
-        return app('json')->success(['ad_id' => $adId]);
+        return app('json')->success(['ad_id' => $adId, 'coupon_code' => $couponCode, 'stock_id' => $raw['stock_id']]);
     }
 }
