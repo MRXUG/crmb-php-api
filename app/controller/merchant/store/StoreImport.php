@@ -96,8 +96,8 @@ class StoreImport extends BaseController
                      'mer_id' => $this->request->merId(),
                      'data' => [
                          'path' => $path,
-                         'sql' => ['delivery_name' => 'D', 'delivery_id' => 'E',],
-                         'where' => ['order_sn' => 'B',],
+                         'sql' => ['delivery_name' => 'B', 'delivery_id' => 'D',],
+                         'where' => ['order_sn' => 'A',],
                     ]
                  ];
                 break;

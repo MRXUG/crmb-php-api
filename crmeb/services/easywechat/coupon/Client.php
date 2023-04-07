@@ -220,7 +220,6 @@ class Client extends BaseClient
     {
         $params = $this->formatBuildCoupon($params, $merchantConfig);
 
-        Log::info('建券参数,' . json_encode(compact('params')));
         $jsonBody = json_encode($params);
 //        echo json_encode($jsonBody, 256);die;
         $result = $this->request('/v3/marketing/busifavor/stocks', 'POST', ['sign_body' => $jsonBody]);
@@ -343,7 +342,8 @@ class Client extends BaseClient
                 'mini_programs_info' => [
                     'entrance_words'      => $params['entrance_words'],
                     'guiding_words'       => $params['guiding_words'],
-                    'mini_programs_path'  => 'pages/columnGoods/goods_coupon_list/index', //小程序首页
+                    'mini_programs_path'  => "/pages/columnGoods/goods_coupon_list/index?type={$params['type']}&mer_id={$params['mer_id']}", //小程序首页
+//                    'mini_programs_path'  => 'pages/columnGoods/goods_coupon_list/index', //小程序首页
                     'mini_programs_appid' => $appId,
                 ],
 //                'appid' => 'wxee403b4ddd3978bd',  // TODO 公众号appid，提示与商户没有关联

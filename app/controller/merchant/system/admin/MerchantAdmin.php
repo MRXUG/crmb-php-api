@@ -14,6 +14,7 @@
 namespace app\controller\merchant\system\admin;
 
 
+use app\common\dao\system\merchant\MerchantDao;
 use app\common\repositories\system\auth\RoleRepository;
 use crmeb\basic\BaseController;
 use app\common\repositories\system\merchant\MerchantAdminRepository;
