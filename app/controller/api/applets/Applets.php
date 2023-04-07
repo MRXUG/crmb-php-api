@@ -64,7 +64,9 @@ class Applets extends BaseController{
             ];
 //  return json_encode($data);
             //提交
-            return $this->httpCURL($url,json_encode($data));
+            $result = $this->httpCURL($url,json_encode($data));
+
+            return app('json')->success(json_decode($result,true));
         }
     }
     
