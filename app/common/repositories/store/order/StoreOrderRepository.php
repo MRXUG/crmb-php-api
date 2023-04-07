@@ -1375,7 +1375,6 @@ class StoreOrderRepository extends BaseRepository
      */
     public function adminMerGetList($where, $page, $limit)
     {
-        dd($where, $page, $limit);
         $where['paid'] = 1;
         $query = $this->dao->search($where, null);
         $count = $query->count();

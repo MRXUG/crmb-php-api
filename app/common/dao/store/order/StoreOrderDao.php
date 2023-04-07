@@ -254,12 +254,12 @@ class StoreOrderDao extends BaseDao
             ->when(isset($where['ad_account_id']) && $where['ad_account_id'] !== '', function ($query) use ($where) {
                     $query->join('MerchantAd MA','StoreOrder.ad_id = MA.ad_id')
                     ->where(function($query) use($where) {
-                        $query->where('MA.ad_account_id', $where['ad_account_id']);
+                        $query->whereLike('MA.ad_account_id', "%{$where['ad_account_id']}%");
                     });
             })
             // 广告id
             ->when(isset($where['ad_id']) && $where['ad_id'] !== '', function ($query) use ($where) {
-                $query->where('StoreOrder.ad_id' ,$where['ad_id']);
+                $query->whereLike('StoreOrder.ad_id' ,"%{$where['ad_id']}%");
             })
             // 商户名称
             ->when(isset($where['mer_name']) && $where['mer_name'] !== '', function ($query) use ($where) {
