@@ -10,6 +10,7 @@
 // +----------------------------------------------------------------------
 namespace app\common\repositories\store\product;
 
+use app\common\dao\coupon\CouponStocksDao;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\coupon\StoreCouponProductRepository;
 use app\common\repositories\store\coupon\StoreCouponRepository;
@@ -448,12 +449,13 @@ class SpuRepository extends BaseRepository
 
     public function getApiSearchByCoupon($where, $page, $limit, $userInfo)
     {
-        /** @var StoreCouponRepository $couponRepository */
-        $couponRepository = app()->make(CouponStocksRepository::class);
-        $coupon = $couponRepository->search(null, [
+        /** @var CouponStocksDao $couponDao */
+        $couponDao = app()->make(CouponStocksDao::class);
+//        dd($where['coupon_id']);
+        $coupon = $couponDao->getModelObj()->with(['product'])->where([
             'status' => 2,
             'id' => $where['coupon_id']
-        ])->with(['product'])->find();
+        ])->find();
         /** @var Collection $productList */
         $productList = $coupon->getRelation('product');
         $data['coupon'] = $coupon;
@@ -472,6 +474,7 @@ class SpuRepository extends BaseRepository
             $where['order'] = 'star';
             $where['is_coupon'] = 1;
             $product = $this->getApiSearch($where, $page, $limit, $userInfo);
+//            dd([$product, $where]);
         }
 
         $data['count'] = $product['count'] ?? 0;
