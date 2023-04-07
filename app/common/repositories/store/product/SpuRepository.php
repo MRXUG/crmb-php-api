@@ -11,6 +11,7 @@
 namespace app\common\repositories\store\product;
 
 use app\common\dao\coupon\CouponStocksDao;
+use app\common\model\coupon\CouponStocks;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\coupon\StoreCouponProductRepository;
 use app\common\repositories\store\coupon\StoreCouponRepository;
@@ -452,12 +453,11 @@ class SpuRepository extends BaseRepository
         /** @var CouponStocksDao $couponDao */
         $couponDao = app()->make(CouponStocksDao::class);
 //        dd($where['coupon_id']);
+        /** @var CouponStocks $coupon */
         $coupon = $couponDao->getModelObj()->with(['product'])->where([
             'status' => 2,
             'id' => $where['coupon_id']
         ])->find();
-        /** @var Collection $productList */
-        $productList = $coupon->getRelation('product');
         $data['coupon'] = $coupon;
         if ($coupon) {
             // 店铺获取模式
@@ -467,6 +467,8 @@ class SpuRepository extends BaseRepository
             // 商品获取模式
             if ($coupon->getAttr('scope') == 2) {
                 $where['product_ids'] = [];
+                /** @var Collection $productList */
+                $productList = $coupon->getRelation('product');
                 if ($productList) {
                     $where['product_ids'] = array_unique(array_column($productList->toArray() ?? [], 'product_id'));
                 }
