@@ -95,7 +95,7 @@ class StoreOrder extends BaseController
      * @return mixed
      */
     public function getUserBeforeOneCoupon(){
-        $money = (int)$this->request->param('money', 0);
+        $money = (double) $this->request->param('money', 0);
         if ($money == 0){
             return app('json')->success([]);
         }
@@ -116,7 +116,7 @@ class StoreOrder extends BaseController
             "goods_id"=>$productId,
             "origin_amount"=>$money,
         ];
-
+        /** @var CouponStocksUserRepository $couponUser */
         $couponUser = app()->make(CouponStocksUserRepository::class);
         $checkCouponList = $couponUser->best($uid, $merId, $goodsInfo,$money);
 

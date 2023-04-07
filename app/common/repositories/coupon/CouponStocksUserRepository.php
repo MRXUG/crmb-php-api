@@ -301,7 +301,6 @@ class CouponStocksUserRepository extends BaseRepository
     {
         $today = date('Y-m-d H:i:s');
         $productAmount = $productInfo['price'];
-
         $couponList = $this->dao->getModelObj()
             ->alias('a')
             ->leftJoin('eb_coupon_stocks b', 'a.stock_id = b.stock_id')
@@ -314,11 +313,14 @@ class CouponStocksUserRepository extends BaseRepository
                 ['a.end_at', '>=', $today],
                 ['a.start_at', '<', $today],
             ])
+            ->order('b.discount_num', 'desc')
             ->select()->toArray();
+
         # 删除掉不符合规则的优惠券
         foreach ($couponList as $k => $v) {
             if ($v['discount_num'] >= $orderPrice) unset($couponList[$k]);
         }
+
         $stockIdList = array_column($couponList, 'stock_id');
         /**
          * @var CouponStocksRepository $couponStockRepository
