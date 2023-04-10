@@ -76,9 +76,5 @@ return [
         'order.delivery' => [\crmeb\listens\OrderDeliveryListen::class]
     ],
 
-    'subscribe' => [
-        'updateMerchantProfitJob'=>[
-            \crmeb\jobs\UpdateMerchantProfitJob::class
-        ]
-    ],
+    'subscribe' => [],
 ];
