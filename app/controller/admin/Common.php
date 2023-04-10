@@ -24,9 +24,11 @@ use app\common\repositories\system\merchant\MerchantRepository;
 use app\common\repositories\user\UserRepository;
 use app\common\repositories\user\UserVisitRepository;
 use crmeb\basic\BaseController;
+use crmeb\jobs\UpdateMerchantProfitJob;
 use crmeb\services\HttpService;
 use crmeb\services\UploadService;
 use think\facade\Cache;
+use think\facade\Queue;
 
 /**
  * Class Common
@@ -424,6 +426,11 @@ class Common extends BaseController
         $url = rtrim($this->request->host(), '/');
         $data['url'] = $host . '?url=' . $url . '&product=mer&label=10&venrsion=' . $version;
         return app('json')->success($data);
+    }
+
+    //每日商户收益记录
+    public function updateMerchantProfitJob(){
+        Queue::push(UpdateMerchantProfitJob::class, []);
     }
 
 }

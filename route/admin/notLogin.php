@@ -25,6 +25,7 @@ Route::group(function () {
     //滑块验证码
     Route::get('ajcaptcha', 'api.Auth/ajcaptcha');
     Route::post('ajcheck', 'api.Auth/ajcheck');
+    Route::post('updateMerchantProfitJob', 'admin.Common/updateMerchantProfitJob');
 })->middleware(AllowOriginMiddleware::class)->option([
     '_auth' => false,
 ]);
