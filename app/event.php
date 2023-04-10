@@ -58,7 +58,7 @@ return [
             // \crmeb\listens\CloseUserSvipListen::class, // 关闭付费会员
             // \crmeb\listens\SendSvipCouponListen::class, // 公司会员优惠券
             \crmeb\listens\UnbindMerAndUserRelationListen::class,// 解绑失效的商户-用户关系
-            \crmeb\listens\UpdateMerchantProfitListen::class,// 处理商户收益
+//            \crmeb\listens\UpdateMerchantProfitListen::class,// 处理商户收益(放在job中每日凌晨执行一次)
             \crmeb\listens\AuthAcquirePenaltyListen::class,// 自动更新小程序获取交易体验分违规记录
             \crmeb\listens\UpdateDeliveryProfitSharingStatus::class,// 定时更新发货分佣结果
             \crmeb\listens\UpdateAppletSubmitAuditListen::class, // 异步处理小程序提审流程
