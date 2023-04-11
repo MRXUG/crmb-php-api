@@ -35,7 +35,8 @@ class Applets extends BaseController{
         $param = $this->request->param();
         file_put_contents('applets.txt',json_encode($param).PHP_EOL,FILE_APPEND);
         if($this->request->has('qz_gdt') || $this->request->has('gdt_vid')){
-
+            //click_id
+            $click_id = $this->request->has('qz_gdt') ? $this->request->has('qz_gdt') : $this->request->has('gdt_vid');
             $param = $this->request->param();
 
             // $url = urldecode($param['$param']);
@@ -45,15 +46,15 @@ class Applets extends BaseController{
                 'actions' => [
                     [
                         // 'outer_action_id' => 'outer_action_identity',
-                        'action_time' => '',
+                        'action_time' => time(),
                         'user_id' => [
                             'wechat_openid' => '', // wechat_openid 和 wechat_unionid 二者必填一
                             'wechat_unionid' => '', // 企业微信必填
-                            'wechat_app_id' => ''  // 微信类上报必填，且必须通过授权。授权请参考微信数据接入
+                            'wechat_app_id' => 'gh_339196192718'  // 微信类上报必填，且必须通过授权。授权请参考微信数据接入
                         ],
                         'action_type' => 'LANDING_PAGE_CLICK', //必填 行为类型  下单 COMPLETE_ORDER   点击 LANDING_PAGE_CLICK
                         "trace" => [
-                            "click_id" => 'wx0testtestzzzma00' // 不设置监测链接，必填 click_id    
+                            "click_id" => $click_id // 不设置监测链接，必填 click_id    
                         ],
                         'action_param' => [
                             'value' => '100',
@@ -62,7 +63,7 @@ class Applets extends BaseController{
                     ]
                 ]
             ];
-//  return json_encode($data);
+//  return json_encode($data);die;
             //提交
             $result = $this->httpCURL($url,json_encode($data));
 
