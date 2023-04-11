@@ -55,7 +55,7 @@ class MerchantAdRepository extends BaseRepository
            if (isset($info["couponInfo"]["transaction_minimum"]) && isset($info["couponInfo"]["discount_num"]) && ($info["couponInfo"]["transaction_minimum"] == 0)){
                $info["couponInfo"]["transaction_minimum"] = $info["couponInfo"]["discount_num"]+0.01;
            }
-           if($info['deliveryMethod']){
+           if(isset($info['deliveryMethod']) && $info['deliveryMethod']){
                $info['deliveryMethod'] = json_decode($info['deliveryMethod']);
            }
 
