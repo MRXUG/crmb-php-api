@@ -94,6 +94,10 @@ class MerchantAdRepository extends BaseRepository
         if (isset($data['create_time']))  unset($data['create_time']);
         if (isset($data['update_time']))  unset($data['update_time']);
 
+        if(isset($data['deliveryMethod']) && $data['deliveryMethod']){
+            $data['deliveryMethod'] = json_encode($data['deliveryMethod'],true);
+        }
+
         Db::transaction(function () use ($id, $data, $coupon) {
             if ($id) {
                 $this->dao->update($id, $data);
