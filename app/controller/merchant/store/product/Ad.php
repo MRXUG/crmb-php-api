@@ -40,7 +40,12 @@ class Ad extends BaseController
     {
         if (!$this->repository->adExists($id))
             return app('json')->fail('数据不存在');
-        return app('json')->success($this->repository->getInfo($id));
+
+        $info = $this->repository->getInfo($id);
+        if($info['deliveryMethod']){
+            $info['deliveryMethod'] = json_decode($info['deliveryMethod']);
+        }
+        return app('json')->success($info);
     }
 
     /**
