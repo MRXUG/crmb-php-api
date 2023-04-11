@@ -643,7 +643,7 @@ class Auth extends BaseController
         }
         $tokenInfo = $userRepository->createToken($user);
         $userRepository->loginAfter($user);
-        return app('json')->status(200, $userRepository->returnToken($user, $tokenInfo));
+        return app('json')->status(200, $userRepository->returnToken($user, $tokenInfo,$auth['auth']['code']??''));
     }
 
 

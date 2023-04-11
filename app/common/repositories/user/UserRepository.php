@@ -1151,17 +1151,32 @@ class UserRepository extends BaseRepository
         return $switchUser;
     }
 
-    public function returnToken($user, $tokenInfo)
+    public function returnToken($user, $tokenInfo,$code = "")
     {
         if (!$user->status) {
             throw new ValidateException('账号已被禁用');
         }
         $user = $user->hidden(['label_id', 'group_id', 'main_uid', 'pwd', 'addres', 'card_id', 'last_time', 'last_ip', 'create_time', 'mark', 'status', 'spread_uid', 'spread_time', 'real_name', 'birthday', 'brokerage_price'])->toArray();
+
+        //获取用户授权信息
+        $openid = '';
+        $unionid = '';
+        if ($code != ""){
+            $auth =  Cache::get('eb_api_code_' . $code);
+
+            $openid = $auth['openid']??'';
+            $unionid = $auth['unionid']??'';
+
+
+        }
+
         return [
             'token' => $tokenInfo['token'],
             'exp' => $tokenInfo['out'],
             'expires_time' => strtotime('+ '.$tokenInfo['out']. 'seconds'),
-            'user' => $user
+            'user' => $user,
+            'openid' => $openid,
+            'unionid' => $unionid,
         ];
     }
 
