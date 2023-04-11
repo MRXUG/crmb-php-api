@@ -118,10 +118,16 @@ class MerchantAdRepository extends BaseRepository
      */
     public function createAdCouponRelation($id, $coupon)
     {
-        $arr = ['ad_id' => $id];
-        array_walk($coupon, function (&$value, $key, $arr) {
-            $value = array_merge($value, $arr);
-        }, $arr);
-        app()->make(MerchantAdCouponRepository::class)->insertAll($coupon);
+        $arr = [];
+
+        foreach ($coupon as $k=>$v){
+            $arr[] = [
+                'ad_id'=>$id,
+                'stock_id'=>$v['stock_id']
+            ];
+        }
+        if (count($arr) > 0){
+            app()->make(MerchantAdCouponRepository::class)->insertAll($arr);
+        }
     }
 }
