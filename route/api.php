@@ -446,6 +446,7 @@ Route::group('api/', function () {
             Route::get('/preview', 'StoreProduct/preview');
             Route::get('/price_rule/:id', 'StoreProduct/priceRule');
             Route::get('/ad/:id', 'StoreProduct/adDetail');
+            Route::post('/getAdDetail', 'StoreProduct/getAdDetail');
         })->prefix('api.store.product.');
 
         //各种商品列表

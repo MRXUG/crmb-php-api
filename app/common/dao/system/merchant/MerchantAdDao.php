@@ -50,4 +50,8 @@ class MerchantAdDao extends BaseDao
 
         return $res;
     }
+
+    public function getDeliveryMethod($id){
+        return $this->getModel()->where("id","=",$id)->value("deliveryMethod");
+    }
 }

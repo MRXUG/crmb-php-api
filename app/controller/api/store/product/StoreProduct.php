@@ -220,4 +220,22 @@ class StoreProduct extends BaseController
             return app('json')->fail('数据不存在');
         return app('json')->success($this->adRepository->getInfo($id));
     }
+
+    /**获取抖音广告信息和scheme
+     * @return mixed
+     */
+    public function getAdDetail(){
+
+        $id = $this->request->param('id');
+
+        if (!$this->adRepository->adExists($id))
+            return app('json')->fail('数据不存在');
+        $page = $this->request->param('page');
+        $query = $this->request->param('query');
+        $env_version = $this->request->param('env_version');
+
+        return app('json')->success($this->adRepository->getDeliveryMethod($id,$page,$query,$env_version));
+
+
+    }
 }

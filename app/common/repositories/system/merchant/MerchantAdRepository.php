@@ -1,6 +1,7 @@
 <?php
 namespace app\common\repositories\system\merchant;
 
+use app\common\repositories\wechat\OpenPlatformRepository;
 use think\facade\Db;
 use think\db\exception\DbException;
 use think\db\exception\DataNotFoundException;
@@ -133,5 +134,37 @@ class MerchantAdRepository extends BaseRepository
         if (count($arr) > 0){
             app()->make(MerchantAdCouponRepository::class)->insertAll($arr);
         }
+    }
+
+    public function getDeliveryMethod($id,$page,$query,$env_version){
+        $deliveryMethod = $this->dao->getDeliveryMethod($id);
+        if (!$deliveryMethod) return [];
+
+        $params = [
+            'jump_wxa'=>[
+                "path"=>$page,
+                "query"=>$query,
+                "env_version"=>$env_version,
+            ],
+            'is_expire'=>true,
+            'expire_type'=>1,
+            'expire_interval'=>1,
+        ];
+        //获取scheme码
+        $openPlatform = app()->make(OpenPlatformRepository::class);
+        $appid = 'wx3ed327fd1af68e86';
+        $scheme = $openPlatform->getScheme($appid,$params);
+
+       return [
+            'goType'=>$deliveryMethod['jumpMethod'],
+            'title'=>$deliveryMethod['landingPageTitle'],
+            'btnTitle'=>$deliveryMethod['buttonCopy'],
+            'btn_bg_Color'=>$deliveryMethod['backgroundColor'],
+            'btn_text_Color'=>$deliveryMethod['buttonCopyColor'],
+            'btnPosition'=>$deliveryMethod['landingPageButton'],
+            'bgImg'=>$deliveryMethod['landingBackgroundImage'],
+            'openLink'=>$scheme,
+        ];
+
     }
 }

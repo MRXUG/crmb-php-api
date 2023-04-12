@@ -1205,4 +1205,46 @@ class OpenPlatformRepository extends BaseRepository
         libxml_disable_entity_loader(true);
         return json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
     }
+
+
+    /**
+     * 获取scheme码
+     * @param $appId
+     * @param $params
+     * @return mixed|string
+     * @throws GuzzleException
+     * @author  wzq
+     * @date    2023/3/3 19:00
+     */
+    public function getScheme($appId,$params)
+    {
+        try {
+            $token = $this->getAuthorizerToken($appId);
+            $url = Constant::API_WXA_SCHEME . '?access_token='.$token;
+
+            $data = sendRequest('post', $url, $params);
+            if ($data['errcode'] != 0 || !isset($data['openlink'])){
+                $msg = '获取scheme码失败:'. json_encode($data, JSON_UNESCAPED_UNICODE);
+                Log::error($msg);
+                sendMessageToWorkBot([
+                    'msg' => $msg,
+                    'file' => __FILE__,
+                    'line' => __LINE__
+                ]);
+                throw new WechatException('获取scheme码失败');
+            }
+
+            return $data['openlink'];
+
+        } catch (\Exception $e) {
+            $msg = '获取scheme码:检测:error-'. $appId.$e->getMessage();
+            Log::error($msg);
+            sendMessageToWorkBot([
+                'msg' => $msg,
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return '';
+        }
+    }
 }

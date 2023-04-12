@@ -73,4 +73,7 @@ class Constant
     // 小程序版本发布已通过审核的小程序
     const API_WXA_RELEASE = 'https://api.weixin.qq.com/wxa/release';
 
+    // 小程序版本发布已通过审核的小程序
+    const API_WXA_SCHEME = 'https://api.weixin.qq.com/wxa/generatescheme';
+
 }
