@@ -4,6 +4,7 @@ namespace app\common\repositories\system\merchant;
 use app\common\repositories\wechat\OpenPlatformRepository;
 use crmeb\exceptions\WechatException;
 use GuzzleHttp\Client;
+use think\facade\Cache;
 use think\facade\Db;
 use think\db\exception\DbException;
 use think\db\exception\DataNotFoundException;
@@ -142,42 +143,60 @@ class MerchantAdRepository extends BaseRepository
         $deliveryMethod = $this->dao->getDeliveryMethod($id);
         if (!$deliveryMethod) return [];
         $deliveryMethod = json_decode($deliveryMethod,true);
-        $params = [
-            'jump_wxa'=>[
-                "path"=>$page,
-                "query"=>$query,
-                "env_version"=>$env_version,
-            ],
-            'is_expire'=>true,
-            'expire_type'=>1,
-            'expire_interval'=>1,
-        ];
-        //获取scheme码
+
+
+        $key = "adGenerateSchemeAdId=".$id;
+        //获取缓存是否有数据
+        $scheme = Cache::get($key);
+        if (!$scheme){
+
+            $params = [
+                'jump_wxa'=>[
+                    "path"=>$page,
+                    "query"=>$query,
+                    "env_version"=>$env_version,
+                ],
+                'is_expire'=>true,
+                'expire_type'=>1,
+                'expire_interval'=>1,
+            ];
+
+
+
+            //获取scheme码
 //        $openPlatform = app()->make(OpenPlatformRepository::class);
 //        $appid = 'wx3ed327fd1af68e86';
 //        $scheme = $openPlatform->getScheme($appid,$params);
 
-        $appid = 'wx3ed327fd1af68e86';
-        $appSecret = 'd01532066e44b271138085fd49580445';
-        //获取token
-        $token = $this->getAppletsToken($appid,$appSecret);
-        if (!$token){
-            throw new WechatException('获取token失败：');
+
+
+            $appid = 'wx3ed327fd1af68e86';
+            $appSecret = 'd01532066e44b271138085fd49580445';
+            //获取token
+            $token = $this->getAppletsToken($appid,$appSecret);
+            if (!$token){
+                throw new WechatException('获取token失败：');
+            }
+
+            $scheme = $this->getScheme($token,$params);
+            if ($scheme == ""){
+                throw new WechatException('获取scheme失败：');
+            }
+
+            //保存到缓存
+            Cache::set($key,$scheme,60*60*24*28);
+
         }
 
-        $scheme = $this->getScheme($token,$params);
-        if ($scheme == ""){
-            throw new WechatException('获取scheme失败：');
-        }
 
        return [
-            'goType'=>$deliveryMethod['jumpMethod'],
-            'title'=>$deliveryMethod['landingPageTitle'],
-            'btnTitle'=>$deliveryMethod['buttonCopy'],
-            'btn_bg_Color'=>$deliveryMethod['backgroundColor'],
-            'btn_text_Color'=>$deliveryMethod['buttonCopyColor'],
-            'btnPosition'=>$deliveryMethod['landingPageButton'],
-            'bgImg'=>$deliveryMethod['landingBackgroundImage'],
+            'goType'=>$deliveryMethod['jumpMethod']??"",
+            'title'=>$deliveryMethod['landingPageTitle']??"",
+            'btnTitle'=>$deliveryMethod['buttonCopy']??"",
+            'btn_bg_Color'=>$deliveryMethod['backgroundColor']??"",
+            'btn_text_Color'=>$deliveryMethod['buttonCopyColor']??"",
+            'btnPosition'=>$deliveryMethod['landingPageButton']??"",
+            'bgImg'=>$deliveryMethod['landingBackgroundImage']??"",
             'openLink'=>$scheme,
         ];
 
