@@ -14,6 +14,7 @@
 namespace app\common\repositories\store\coupon;
 
 
+use app\common\dao\coupon\CouponStocksDao;
 use app\common\dao\store\coupon\StoreCouponDao;
 use app\common\dao\store\coupon\StoreCouponProductDao;
 use app\common\model\store\coupon\StoreCoupon;
@@ -77,7 +78,7 @@ class StoreCouponRepository extends BaseRepository
      * StoreCouponIssueRepository constructor.
      * @param StoreCouponDao $dao
      */
-    public function __construct(StoreCouponDao $dao)
+    public function __construct(CouponStocksDao $dao)
     {
         $this->dao = $dao;
     }
