@@ -141,7 +141,7 @@ class MerchantAdRepository extends BaseRepository
     public function getDeliveryMethod($id,$page,$query,$env_version){
         $deliveryMethod = $this->dao->getDeliveryMethod($id);
         if (!$deliveryMethod) return [];
-
+        $deliveryMethod = json_decode($deliveryMethod,true);
         $params = [
             'jump_wxa'=>[
                 "path"=>$page,
