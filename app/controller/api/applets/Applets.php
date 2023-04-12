@@ -90,7 +90,7 @@ class Applets extends BaseController{
                 'timestamp' => $this->getMillisecond()
                 ]
             ];
-            echo '<pre>';var_dump($data);die;
+ 
             //提交
             $result = $this->httpCURL($url,json_encode($data));
 
