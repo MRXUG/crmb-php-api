@@ -2,6 +2,8 @@
 namespace app\common\repositories\system\merchant;
 
 use app\common\repositories\wechat\OpenPlatformRepository;
+use crmeb\exceptions\WechatException;
+use GuzzleHttp\Client;
 use think\facade\Db;
 use think\db\exception\DbException;
 use think\db\exception\DataNotFoundException;
@@ -151,9 +153,22 @@ class MerchantAdRepository extends BaseRepository
             'expire_interval'=>1,
         ];
         //获取scheme码
-        $openPlatform = app()->make(OpenPlatformRepository::class);
+//        $openPlatform = app()->make(OpenPlatformRepository::class);
+//        $appid = 'wx3ed327fd1af68e86';
+//        $scheme = $openPlatform->getScheme($appid,$params);
+
         $appid = 'wx3ed327fd1af68e86';
-        $scheme = $openPlatform->getScheme($appid,$params);
+        $appSecret = 'd01532066e44b271138085fd49580445';
+        //获取token
+        $token = $this->getAppletsToken($appid,$appSecret);
+        if (!$token){
+            throw new WechatException('获取token失败：');
+        }
+
+        $scheme = $this->getScheme($token,$params);
+        if ($scheme == ""){
+            throw new WechatException('获取scheme失败：');
+        }
 
        return [
             'goType'=>$deliveryMethod['jumpMethod'],
@@ -166,5 +181,39 @@ class MerchantAdRepository extends BaseRepository
             'openLink'=>$scheme,
         ];
 
+    }
+
+
+    /**获取小程序token
+     * @param $appId
+     * @param $appSecret
+     * @return mixed|null
+     */
+    public static function getAppletsToken($appId,$appSecret){
+        $client = new Client();
+        $res = $client->get("https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=".$appId."&secret=".$appSecret);
+        $data = json_decode($res->getBody()->getContents(), true) ?? null;
+
+        if (empty($data)) return null;
+
+        if (isset($data["access_token"])){
+            return $data["access_token"];
+        }
+
+        return  null;
+    }
+
+    public static function getScheme($token,$params){
+        $client = new Client();
+        $res = $client->post("https://api.weixin.qq.com/wxa/generatescheme?access_token=".$token,['json' => $params]);
+        $data = json_decode($res->getBody()->getContents(), true) ?? null;
+
+        if (empty($data)) return "";
+
+        if (isset($data["openlink"])){
+            return $data["openlink"];
+        }
+
+        return  "";
     }
 }
