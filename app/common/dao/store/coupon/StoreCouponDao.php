@@ -85,7 +85,6 @@ class StoreCouponDao extends BaseDao
 
     public function newSearch(?int $merId, array $where): BaseQuery
     {
-        dd($where);
         $query = isset($where['is_reader']) && $where['is_trader'] !== ''
             ? CouponStocks::hasWhere('merchant',function($query)use($where){
                     $query->where('is_trader',$where['is_trader']);
