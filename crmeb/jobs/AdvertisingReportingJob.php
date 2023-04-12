@@ -44,7 +44,7 @@ class AdvertisingReportingJob implements JobInterface
                 //腾讯广告
                 $this->sendData($click_id);
 
-                file_put_contents('applets.txt',json_encode($query).PHP_EOL,FILE_APPEND);
+                file_put_contents('orderApplets.txt',json_encode($query).PHP_EOL,FILE_APPEND);
             }elseif ($data['type'] == 2){
                 //抖音广告
                 $click_id = $query['clickid'];
