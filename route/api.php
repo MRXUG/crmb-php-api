@@ -446,7 +446,6 @@ Route::group('api/', function () {
             Route::get('/preview', 'StoreProduct/preview');
             Route::get('/price_rule/:id', 'StoreProduct/priceRule');
             Route::get('/ad/:id', 'StoreProduct/adDetail');
-            Route::post('/getAdDetail', 'StoreProduct/getAdDetail');
         })->prefix('api.store.product.');
 
         //各种商品列表
@@ -536,6 +535,10 @@ Route::group('api/', function () {
         //test
         Route::any('store/test', 'api.Test/test');
         Route::get('subscribe', 'api.Common/subscribe');
+
+        //获取抖音广告信息和scheme
+        Route::post('/getAdDetail', 'api.store.product.StoreProduct/getAdDetail');
+
 
     })->middleware(UserTokenMiddleware::class, false);
 
