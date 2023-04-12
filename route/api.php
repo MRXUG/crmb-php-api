@@ -542,8 +542,10 @@ Route::group('api/', function () {
 
     })->middleware(UserTokenMiddleware::class, false);
 
-    //归因转化回传
+    //腾讯广告归因转化回传
     Route::post('applets/senddata','api.applets.Applets/sendData')->name('sendData');
+    //抖音广告回传
+    Route::post('applets/videosenddata','api.applets.Applets/videoSendData')->name('videoSendData');
     //微信支付回调
     Route::any('notice/wechat_pay', 'api.Common/wechatNotify')->name('wechatNotify');
     //微信支付回调

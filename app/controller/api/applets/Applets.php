@@ -85,11 +85,12 @@ class Applets extends BaseController{
                 'event_type' => 'page_view',
                 'context' => [
                     'ad' => [
-                        'callback' => 'B.rqB7I6enkYhGUseoWmFQtyWfsFfsrOmxUlkU5Vqlidhn2xqauN5xagKn5biLl1Ta3dK2b57eFwNuOalJ6QeabATTiIVbzIYemy7io6uR94lBIVM2Ok3h2hQtbdQ1zw2VfBTkOZCiUIz55r7mBexblPT&event_type=0&model=M2102K1AC'
-                    ]
+                        'callback' => $param['clickid']
+                    ],
+                'timestamp' => $this->getMillisecond()
                 ]
             ];
-            
+ 
             //提交
             $result = $this->httpCURL($url,json_encode($data));
 
@@ -127,5 +128,11 @@ class Applets extends BaseController{
         $statusCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
         curl_close($curl);
         return $code;
+    }
+    
+    //获取毫秒时间戳
+    function getMillisecond() {
+      list($s1, $s2) = explode(' ', microtime());
+      return (float)sprintf('%.0f', (floatval($s1) + floatval($s2)) * 1000);
     }
 }
