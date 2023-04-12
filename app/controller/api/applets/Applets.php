@@ -82,14 +82,18 @@ class Applets extends BaseController{
         if($this->request->has('clickid')){
             $url = 'https://analytics.oceanengine.com/api/v2/conversion';
             $data = [
-                'event_type' => 'active',
+                'event_type' => 'page_view',
                 'context' => [
                     'ad' => [
-                        
+                        'callback' => 'B.rqB7I6enkYhGUseoWmFQtyWfsFfsrOmxUlkU5Vqlidhn2xqauN5xagKn5biLl1Ta3dK2b57eFwNuOalJ6QeabATTiIVbzIYemy7io6uR94lBIVM2Ok3h2hQtbdQ1zw2VfBTkOZCiUIz55r7mBexblPT&event_type=0&model=M2102K1AC'
                     ]
                 ]
+            ];
+            
+            //提交
+            $result = $this->httpCURL($url,json_encode($data));
 
-            ]
+            return app('json')->success(json_decode($result,true));
         }
 
     }
