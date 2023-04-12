@@ -47,6 +47,7 @@ use app\common\repositories\user\UserBillRepository;
 use app\common\repositories\user\UserBrokerageRepository;
 use app\common\repositories\user\UserMerchantRepository;
 use app\common\repositories\user\UserRepository;
+use crmeb\jobs\AdvertisingReportingJob;
 use crmeb\jobs\HandleBindingJob;
 use crmeb\jobs\HandleGoodsPaymentJob;
 use crmeb\jobs\HandleMerchantProfit;
@@ -402,6 +403,9 @@ class StoreOrderRepository extends BaseRepository
                 ], $order->mer_id);
                 //自动打印订单
                 $this->autoPrinter($order->order_id, $order->mer_id);
+
+                //处理广告回传
+                Queue::push(AdvertisingReportingJob::class,['type'=>$order->ad_channel_id,'query'=>$order->ad_query,'orderId'=>$order->order_id,'ad_id'=>$order->ad_id]);
             }
 
 
