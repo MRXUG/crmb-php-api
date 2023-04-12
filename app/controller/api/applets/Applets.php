@@ -22,7 +22,7 @@ class Applets extends BaseController{
         parent::__construct($app);
     }
     
-    //归因上报
+    //腾讯广告回传
     public function sendData(){
         //监测链接
 // https://dianshang.sasz.cn/pages/goods_details/index?account_id=__ACCOUNT_ID__&adgroup_id=__ADGROUP_ID__&ad_id=__AD_ID__&click_id=__CLICK_ID__&click_time=__CLICK_TIME__&request_id=__REQUEST_ID__&wechat_openid=__WECHAT_OPEN_ID__&c=__CALLBACK__
@@ -69,6 +69,29 @@ class Applets extends BaseController{
 
             return app('json')->success(json_decode($result,true));
         }
+    }
+
+    /**
+     * 抖音广告回传
+     */
+    public function videoSendData(){
+        //URL https://dianshang.sasz.cn/pages/h-advert/index?adid=__AID__&creativeid=__CID__&creativetype=__CTYPE__&clickid=__CLICKID__
+        $param = $this->request->param();
+        file_put_contents('applets.txt',json_encode($param).PHP_EOL,FILE_APPEND);
+
+        if($this->request->has('clickid')){
+            $url = 'https://analytics.oceanengine.com/api/v2/conversion';
+            $data = [
+                'event_type' => 'active',
+                'context' => [
+                    'ad' => [
+                        
+                    ]
+                ]
+
+            ]
+        }
+
     }
     
     
