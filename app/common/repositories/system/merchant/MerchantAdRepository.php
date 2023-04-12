@@ -4,6 +4,7 @@ namespace app\common\repositories\system\merchant;
 use app\common\repositories\wechat\OpenPlatformRepository;
 use crmeb\exceptions\WechatException;
 use GuzzleHttp\Client;
+use think\exception\ValidateException;
 use think\facade\Cache;
 use think\facade\Db;
 use think\db\exception\DbException;
@@ -161,27 +162,26 @@ class MerchantAdRepository extends BaseRepository
                 'expire_interval'=>1,
             ];
 
-
-
             //获取scheme码
-//        $openPlatform = app()->make(OpenPlatformRepository::class);
-//        $appid = 'wx3ed327fd1af68e86';
-//        $scheme = $openPlatform->getScheme($appid,$params);
+        $openPlatform = app()->make(OpenPlatformRepository::class);
+        $appid = systemConfig('routine_appId');
+        if (!$appid){throw new ValidateException('请先配置小程序appId');}
+        $scheme = $openPlatform->getScheme($appid,$params);
 
 
 
-            $appid = 'wx3ed327fd1af68e86';
-            $appSecret = 'd01532066e44b271138085fd49580445';
+//            $appid = 'wx3ed327fd1af68e86';
+//            $appSecret = 'd01532066e44b271138085fd49580445';
             //获取token
-            $token = $this->getAppletsToken($appid,$appSecret);
-            if (!$token){
-                throw new WechatException('获取token失败：');
-            }
+//            $token = $this->getAppletsToken($appid,$appSecret);
+//            if (!$token){
+//                throw new WechatException('获取token失败：');
+//            }
 
-            $scheme = $this->getScheme($token,$params);
-            if ($scheme == ""){
-                throw new WechatException('获取scheme失败：');
-            }
+//            $scheme = $this->getScheme($token,$params);
+//            if ($scheme == ""){
+//                throw new WechatException('获取scheme失败：');
+//            }
 
             //保存到缓存
             Cache::set($key,$scheme,60*60*24*28);
