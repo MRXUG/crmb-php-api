@@ -1007,7 +1007,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
      * @param  array  $marketingDiscount
      * @return mixed
      */
-    public function v2CreateOrder(int $pay_type, $user, array $cartId, array $extend, array $mark, array $receipt_data, array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null, array $post, array $marketingDiscount = [],$clipCoupons = 1)
+    public function v2CreateOrder(int $pay_type, $user, array $cartId, array $extend, array $mark, array $receipt_data, array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null, array $post, array $marketingDiscount = [],$clipCoupons = 1,$ad_type = 0,$ad_query = '')
     {
         $uid = $user->uid;
         $orderInfo = $this->v2CartIdByOrderInfo($user, $cartId, $takes, $useCoupon, $useIntegral, $addressId, true, $marketingDiscount,$clipCoupons);
@@ -1177,6 +1177,12 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 $rate = bcmul($merchantCart['merchantCategory']['commission_rate'], 100, 4);
             }
             $user_address = isset($address) ? ($address['province'] . $address['city'] . $address['district'] . $address['street'] . $address['detail']) : '';
+
+            $ad_channel_id = 0;
+            $isAd = $marketingData['merchant_source'] == StoreOrder::MERCHANT_SOURCE_AD ? 1 : 0;
+            if ($isAd == 1){
+                $ad_channel_id = $ad_type;
+            }
             //整理订单数据
             $_order = [
                 'appid' => request()->appid(),
@@ -1214,9 +1220,10 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 'platform_coupon_price' => $merchantCart['order']['platform_coupon_price'],
                 'pay_type' => $pay_type,
                 'ad_id' => $marketingDiscount['ad_id'] ?? '',
-                'ad_channel_id' => $marketingData['merchant_source'] == StoreOrder::MERCHANT_SOURCE_AD ? 1 : 0, // 广告渠道，当前默认腾讯广告1.
+                'ad_channel_id' => $ad_channel_id, // 广告渠道，腾讯广告1. 抖音广告2
                 'platform_source'=> $marketingData['platform_source'],
                 'merchant_source'=> $marketingData['merchant_source'],
+                'ad_query'=> $ad_query,
                 'system_commission' => $this->getSysCommissionConfig(),
                 'coupon_code' => $orderMerchantCoupon['coupon_code'] ?? '', // 商家券编码
                 'stock_id' => $orderMerchantCoupon['stock_id'] ?? '', // 商家券批次
