@@ -99,8 +99,10 @@ class StoreOrder extends BaseModel
      * 广告渠道：1-腾讯广告
      */
     const TENCENT_AD = 1;
+    const TRILL_AD = 2;
     const AD_CHANNEL = [
-        self::TENCENT_AD => '腾讯广告'
+        self::TENCENT_AD => '腾讯广告',
+        self::TRILL_AD => '抖音广告'
     ];
     public static function tablePk(): ?string
     {
