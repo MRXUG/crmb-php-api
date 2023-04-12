@@ -148,7 +148,7 @@ class StoreOrder extends BaseController
         // 营销页优惠
         $marketingDiscount = (array)$this->request->param('marketing_discount', []);
         $ad_type = (int)$this->request->param('ad_type',0);
-        $ad_query = (int)$this->request->param('ad_query','');
+        $ad_query = $this->request->param('ad_query','');
         if ($clipCoupons == 2) {
             $couponIds = [];
         }
