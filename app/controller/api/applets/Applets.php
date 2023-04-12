@@ -82,7 +82,7 @@ class Applets extends BaseController{
         if($this->request->has('clickid')){
             $url = 'https://analytics.oceanengine.com/api/v2/conversion';
             $data = [
-                'event_type' => 'page_view',
+                'event_type' => 'successful_pay',
                 'context' => [
                     'ad' => [
                         'callback' => $param['clickid']
