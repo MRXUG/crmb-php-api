@@ -110,7 +110,7 @@ class ProductDao extends BaseDao
     {
         $keyArray = $whereArr = [];
         unset($where['type']);
-        $out = ['soft', 'us_status', 'mer_labels', 'sys_labels', 'order', 'hot_type'];
+        $out = ['soft', 'us_status', 'mer_labels', 'sys_labels', 'order', 'hot_type','pid'];
         foreach ($where as $key => $item) {
             if ($item !== '' && !in_array($key, $out)) {
                 $keyArray[] = $key;
