@@ -123,7 +123,7 @@ class ProductDao extends BaseDao
                 $query->where('is_trader', $where['is_trader']);
             });
         }
-//        $query->withSearch($keyArray, $whereArr)
+        $query->withSearch($keyArray, $whereArr);
         $query->Join('StoreSpu U', 'Product.product_id = U.product_id')
             ->leftJoin('eb_merchant M', 'Product.mer_id = M.mer_id')
             ->leftJoin('eb_merchant_category MC', 'M.category_id = MC.merchant_category_id')
