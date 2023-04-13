@@ -13,6 +13,7 @@
 namespace app\controller\api;
 
 
+use app\common\dao\coupon\CouponStocksDao;
 use app\common\model\store\RefundTask;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
@@ -54,7 +55,7 @@ class Auth extends BaseController
 {
     public function test()
     {
-        var_dump(public_path());
+
     }
 
     /**

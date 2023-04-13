@@ -179,6 +179,9 @@ Route::group(function () {
         Route::get('lst', '/lst')->name('systemStoreProductLst')->option([
             '_alias' => '列表',
         ]);
+        Route::get('getMerCategory', '/getMerCategory')->name('systemStoreProductMerCategory')->option([
+            '_alias' => '商户分类列表'
+        ]);
         Route::get('list', '/lst')->option([
             '_alias' => '',
             '_auth'  => false,
