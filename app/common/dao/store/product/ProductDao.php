@@ -123,8 +123,8 @@ class ProductDao extends BaseDao
                 $query->where('is_trader', $where['is_trader']);
             });
         }
-        $query->withSearch($keyArray, $whereArr)
-            ->Join('StoreSpu U', 'Product.product_id = U.product_id')->where('U.product_type', $where['product_type'] ?? 0)
+//        $query->withSearch($keyArray, $whereArr)
+            $query->Join('StoreSpu U', 'Product.product_id = U.product_id')->where('U.product_type', $where['product_type'] ?? 0)
             ->when(($merId !== null), function ($query) use ($merId) {
                 $query->where('Product.mer_id', $merId);
             })
@@ -141,7 +141,7 @@ class ProductDao extends BaseDao
             ->when(isset($where['pid']) && $where['pid'] !== '', function ($query) use ($where) {
                 $storeCategoryRepository = app()->make(StoreCategoryRepository::class);
                 $ids = array_merge($storeCategoryRepository->findChildrenId((int)$where['pid']), [(int)$where['pid']]);
-                if (count($ids)) $query->whereIn('cate_id', $ids);
+                if (count($ids)) $query->whereIn('Product.cate_id', $ids);
             })
             ->when(isset($where['us_status']) && $where['us_status'] !== '', function ($query) use ($where) {
                 if ($where['us_status'] == 0) {

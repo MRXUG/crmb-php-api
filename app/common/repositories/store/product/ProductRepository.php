@@ -655,9 +655,9 @@ class ProductRepository extends BaseRepository
 
         $data['delivery_way']  = empty($data['delivery_way']) ? [2] : explode(',',$data['delivery_way']);
         $data['extend']  = empty($data['extend']) ? [] : json_decode($data['extend']);
-        $make_order = app()->make(StoreCouponRepository::class);
-        $where = [['coupon_id', 'in', $data['give_coupon_ids']]];
-        $data['coupon'] = $make_order->selectWhere($where, 'coupon_id,title')->toArray();
+        $make_order = app()->make(CouponStocksRepository::class);
+        $where = [['id', 'in', $data['give_coupon_ids']]];
+        $data['coupon'] = $make_order->selectWhere($where, 'id, stock_name as title ')->toArray();
         $spu_make = app()->make(SpuRepository::class);
 
         $append = [];
