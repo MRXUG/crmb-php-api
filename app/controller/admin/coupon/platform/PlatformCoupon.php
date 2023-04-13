@@ -29,6 +29,19 @@ class PlatformCoupon extends BaseController
     }
 
     /**
+     * 选卷
+     *
+     * @return mixed
+     */
+    public function selectCoupon(Request $request)
+    {
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 10);
+
+        return app('json')->success($this->repository->selectCoupon($page, $limit));
+    }
+
+    /**
      * 创建
      *
      * @param Request $request
@@ -36,11 +49,19 @@ class PlatformCoupon extends BaseController
      */
     public function create(Request $request)
     {
-        $param = $request->post();
-
-        dd($param);
-
-        $this->repository->save();
+        $this->repository->save($request->post());
+        return app('json')->success();
     }
 
+    /**
+     * 修改
+     *
+     * @param int $id
+     * @param Request $request
+     * @return mixed
+     */
+    public function update(int $id, Request $request) {
+        $this->repository->save($request->post(), $id);
+        return app('json')->success();
+    }
 }

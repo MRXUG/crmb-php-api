@@ -11,6 +11,8 @@ R::group(function () {
     R::group('platformCoupon', function () {
 
         R::post('create', 'PlatformCoupon/create'); # 创建平台优惠券
+        R::post('update/:id', 'PlatformCoupon/update'); # 创建平台优惠券
+        R::get('selectCoupon', 'PlatformCoupon/selectCoupon'); # 选择优惠券
 
     })->prefix('admin.coupon.platform.')->option([
         '_auth' => true,
