@@ -33,8 +33,8 @@ class PlatformCouponRepository extends BaseRepository
      *
      * @param int $page
      * @param int $limit
-     * @throws null
      * @return array
+     * @throws null
      */
     public function selectCoupon(int $page = 1, int $limit = 10): array
     {
@@ -53,17 +53,17 @@ class PlatformCouponRepository extends BaseRepository
             'max(`end_at`)  as `max_end_time`' # 最晚发券结束时间
         ];
 
-        $model =  $couponDao->getModelObj()->where([
+        $model = $couponDao->getModelObj()->where([
             ['is_del', '=', 0],
             ['type', '=', 1],
-            ['status', 'in', [1,2]],
+            ['status', 'in', [1, 2]],
             ['end_at', '>', $nowDate],
             ['start_at', '<', $nowDate]
         ])->group('discount_num');
 
         $list = (clone $model)->field($field)->page($page, $limit)->select()->toArray();
 
-        $productModel =  fn() => Product::getInstance();
+        $productModel = fn() => Product::getInstance();
 
         # 获取用于查询商品数据的 productId
         foreach ($list as &$item) {
@@ -77,8 +77,8 @@ class PlatformCouponRepository extends BaseRepository
                 Db::raw('sum(`sales`) as goods_sales'),
             ])->whereIn('product_id', $productIdArr)->find()->toArray();
 
-            $item['goods_count'] = (int) $goodsInfo['goods_count'];
-            $item['goods_sales'] = (int) $goodsInfo['goods_sales'];
+            $item['goods_count'] = (int)$goodsInfo['goods_count'];
+            $item['goods_sales'] = (int)$goodsInfo['goods_sales'];
 
             unset($item['scope_arr'], $item['coupon_id_arr'], $item['mer_id_arr']);
         }
@@ -97,7 +97,7 @@ class PlatformCouponRepository extends BaseRepository
      * @param array $mer_id_arr
      * @return array
      */
-    private function getProductId (array $coupon_id_arr, array $scope_arr, array $mer_id_arr): array
+    private function getProductId(array $coupon_id_arr, array $scope_arr, array $mer_id_arr): array
     {
         $merArr = [];
         $couponArr = [];
@@ -126,7 +126,8 @@ class PlatformCouponRepository extends BaseRepository
         # 根据优惠券id获取选择的商品id
         $couponProductId = empty($couponArr) ? [] : $productModel()->whereIn('product_id', Db::raw(<<<SQL
             select product_id from eb_stock_goods where coupon_stocks_id in ({$couponStr})
-        SQL))->column('product_id');
+        SQL
+        ))->column('product_id');
 
         return array_merge(array_unique(array_merge($couponProductId, $merProductId)), []);
     }
@@ -139,9 +140,9 @@ class PlatformCouponRepository extends BaseRepository
      * @param int $limit
      * @return void
      */
-    public function platformCouponMerDetails (int $amount, int $page = 1, int $limit = 10): array
+    public function platformCouponMerDetails(int $amount, int $page = 1, int $limit = 10): array
     {
-        $couponModel = fn () => CouponStocks::getInstance()->alias('a')
+        $couponModel = fn() => CouponStocks::getInstance()->alias('a')
             ->where([
                 ['a.discount_num', '=', $amount]
             ])
@@ -161,7 +162,7 @@ class PlatformCouponRepository extends BaseRepository
             ->page($page, $limit)
             ->select()->toArray();
 
-        $productModel =  fn() => Product::getInstance();
+        $productModel = fn() => Product::getInstance();
 
         # 获取用于查询商品数据的 productId
         foreach ($coupon as &$item) {
@@ -175,8 +176,8 @@ class PlatformCouponRepository extends BaseRepository
                 Db::raw('sum(`sales`) as goods_sales'),
             ])->whereIn('product_id', $productIdArr)->find()->toArray();
 
-            $item['goods_count'] = (int) $goodsInfo['goods_count'];
-            $item['goods_sales'] = (int) $goodsInfo['goods_sales'];
+            $item['goods_count'] = (int)$goodsInfo['goods_count'];
+            $item['goods_sales'] = (int)$goodsInfo['goods_sales'];
 
             unset($item['scope_arr'], $item['coupon_id_arr'], $item['mer_id_arr']);
         }
@@ -206,15 +207,15 @@ class PlatformCouponRepository extends BaseRepository
      *     crowd: int
      * } $param
      * @param int|null $platformCouponId
-     * @throws null
      * @return void
+     * @throws null
      */
     public function save(array $param, ?int $platformCouponId = null)
     {
         # 不为空时为修改操作
         $isUpdate = !empty($platformCouponId);
         # 判断需要设置范围的时候是否有范围数据
-        if (in_array($param['use_type'], [2,3,4]) && empty($param['scope_id_arr'])) {
+        if (in_array($param['use_type'], [2, 3, 4]) && empty($param['scope_id_arr'])) {
             throw new ValidateException('请选择范围');
         }
         # 检测是否勾选发券位置
@@ -237,7 +238,7 @@ class PlatformCouponRepository extends BaseRepository
                 $this->useScopeDao->getModelObj()->where('platform_coupon_id', $platformCouponId)->delete();
             }
             if (($isUpdate && !empty($param['scope_id_arr'])) || !$isUpdate) {
-                $this->useScopeDao->getModelObj()->insertAll((function () use ($param, $platformCouponModel, $nowDate):array {
+                $this->useScopeDao->getModelObj()->insertAll((function () use ($param, $platformCouponModel, $nowDate): array {
                     $arr = [];
                     foreach ($param['scope_id_arr'] as $item) $arr[] = [
                         'scope_id' => $item,

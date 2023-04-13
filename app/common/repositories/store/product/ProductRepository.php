@@ -929,6 +929,8 @@ class ProductRepository extends BaseRepository
             'merchant',
         ]);
         $count = $query->count();
+
+        $this->admin_filed .= ',MC.category_name';
         $data = $query->page($page, $limit)->setOption('field', [])->field($this->admin_filed)->select();
         $data->append([ 'us_status']);
         $list = hasMany(
