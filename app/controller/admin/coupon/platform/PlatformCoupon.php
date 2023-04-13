@@ -42,6 +42,21 @@ class PlatformCoupon extends BaseController
     }
 
     /**
+     * 商户明细
+     *
+     * @param int $amount
+     * @param Request $request
+     * @return void
+     */
+    public function merDetails(int $amount, Request $request)
+    {
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 10);
+
+        return app('json')->success($this->repository->platformCouponMerDetails($amount, $page, $limit));
+    }
+
+    /**
      * 创建
      *
      * @param Request $request

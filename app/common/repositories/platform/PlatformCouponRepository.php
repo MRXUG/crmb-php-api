@@ -6,6 +6,7 @@ use app\common\dao\coupon\CouponStocksDao;
 use app\common\dao\platform\PlatformCouponDao;
 use app\common\dao\platform\PlatformCouponPositionDao;
 use app\common\dao\platform\PlatformCouponUseScopeDao;
+use app\common\model\coupon\CouponStocks;
 use app\common\model\platform\PlatformCoupon;
 use app\common\model\store\product\Product;
 use app\common\repositories\BaseRepository;
@@ -76,7 +77,8 @@ class PlatformCouponRepository extends BaseRepository
                 Db::raw('sum(`sales`) as goods_sales'),
             ])->whereIn('product_id', $productIdArr)->find()->toArray();
 
-            $item = array_merge($item, $goodsInfo);
+            $item['goods_count'] = (int) $goodsInfo['goods_count'];
+            $item['goods_sales'] = (int) $goodsInfo['goods_sales'];
 
             unset($item['scope_arr'], $item['coupon_id_arr'], $item['mer_id_arr']);
         }
@@ -87,7 +89,14 @@ class PlatformCouponRepository extends BaseRepository
         ];
     }
 
-
+    /**
+     * 获取商品id组
+     *
+     * @param array $coupon_id_arr
+     * @param array $scope_arr
+     * @param array $mer_id_arr
+     * @return array
+     */
     private function getProductId (array $coupon_id_arr, array $scope_arr, array $mer_id_arr): array
     {
         $merArr = [];
@@ -120,6 +129,62 @@ class PlatformCouponRepository extends BaseRepository
         SQL))->column('product_id');
 
         return array_merge(array_unique(array_merge($couponProductId, $merProductId)), []);
+    }
+
+    /**
+     * 平台优惠券商户明细
+     *
+     * @param int $amount
+     * @param int $page
+     * @param int $limit
+     * @return void
+     */
+    public function platformCouponMerDetails (int $amount, int $page = 1, int $limit = 10): array
+    {
+        $couponModel = fn () => CouponStocks::getInstance()->alias('a')
+            ->where([
+                ['a.discount_num', '=', $amount]
+            ])
+            ->group('a.mer_id');
+
+        $coupon = $couponModel()->field([
+            'a.mer_id', 'b.mer_name', 'b.real_name', 'c.category_name',
+            'min(a.start_at) as `min_start_time`', # 最早发券开始时间
+            'max(a.end_at)  as `max_end_time`', # 最晚发券结束时间
+            'max(`a`.`transaction_minimum`) as `threshold`', # 最大门槛
+            'group_concat(`a`.`id` order by `id` desc) as `coupon_id_arr`', # 优惠券id组
+            'group_concat(`a`.`scope` order by `id` desc) as `scope_arr`', # 优惠券id组
+            'group_concat(`a`.`mer_id` order by `id` desc) as `mer_id_arr`', # 优惠券id组
+        ])
+            ->leftJoin('eb_merchant b', 'a.mer_id = b.mer_id')
+            ->leftJoin('eb_merchant_category c', 'b.category_id = c.merchant_category_id')
+            ->page($page, $limit)
+            ->select()->toArray();
+
+        $productModel =  fn() => Product::getInstance();
+
+        # 获取用于查询商品数据的 productId
+        foreach ($coupon as &$item) {
+            $coupon_id_arr = explode(',', $item['coupon_id_arr']);
+            $scope_arr = explode(',', $item['scope_arr']);
+            $mer_id_arr = explode(',', $item['mer_id_arr']);
+            $productIdArr = $this->getProductId($coupon_id_arr, $scope_arr, $mer_id_arr);
+
+            $goodsInfo = $productModel()->field([
+                Db::raw('count(`product_id`) as goods_count'),
+                Db::raw('sum(`sales`) as goods_sales'),
+            ])->whereIn('product_id', $productIdArr)->find()->toArray();
+
+            $item['goods_count'] = (int) $goodsInfo['goods_count'];
+            $item['goods_sales'] = (int) $goodsInfo['goods_sales'];
+
+            unset($item['scope_arr'], $item['coupon_id_arr'], $item['mer_id_arr']);
+        }
+
+        return [
+            'list' => $coupon,
+            'count' => $couponModel()->count('a.id')
+        ];
     }
 
     /**
