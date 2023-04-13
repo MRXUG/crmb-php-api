@@ -73,19 +73,19 @@ class ProductDao extends BaseDao
     public function merFieldExists(?int $merId, $field, $value, $except = null)
     {
         return model::withTrashed()->when($except, function ($query, $except) use ($field) {
-            $query->where($field, '<>', $except);
-        })->when($merId, function ($query, $merId) {
-            $query->where('mer_id', $merId);
-        })->where($field, $value)->count() > 0;
+                $query->where($field, '<>', $except);
+            })->when($merId, function ($query, $merId) {
+                $query->where('mer_id', $merId);
+            })->where($field, $value)->count() > 0;
     }
 
     public function apiFieldExists(int $merId, $field, $value, $except = null)
     {
         return ($this->getModel())::getDB()->when($except, function ($query, $except) use ($field) {
-            $query->where($field, '<>', $except);
-        })->when($merId, function ($query, $merId) {
-            $query->where('mer_id', $merId);
-        })->where(['status' => 1])->where($field, $value)->count() > 0;
+                $query->where($field, '<>', $except);
+            })->when($merId, function ($query, $merId) {
+                $query->where('mer_id', $merId);
+            })->where(['status' => 1])->where($field, $value)->count() > 0;
     }
 
     /**
@@ -110,9 +110,9 @@ class ProductDao extends BaseDao
     {
         $keyArray = $whereArr = [];
         unset($where['type']);
-        $out = ['soft','us_status','mer_labels','sys_labels','order','hot_type'];
+        $out = ['soft', 'us_status', 'mer_labels', 'sys_labels', 'order', 'hot_type'];
         foreach ($where as $key => $item) {
-            if ($item !== '' && !in_array($key,$out)) {
+            if ($item !== '' && !in_array($key, $out)) {
                 $keyArray[] = $key;
                 $whereArr[$key] = $item;
             }
@@ -124,7 +124,13 @@ class ProductDao extends BaseDao
             });
         }
 //        $query->withSearch($keyArray, $whereArr)
-            $query->Join('StoreSpu U', 'Product.product_id = U.product_id')->where('U.product_type', $where['product_type'] ?? 0)
+        $query->Join('StoreSpu U', 'Product.product_id = U.product_id')
+            ->leftJoin('eb_merchant M', 'Product.mer_id = M.mer_id')
+            ->leftJoin('eb_merchant_category MC', 'M.category_id = MC.merchant_category_id')
+            ->when(isset($where['merchant_category_id']) && $where['merchant_category_id'] != '', fn (BaseQuery $query) =>
+                $query->where("M.category_id", '=', $where['merchant_category_id'])
+            )
+            ->where('U.product_type', $where['product_type'] ?? 0)
             ->when(($merId !== null), function ($query) use ($merId) {
                 $query->where('Product.mer_id', $merId);
             })
@@ -145,14 +151,14 @@ class ProductDao extends BaseDao
             })
             ->when(isset($where['us_status']) && $where['us_status'] !== '', function ($query) use ($where) {
                 if ($where['us_status'] == 0) {
-                    $query->where('Product.is_show', 0)->where('Product.is_used', 1)->where('Product.status',1);
+                    $query->where('Product.is_show', 0)->where('Product.is_used', 1)->where('Product.status', 1);
                 }
                 if ($where['us_status'] == 1) {
-                    $query->where('Product.is_show', 1)->where('Product.is_used', 1)->where('Product.status',1);
+                    $query->where('Product.is_show', 1)->where('Product.is_used', 1)->where('Product.status', 1);
                 }
                 if ($where['us_status'] == -1) {
-                    $query->where(function($query){
-                        $query->where('Product.is_used',0)->whereOr('Product.status','<>',1);
+                    $query->where(function ($query) {
+                        $query->where('Product.is_used', 0)->whereOr('Product.status', '<>', 1);
                     });
                 }
             })
@@ -163,7 +169,7 @@ class ProductDao extends BaseDao
                 $query->whereLike('U.sys_labels', "%,{$where['sys_labels']},%");
             })
             ->when(isset($where['order']), function ($query) use ($where, $merId) {
-                if(in_array($where['order'], ['is_new', 'price_asc', 'price_desc', 'rate', 'sales']) ){
+                if (in_array($where['order'], ['is_new', 'price_asc', 'price_desc', 'rate', 'sales'])) {
                     if ($where['order'] == 'price_asc') {
                         $where['order'] = 'price ASC';
                     } else if ($where['order'] == 'price_desc') {
@@ -172,13 +178,13 @@ class ProductDao extends BaseDao
                         $where['order'] = $where['order'] . ' DESC';
                     }
                     $query->order($where['order'] . ',rank DESC ,create_time DESC ');
-                } else if($where['order'] !== ''){
-                    $query->order('U.'.$where['order'].' DESC,U.create_time DESC');
+                } else if ($where['order'] !== '') {
+                    $query->order('U.' . $where['order'] . ' DESC,U.create_time DESC');
                 } else {
                     $query->order('U.create_time DESC');
                 }
             })
-            ->when(isset($where['star']),function($query)use($where){
+            ->when(isset($where['star']), function ($query) use ($where) {
                 $query->when($where['star'] !== '', function ($query) use ($where) {
                     $query->where('U.star', $where['star']);
                 });
@@ -204,17 +210,17 @@ class ProductDao extends BaseDao
                 ->where('end_time', '<=', $where['end_time']);
         });
         $query->where([
-            'Product.is_show'       => 1,
-            'Product.status'        => 1,
-            'Product.is_used'       => 1,
-            'Product.mer_status'    => 1,
-            'Product.product_type'  => 1,
-            'Product.is_gift_bag'   => 0,
+            'Product.is_show' => 1,
+            'Product.status' => 1,
+            'Product.is_used' => 1,
+            'Product.mer_status' => 1,
+            'Product.product_type' => 1,
+            'Product.is_gift_bag' => 0,
         ])
-            ->when(isset($where['mer_id']) && $where['mer_id'] !== '',function($query)use($where){
-                $query->where('Product.mer_id',$where['mer_id']);
+            ->when(isset($where['mer_id']) && $where['mer_id'] !== '', function ($query) use ($where) {
+                $query->where('Product.mer_id', $where['mer_id']);
             })
-            ->when(isset($where['star']),function($query)use($where){
+            ->when(isset($where['star']), function ($query) use ($where) {
                 $query->Join('StoreSpu U', 'Product.product_id = U.product_id')->where('U.product_type', 1);
                 $query->when($where['star'] !== '', function ($query) use ($where) {
                     $query->where('U.star', $where['star']);
@@ -234,12 +240,12 @@ class ProductDao extends BaseDao
     public function delete(int $id, $soft = false)
     {
         if ($soft) {
-             (($this->getModel())::onlyTrashed()->find($id))->force()->delete();
+            (($this->getModel())::onlyTrashed()->find($id))->force()->delete();
         } else {
-             $this->getModel()::where($this->getPk(), $id)->update(['is_del' => 1]);
+            $this->getModel()::where($this->getPk(), $id)->update(['is_del' => 1]);
         }
         app()->make(SpuRepository::class)->getSearch(['product_id' => $id])->update(['is_del' => 1, 'status' => 0]);
-        event('product.delete',compact('id'));
+        event('product.delete', compact('id'));
     }
 
     /**
@@ -405,12 +411,12 @@ class ProductDao extends BaseDao
     public function productShow()
     {
         return [
-            'is_show'       => 1,
-            'status'        => 1,
-            'is_used'       => 1,
-            'product_type'  => 0,
-            'mer_status'    => 1,
-            'is_gift_bag'   => 0,
+            'is_show' => 1,
+            'status' => 1,
+            'is_used' => 1,
+            'product_type' => 0,
+            'mer_status' => 1,
+            'is_gift_bag' => 0,
         ];
     }
 
@@ -423,12 +429,12 @@ class ProductDao extends BaseDao
     public function bagShow()
     {
         return [
-            'is_show'       => 1,
-            'status'        => 1,
-            'is_used'       => 1,
-            'mer_status'    => 1,
-            'product_type'  => 0,
-            'is_gift_bag'   => 1,
+            'is_show' => 1,
+            'status' => 1,
+            'is_used' => 1,
+            'mer_status' => 1,
+            'product_type' => 0,
+            'is_gift_bag' => 1,
         ];
     }
 
@@ -441,12 +447,12 @@ class ProductDao extends BaseDao
     public function seckillShow()
     {
         return [
-            'is_show'       => 1,
-            'status'        => 1,
-            'is_used'       => 1,
-            'mer_status'    => 1,
-            'product_type'  => 1,
-            'is_gift_bag'   => 0,
+            'is_show' => 1,
+            'status' => 1,
+            'is_used' => 1,
+            'mer_status' => 1,
+            'product_type' => 1,
+            'is_gift_bag' => 0,
         ];
     }
 
@@ -457,7 +463,7 @@ class ProductDao extends BaseDao
                 $query->where('product_type', $exsistType);
             })
             ->where($this->getPk(), $productId)->where('is_del', 0)->value('product_type');
-        return $product_type == 0 ?  true : false;
+        return $product_type == 0 ? true : false;
     }
 
     public function getFailProduct(int $productId)
@@ -467,7 +473,7 @@ class ProductDao extends BaseDao
 
     public function geTrashedtProduct(int $id)
     {
-        return model::withTrashed()->where($this->getPk(),$id);
+        return model::withTrashed()->where($this->getPk(), $id);
     }
 
 
@@ -492,21 +498,21 @@ class ProductDao extends BaseDao
                 break;
             case 1:
                 $query->join('StoreSeckillActive S', 'S.product_id = P.product_id')
-                ->field('P.*,S.status,S.seckill_active_id,S.end_time');
+                    ->field('P.*,S.status,S.seckill_active_id,S.end_time');
                 break;
             case 2:
                 $query->join('StoreProductPresell R', 'R.product_id = P.product_id')
-                ->where('R.is_del',0)
-                ->field('P.*,R.product_presell_id,R.store_name,R.price,R.status,R.is_show,R.product_status,R.action_status');
+                    ->where('R.is_del', 0)
+                    ->field('P.*,R.product_presell_id,R.store_name,R.price,R.status,R.is_show,R.product_status,R.action_status');
                 break;
             case 3:
                 $query->join('StoreProductAssist A', 'A.product_id = P.product_id')
-                    ->where('A.is_del',0)
+                    ->where('A.is_del', 0)
                     ->field('P.*,A.product_assist_id,A.store_name,A.status,A.is_show,A.product_status,A.action_status');
                 break;
             case 4:
                 $query->join('StoreProductGroup G', 'G.product_id = P.product_id')
-                    ->where('G.is_del',0)
+                    ->where('G.is_del', 0)
                     ->field('P.*,G.product_group_id,G.price,G.status,G.is_show,G.product_status,G.action_status');
                 break;
             default:
@@ -656,6 +662,6 @@ class ProductDao extends BaseDao
     {
         $v = $this->getModel()::getDb()->where('product_id', $productId)->value('mer_id');
         if (empty($v)) return null;
-        return (int) $v;
+        return (int)$v;
     }
 }
