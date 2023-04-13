@@ -14,7 +14,6 @@
 namespace app\common\repositories\store\order;
 
 
-use app\common\dao\store\coupon\StoreCouponDao;
 use app\common\dao\store\order\StoreCartDao;
 use app\common\model\store\product\Product;
 use app\common\repositories\BaseRepository;
@@ -68,7 +67,7 @@ class StoreCartRepository extends BaseRepository
             } else {
                 $merchantData = $item['merchant']->append(['openReceipt'])->toArray();
                 unset($item['merchant']);
-                $coupon_make = app()->make(StoreCouponDao::class);
+                $coupon_make = app()->make(StoreCouponRepository::class);
                 if (!isset($arr[$item['mer_id']])) {
                     if ($hasCoupon)
                         $merchantData['hasCoupon'] = $coupon_make->validMerCouponExists($item['mer_id'], $hasCoupon);
