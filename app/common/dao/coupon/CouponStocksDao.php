@@ -8,6 +8,8 @@ namespace app\common\dao\coupon;
 use app\common\dao\BaseDao;
 use app\common\model\applet\WxAppletModel;
 use app\common\model\coupon\CouponStocks;
+use app\common\model\coupon\StockProduct;
+use app\common\model\store\product\Product;
 use think\db\BaseQuery;
 
 class CouponStocksDao extends BaseDao
@@ -126,6 +128,50 @@ class CouponStocksDao extends BaseDao
             ->where('is_del', 0)
             ->page($page, $limit)
             ->select();
+    }
+
+    /**
+     * 根据商品id获取优惠券列表
+     *
+     * @param int $productId
+     * @return array
+     * @throws null
+     */
+    public function getCouponListFromProductId(int $productId): array
+    {
+        $newDate = date("Y-m-d H:i:s");
+        $mer_id = Product::getInstance()->where('product_id', $productId)->value('mer_id');
+        # 以获取优惠券id的方式获取优惠券数据
+        # 先获取匹配的商户优惠券
+        $where = [
+            ['a.scope', '=', 1],
+            ['a.is_del', '=', 0],
+            ['a.end_at', '>', $newDate],
+            ['a.status', 'in', [1, 2]]
+        ];
+
+        $couponIds = CouponStocks::getInstance()->alias('a')
+            ->where(array_merge($where, [['a.mer_id', '=', $mer_id]]))
+            ->column('a.id');
+
+        array_push($couponIds, ...StockProduct::getInstance()
+            ->alias('b')
+            ->leftJoin('eb_coupon_stocks a', 'b.coupon_stocks_id = a.id')
+            ->where($where)
+            ->where('b.product_id', $productId)
+            ->column('b.coupon_stocks_id'));
+
+        $couponIds = array_unique($couponIds);
+
+        return CouponStocks::getInstance()->whereIn('id', $couponIds)
+            ->field([
+                'id',
+                'discount_num',
+                'transaction_minimum',
+                'status'
+            ])
+            ->select()
+            ->toArray();
     }
 
 }

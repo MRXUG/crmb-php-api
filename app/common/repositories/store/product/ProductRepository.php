@@ -13,6 +13,7 @@
 
 namespace app\common\repositories\store\product;
 
+use app\common\dao\coupon\CouponStocksDao;
 use app\common\model\store\product\ProductLabel;
 use app\common\model\user\User;
 use app\common\repositories\community\CommunityRepository;
@@ -942,6 +943,12 @@ class ProductRepository extends BaseRepository
             ['status' => 1],
             'product_label_id,product_label_id id,label_name name'
         );
+        /** @var CouponStocksDao $couponStockDao */
+        $couponStockDao = app()->make(CouponStocksDao::class);
+
+        foreach ($list as &$item) {
+            $item['couponList'] = $couponStockDao->getCouponListFromProductId($item['product_id']);
+        }
 
         return compact('count', 'list');
     }

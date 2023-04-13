@@ -12,6 +12,7 @@
 
 namespace app\controller\admin\store;
 
+use app\common\model\system\merchant\MerchantCategory;
 use app\common\repositories\store\product\SpuRepository;
 use app\common\repositories\system\merchant\MerchantRepository;
 use app\common\repositories\wechat\RoutineQrcodeRepository;
@@ -67,6 +68,13 @@ class StoreProduct extends BaseController
         unset($_where['star']);
         $where = array_merge($where, $_where);
         return app('json')->success($this->repository->getAdminList($merId, $where, $page, $limit));
+    }
+
+    public function getMerCategory ()
+    {
+        return app('json')->success(MerchantCategory::getInstance()->field([
+            'merchant_category_id', 'category_name', 'create_time'
+        ])->order('merchant_category_id', 'desc')->select());
     }
 
     /**
