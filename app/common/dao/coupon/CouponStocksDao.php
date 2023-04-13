@@ -28,41 +28,51 @@ class CouponStocksDao extends BaseDao
      * @author  wanglei <wanglei@vchangyi.com>
      * @date    2023/3/6 14:38
      */
-    public function search(?int $mchId, array $where)
+    public function search($mchId, array $where)
     {
         $query = ($this->getModel()::getDB())
-            ->with(['couponStocksUser']);
+            ->with(['couponStocksUser','merchant']);
+
+        $query->hasWhere("merchant",function ($query)use ($where){
+
+            if (isset($where['mer_name']) && $where['mer_name'] != ''){
+                $query->where('mer_name', 'LIKE', "%{$where['mer_name']}%");
+            }else{
+                $query->where(true);
+            }
+        });
+
 
         $query->when(isset($where['status']) && $where['status'] !== '', function ($query) use ($where) {
-            $query->where('status', (int)$where['status']);
+            $query->where('CouponStocks.status', (int)$where['status']);
         })
             ->when(isset($where['stock_name']) && $where['stock_name'] !== '', function ($query) use ($where) {
-                $query->whereLike('stock_name', "%{$where['stock_name']}%");
+                $query->whereLike('CouponStocks.stock_name', "%{$where['stock_name']}%");
             })
             ->when(isset($where['type']) && $where['type'] !== '', function ($query) use ($where) {
-                $query->whereLike('type', $where['type']);
+                $query->whereLike('CouponStocks.type', $where['type']);
             })
             ->when(isset($where['stock_id']) && $where['stock_id'] !== '', function ($query) use ($where) {
-                $query->whereLike('stock_id', $where['stock_id']);
+                $query->whereLike('CouponStocks.stock_id', $where['stock_id']);
             })
             ->when($mchId > 0, function ($query) use ($mchId) {
-                $query->where('mch_id', $mchId);
+                $query->where('CouponStocks.mch_id', $mchId);
             })
             ->when(isset($where['is_public']) && $where['is_public'] !== '', function ($query) use ($where) {
-                $query->where('is_public', (int)$where['is_public']);
+                $query->where('CouponStocks.is_public', (int)$where['is_public']);
             })
             ->when(isset($where['scope']) && $where['scope'] !== '', function ($query) use ($where) {
-                $query->where('scope', (int)$where['scope']);
+                $query->where('CouponStocks.scope', (int)$where['scope']);
             })
             ->when(isset($where['mer_id']) && $where['mer_id'] > 0, function ($query) use ($where) {
-                $query->where('mer_id', (int)$where['mer_id']);
+                $query->where('CouponStocks.mer_id', (int)$where['mer_id']);
             })
 
             ->when(isset($where['time']) && $where['time'], function ($query) use ($where) {
-                $query->where('start_at', '<', $where['time'])->where('end_at', '>', $where['time']);
+                $query->where('CouponStocks.start_at', '<', $where['time'])->where('end_at', '>', $where['time']);
             })
-            ->where('is_del', WxAppletModel::IS_DEL_NO);
-        return $query->order('id DESC');
+            ->where('CouponStocks.is_del', WxAppletModel::IS_DEL_NO);
+        return $query->order('CouponStocks.id DESC');
     }
 
     public function joinStockProduct($where)
