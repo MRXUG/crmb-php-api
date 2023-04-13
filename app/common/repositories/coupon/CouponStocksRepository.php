@@ -309,4 +309,8 @@ class CouponStocksRepository extends BaseRepository
         $stockProductRep = app()->make(StockProductRepository::class);
         return $stockProductRep->productBestOffer($productId, $merId, $isFirst,$price);
     }
+
+    public function getWhereCount($where = []){
+        return $this->userDao->getWhereCount($where);
+    }
 }

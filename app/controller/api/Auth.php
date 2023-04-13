@@ -14,6 +14,7 @@ namespace app\controller\api;
 
 
 use app\common\model\store\RefundTask;
+use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
 use app\common\repositories\store\order\StoreRefundOrderRepository;
 use app\common\repositories\system\notice\SystemNoticeConfigRepository;
@@ -170,6 +171,14 @@ class Auth extends BaseController
         if (systemConfig('member_status')) {
             $data['member_icon'] = $this->request->userInfo()->member->brokerage_icon ?? '';
         }
+        $couponStock =  app()->make(CouponStocksRepository::class);
+        $data['total_coupon'] = $couponStock->getWhereCount([
+            ['uid','=',$user['uid']],
+            ['is_del','=',0],
+            ['written_off','=',0],
+            ['start_at','<',date('Y-m-d H:i:s')],
+            ['end_at','>',date('Y-m-d H:i:s')],
+            ]);
         if ($data['is_svip'] == 3) {
             $data['svip_endtime'] = date('Y-m-d H:i:s', strtotime("+100 year"));
         }
