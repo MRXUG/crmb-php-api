@@ -120,7 +120,7 @@ class ProductDao extends BaseDao
         $query = isset($where['soft']) ? model::onlyTrashed()->alias('Product') : model::alias('Product');
         if (isset($where['is_trader']) && $where['is_trader'] !== '') {
             $query->hasWhere('merchant', function ($query) use ($where) {
-                $query->where('is_trader', $where['is_trader']);
+                $query->where('Product.is_trader', $where['is_trader']);
             });
         }
         $query->withSearch($keyArray, $whereArr);
