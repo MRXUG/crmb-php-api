@@ -134,7 +134,7 @@ class ProductDao extends BaseDao
                 else if ($where['hot_type'] == 'hot')
                     $query->where('is_hot', 1);
                 else if ($where['hot_type'] == 'best')
-                    $query->where('is_best', 1);
+                    $query->where('Product.is_best', 1);
                 else if ($where['hot_type'] == 'good')
                     $query->where('is_benefit', 1);
             })
