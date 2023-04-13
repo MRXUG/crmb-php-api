@@ -153,6 +153,10 @@ class StoreOrder extends BaseController
             $couponIds = [];
         }
 
+        if ($ad_query){
+            $ad_query = json_encode($ad_query);
+        }
+
         $isPc = $payType === 'pc';
         if ($isPc) {
             $payType = 'balance';
