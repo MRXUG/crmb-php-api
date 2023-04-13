@@ -118,11 +118,11 @@ class ProductDao extends BaseDao
             }
         }
         $query = isset($where['soft']) ? model::onlyTrashed()->alias('Product') : model::alias('Product');
-        if (isset($where['is_trader']) && $where['is_trader'] !== '') {
-            $query->hasWhere('merchant', function ($query) use ($where) {
-                $query->where('merchant.is_trader', $where['is_trader']);
-            });
-        }
+//        if (isset($where['is_trader']) && $where['is_trader'] !== '') {
+//            $query->hasWhere('merchant', function ($query) use ($where) {
+//                $query->where('merchant.is_trader', $where['is_trader']);
+//            });
+//        }
         $query->withSearch($keyArray, $whereArr);
         $query->Join('StoreSpu U', 'Product.product_id = U.product_id')
             ->leftJoin('eb_merchant M', 'Product.mer_id = M.mer_id')
@@ -130,6 +130,9 @@ class ProductDao extends BaseDao
             ->when(isset($where['merchant_category_id']) && $where['merchant_category_id'] != '', fn (BaseQuery $query) =>
                 $query->where("M.category_id", '=', $where['merchant_category_id'])
             )
+            ->when((isset($where['is_trader']) && $where['is_trader'] !== ''), function ($query) use ($where) {
+                $query->where('M.is_trader', $where['is_trader']);
+            })
             ->where('U.product_type', $where['product_type'] ?? 0)
             ->when(($merId !== null), function ($query) use ($merId) {
                 $query->where('Product.mer_id', $merId);
