@@ -99,7 +99,7 @@ class CouponStocksRepository extends BaseRepository
         $copywriter = '';
         // 用券消费门槛
         if ($data['transaction_minimum'] == 0) {
-            $copywriter = '无门槛使用';
+            $copywriter = ($data["discount_num"] + 0.01);
         } else {
             // 券类型
             if ($data['stock_type'] == CouponStocks::STOCK_TYPE_REDUCE) {
