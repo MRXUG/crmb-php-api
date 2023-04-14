@@ -192,12 +192,12 @@ class Menu extends BaseController
      */
     public function menus()
     {
-        $pre = config('admin.' . ($this->merchant ? 'merchant' : 'admin') . '_prefix');
+//        $pre = config('admin.' . ($this->merchant ? 'merchant' : 'admin') . '_prefix');
         $menus = $this->request->adminInfo()->level
             ? $this->repository->ruleByMenuList($this->request->adminRule(), $this->merchant)
             : $this->repository->getValidMenuList($this->merchant);
         foreach ($menus as $k => $menu) {
-            $menu['route'] = $pre . $menu['route'];
+//            $menu['route'] = $pre . $menu['route'];
             $menus[$k] = $menu;
         }
         return app('json')->success(array_values(array_filter(formatCategory($menus, 'menu_id'), function ($v) {
@@ -212,13 +212,13 @@ class Menu extends BaseController
      */
     public function merchantMenus()
     {
-        $pre = config('admin.merchant_prefix');
+//        $pre = config('admin.merchant_prefix');
         $merchant = $this->request->merchant();
         $menus = $this->request->adminInfo()->level
             ? $this->repository->ruleByMenuList($this->request->adminRule(), $this->merchant)
             : ($merchant->type_id ? $this->repository->typesByValidMenuList($merchant->type_id) : $this->repository->getValidMenuList($this->merchant));
         foreach ($menus as $k => $menu) {
-            $menu['route'] = $pre . $menu['route'];
+//            $menu['route'] = $pre . $menu['route'];
             $menus[$k] = $menu;
         }
         return app('json')->success(array_values(array_filter(formatCategory($menus, 'menu_id'), function ($v) {
