@@ -95,12 +95,13 @@ class StoreSpu extends BaseController
     public function recommend()
     {
         [$page, $limit] = $this->getPage();
+        $recommend_type = $this->request->get('sort_type');
         $where = $this->request->params(['common','mer_id']);
         $where['is_gift_bag'] = 0;
         //1:星级
         //2:用户收藏
         //3:创建时间
-        switch (systemConfig('recommend_type')) {
+        switch ($recommend_type == 1 ? systemConfig('recommend_type') : systemConfig('user_home_recommend_type')) {
             case '1':
                 $where['order'] = 'star';
                 break;
@@ -122,7 +123,6 @@ class StoreSpu extends BaseController
         $where['product_type'] = 0;
         $where['is_stock'] = 1;
         $data = $this->repository->getApiSearch($where, $page, $limit, $this->userInfo);
-        $data['user_home_recommend_type'] = systemConfig('user_home_recommend_type');
         return app('json')->success($data);
     }
 
