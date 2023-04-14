@@ -373,7 +373,7 @@ class MerchantRepository extends BaseRepository
      */
     public function merchantInfo($merId)
     {
-        $result = $this->dao->get($merId)->with('relatedBusiness')->hidden([
+        $result = $this->dao->get($merId)->with('relatedBusiness')->where("mer_id",$merId)->hidden([
             "mer_phone", "reg_admin_id", "sort", "is_del", "is_audit", "is_best", "mer_state", "bank", "bank_number", "bank_name", 'update_time',
             'financial_alipay', 'financial_bank', 'financial_wechat', 'financial_type'
         ])->limit(1)->select()->toArray();
