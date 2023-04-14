@@ -61,7 +61,7 @@ class StoreGroupOrderRepository extends BaseRepository
         $query = $this->search($where);
         $count = $query->count();
         $list = $query->with(['orderList' => function (Relation $query) {
-            $query->field('order_id,group_order_id,activity_type,pay_price')->with(['orderProduct','presellOrder']);
+            $query->field('order_id,group_order_id,activity_type,pay_price')->with(['orderProduct','presellOrder','merchant']);
         }])->page($page, $limit)->order('create_time DESC')->select();
         return compact('count', 'list');
     }

@@ -256,7 +256,8 @@ class StoreSpu extends BaseController
             'brand_id',
             'pid',
             'mer_cate_id',
-            'coupon_id'
+            'coupon_id',
+            'mer_id'
         ]);
         $where['is_gift_bag'] = 0;
         $where['order'] = $where['order'] ? $where['order'] : 'star';
