@@ -52,7 +52,7 @@ class WechatTemplateMessageService
             return true;
         foreach($res as $item){
             if(is_array($item['uid'])){
-                foreach ($item as $value){
+                foreach ($item['uid'] as $value){
                     $openid = $this->getUserOpenID($value['uid']);
                     if (!$openid) continue;
                     $this->send($openid,$item['tempCode'],$item['data'],'wechat',$item['link'],$item['color']);
