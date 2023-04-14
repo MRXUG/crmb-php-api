@@ -77,9 +77,9 @@ class StockProductRepository extends BaseRepository
      * @author  wanglei <wanglei@vchangyi.com>
      * @date    2023/3/7 16:53
      */
-    public function productBestOffer($productId, $merId, $isFirst = true,$price = 0, bool $returnAll = false): array
+    public function productBestOffer($productId, $merId, $isFirst = true,$price = 0, bool $returnAll = false, $uid): array
     {
-        return $this->dao->productBestOffer($productId, $merId, $isFirst,$price, $returnAll);
+        return $this->dao->productBestOffer($productId, $merId, $isFirst,$price, $returnAll, $uid);
     }
 
     public function existsWhere($where)
