@@ -80,7 +80,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         }
         /** @var StoreCartRepository $storeCartRepository */
         $storeCartRepository = app()->make(StoreCartRepository::class);
-        $res = $storeCartRepository->checkCartList($storeCartRepository->cartIbByData($cartId, $uid, $address), $clipCoupons == 1 ? 1 : 0, $user);
+        $res = $storeCartRepository->checkCartList($storeCartRepository->cartIbByData($cartId, $uid, $address), 0, $user);
         $merchantCartList = $res['list'];
 //        dd($merchantCartList);
 //         [$storeCouponDiscountByCode, $productCouponDiscountByCode] = $this->merchantCoupon($marketing_data, $merchantCartList);

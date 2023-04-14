@@ -472,7 +472,7 @@ class SpuRepository extends BaseRepository
                     $where['product_ids'] = array_unique(array_column($productList->toArray() ?? [], 'product_id'));
                 }
             }
-            $where['order'] = 'star';
+//            $where['order'] = 'star';
             $where['is_coupon'] = 1;
             $product = $this->getApiSearch($where, $page, $limit, $userInfo);
 //            dd([$product, $where]);
