@@ -122,6 +122,7 @@ class StoreSpu extends BaseController
         $where['product_type'] = 0;
         $where['is_stock'] = 1;
         $data = $this->repository->getApiSearch($where, $page, $limit, $this->userInfo);
+        $data['user_home_recommend_type'] = systemConfig('user_home_recommend_type');
         return app('json')->success($data);
     }
 
