@@ -114,6 +114,7 @@ class MerchantIntentionRepository extends BaseRepository
         $data['is_margin'] = $margin['is_margin'] ?? -1;
         $data['margin'] = $margin['margin'] ?? 0;
         $merData = [];
+        $smsData = [];
         if ($create) {
             $password = substr($intention['phone'], -6);
             $merData = [
