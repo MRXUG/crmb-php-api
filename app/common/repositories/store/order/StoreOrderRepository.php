@@ -404,8 +404,11 @@ class StoreOrderRepository extends BaseRepository
                 //自动打印订单
                 $this->autoPrinter($order->order_id, $order->mer_id);
 
-                //处理广告回传
-                Queue::push(AdvertisingReportingJob::class,['type'=>$order->ad_channel_id,'query'=>$order->ad_query,'orderId'=>$order->order_id,'ad_id'=>$order->ad_id]);
+                if ($order->ad_id > 0 && $order->ad_query && $order->ad_channel_id){
+                    //处理广告回传
+                    Queue::push(AdvertisingReportingJob::class,['type'=>$order->ad_channel_id,'query'=>$order->ad_query,'orderId'=>$order->order_id,'ad_id'=>$order->ad_id]);
+                }
+
             }
 
 
