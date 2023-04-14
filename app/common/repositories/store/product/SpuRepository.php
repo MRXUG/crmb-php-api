@@ -171,11 +171,7 @@ class SpuRepository extends BaseRepository
             $act = $make->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_BORDER,$item['spu_id'],$item['cate_id'],$item['mer_id']);
             $list[$k]['border_pic'] = $act['pic'] ?? '';
             $couponInfo = $couponStockRep->getRecommendCoupon($item['product_id']);
-            if (!$couponInfo) {
-                unset($list[$k]);
-                continue;
-            }
-            $minPriceSku = !empty($couponInfo) ? $couponInfo['minPriceSku']['price'] : 0;
+            $minPriceSku = !empty($couponInfo) ? $couponInfo['price'] : 0;
             if ($minPriceSku <= $discountNum) {
                 unset($list[$k]);
                 continue;
