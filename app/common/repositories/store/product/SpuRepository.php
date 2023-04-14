@@ -173,9 +173,6 @@ class SpuRepository extends BaseRepository
             $couponInfo = $couponStockRep->getRecommendCoupon($item['product_id']);
             $minPriceSku = !empty($couponInfo) ? $couponInfo['price'] : 0;
             if ($minPriceSku <= $discountNum) {
-                var_dump("minPriceSku=".$minPriceSku);
-                var_dump("discountNum=".$discountNum);
-                var_dump("----");
                 unset($list[$k]);
                 continue;
             }
