@@ -1291,7 +1291,7 @@ if (!function_exists('sendRequest')) {
          * @param $id
          * @param $appid
          * @param $page 'pages/goods_details/index'
-         * @param $data 'id=' . $id;
+         * @param $data
          *
          * @author  wanglei <wanglei@vchangyi.com>
          * @date    2023/3/10 15:49
