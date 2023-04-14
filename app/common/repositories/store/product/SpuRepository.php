@@ -126,7 +126,7 @@ class SpuRepository extends BaseRepository
      * @author Qinii
      * @day 12/18/20
      */
-    public function getApiSearch($where, $page, $limit, $userInfo = null)
+    public function getApiSearch($where, $page, $limit, $userInfo = null,$discountNum = 0)
     {
         if (isset($where['keyword']) && !empty($where['keyword'])) {
             if (preg_match('/^(\/@[1-9]{1}).*\*\//', $where['keyword'])) {
@@ -157,11 +157,11 @@ class SpuRepository extends BaseRepository
         if ($productMake->getUserIsPromoter($userInfo))
             $append[] = 'max_extension';
         $list->append($append);
-        $list = $this->getBorderList($list);
+        $list = $this->getBorderList($list,$discountNum);
         return compact('count', 'list');
     }
 
-    public function getBorderList($list)
+    public function getBorderList($list,$discountNum = 0)
     {
         /** @var StoreActivityRepository $make */
         $make = app()->make(StoreActivityRepository::class);
@@ -171,6 +171,9 @@ class SpuRepository extends BaseRepository
             $act = $make->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_BORDER,$item['spu_id'],$item['cate_id'],$item['mer_id']);
             $item['border_pic'] = $act['pic'] ?? '';
             $couponInfo = $couponStockRep->getRecommendCoupon($item['product_id']);
+            if (!$couponInfo) unset($item);
+            $minPriceSku = !empty($couponInfo) ? $couponInfo['minPriceSku'] : 0;
+            if ($minPriceSku <= $discountNum) unset($item);
             $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
             $item['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
         }
@@ -474,7 +477,7 @@ class SpuRepository extends BaseRepository
             }
 //            $where['order'] = 'star';
             $where['is_coupon'] = 1;
-            $product = $this->getApiSearch($where, $page, $limit, $userInfo);
+            $product = $this->getApiSearch($where, $page, $limit, $userInfo,$couponDao['discount_num']);
 //            dd([$product, $where]);
         }
 
