@@ -1,10 +1,12 @@
 <?php
+
 /**
  * @user: BEYOND 2023/3/2 21:10
  */
 
 namespace app\controller\api\coupon;
 
+use app\common\dao\coupon\CouponStocksUserDao;
 use app\validate\api\SendCouponValidate;
 use crmeb\basic\BaseController;
 use crmeb\services\MerchantCouponService;
@@ -22,16 +24,7 @@ class GenerateCouponSign extends BaseController
     public function generateCouponSign(SendCouponValidate $sendCouponValidate)
     {
         /**
-         * {
-        "status": 200,
-        "message": "success",
-        "data": {
-        "app_id": "wxcc2ff8afd2e40525",
-        "mch_id": "1638941761",
-        "create_time": "2023-03-05T19:34:41+08:00",
-        "stock_id": "1272180000000007"
-        }
-        }
+         * 生成券签名
          */
         $params = $this->request->post();
         $sendCouponValidate->check($params);
@@ -40,5 +33,36 @@ class GenerateCouponSign extends BaseController
         $data = MerchantCouponService::create(MerchantCouponService::SEND_COUPON, [], $merchantConfig)->coupon()->generateSign($params['stock_list'], $merchantConfig);
 
         return app('json')->success($data);
+    }
+
+    public function generateCouponSign2(SendCouponValidate $sendCouponValidate, CouponStocksUserDao $CouponStocksUserDao)
+    {
+        $params = $this->request->post();
+        $uid = $this->request->uid() ? $this->request->uid() : 0;
+
+        if ($uid == 0) {
+            /**
+             * 生成券签名
+             */
+            // $generateCouponSign = app()->make(GenerateCouponSign::class);
+            // $generateCouponSign->generateCouponSign($sendCouponValidate);
+            $sendCouponValidate->check($params);
+            $sendCouponValidate->validateReceiveCoupon($params['stock_list'], $this->request->uid());
+
+            $data = MerchantCouponService::create(MerchantCouponService::SEND_COUPON, [], $merchantConfig)->coupon()->generateSign($params['stock_list'], $merchantConfig);
+
+            return app('json')->success($data);
+        } else {
+            foreach ($params['stock_list'] as $item) {
+                $stockId = $item['stock_id'];
+                $coupon_count = $CouponStocksUserDao->userReceivedCoupon($stockId, $uid)->count();
+                $sendCouponValidate->check($params);
+                $sendCouponValidate->validateReceiveCoupon($params['stock_list'], $this->request->uid());
+
+                $data = MerchantCouponService::create(MerchantCouponService::SEND_COUPON, [], $merchantConfig)->coupon()->generateSign($params['stock_list'], $merchantConfig);
+                $data['coupon_count'] = $coupon_count;
+                return app('json')->success($data);
+            }
+        }
     }
 }

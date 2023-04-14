@@ -85,7 +85,7 @@ class CouponStocksUserDao extends BaseDao
      */
     public function couponWrittenOffNum($stockId, $writtenOff)
     {
-        return ($this->getModel()::getDB())
+        return $this->getModelObj()
             ->where([
                 'stock_id'    => $stockId,
                 'written_off' => $writtenOff,
@@ -94,7 +94,8 @@ class CouponStocksUserDao extends BaseDao
 
     public function userReceivedCoupon($stockId, $uid)
     {
-        return ($this->getModel()::getDB())
+        return $this->getModelObj()
+            ->with("stockDetail")
             ->where([
                 'stock_id'    => $stockId,
                 'uid'         => $uid
