@@ -44,6 +44,7 @@ Route::group('api/', function () {
         Route::group('merchant/coupon', function () {
             // 领券签名
             Route::post('sign', 'api.coupon.GenerateCouponSign/generateCouponSign');
+            Route::post('sign2', 'api.coupon.GenerateCouponSign/generateCouponSign2');
             // 领券时调用
             Route::post('receive', 'api.coupon.ReceiveCoupon/receive');
             // 券-核销
