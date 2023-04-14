@@ -20,8 +20,8 @@ return [
     'user_token_valid_exp' => 7, //7天
     //登录验证码有效期
     'captcha_exp' => 30, //30分钟
-    'admin_prefix' => '',
-    'merchant_prefix' => '/merchant',
+    'admin_prefix' => '/admin',
+    'merchant_prefix' => '',
     'service_prefix' => 'kefu',
     'api_admin_prefix' => 'sys',
     'api_merchant_prefix' => 'mer',
