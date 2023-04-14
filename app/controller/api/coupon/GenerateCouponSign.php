@@ -55,12 +55,12 @@ class GenerateCouponSign extends BaseController
         } else {
             foreach ($params['stock_list'] as $item) {
                 $stockId = $item['stock_id'];
-                $coupon_count = $CouponStocksUserDao->userReceivedCoupon($stockId, $uid)->count();
+                $has_coupons = $CouponStocksUserDao->userReceivedCoupon($stockId, $uid)->select()->toArray();
                 $sendCouponValidate->check($params);
                 $sendCouponValidate->validateReceiveCoupon($params['stock_list'], $this->request->uid());
 
                 $data = MerchantCouponService::create(MerchantCouponService::SEND_COUPON, [], $merchantConfig)->coupon()->generateSign($params['stock_list'], $merchantConfig);
-                $data['coupon_count'] = $coupon_count;
+                $data['coupon_count'] = $has_coupons;
                 return app('json')->success($data);
             }
         }
