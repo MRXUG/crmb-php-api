@@ -250,7 +250,7 @@ class Merchant extends BaseController
             'token' => $tokenInfo['token'],
             'exp' => $tokenInfo['out'],
             'admin' => $admin,
-            'url' => config('admin.merchant_prefix')
+            'url' => ''
         ];
 
         return app('json')->success($data);
