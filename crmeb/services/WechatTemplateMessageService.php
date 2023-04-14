@@ -383,7 +383,7 @@ class WechatTemplateMessageService
                  */
                 $res = $refund_make->get($id);
                 if(!$res || $res['status'] != 1) return false;
-                $data = [
+                $data[] = [
                     'tempCode' => 'REFUND_SUCCESS_CODE',
                     'uid' => $res->uid,
                     'data' => [
@@ -408,7 +408,7 @@ class WechatTemplateMessageService
                  */
                 $res = $refund_make->get($id);
                 if(!$res || $res['status'] != -1) return false;
-                $data = [
+                $data[] = [
                     'tempCode' => 'REFUND_FAIL_CODE',
                     'uid' => $res->uid,
                     'data' => [
@@ -435,7 +435,7 @@ class WechatTemplateMessageService
                  */
                 $res = $refund_make->get($id);
                 if(!$res || $res['status'] != 3) return false;
-                $data = [
+                $data[] = [
                     'tempCode' => 'REFUND_CONFORM_CODE',
                     'uid' => $res->uid,
                     'data' => [

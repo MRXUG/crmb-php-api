@@ -126,7 +126,7 @@ class SpuRepository extends BaseRepository
      * @author Qinii
      * @day 12/18/20
      */
-    public function getApiSearch($where, $page, $limit, $userInfo = null)
+    public function getApiSearch($where, $page, $limit, $userInfo = null,$discountNum = 0)
     {
         if (isset($where['keyword']) && !empty($where['keyword'])) {
             if (preg_match('/^(\/@[1-9]{1}).*\*\//', $where['keyword'])) {
@@ -157,22 +157,30 @@ class SpuRepository extends BaseRepository
         if ($productMake->getUserIsPromoter($userInfo))
             $append[] = 'max_extension';
         $list->append($append);
-        $list = $this->getBorderList($list);
+        $list = $this->getBorderList($list,$discountNum);
         return compact('count', 'list');
     }
 
-    public function getBorderList($list)
+    public function getBorderList($list,$discountNum = 0)
     {
         /** @var StoreActivityRepository $make */
         $make = app()->make(StoreActivityRepository::class);
         /** @var CouponStocksRepository $couponStockRep */
         $couponStockRep = app()->make(CouponStocksRepository::class);
-        foreach ($list as &$item) {
+        foreach ($list as $k=>$item) {
             $act = $make->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_BORDER,$item['spu_id'],$item['cate_id'],$item['mer_id']);
-            $item['border_pic'] = $act['pic'] ?? '';
+            $list[$k]['border_pic'] = $act['pic'] ?? '';
             $couponInfo = $couponStockRep->getRecommendCoupon($item['product_id']);
-            $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
-            $item['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
+            $minPriceSku = !empty($couponInfo) ? $couponInfo['price'] : 0;
+            if ($minPriceSku <= $discountNum) {
+                var_dump("minPriceSku=".$minPriceSku);
+                var_dump("discountNum=".$discountNum);
+                var_dump("----");
+                unset($list[$k]);
+                continue;
+            }
+            $list[$k]['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+            $list[$k]['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
         }
         return $list;
     }
@@ -472,9 +480,9 @@ class SpuRepository extends BaseRepository
                     $where['product_ids'] = array_unique(array_column($productList->toArray() ?? [], 'product_id'));
                 }
             }
-            $where['order'] = 'star';
+//            $where['order'] = 'star';
             $where['is_coupon'] = 1;
-            $product = $this->getApiSearch($where, $page, $limit, $userInfo);
+            $product = $this->getApiSearch($where, $page, $limit, $userInfo,$coupon->getAttr('discount_num'));
 //            dd([$product, $where]);
         }
 

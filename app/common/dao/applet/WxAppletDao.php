@@ -3,6 +3,7 @@ namespace app\common\dao\applet;
 
 use app\common\dao\BaseDao;
 use app\common\model\applet\WxAppletModel;
+use app\common\model\applet\WxAppletSubjectModel;
 use app\common\model\BaseModel;
 use think\db\BaseQuery;
 use think\db\exception\DataNotFoundException;
@@ -26,13 +27,24 @@ class WxAppletDao extends BaseDao
     public function search(string $name = '', int $healthStatus = 0, $orderBy = '', array $condition = [])
     {
         $query = ($this->getModel()::getDB())
-            ->with(['subject', 'submit'])
-            ->when(isset($name), function (Query $query) use ($name) {
-                $query->where(function (Query $query) use ($name) {
-                    $query->where('name', 'like', '%' . $name . '%');
-                });
-            })
-            ->when($healthStatus > 0, function ($query) use ($healthStatus) {
+            ->with(['subject', 'submit']);
+
+        if (isset($name) && $name != ''){
+
+            //查询主体ids
+            $subjectIds = WxAppletSubjectModel::getDB()->where('subject', 'like', '%' . $name . '%')->column("id");
+
+            $query->where(function ($query) use ($subjectIds,$name) {
+                $query->where('subject_id', 'in', $subjectIds)->whereOr('name', 'like', '%' . $name . '%');
+
+            });
+        }
+//            $query->when(isset($name), function (Query $query) use ($name) {
+//                $query->where(function (Query $query) use ($name) {
+//                    $query->where('name', 'like', '%' . $name . '%');
+//                });
+//            })
+            $query->when($healthStatus > 0, function ($query) use ($healthStatus) {
                 $query->where('health_status', $healthStatus);
             })
             ->when(!empty($condition), function ($query) use ($condition) {
