@@ -19,7 +19,7 @@ class UseCoupon extends BaseController
     {
     "code": "SUCCESS",
     "coupon_code": "1217124432016880936800",
-    "coupon_name": "千流-0305",
+    "coupon_name": "万对-0305",
     "discount": "0.01元",
     "end_time": "1678118399",
     "logo": "https://wx.gtimg.com/resource/feuploader/202106/holder_logo_240x240.png",

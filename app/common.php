@@ -1364,7 +1364,7 @@ if (!function_exists('sendMessageToWorkBot')) {
         $msg = $params['msg'] ?? '未知异常';
         $module = $params['module'] ?? '未知模块';// 业务模块
         $content = "
-                ### 千流业务告警<font color=\"warning\">[ $module ]</font>
+                ### 万对业务告警<font color=\"warning\">[ $module ]</font>
                 > 环境：`$env`
                 > 时间：$time
                 > 日志链路：$requestId

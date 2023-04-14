@@ -252,7 +252,7 @@ class StoreOrderRepository extends BaseRepository
                 }
                 if ($order->order_type == 1 && $order->status != 10)
                     $order->verify_code = $this->verifyCode();
-                // 上面的活动在千流暂时没有 或者后期根据付款情况记录appid
+                // 上面的活动在万对暂时没有 或者后期根据付款情况记录appid
                 $order->save();
 
                 $orderStatus[] = [
