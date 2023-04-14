@@ -13,7 +13,7 @@ class UpdateMerchantProfitListen extends TimerService implements ListenerInterfa
     protected string $name = '处理商户收益:' . __CLASS__;
     public function handle($event): void
     {
-//        if (env('app_name') == 'qianliu_prod'){
+//        if (env('app_name') == 'wandui_prod'){
 //            $intervalSec = 3600;
 //            $intervalSec = 180;//todo-fw 2023/3/16 16:57: just for testing
 //        }else{
