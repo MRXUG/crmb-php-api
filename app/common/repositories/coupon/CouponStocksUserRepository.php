@@ -179,16 +179,17 @@ class CouponStocksUserRepository extends BaseRepository
         $totalReceivedCurrentDay = $receivedCouponModel->where('create_time', date('Y-m-d H:i:s'))->count();
         // 该批次该用户总领券数量
         $totalReceivedByUser = $receivedCouponModel1->where('uid', $uid)->count();
-        $sendNumTotal = $stockIdInfo['max_coupons'] - $totalReceived;
-        if ($sendNumTotal < 1) {
-            // 超过总的券数量
-            throw new ValidateException('优惠券已抢光～');
-        }
-
+        
         $sendNumByUser = $stockIdInfo['max_coupons_per_user'] - $totalReceivedByUser;
         if ($sendNumByUser < 1) {
             // 当前用户领券达到上限
             throw new ValidateException('您的该优惠券使用已达上限，暂不可领');
+        }
+
+        $sendNumTotal = $stockIdInfo['max_coupons'] - $totalReceived;
+        if ($sendNumTotal < 1) {
+            // 超过总的券数量
+            throw new ValidateException('优惠券已抢光～');
         }
 
         $sendNumCurrentDay = $stockIdInfo['max_coupons_by_day'] - $totalReceivedCurrentDay;
