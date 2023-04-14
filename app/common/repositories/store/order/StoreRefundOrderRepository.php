@@ -798,6 +798,14 @@ class StoreRefundOrderRepository extends BaseRepository
             if ($res['refund_type'] == 1) {
 //                $refund = $this->doRefundPrice($id, $_refund_price);
                 $data['status'] = 4;
+                # 添加退款记录
+                /** @var StoreRefundStatusRepository $statusRepository */
+                $statusRepository = app()->make(StoreRefundStatusRepository::class);
+                $statusRepository->status(
+                    $id,
+                    $statusRepository::CHANGE_REFUND_AGREE,
+                    '退款审核已通过'
+                );
                 ProfitSharing::refund($id, [1 => true, 2 => false][$res->getAttr('refund_type')]);
 //                $statusRepository = app()->make(StoreRefundStatusRepository::class);
 //                $statusRepository->status($id, $statusRepository::CHANGE_REFUND_PRICE, '退款成功');
@@ -1131,6 +1139,13 @@ class StoreRefundOrderRepository extends BaseRepository
             $res = $this->dao->getWhere(['refund_order_id' => $id], '*', ['refundProduct.product']);
             $this->getProductRefundNumber($res, 1, true);
             # 调用退款函数
+            /** @var StoreRefundStatusRepository $statusRepository */
+            $statusRepository = app()->make(StoreRefundStatusRepository::class);
+            $statusRepository->status(
+                $id,
+                $statusRepository::CHANGE_REFUND_AGREE,
+                '退款审核已通过'
+            );
             ProfitSharing::refund($id, [1 => true, 2 => false][$res->getAttr('refund_type')]);
 //            $refund = $this->doRefundPrice($id, 0);
 //            if ($refund) $this->refundAfter($refund);

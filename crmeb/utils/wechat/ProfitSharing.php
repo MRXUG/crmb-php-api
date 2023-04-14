@@ -8,11 +8,6 @@ use app\common\model\store\order\StoreRefundOrder;
 use app\common\model\store\RefundTask;
 use crmeb\jobs\SplitReturnResultJob;
 use crmeb\services\WechatService;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
-use think\exception\ValidateException;
-use think\facade\Queue;
 
 /**
  * 分账调用封装
@@ -24,6 +19,7 @@ class ProfitSharing
     /**
      * 分账退回调用
      * @param int $refundOrderId 退款订单 id
+     * @param bool $immediatelyRefund 是否直接退款
      * @return void
      * @throws null
      */
