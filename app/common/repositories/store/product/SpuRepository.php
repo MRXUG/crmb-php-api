@@ -172,7 +172,7 @@ class SpuRepository extends BaseRepository
             $item['border_pic'] = $act['pic'] ?? '';
             $couponInfo = $couponStockRep->getRecommendCoupon($item['product_id']);
             if (!$couponInfo) unset($item);
-            $minPriceSku = !empty($couponInfo) ? $couponInfo['minPriceSku'] : 0;
+            $minPriceSku = !empty($couponInfo) ? $couponInfo['minPriceSku']['price'] : 0;
             if ($minPriceSku <= $discountNum) unset($item);
             $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
             $item['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
