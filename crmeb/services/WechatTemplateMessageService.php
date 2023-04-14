@@ -52,7 +52,7 @@ class WechatTemplateMessageService
             return true;
         foreach($res as $item){
             if(is_array($item['uid'])){
-                foreach ($item['uid'] as $value){
+                foreach ($item as $value){
                     $openid = $this->getUserOpenID($value['uid']);
                     if (!$openid) continue;
                     $this->send($openid,$item['tempCode'],$item['data'],'wechat',$item['link'],$item['color']);
@@ -383,7 +383,7 @@ class WechatTemplateMessageService
                  */
                 $res = $refund_make->get($id);
                 if(!$res || $res['status'] != 1) return false;
-                $data = [
+                $data[] = [
                     'tempCode' => 'REFUND_SUCCESS_CODE',
                     'uid' => $res->uid,
                     'data' => [
@@ -408,7 +408,7 @@ class WechatTemplateMessageService
                  */
                 $res = $refund_make->get($id);
                 if(!$res || $res['status'] != -1) return false;
-                $data = [
+                $data[] = [
                     'tempCode' => 'REFUND_FAIL_CODE',
                     'uid' => $res->uid,
                     'data' => [
@@ -435,7 +435,7 @@ class WechatTemplateMessageService
                  */
                 $res = $refund_make->get($id);
                 if(!$res || $res['status'] != 3) return false;
-                $data = [
+                $data[] = [
                     'tempCode' => 'REFUND_CONFORM_CODE',
                     'uid' => $res->uid,
                     'data' => [
