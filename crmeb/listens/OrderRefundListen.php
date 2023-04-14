@@ -24,6 +24,8 @@ class OrderRefundListen extends TimerService implements ListenerInterface
 
     protected string $name = '订单退款处理-' . __CLASS__;
 
+    private int $reNumber = 0;
+
     public function handle($event): void
     {
         # 每半分钟检测一次
@@ -162,8 +164,12 @@ class OrderRefundListen extends TimerService implements ListenerInterface
             return;
         }
         if (isset($res->err_code)) {
+            $this->reNumber += 1;
             $task->profitSharingErrHandler(['发起退款失败 错误码:' . ($res->err_code_des ?? '')]);
             Log::error("退款失败 正在进行重新尝试" . ($res->err_code_des ?? ''));
+            if ($this->reNumber >= 5) {
+                return;
+            }
             sleep(5);
             $this->runner($task);
             return;
