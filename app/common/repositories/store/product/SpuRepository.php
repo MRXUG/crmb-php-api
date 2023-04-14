@@ -477,7 +477,7 @@ class SpuRepository extends BaseRepository
             }
 //            $where['order'] = 'star';
             $where['is_coupon'] = 1;
-            $product = $this->getApiSearch($where, $page, $limit, $userInfo,$couponDao['discount_num']);
+            $product = $this->getApiSearch($where, $page, $limit, $userInfo,$coupon->getAttr('discount_num'));
 //            dd([$product, $where]);
         }
 
