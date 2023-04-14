@@ -275,7 +275,6 @@ class CouponStocksRepository extends BaseRepository
         if (!$minPriceSku) return null;
 
         $price = $minPriceSku['price'] ?? 0;
-        var_dump("price=".$price);
 
         $coupon = $this->getRecommendCouponFormProductId($productId, true,$price);
 
@@ -308,7 +307,7 @@ class CouponStocksRepository extends BaseRepository
         $merId = $productRep->getMerIdFormProductId($productId);
         /** @var StockProductRepository $stockProductRep */
         $stockProductRep = app()->make(StockProductRepository::class);
-        return $stockProductRep->productBestOffer($productId, $merId, $isFirst,$price);
+        return $stockProductRep->productBestOffer($productId, $merId, $isFirst,$price,false,0);
     }
 
     public function getWhereCount($where = []){
