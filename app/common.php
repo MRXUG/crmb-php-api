@@ -51,9 +51,9 @@ if (!function_exists('formToData')) {
         $admin = config('admin.api_admin_prefix');
         $merchant = config('admin.api_merchant_prefix');
         $api = $action;
-        if (strpos($api, $admin) === 0) {
+        if (strpos($api, '/' . $admin) === 0) {
             $api = substr($api, strlen($admin) + 1);
-        } else if (strpos($api, $merchant) === 0) {
+        } else if (strpos($api, '/' . $merchant) === 0) {
             $api = substr($api, strlen($merchant) + 1);
         }
         $api = str_replace('.html', '', $api);
