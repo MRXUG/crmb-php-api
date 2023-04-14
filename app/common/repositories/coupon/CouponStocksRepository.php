@@ -275,6 +275,7 @@ class CouponStocksRepository extends BaseRepository
         if (!$minPriceSku) return null;
 
         $price = $minPriceSku['price'] ?? 0;
+        var_dump("price=".$price);
 
         $coupon = $this->getRecommendCouponFormProductId($productId, true,$price);
 

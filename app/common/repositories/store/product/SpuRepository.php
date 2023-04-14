@@ -175,6 +175,7 @@ class SpuRepository extends BaseRepository
             if ($minPriceSku <= $discountNum) {
                 var_dump("minPriceSku=".$minPriceSku);
                 var_dump("discountNum=".$discountNum);
+                var_dump("discountNum=".$couponInfo);
                 var_dump("----");
                 unset($list[$k]);
                 continue;
