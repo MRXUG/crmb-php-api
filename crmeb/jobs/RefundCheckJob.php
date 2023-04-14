@@ -90,8 +90,7 @@ class RefundCheckJob implements JobInterface
         } catch (Exception|Throwable|ValueError $e) {
             Log::error("确认提款成功队列出错 id:{$data['refund_task_id']}");
         }
-
-
+        $job->delete();
     }
 
     public function failed($data)
