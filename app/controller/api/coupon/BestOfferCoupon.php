@@ -26,6 +26,7 @@ class BestOfferCoupon extends BaseController
         $params = $this->request->params(['mer_id']);
 
         $uid = $this->request->uid();
+        $uid = 0;
         // 获取最小的商品sku
         $minPriceSku = ProductAttrValue::getDB()->where('product_id', $id)->order('price', 'asc')->find();
         if (!$minPriceSku) return null;
