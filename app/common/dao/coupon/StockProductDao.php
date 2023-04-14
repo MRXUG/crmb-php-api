@@ -55,7 +55,7 @@ class StockProductDao extends BaseDao
      * @author  wanglei <wanglei@vchangyi.com>
      * @date    2023/3/7 15:57
      */
-    public function productBestOffer($productId, $merId, $isFirst = true,$price = 0, bool $returnAll = false, $uid)
+    public function productBestOffer($productId, $merId, $isFirst = true,$price = 0, bool $returnAll = false, $uid = 0)
     {
         // 全场券
         $where['scope'] = CouponStocks::SCOPE_YES;
@@ -121,10 +121,13 @@ class StockProductDao extends BaseDao
                 }
             }
             $list = array_merge($bestOffer, []);
-            foreach ($list as &$item) {
-                $item['written_off_num'] =
-                    $this->userDao->userReceivedCoupon($item['stock_id'], $uid)->count();
+            if ($uid>0){
+                foreach ($list as &$item) {
+                    $item['written_off_num'] =
+                        $this->userDao->userReceivedCoupon($item['stock_id'], $uid)->count();
+                }
             }
+
             return $list;
         } else {
             return [];
