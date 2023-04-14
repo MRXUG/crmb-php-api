@@ -36,6 +36,8 @@ class StoreOrder extends BaseModel
     const ORDER_STATUS_BE_RECEIVE = 1;
     const ORDER_STATUS_REPLY = 2;
     const ORDER_STATUS_SUCCESS = 3;
+    const ORDER_STATUS_REFUNDING = 4;
+    const ORDER_STATUS_REFUND_ERROR = 5;
     const ORDER_STATUS_SPELL = 9;
     const ORDER_STATUS_TAIL = 10;
     const ORDER_STATUS_TAIL_FAIL = 11;
@@ -46,6 +48,8 @@ class StoreOrder extends BaseModel
         self::ORDER_STATUS_BE_RECEIVE => '待收货',
         self::ORDER_STATUS_REPLY => '待评价',
         self::ORDER_STATUS_SUCCESS => '已完成',
+        self::ORDER_STATUS_REFUNDING => '退款中',
+        self::ORDER_STATUS_REFUND_ERROR => '退款失败',
         self::ORDER_STATUS_SPELL => '拼团中',
         self::ORDER_STATUS_TAIL => '待付尾款',
         self::ORDER_STATUS_TAIL_FAIL => '尾款超时未付',
