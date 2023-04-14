@@ -167,17 +167,24 @@ class SpuRepository extends BaseRepository
         $make = app()->make(StoreActivityRepository::class);
         /** @var CouponStocksRepository $couponStockRep */
         $couponStockRep = app()->make(CouponStocksRepository::class);
-        foreach ($list as &$item) {
+
+        $newList = [];
+        foreach ($list as $k=>$item) {
             $act = $make->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_BORDER,$item['spu_id'],$item['cate_id'],$item['mer_id']);
             $item['border_pic'] = $act['pic'] ?? '';
             $couponInfo = $couponStockRep->getRecommendCoupon($item['product_id']);
-            if (!$couponInfo) unset($item);
-            $minPriceSku = !empty($couponInfo) ? $couponInfo['minPriceSku'] : 0;
-            if ($minPriceSku <= $discountNum) unset($item);
+            $minPriceSku = !empty($couponInfo) ? $couponInfo['price'] : 0;
+            if ($minPriceSku <= $discountNum) {
+                unset($list[$k]);
+                continue;
+            }
             $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
             $item['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
+
+            $newList[] = $item;
         }
-        return $list;
+
+        return $newList;
     }
 
 

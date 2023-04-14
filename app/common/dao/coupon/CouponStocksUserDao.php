@@ -92,4 +92,13 @@ class CouponStocksUserDao extends BaseDao
             ]);
     }
 
+    public function userReceivedCoupon($stockId, $uid)
+    {
+        return ($this->getModel()::getDB())
+            ->where([
+                'stock_id'    => $stockId,
+                'uid'         => $uid
+            ]);
+    }
+
 }
