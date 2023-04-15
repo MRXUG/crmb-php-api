@@ -61,7 +61,7 @@ class CouponStocksUserDao extends BaseDao
                 $query->where('CouponStocksUser.coupon_code', '=', $where['coupon_code']);
             })->when(isset($where['stock_id']) && $where['stock_id'], function ($query) use ($where) {
                 $query->where('CouponStocksUser.stock_id', '=', $where['stock_id']);
-            })->when(isset($where['status']), function ($query) use ($where) {
+            })->when(isset($where['status']) && $where['status'] != "", function ($query) use ($where) {
                 if (intval($where['status']) === 1) $query->where('written_off', $where['status']);
                 if (intval($where['status']) === 0) $query->where('written_off', $where['status']);
                 if (intval($where['status']) === 2) {
