@@ -61,7 +61,7 @@ class StoreRefundOrderDao extends BaseDao
         })->when(isset($where['is_del']) && $where['is_del'] !== '', function ($query) use ($where) {
             $query->where('StoreRefundOrder.is_del', $where['is_del']);
         })->when(isset($where['type']) && $where['type'] == 1, function ($query) {
-            $query->whereIn('StoreRefundOrder.status', [0, 1, 2]);
+            $query->whereIn('StoreRefundOrder.status', [0, 1, 2, 4, 5]);
         })->when(isset($where['type']) && $where['type'] == 2, function ($query) {
             $query->whereIn('status', [-1, 3,-10]);
         })->when(isset($where['refund_type']) && $where['refund_type'] !== '',function($query)use($where){
