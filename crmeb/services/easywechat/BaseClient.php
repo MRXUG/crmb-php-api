@@ -273,7 +273,7 @@ class BaseClient extends AbstractAPI
         $associatedData = $encryptCertificate['associated_data'];
         $nonceStr = $encryptCertificate['nonce'];
 //        $aesKey = $this->app['config']['service_payment']['apiv3_key'];
-        $aesKey = '2E4A42F89EAD2D0E23A88B5935E5E6C1';
+        $aesKey = '2942ABD71A7C7BE25CDCB7A2E373E565';
 
         try {
             // ext-sodium (default installed on >= PHP 7.2)
