@@ -269,11 +269,10 @@ class BaseClient extends AbstractAPI
      */
     public function decrypt(array $encryptCertificate)
     {
-        $ciphertext = base64_decode($encryptCertificate['ciphertext'], true);
+        $ciphertext = base64_decode(urldecode($encryptCertificate['ciphertext']), true);
         $associatedData = $encryptCertificate['associated_data'];
         $nonceStr = $encryptCertificate['nonce'];
-//        $aesKey = $this->app['config']['service_payment']['apiv3_key'];
-        $aesKey = '4B1E278F34031F2FA58AAAC9F7D1892';
+        $aesKey = $this->app['config']['service_payment']['apiv3_key'];
 
         try {
             // ext-sodium (default installed on >= PHP 7.2)
