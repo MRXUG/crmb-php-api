@@ -112,7 +112,10 @@ class StoreRefundOrderRepository extends BaseRepository
                 if ($storeRefundOrderCount > 0){
                     unset($list[$k]);
                 }
+
             }
+            $newList = $list;
+
         }else{
             $newList = $list;
         }
