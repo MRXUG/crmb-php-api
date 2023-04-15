@@ -100,10 +100,12 @@ class StoreRefundOrderRepository extends BaseRepository
                 //已拒绝的去重
                 $storeRefundOrderCount = $storeRefundOrderDao->getWhereCount(
                     [
-                        "status",'not in',[-1, 3,-10]
-                    ],
-                    [
-                        "order_id","=",$v['order_id']
+                        [
+                            "status",'not in',[-1, 3,-10]
+                        ],
+                        [
+                            "order_id","=",$v['order_id']
+                        ]
                     ]
                 );
 
