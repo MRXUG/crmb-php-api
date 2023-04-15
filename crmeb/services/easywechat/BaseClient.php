@@ -271,7 +271,9 @@ class BaseClient extends AbstractAPI
     {
         var_dump($encryptCertificate);
         $strUrlDecodeText = urldecode($encryptCertificate['ciphertext']);
+        var_dump($strUrlDecodeText);
         $ciphertext = base64_decode($strUrlDecodeText, true);
+        var_dump($ciphertext);
         $associatedData = $encryptCertificate['associated_data'];
         $nonceStr = $encryptCertificate['nonce'];
         $aesKey = $this->app['config']['service_payment']['apiv3_key'];
@@ -287,6 +289,13 @@ class BaseClient extends AbstractAPI
             }
             // openssl (PHP >= 7.1 support AEAD)
             if (PHP_VERSION_ID >= 70100 && in_array('aes-256-gcm', \openssl_get_cipher_methods())) {
+
+
+                $pem = sodium_crypto_aead_aes256gcm_decrypt($ciphertext,$associatedData,$nonceStr,$aesKey);
+                var_dump("new");
+                var_dump($pem);
+
+
                 $ctext = substr($ciphertext, 0, -self::AUTH_TAG_LENGTH_BYTE);
                 $authTag = substr($ciphertext, -self::AUTH_TAG_LENGTH_BYTE);
                 return \openssl_decrypt($ctext, 'aes-256-gcm', $aesKey, \OPENSSL_RAW_DATA, $nonceStr, $authTag, $associatedData);
