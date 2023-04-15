@@ -277,21 +277,30 @@ class BaseClient extends AbstractAPI
         try {
             // ext-sodium (default installed on >= PHP 7.2)
             if (function_exists('\sodium_crypto_aead_aes256gcm_is_available') && \sodium_crypto_aead_aes256gcm_is_available()) {
+                var_dump(1111);
+                var_dump(\sodium_crypto_aead_aes256gcm_decrypt($ciphertext, $associatedData, $nonceStr, $aesKey));
                 return \sodium_crypto_aead_aes256gcm_decrypt($ciphertext, $associatedData, $nonceStr, $aesKey);
             }
             // ext-libsodium (need install libsodium-php 1.x via pecl)
             if (function_exists('\Sodium\crypto_aead_aes256gcm_is_available') && \Sodium\crypto_aead_aes256gcm_is_available()) {
+                var_dump(2222);
+                var_dump(\Sodium\crypto_aead_aes256gcm_decrypt($ciphertext, $associatedData, $nonceStr, $aesKey));
                 return \Sodium\crypto_aead_aes256gcm_decrypt($ciphertext, $associatedData, $nonceStr, $aesKey);
             }
             // openssl (PHP >= 7.1 support AEAD)
             if (PHP_VERSION_ID >= 70100 && in_array('aes-256-gcm', \openssl_get_cipher_methods())) {
                 $ctext = substr($ciphertext, 0, -self::AUTH_TAG_LENGTH_BYTE);
                 $authTag = substr($ciphertext, -self::AUTH_TAG_LENGTH_BYTE);
+
+                var_dump(333);
+                var_dump(\openssl_decrypt($ctext, 'aes-256-gcm', $aesKey, \OPENSSL_RAW_DATA, $nonceStr, $authTag, $associatedData));
                 return \openssl_decrypt($ctext, 'aes-256-gcm', $aesKey, \OPENSSL_RAW_DATA, $nonceStr, $authTag, $associatedData);
             }
         } catch (\Exception $exception) {
+            var_dump(444);
             throw new InvalidArgumentException($exception->getMessage(), $exception->getCode());
         } catch (\SodiumException $exception) {
+            var_dump(555);
             throw new InvalidArgumentException($exception->getMessage(), $exception->getCode());
         }
         throw new InvalidArgumentException('AEAD_AES_256_GCM 需要 PHP 7.1 以上或者安装 libsodium-php');
