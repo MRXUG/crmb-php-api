@@ -91,6 +91,30 @@ class StoreRefundOrderRepository extends BaseRepository
             ->with(['merchant' => function ($query) {
                 $query->field('mer_name,mer_id');
             }, 'refundProduct.product'])->page($page, $limit)->select();
+
+        $newList = [];
+        if ($where['type'] == 2){
+            $storeRefundOrderDao = app()->make(StoreRefundOrderDao::class);
+            foreach ($list as $k=>$v){
+
+                //已拒绝的去重
+                $storeRefundOrderCount = $storeRefundOrderDao->getWhereCount(
+                    [
+                        "status",'not in',[-1, 3,-10]
+                    ],
+                    [
+                        "order_id","=",$v['order_id']
+                    ]
+                );
+
+                if ($storeRefundOrderCount > 0){
+                    unset($list[$k]);
+                }
+            }
+        }else{
+            $newList = $list;
+        }
+        $list = $newList;
         return compact('list', 'count');
     }
 
