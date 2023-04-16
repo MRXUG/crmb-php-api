@@ -41,6 +41,7 @@ use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
 use think\exception\ValidateException;
 use think\facade\Cache;
+use think\facade\Db;
 use think\facade\Log;
 use think\facade\Queue;
 use crmeb\jobs\SendSmsJob;
@@ -55,7 +56,6 @@ class Auth extends BaseController
 {
     public function test()
     {
-
     }
 
     /**

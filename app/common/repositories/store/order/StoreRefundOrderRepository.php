@@ -476,7 +476,7 @@ class StoreRefundOrderRepository extends BaseRepository
             $product->is_refund = 1;
             $product->save();
             $statusRepository = app()->make(StoreRefundStatusRepository::class);
-            $statusRepository->status($refund->refund_order_id, $statusRepository::CHANGE_CREATE, '创建退款单');
+            $statusRepository->status($refund->refund_order_id, $statusRepository::CHANGE_CREATE, '用户创建退货退款单');
             $this->applyRefundAfter($refund, $order);
             return $refund;
         });
@@ -720,7 +720,7 @@ class StoreRefundOrderRepository extends BaseRepository
         Db::transaction(function () use ($refund, $data, $id, $uid) {
             $refund->save($data);
             $statusRepository = app()->make(StoreRefundStatusRepository::class);
-            $statusRepository->status($id, $statusRepository::CHANGE_BACK_GOODS, '已发货');
+            $statusRepository->status($id, $statusRepository::CHANGE_BACK_GOODS, '用户上传退货单');
             event('refund.backGoods',compact('uid','id','data'));
         });
         Queue::push(SendSmsJob::class, [

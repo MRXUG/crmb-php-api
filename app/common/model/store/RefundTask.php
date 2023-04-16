@@ -41,9 +41,6 @@ class RefundTask extends BaseModel
         StoreRefundOrder::getInstance()->where('refund_order_id', $this->getAttr('refund_order_id'))->update([
             'status' => 5
         ]);
-        /** @var StoreOrderDao $orderDao */
-        $orderDao = app()->make(StoreOrderDao::class);
-
         return true;
     }
 }
