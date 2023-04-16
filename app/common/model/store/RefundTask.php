@@ -35,7 +35,7 @@ class RefundTask extends BaseModel
         Log::debug("退款错误获取到参数 {$this->getAttr('refund_task_id')} " . implode(";", array_merge(explode(";", $this->getAttr('err_msg')) ?? [], $errArr)));
         # 解析先前存在的错误
         RefundTask::getInstance()->where('refund_task_id', $this->getAttr('refund_task_id'))->update([
-            'err_msg' => implode(";", array_merge(explode(";", $this->getAttr('err_msg')) ?? [], $errArr))
+            'err_msg' => implode(";", array_merge(explode(";", $this->getAttr('err_msg') ?? ''), $errArr))
         ]);
         # 变更退款状态
         StoreRefundOrder::getInstance()->where('refund_order_id', $this->getAttr('refund_order_id'))->update([

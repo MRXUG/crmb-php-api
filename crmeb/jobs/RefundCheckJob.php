@@ -37,6 +37,7 @@ class RefundCheckJob implements JobInterface
         try {
             Db::transaction(function () use($job, $data) {
                 # 查询需要处理的模型
+                /** @var RefundTask $refundOrderTask */
                 $refundOrderTask = RefundTask::getDB()->where('refund_task_id', $data['refund_task_id'])->find();
                 if (!$refundOrderTask) { $job->delete();return; }
                 # 发起退款 2 分钟后查询状态
@@ -67,7 +68,7 @@ class RefundCheckJob implements JobInterface
                         Queue::later(15, RefundCheckJob::class, $data);
                         return;
                     }
-                    $refundOrderTask->profitSharingErrHandler(['发起退款失败 错误码:' . ($res->err_code_des ?? '')]);
+                    $refundOrderTask->profitSharingErrHandler(['发起退款失败 错误码: ' . ($res->err_code_des ?? '')]);
                     return;
                 }
 
