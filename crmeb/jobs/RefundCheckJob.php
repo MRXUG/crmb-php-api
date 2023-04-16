@@ -4,8 +4,10 @@ namespace crmeb\jobs;
 
 use app\common\dao\store\order\StoreOrderDao;
 use app\common\dao\store\order\StoreRefundOrderDao;
+use app\common\model\store\order\OrderFlow;
 use app\common\model\store\order\StoreRefundOrder;
 use app\common\model\store\RefundTask;
+use app\common\repositories\store\order\OrderFlowRepository;
 use app\common\repositories\store\order\StoreRefundOrderRepository;
 use app\common\repositories\store\order\StoreRefundStatusRepository;
 use crmeb\interfaces\JobInterface;
@@ -83,6 +85,7 @@ class RefundCheckJob implements JobInterface
                     $statusRepository::CHANGE_REFUND_PRICE,
                     '退款成功'
                 );
+                $this->orderFlow($refundOrderTask);
                 /** @var StoreOrderDao $orderDao */
                 $orderDao = app()->make(StoreOrderDao::class);
                 $orderDao->updateOrderStatus($refundOrder->getAttr('order_id'), -1);
@@ -92,6 +95,27 @@ class RefundCheckJob implements JobInterface
             Log::error("确认提款成功队列出错 id:{$data['refund_task_id']}");
         }
         $job->delete();
+    }
+
+    public function orderFlow (RefundTask $refundTask)
+    {
+        $amountList = OrderFlow::getInstance()->where([
+            ['order_sn', '=', $refundTask->getAttr('order_sn')],
+            ['type', '=', 1]
+        ])->column('amount');
+
+        $amount = 0;
+        foreach ($amountList as $item)  $amount = bcadd($item, $amount, 2);
+
+        app()->make(OrderFlowRepository::class)->refundOrderFlowWrite([
+            'amount' => '-' . $amount,
+            'type' => OrderFlow::FLOW_TYPE_OUT,
+            'create_time' => date('Y-m-d H:i:s'),
+            'mer_id' => $refundTask->getAttr('mer_id'),
+            'mch_id' => 0,
+            'order_sn' => $refundTask->getAttr('order_sn'),
+            'remark' => OrderFlow::SALE_AFTER_REFUND_CN
+        ]);
     }
 
     public function failed($data)
