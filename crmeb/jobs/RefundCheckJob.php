@@ -107,15 +107,17 @@ class RefundCheckJob implements JobInterface
         $amount = 0;
         foreach ($amountList as $item)  $amount = bcadd($item, $amount, 2);
 
-        app()->make(OrderFlowRepository::class)->refundOrderFlowWrite([
-            'amount' => '-' . $amount,
-            'type' => OrderFlow::FLOW_TYPE_OUT,
-            'create_time' => date('Y-m-d H:i:s'),
-            'mer_id' => $refundTask->getAttr('mer_id'),
-            'mch_id' => 0,
-            'order_sn' => $refundTask->getAttr('order_sn'),
-            'remark' => OrderFlow::SALE_AFTER_REFUND_CN
-        ]);
+        if ($amount == 0) {
+            app()->make(OrderFlowRepository::class)->refundOrderFlowWrite([
+                'amount' => '-' . $amount,
+                'type' => OrderFlow::FLOW_TYPE_OUT,
+                'create_time' => date('Y-m-d H:i:s'),
+                'mer_id' => $refundTask->getAttr('mer_id'),
+                'mch_id' => 0,
+                'order_sn' => $refundTask->getAttr('order_sn'),
+                'remark' => OrderFlow::SALE_AFTER_REFUND_CN
+            ]);
+        }
     }
 
     public function failed($data)
