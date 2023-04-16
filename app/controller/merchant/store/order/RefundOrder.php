@@ -19,6 +19,7 @@ use crmeb\services\ExcelService;
 use think\App;
 use crmeb\basic\BaseController;
 use app\common\repositories\store\order\StoreRefundOrderRepository as repository;
+use think\facade\Db;
 
 class RefundOrder extends BaseController
 {
@@ -116,7 +117,22 @@ class RefundOrder extends BaseController
     {
         if(!$this->repository->getRefundPriceExists($this->request->merId(),$id))
             return app('json')->fail('信息或状态错误');
-        $this->repository->adminRefund($id,$this->request->adminId());
+
+        $repository = $this->repository;
+        $adminId = $this->request->adminId();
+
+        Db::transaction(function () use($id, $repository, $adminId) {
+            $repository->adminRefund($id,$adminId);
+
+            /** @var StoreRefundStatusRepository $statusRepository */
+            $statusRepository = app()->make(StoreRefundStatusRepository::class);
+            $statusRepository->status(
+                $id,
+                $statusRepository::CONFIRMATION_OF_RECEIPT_OF_RETURNED_GOODS,
+                '退货商品确认收货'
+            );
+        });
+
         return app('json')->success('退款成功');
     }
 

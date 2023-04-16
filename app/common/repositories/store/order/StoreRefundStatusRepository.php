@@ -28,6 +28,12 @@ class StoreRefundStatusRepository extends BaseRepository
 {
     //已发货
     const CHANGE_BACK_GOODS = 'back_goods';
+    // 微信退款重新发起
+    const WECHAT_REFUND_RE_INITIATED = 'wechat_refund_re_initiated';
+    // 退货商品确认收货
+    const CONFIRMATION_OF_RECEIPT_OF_RETURNED_GOODS = 'confirmation_of_receipt_of_returned_goods';
+    // 退款失败
+    const REFUND_FAILED = 'refund_failed';
     //创建退款单
     const CHANGE_CREATE = 'create';
     //删除记录
