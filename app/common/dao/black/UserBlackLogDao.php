@@ -27,6 +27,6 @@ class UserBlackLogDao extends BaseDao
      */
     protected function getModel(): string
     {
-        return UserBlackLogDao::class;
+        return UserBlackLog::class;
     }
 }
