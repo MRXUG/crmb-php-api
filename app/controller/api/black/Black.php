@@ -79,9 +79,9 @@ class Black extends BaseController{
      * 黑名单操作记录
      * $type 1加入黑名单0移出黑名单
      * $uid  用户id
-     * $opreate  变更形式1系统判定2人工添加3用户主动	
+     * $operate  变更形式1系统判定2人工添加3用户主动	
      */
-    public function setLog($data){
+    public function setLog($data=[]){
         if($this->request->has('uid')){
             $param = $this->request->param();
             $arr = [
@@ -101,7 +101,7 @@ class Black extends BaseController{
             }
         }
 
-        $info = $this->userblackLogRepository->create($arr);
+        $info = app()->make(UserBlackLogRepository::class)->create($arr);
         if($info){
             return app('json')->success('记录成功');
         }else{

@@ -14,8 +14,16 @@
 namespace app\common\dao\black;
 
 
+use think\Collection;
+use think\db\BaseQuery;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
+use think\facade\Db;
 use app\common\dao\BaseDao;
+use app\common\model\black\UserBlackLog;
 use app\common\model\BaseModel;
+use think\Model;
 
 class UserBlackLogDao extends BaseDao
 {
