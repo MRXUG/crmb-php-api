@@ -22,7 +22,7 @@ use crmeb\basic\BaseController;
 class Black extends BaseController{
 
     protected $userRepository;
-    protected $userblackLogRepository
+    protected $userblackLogRepository;
     protected $user;
 
     public function __construct(App $app, UserRepository $userRepository,UserBlackLogRepository $userblackLogRepository)
@@ -87,7 +87,7 @@ class Black extends BaseController{
             $arr = [
                 'uid' => $param['uid'],
                 'type' => $param['type'],
-                'operate' => $param['operate']
+                'operate' => $param['operate'],
                 'logtime' => time()
             ];
         }else{
@@ -95,7 +95,7 @@ class Black extends BaseController{
                 $arr = [
                     'uid' => $data['uid'],
                     'type' => $data['type'],
-                    'operate' => $data['operate']
+                    'operate' => $data['operate'],
                     'logtime' => time()
                 ];
             }
