@@ -174,8 +174,8 @@ class StoreOrder extends BaseController
         $uid = $this->request->uid();
         if (!($count = count($cartId)) || $count != count($cartRepository->validIntersection($cartId, $uid)))
             return app('json')->fail('数据无效');
-//        if (!$addressId)
-//            return app('json')->fail('请选择地址');
+        // if (!$addressId)
+        //     return app('json')->fail('请选择地址');
 
         $groupOrder = app()->make(LockService::class)->exec('order.create', function () use ($orderCreateRepository, $receipt_data, $mark, $extend, $cartId, $payType, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query) {
             return $orderCreateRepository->v2CreateOrder(array_search($payType, StoreOrderRepository::PAY_TYPE), $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query);
@@ -184,8 +184,83 @@ class StoreOrder extends BaseController
         if ($groupOrder['pay_price'] == 0) {
             return app('json')->status('error', "支付金额不能为0", ['order_id' => $groupOrder->group_order_id]);
 
-//            $this->repository->paySuccess($groupOrder);
-//            return app('json')->status('success', '支付成功', ['order_id' => $groupOrder['group_order_id']]);
+            // $this->repository->paySuccess($groupOrder);
+            //     return app('json')->status('success', '支付成功', ['order_id' => $groupOrder['group_order_id']]);
+        }
+        if ($isPc) {
+            return app('json')->success(['order_id' => $groupOrder->group_order_id]);
+        }
+        try {
+            return $this->repository->pay($payType, $this->request->userInfo(), $groupOrder, $this->request->param('return_url'), $this->request->isApp());
+        } catch (\Exception $e) {
+            return app('json')->status('error', $e->getMessage(), ['order_id' => $groupOrder->group_order_id]);
+        }
+    }
+
+    /**
+     * 提交订单2
+     *
+     * @param StoreCartRepository $cartRepository
+     * @param StoreOrderCreateRepository $orderCreateRepository
+     *
+     * @return mixed
+     */
+    public function v2CreateOrder2(StoreCartRepository $cartRepository, StoreOrderCreateRepository $orderCreateRepository)
+    {
+        $cartId = (array)$this->request->param('cart_id', []);
+        $addressId = (int)$this->request->param('address_id');
+        $couponIds = (array)$this->request->param('use_coupon', []);
+        $takes = (array)$this->request->param('takes', []);
+        $useIntegral = (bool)$this->request->param('use_integral', false);
+        $receipt_data = (array)$this->request->param('receipt_data', []);
+        $extend = (array)$this->request->param('extend', []);
+        $mark = (array)$this->request->param('mark', []);
+        $payType = $this->request->param('pay_type');
+        $post = (array)$this->request->param('post');
+        $clipCoupons = (int)$this->request->param('clipCoupons',1);
+        // 营销页优惠
+        $marketingDiscount = (array)$this->request->param('marketing_discount', []);
+        // 卡包回流券信息
+        $refluxCoil = isset($marketingDiscount['refluxCoil']) ? (array)$marketingDiscount['refluxCoil'] : [];
+        $ad_type = (int)$this->request->param('ad_type',0);
+        $ad_query = $this->request->param('ad_query','');
+        if ($clipCoupons == 2) {
+            $couponIds = [];
+        }
+
+        if ($ad_query){
+            $ad_query = json_encode($ad_query);
+        }
+
+        $isPc = $payType === 'pc';
+        if ($isPc) {
+            $payType = 'balance';
+        }
+
+        if (!in_array($payType, StoreOrderRepository::PAY_TYPE, true))
+            return app('json')->fail('请选择正确的支付方式');
+
+        $validate = app()->make(UserReceiptValidate::class);
+        foreach ($receipt_data as $receipt) {
+            if (!is_array($receipt)) throw new ValidateException('发票信息有误');
+            $validate->check($receipt);
+        }
+
+        $uid = $this->request->uid();
+        if (!($count = count($cartId)) || $count != count($cartRepository->validIntersection($cartId, $uid)))
+            return app('json')->fail('数据无效');
+        // if (!$addressId)
+        //     return app('json')->fail('请选择地址');
+
+        $groupOrder = app()->make(LockService::class)->exec('order.create', function () use ($orderCreateRepository, $receipt_data, $mark, $extend, $cartId, $payType, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query) {
+            return $orderCreateRepository->v2CreateOrder2(array_search($payType, StoreOrderRepository::PAY_TYPE), $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query);
+        });
+
+        if ($groupOrder['pay_price'] == 0) {
+            return app('json')->status('error', "支付金额不能为0", ['order_id' => $groupOrder->group_order_id]);
+
+            // $this->repository->paySuccess($groupOrder);
+            //     return app('json')->status('success', '支付成功', ['order_id' => $groupOrder['group_order_id']]);
         }
         if ($isPc) {
             return app('json')->success(['order_id' => $groupOrder->group_order_id]);
