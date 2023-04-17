@@ -101,7 +101,7 @@ class Black extends BaseController{
             }
         }
 
-        $info = $this->userblackLogRepository->save($arr);
+        $info = $this->userblackLogRepository->create($arr);
         if($info){
             return app('json')->success('记录成功');
         }else{

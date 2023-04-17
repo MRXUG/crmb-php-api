@@ -40,4 +40,15 @@ class UserBlackLogRepository extends BaseRepository{
         $this->dao = $dao;
     }
 
+
+     /**
+     * TODO 添加记录
+     * $data 参数数组
+     * @day 2020-10-27
+     */
+    public function create(array $data){
+        $result = $this->dao->create($data);
+        return $result;
+    }
+
 }
