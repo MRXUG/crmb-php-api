@@ -216,6 +216,10 @@ Route::group('api/', function () {
 
             Route::get('member/info', 'User/memberInfo');
             Route::get('member/log', 'Member/getMemberValue');
+
+            //设置和解除黑名单
+            Route::post('member/black','User/blackOperate');
+
         })->prefix('api.user.');
 
         //购物车
