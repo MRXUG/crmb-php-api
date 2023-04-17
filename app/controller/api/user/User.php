@@ -528,4 +528,40 @@ class User extends BaseController
         return app('json')->success('修改成功');
     }
 
+    /**
+     * 设置黑名单
+     */
+    public function blackOperate($uid=0,$operate='add'){
+        if($this->request->has('uid')){
+            $uid = $this->request->param('uid');
+
+            $user = $this->request->get($uid);
+        }else{
+            if($uid){
+                $user = $this->request->get($uid);
+            }
+        }
+
+        if($user){
+            if($this->request->has('operate')){
+                $operate = $this->request->param('operate');
+            }
+
+            switch(){
+                case 'get':
+                    return app('json')->success('获取成功',$data['info'=>1]);
+                    break;
+                case 'del':
+                    return app('json')->success('修改成功');
+                    break;
+                default:
+
+                    return app('json')->success('修改成功');
+                    
+            }
+        }else{
+            return app('json')->fail('参数错误');
+        }
+    }
+
 }
