@@ -216,10 +216,6 @@ Route::group('api/', function () {
 
             Route::get('member/info', 'User/memberInfo');
             Route::get('member/log', 'Member/getMemberValue');
-
-            //设置和解除黑名单
-            Route::post('member/black','User/blackOperate');
-
         })->prefix('api.user.');
 
         //购物车
@@ -643,6 +639,11 @@ Route::group('api/', function () {
 
     // 商家券回调
     Route::any('notice/receive-coupon-notify', 'api.Common/merchantCouponNotify')->name('merchantCouponNotify');
+
+    //黑名单
+    Route::group('black',function(){
+        Route::post('operate','Black/Operate');
+    })->prefix('api.black.');
 
     // 新优惠券
     Route::group('stock/coupon', function () {
