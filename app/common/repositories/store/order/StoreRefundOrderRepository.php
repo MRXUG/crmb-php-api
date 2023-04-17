@@ -476,7 +476,11 @@ class StoreRefundOrderRepository extends BaseRepository
             $product->is_refund = 1;
             $product->save();
             $statusRepository = app()->make(StoreRefundStatusRepository::class);
-            $statusRepository->status($refund->refund_order_id, $statusRepository::CHANGE_CREATE, '用户创建退货退款单');
+            $statusRepository->status(
+                $refund->refund_order_id,
+                $statusRepository::CHANGE_CREATE,
+                $refund->refund_type == 1 ? '用户创建退款单' : '用户创建退货退款单',
+            );
             $this->applyRefundAfter($refund, $order);
             return $refund;
         });
