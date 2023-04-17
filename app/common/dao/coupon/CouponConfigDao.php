@@ -19,8 +19,8 @@ class CouponConfigDao extends BaseDao
     {
         $couponConfigMode = ($this->getModel()::getDB());
         foreach ($data as $k=>$v){
-            if ($couponConfigMode->where(['configKey'=>$k])->count()){
-                $couponConfigMode->where(['configKey'=>$k])->update([
+            if ($id = $couponConfigMode->where(['configKey'=>$k])->value("id")){
+                $couponConfigMode->where(['id'=>$id])->update([
                     'configValue'=>$v
                 ]);
             }else{
