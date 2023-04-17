@@ -643,6 +643,7 @@ Route::group('api/', function () {
     //黑名单
     Route::group('black',function(){
         Route::post('operate','Black/Operate');
+        Route::post('setlog','Black/setLog');
     })->prefix('api.black.');
 
     // 新优惠券

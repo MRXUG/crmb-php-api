@@ -14,19 +14,22 @@
 namespace app\controller\api\black;
 
 use app\common\repositories\user\UserRepository;
+use app\common\repositories\black\BlackLogRepository;
 use think\App;
 use crmeb\basic\BaseController;
 
 
 class Black extends BaseController{
 
-    protected $repository;
+    protected $userRepository;
+    protected $blacklogRepository
     protected $user;
 
-    public function __construct(App $app, UserRepository $repository)
+    public function __construct(App $app, UserRepository $userRepository,BlackLogRepository $blacklogRepository)
     {
         parent::__construct($app);
-        $this->repository = $repository;
+        $this->userRepository = $userRepository;
+        $this->balcklogRepository = $blacklogRepository;
     }
 
     /**
@@ -51,22 +54,56 @@ class Black extends BaseController{
                     case 'add':
                         //拉入黑名单
                         $data = ['black'=>1];
-                        $this->repository->update($uid,$data);
+                        $this->userRepository->update($uid,$data);
                         
-                        return app('json')->success('获取成功');
+                        return app('json')->success('黑名单设置成功');
                         break;
                     case 'del':
                         //移除黑名单
                         $data = ['black'=>0];
-                        $this->repository->update($uid,$data);
+                        $this->userRepository->update($uid,$data);
                         
-                        return app('json')->success('修改成功');
+                        return app('json')->success('黑名单移除成功');
                         break;
                     default:
-                        return app('json')->success('修改成功');
-                        
+                        return app('json')->success('黑名单状态获取成功');
                 }
             }
+        }else{
+            return app('json')->fail('参数错误');
+        }
+    }
+
+
+    /**
+     * 黑名单操作记录
+     * $type 1加入黑名单0移出黑名单
+     * $uid  用户id
+     * $opreate  变更形式1系统判定2人工添加3用户主动	
+     */
+    public function setLog($data){
+        if($this->request->has('uid')){
+            $param = $this->request->param();
+            $arr = [
+                'uid' => $param['uid'],
+                'type' => $param['type'],
+                'operate' => $param['operate']
+                'logtime' => time()
+            ];
+        }else{
+            if(isset($data['uid'])){
+                $arr = [
+                    'uid' => $data['uid'],
+                    'type' => $data['type'],
+                    'operate' => $data['operate']
+                    'logtime' => time()
+                ];
+            }
+        }
+
+        $info = $this->blacklogRepository->save($arr);
+        if($info){
+            return app('json')->success('记录成功');
         }else{
             return app('json')->fail('参数错误');
         }
