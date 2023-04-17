@@ -27,7 +27,6 @@ class Black extends BaseController{
     {
         parent::__construct($app);
         $this->repository = $repository;
-        $this->user = $this->request->userInfo();
     }
 
     /**
@@ -37,29 +36,36 @@ class Black extends BaseController{
         if($this->request->has('uid')){
             $uid = $this->request->param('uid');
 
-            $user = $this->request->get($uid);
+            $this->user = $this->repository->get($uid);
         }else{
             if($uid){
-                $user = $this->request->get($uid);
+                $this->user = $this->repository->get($uid);
             }
         }
 
-        if($user){
+        if($this->user){
             if($this->request->has('operate')){
                 $operate = $this->request->param('operate');
-            }
-
-            switch(){
-                case 'get':
-                    return app('json')->success('获取成功',$data['info'=>1]);
-                    break;
-                case 'del':
-                    return app('json')->success('修改成功');
-                    break;
-                default:
-
-                    return app('json')->success('修改成功');
-                    
+            
+                switch($operate){
+                    case 'add':
+                        //拉入黑名单
+                        $data = ['black'=>1];
+                        $this->repository->update($uid,$data);
+                        
+                        return app('json')->success('获取成功');
+                        break;
+                    case 'del':
+                        //移除黑名单
+                        $data = ['black'=>0];
+                        $this->repository->update($uid,$data);
+                        
+                        return app('json')->success('修改成功');
+                        break;
+                    default:
+                        return app('json')->success('修改成功');
+                        
+                }
             }
         }else{
             return app('json')->fail('参数错误');
