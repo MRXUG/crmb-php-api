@@ -10,8 +10,13 @@ use app\common\model\coupon\CouponStocks;
 use app\common\model\platform\PlatformCoupon;
 use app\common\model\store\product\Product;
 use app\common\repositories\BaseRepository;
+use crmeb\jobs\EstimatePlatformCouponProduct;
+use think\db\exception\DataNotFoundException;
+use think\db\exception\DbException;
+use think\db\exception\ModelNotFoundException;
 use think\exception\ValidateException;
 use think\facade\Db;
+use think\facade\Queue;
 
 /**
  * @property PlatformCouponDao $dao
@@ -33,10 +38,13 @@ class PlatformCouponRepository extends BaseRepository
      *
      * @param int $page
      * @param int $limit
+     * @param array $where
      * @return array
-     * @throws null
+     * @throws DataNotFoundException
+     * @throws DbException
+     * @throws ModelNotFoundException
      */
-    public function selectCoupon(int $page = 1, int $limit = 10): array
+    public function selectCoupon(int $page = 1, int $limit = 10, array $where = []): array
     {
         $nowDate = date("Y-m-d H:i:s");
         /** @var CouponStocksDao $couponDao */
@@ -53,13 +61,15 @@ class PlatformCouponRepository extends BaseRepository
             'max(`end_at`)  as `max_end_time`' # 最晚发券结束时间
         ];
 
-        $model = $couponDao->getModelObj()->where([
+        $where = array_merge($where, [
             ['is_del', '=', 0],
             ['type', '=', 1],
             ['status', 'in', [1, 2]],
             ['end_at', '>', $nowDate],
             ['start_at', '<', $nowDate]
-        ])->group('discount_num');
+        ]);
+
+        $model = $couponDao->getModelObj()->where($where)->group('discount_num');
 
         $list = (clone $model)->field($field)->page($page, $limit)->select()->toArray();
 
@@ -97,7 +107,7 @@ class PlatformCouponRepository extends BaseRepository
      * @param array $mer_id_arr
      * @return array
      */
-    private function getProductId(array $coupon_id_arr, array $scope_arr, array $mer_id_arr): array
+    public function getProductId(array $coupon_id_arr, array $scope_arr, array $mer_id_arr): array
     {
         $merArr = [];
         $couponArr = [];
@@ -261,5 +271,63 @@ class PlatformCouponRepository extends BaseRepository
                 return $arr;
             })());
         });
+    }
+
+    /**
+     * 商品预估
+     *
+     * @param int $discount_num 面额
+     * @param int $threshold 门槛
+     * @param int $use_type 使用范围
+     * @param int[] $scope_id_arr 使用范围id
+     * @param string $receive_start_time 领取开始时间
+     * @param string $receive_end_time 领取结束时间
+     * @return string
+     */
+    public function productEstimate(
+        int $discount_num,
+        int $threshold,
+        int $use_type,
+        array $scope_id_arr,
+        string $receive_start_time,
+        string $receive_end_time
+    ): string
+    {
+        $jobNumber = uniqid('EstimatePlatformCouponProduct');
+        Queue::push(EstimatePlatformCouponProduct::class, compact(
+            'discount_num',
+            'threshold',
+            'use_type',
+            'scope_id_arr',
+            'receive_start_time',
+            'receive_end_time',
+            'jobNumber'
+        ));
+        return $jobNumber;
+    }
+
+    public function platformCouponList (int $page = 1, int $limit = 10): array
+    {
+        $platformCouponModel = fn() => $this->dao->getModelObj();
+
+        $platformCoupon = $platformCouponModel()
+            ->field([
+                'platform_coupon_id',
+                'coupon_name',
+                'receive_start_time',
+                'receive_end_time',
+            ])
+            ->page($page, $limit)
+            ->select()->toArray();
+
+        foreach ($platformCoupon as &$item) {
+            # 处理状态
+
+        }
+
+        return [
+            'list' => $platformCoupon,
+            'count' => $platformCouponModel()->count()
+        ];
     }
 }
