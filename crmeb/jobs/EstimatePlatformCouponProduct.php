@@ -13,7 +13,7 @@ use think\facade\Cache;
 # 预估平台优惠券所使用商品id
 class EstimatePlatformCouponProduct implements JobInterface
 {
-    const EXECUTE_BATCH = 2; # 执行批次
+    const EXECUTE_BATCH = 50; # 执行批次
 
     /**
      * @param Job $job

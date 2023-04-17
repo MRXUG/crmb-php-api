@@ -16,7 +16,8 @@ R::group(function () {
         R::get('merDetails/:amount', 'PlatformCoupon/merDetails'); # 优惠券明细
         R::get('lst', 'PlatformCoupon/lst'); # 优惠券列表
         R::post('createEstimateGoods', 'PlatformCoupon/createEstimateGoods'); # 平台优惠券创建时预估数据
-        R::get('getEstimateGoodsResult/:resultCode', 'PlatformCoupon/getEstimateGoodsResult');
+        R::get('getEstimateGoodsResult/:resultCode', 'PlatformCoupon/getEstimateGoodsResult'); # 获取预估结果数据
+        R::get('getCouponOne/:discountNum', 'PlatformCoupon/getCouponOne'); # 选择优惠券数据
 
     })->prefix('admin.coupon.platform.')->option([
         '_auth' => true,

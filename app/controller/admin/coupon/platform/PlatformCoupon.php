@@ -75,7 +75,7 @@ class PlatformCoupon extends BaseController
      */
     public function getEstimateGoodsResult(string $resultCode)
     {
-        $this->json()->success(Cache::get("EstimatePlatformCouponProduct:{$resultCode}"));
+        return $this->json()->success(Cache::get("EstimatePlatformCouponProduct:{$resultCode}"));
     }
 
     /**
@@ -91,6 +91,17 @@ class PlatformCoupon extends BaseController
         $limit = $request->get('limit', 10);
 
         return app('json')->success($this->repository->selectCoupon($page, $limit));
+    }
+
+    /**
+     * 选择优惠券数据
+     *
+     * @param int $discountNum
+     * @return mixed
+     */
+    public function getCouponOne(int $discountNum)
+    {
+        return $this->json()->success($this->repository->selectCouponOne($discountNum));
     }
 
     /**

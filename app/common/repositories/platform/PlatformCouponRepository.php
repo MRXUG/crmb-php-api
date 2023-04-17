@@ -33,6 +33,34 @@ class PlatformCouponRepository extends BaseRepository
         $this->couponPositionDao = $couponPositionDao;
     }
 
+    public function selectCouponOne(int $discount_num): array
+    {
+        $nowDate = date("Y-m-d H:i:s");
+        /** @var CouponStocksDao $couponDao */
+        $couponDao = app()->make(CouponStocksDao::class);
+        $field = [
+            'discount_num', # 面值
+            'count(distinct(`mer_id`)) as `mer_count`', # 商户数
+            'count(distinct(`id`)) as `platform_coupon_count`', # 平台卷优惠券数量
+            'max(`transaction_minimum`) as `threshold`', # 最大门槛
+            'min(`start_at`) as `min_start_time`', # 最早发券开始时间
+            'max(`end_at`)  as `max_end_time`' # 最晚发券结束时间
+        ];
+
+        $where = [
+            ['is_del', '=', 0],
+            ['type', '=', 1],
+            ['status', 'in', [1, 2]],
+            ['end_at', '>', $nowDate],
+            ['start_at', '<', $nowDate],
+            ['discount_num', '=', $discount_num]
+        ];
+
+        $model = $couponDao->getModelObj()->where($where)->group('discount_num')->field($field)->find();
+
+        return method_exists($model, 'toArray') ? $model->toArray() : [];
+    }
+
     /**
      * 选卷
      *
