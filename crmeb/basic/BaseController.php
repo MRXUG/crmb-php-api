@@ -115,4 +115,9 @@ abstract class BaseController
         $res[0] = max(intval($res[0]), 1);
         return $res;
     }
+
+    public function json()
+    {
+        return app('json');
+    }
 }
