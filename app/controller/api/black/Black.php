@@ -88,7 +88,7 @@ class Black extends BaseController{
                 'uid' => $param['uid'],
                 'type' => $param['type'],
                 'operate' => $param['operate'],
-                'logtime' => time()
+                'create_time' => time()
             ];
         }else{
             if(isset($data['uid'])){
@@ -96,7 +96,7 @@ class Black extends BaseController{
                     'uid' => $data['uid'],
                     'type' => $data['type'],
                     'operate' => $data['operate'],
-                    'logtime' => time()
+                    'create_time' => time()
                 ];
             }
         }
@@ -106,6 +106,20 @@ class Black extends BaseController{
             return app('json')->success('记录成功');
         }else{
             return app('json')->fail('参数错误');
+        }
+    }
+
+    /**
+     * 用户详情 黑名单记录
+     */
+    public function getLog($uid=0){
+        if($this->request->has('uid')){
+            $uid = $this->request->param('uid');
+        }
+
+        if($uid > 0){
+            [$page, $limit] = $this->getPage();
+            return app('json')->success($this->repository->search($uid,$where, $page, $limit));
         }
     }
 

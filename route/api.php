@@ -645,6 +645,7 @@ Route::group('api/', function () {
     Route::group('black',function(){
         Route::post('operate','Black/Operate');
         Route::post('setlog','Black/setLog');
+        Route::get('getlog','Black/getLog');
     })->prefix('api.black.');
 
     // 新优惠券

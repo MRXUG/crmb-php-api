@@ -37,4 +37,19 @@ class UserBlackLogDao extends BaseDao
     {
         return UserBlackLog::class;
     }
+
+
+       /**
+     * 搜索列表
+     * @param $uid
+     * @param array $where
+     * @return BaseQuery
+     * @author Qinii
+     */
+    public function search($uid,array $where)
+    {
+        $query = UserBlackLog::getDB();
+
+        return $query->where('uid',$uid)->order('sort DESC,create_time DESC');
+    }
 }
