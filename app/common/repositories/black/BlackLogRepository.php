@@ -14,7 +14,7 @@
 namespace app\common\repositories\black;
 
 
-use app\common\dao\article\BlackLogDao;
+use app\common\dao\black\UserBlackLogDao;
 use app\common\repositories\BaseRepository;
 use FormBuilder\Exception\FormBuilderException;
 use FormBuilder\Factory\Elm;
@@ -31,12 +31,12 @@ use think\facade\Route;
  * @day 2020-04-20
  * @mixin ArticleCategoryDao
  */
-class BlackLogRepository extends BaseRepository{
+class UserBlackLogRepository extends BaseRepository{
     /**
      * ArticleCategoryRepository constructor.
-     * @param BlackLogDao $dao
+     * @param UserBlackLogDao $dao
      */
-    public function __construct(BlackLogDao $dao){
+    public function __construct(UserBlackLogDao $dao){
         $this->dao = $dao;
     }
 

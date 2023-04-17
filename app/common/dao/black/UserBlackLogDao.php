@@ -17,7 +17,7 @@ namespace app\common\dao\black;
 use app\common\dao\BaseDao;
 use app\common\model\BaseModel;
 
-class BlackLogDao extends BaseDao
+class UserBlackLogDao extends BaseDao
 {
 
     /**
@@ -27,6 +27,6 @@ class BlackLogDao extends BaseDao
      */
     protected function getModel(): string
     {
-        return BlackLogDao::class;
+        return UserBlackLogDao::class;
     }
 }
