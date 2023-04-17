@@ -14,7 +14,7 @@
 namespace app\controller\api\black;
 
 use app\common\repositories\user\UserRepository;
-use app\common\repositories\black\BlackLogRepository;
+use app\common\repositories\black\UserBlackLogRepository;
 use think\App;
 use crmeb\basic\BaseController;
 
@@ -22,14 +22,14 @@ use crmeb\basic\BaseController;
 class Black extends BaseController{
 
     protected $userRepository;
-    protected $blacklogRepository
+    protected $userblackLogRepository
     protected $user;
 
-    public function __construct(App $app, UserRepository $userRepository,BlackLogRepository $blacklogRepository)
+    public function __construct(App $app, UserRepository $userRepository,UserBlackLogRepository $userblackLogRepository)
     {
         parent::__construct($app);
         $this->userRepository = $userRepository;
-        $this->balcklogRepository = $blacklogRepository;
+        $this->userblackLogRepository = $userblackLogRepository;
     }
 
     /**
@@ -101,7 +101,7 @@ class Black extends BaseController{
             }
         }
 
-        $info = $this->blacklogRepository->save($arr);
+        $info = $this->userblackLogRepository->save($arr);
         if($info){
             return app('json')->success('记录成功');
         }else{
