@@ -527,5 +527,4 @@ class User extends BaseController
         $this->repository->updateBaseInfo($data,$user);
         return app('json')->success('修改成功');
     }
-
 }

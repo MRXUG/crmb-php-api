@@ -640,6 +640,11 @@ Route::group('api/', function () {
     // 商家券回调
     Route::any('notice/receive-coupon-notify', 'api.Common/merchantCouponNotify')->name('merchantCouponNotify');
 
+    //黑名单
+    Route::group('black',function(){
+        Route::post('operate','Black/Operate');
+    })->prefix('api.black.');
+
     // 新优惠券
     Route::group('stock/coupon', function () {
         Route::get('list', 'CouponStock/list');
