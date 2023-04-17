@@ -116,7 +116,7 @@ Route::group(function () {
     ]);
 
     Route::group('coupon/', function () {
-        Route::get('settingRisks', 'admin.coupon.CouponConfig/settingRisks');
+        Route::post('settingRisks', 'admin.coupon.CouponConfig/settingRisks');
     });
 
 })->middleware(AllowOriginMiddleware::class)
