@@ -11,6 +11,7 @@ use app\common\dao\store\order\StoreOrderDao;
 use app\common\dao\user\UserHistoryDao;
 use app\common\model\coupon\CouponStocks;
 use app\common\model\coupon\CouponStocksUser;
+use app\common\model\platform\PlatformCouponReceive;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
 
@@ -101,10 +102,10 @@ class CouponConfigRepository extends BaseRepository
     }
 
     //获取上次领券是否超出发券设置的间隔天数
-    public function typePopups1($uid,$couponConfig){
+    public function typePopups1($uid,$couponConfig,$type){
         $date = date('Y-m-d H:i:s');
         //获取上次用户平台券时间
-        $userPlatFormCouponDate = '';
+        $userPlatFormCouponDate = PlatformCouponReceive::getDB()->where("user_id",$uid)->where("use_type",$type)->order("id desc")->value("create_time");
 
         $time1=strtotime($date);
 
