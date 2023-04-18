@@ -5,6 +5,7 @@ namespace app\common\dao\platform;
 use app\common\dao\BaseDao;
 use app\common\dao\coupon\CouponStocksDao;
 use app\common\model\platform\PlatformCoupon;
+use app\common\model\platform\PlatformCouponReceive;
 use app\common\repositories\platform\PlatformCouponRepository;
 
 class PlatformCouponDao extends BaseDao
@@ -59,7 +60,44 @@ class PlatformCouponDao extends BaseDao
         return $platformCouponRepository->getProductId($coupon_id_arr, $scope_arr, $mer_id_arr);
     }
 
-    public function getPopupsPlatformCoupon($where=[] ,$limit = 1){
-       return $this->getModel()::getDB()->where($where)->order("discount_num desc")->limit($limit)->select();
+    public function getPopupsPlatformCoupon($where=[] ,$limit = 1,$uid=0){
+       $num = $this->getModel()::getDB()->where($where)->order("discount_num desc")->count();
+        $newList = [];
+
+        $offset = 0;
+
+        QUERY_AGAIN:
+        $list =  $this->getModel()::getDB()->where($where)->order("discount_num desc")->limit($offset,$limit)->select();
+
+        $offset += 3;
+
+        foreach ($list as $k=>$v){
+           if ($v['is_limit'] == 1){
+               //查询已经领取了多少张
+               $lnum = PlatformCouponReceive::getDB()->where('platform_coupon_id',$v['platform_coupon_id'])->count();
+
+               if ($lnum >= $v['limit_number']){
+                   continue;
+               }
+           }
+
+           if ($v['is_user_limit'] == 1){
+               //查询已经领取了多少张
+               $lnum = PlatformCouponReceive::getDB()->where('platform_coupon_id',$v['platform_coupon_id'])->where("user_id",$uid)->count();
+
+               if ($lnum >= $v['user_limit_number']){
+                   continue;
+               }
+           }
+
+           $newList = $v;
+       }
+
+       $count = count($newList);
+       if (($limit < $count) && ($offset <  $num)){
+           goto QUERY_AGAIN;
+       }
+
+       return $newList;
     }
 }
