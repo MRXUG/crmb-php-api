@@ -50,6 +50,6 @@ class UserBlackLogDao extends BaseDao
     {
         $query = UserBlackLog::getDB();
 
-        return $query->where('uid',$uid)->order('sort DESC,create_time DESC');
+        return $query->where('uid',$uid)->order('create_time DESC');
     }
 }

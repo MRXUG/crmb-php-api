@@ -595,10 +595,12 @@ class User extends BaseController
     /**
      * 设置黑名单
      */
-    public function Operate($uid=0,$operate='get'){
+    public function Operate($uid){
 
         if($uid){
             $this->user = $this->repository->get($uid);
+            
+            $operate = $this->request->param('operate');
             if($this->user){
 
                 switch($operate){
@@ -655,7 +657,7 @@ class User extends BaseController
     /**
      * 获取用户黑名单日志
      */
-    publci function blackLog($uid){
+    public function blackLog($uid){
         if($uid > 0){
             [$page, $limit] = $this->getPage();
             return app('json')->success($this->repository->search($uid,$where, $page, $limit));

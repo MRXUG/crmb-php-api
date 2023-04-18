@@ -16,9 +16,23 @@ namespace app\common\model\black;
 
 use app\common\model\BaseModel;
 
-class UserBlackLog extends BaseModel
-{
+class UserBlackLog extends BaseModel{
 
+    //变更形式
+    protected $logtype = [
+        1 => '系统判定',
+        2 => '人工添加',
+        3 => '用户主动'	  
+    ];
+    
+    //操作类型
+    protected $logoperate = [
+      0 => '移除黑名单',
+      1 => '拉入黑名单'
+    ];
+    
+    
+    
     /**
      * @return string
      * @author xaboy
@@ -38,4 +52,15 @@ class UserBlackLog extends BaseModel
     {
         return 'user_black_log';
     }
+    
+    //操作类型
+    public function getOperateAttr($value){
+        return $this->logoperate[$value];
+    }
+    
+    public function getTypeAttr($value){
+        return $this->logtype[$value];
+    }
+    
+    
 }
