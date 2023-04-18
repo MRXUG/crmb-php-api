@@ -31,4 +31,11 @@ class CouponConfig extends BaseController
 
         return app('json')->success('设置成功');
     }
+
+    public function getCouponConfig(){
+        $list = $this->repository->getCouponConfig();
+
+        return app('json')->success($list);
+
+    }
 }
