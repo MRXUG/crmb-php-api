@@ -475,4 +475,6 @@ class PlatformCouponRepository extends BaseRepository
         $platformCoupon->setAttr('status', $status);
         $platformCoupon->save();
     }
+
+
 }
