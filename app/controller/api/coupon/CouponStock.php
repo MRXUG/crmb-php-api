@@ -80,7 +80,8 @@ class CouponStock extends BaseController
             ['crowd','in',[1,$userType]],
             ['receive_start_time','<',$date],
             ['receive_end_time','>',$date],
-        ],$userIssueCoupons);
+            ['status','=',1],
+        ],$userIssueCoupons,$uid);
 
         return app('json')->success($list);
 
