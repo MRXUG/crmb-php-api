@@ -3093,6 +3093,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     $discountTotal = $adMarketingDiscountAmount;
                     break;
                 case 4:
+                case 5:
                     // 营销 + 红包
                     // 优惠裂变开关：1-开启，2-关闭
                     if ($fissionAmount && (($adInfo['discount_fission_switch'] == 2) || ($fissionAmount != $adFissionAmount))) {
@@ -3304,8 +3305,6 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             }else{
                 $stock = [];
             }
-
-
         } elseif($adId) {
             $adMarketingDiscountAmount = $adInfo['marketing_discount_amount'];
             $adFissionAmount = $adInfo['fission_amount'];
@@ -3324,6 +3323,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     $discountTotal = $adMarketingDiscountAmount;
                     break;
                 case 4:
+                case 5:
                     // 营销 + 红包
                     // 优惠裂变开关：1-开启，2-关闭
                     if ($fissionAmount && (($adInfo['discount_fission_switch'] == 2) || ($fissionAmount != $adFissionAmount))) {
