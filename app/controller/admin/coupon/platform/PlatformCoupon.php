@@ -142,4 +142,18 @@ class PlatformCoupon extends BaseController
         $this->repository->save($request->post(), $id);
         return app('json')->success();
     }
+
+    /**
+     * 修改优惠券状态
+     *
+     * @param int $id
+     * @param Request $request
+     * @return mixed
+     */
+    public function updateStatus(int $id, Request $request)
+    {
+        $status = $request->post('status');
+        $this->repository->updateStatus($id, $status);
+        return $this->json()->success();
+    }
 }

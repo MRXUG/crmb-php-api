@@ -433,8 +433,14 @@ class PlatformCouponRepository extends BaseRepository
             $item['statusCn'] = (function () use (&$item, $nowUnixTime): string {
                 $startTime = strtotime($item['receive_start_time']);
                 $endTime = strtotime($item['receive_end_time']);
-                if ($startTime > $nowUnixTime) return '活动未开始';
-                if ($endTime < $nowUnixTime) return '已结束';
+                if ($startTime > $nowUnixTime) {
+                    $item['status'] = 3;
+                    return '活动未开始';
+                }
+                if ($endTime < $nowUnixTime) {
+                    $item['status'] = 4;
+                    return '已结束';
+                }
                 return [
                     '待发布',
                     '进行中',
@@ -447,5 +453,26 @@ class PlatformCouponRepository extends BaseRepository
             'list' => $platformCoupon,
             'count' => $platformCouponModel()->count()
         ];
+    }
+
+    /**
+     * 修改状态
+     *
+     * @param int $platformCouponId 平台优惠券id
+     * @param int $status 状态 1 发布 2 失效
+     * @throws null
+     * @return void
+     */
+    public function updateStatus(int $platformCouponId, int $status): void
+    {
+        if (!in_array($status, [1,2])) throw new ValidateException('参数错误');
+        /** @var PlatformCoupon $platformCoupon */
+        $platformCoupon = $this->dao->getModelObj()->where([
+            ['platform_coupon_id', '=', $platformCouponId],
+        ])->find();
+        if (!$platformCoupon) throw new ValidateException('操作错误');
+        # 修改状态
+        $platformCoupon->setAttr('status', $status);
+        $platformCoupon->save();
     }
 }
