@@ -13,6 +13,7 @@ use app\common\model\store\product\Product;
 use app\common\repositories\BaseRepository;
 use crmeb\jobs\EstimatePlatformCouponProduct;
 use crmeb\listens\CreatePlatformCouponInitGoods;
+use think\db\BaseQuery;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
@@ -385,25 +386,72 @@ class PlatformCouponRepository extends BaseRepository
      * @return array
      * @throws null
      */
-    public function platformCouponList (int $page = 1, int $limit = 10): array
+    public function platformCouponList (int $page = 1, int $limit = 10, array $where = []): array
     {
-        $platformCouponModel = fn() => $this->dao->getModelObj();
+        $nowDate = date("Y-m-d H:i:s");
+        # TODO 券id搜索 发放位置搜索
+        $platformCouponModel = fn() => $this->dao->getModelObj()->alias('a')->when(!empty($where), function (BaseQuery $query) use($where, $nowDate) {
+            # 根据状态筛选
+            if (isset($where['status']) && $where['status'] >= 0) {
+                switch ($where['status']) {
+                    case 0: # 待发布
+                        $query->where([
+                            ['a.status', '=', 0],['a.receive_end_time', '>', $nowDate]
+                        ]);
+                        break;
+                    case 1: # 进行中
+                        $query->where([
+                            ['a.status', '=', 1],['a.receive_start_time', '<', $nowDate],['a.receive_end_time', '>', $nowDate]
+                        ]);
+                        break;
+                    case 2: # 失效
+                        $query->where([
+                            ['a.status', '=', 2]
+                        ]);
+                        break;
+                    case 3: # 未开始
+                        $query->where([
+                            ['a.status', '=', 1],['a.receive_start_time', '>', $nowDate]
+                        ]);
+                        break;
+                    case 4: # 已结束
+                        $query->where([
+                            ['a.status', '=', 1],['a.receive_end_time', '<', $nowDate]
+                        ]);
+                        break;
+                }
+            }
+            # 根据优惠券名称查询
+            if (!empty($where['name'])) {
+                $query->where('a.coupon_name', 'like',"%{$where['name']}%");
+            }
+            # 微信商户号
+            if (!empty($where['wechat_business_number'])) {
+                $query->where('a.wechat_business_number', 'like', "%{$where['wechat_business_number']}%");
+            }
+            # 发放人群
+            if (isset($where['crowd']) && $where['crowd'] > 0) {
+                $query->where('a.crowd', '=', $where['crowd']);
+            }
+        });
 
         $platformCoupon = $platformCouponModel()
             ->field([
-                'platform_coupon_id',
-                'use_type',
-                'coupon_name',
-                'receive_start_time',
-                'receive_end_time',
-                'wechat_business_number',
-                'threshold',
-                'discount_num',
-                'is_user_limit',
-                'user_limit_number',
-                'status'
+                'a.platform_coupon_id',
+                'a.use_type',
+                'a.coupon_name',
+                'a.receive_start_time',
+                'a.receive_end_time',
+                'a.wechat_business_number',
+                'a.threshold',
+                'a.discount_num',
+                'a.is_user_limit',
+                'a.user_limit_number',
+                'a.status',
+                'a.crowd'
             ])
             ->page($page, $limit)
+            ->order('a.platform_coupon_id', 'desc')
             ->select()
             ->toArray();
 
@@ -489,19 +537,19 @@ class PlatformCouponRepository extends BaseRepository
 
         return [
             'all' => $modelFn(),
-            'wait_to_released' => $modelFn([
+            'wait_to_released' => $modelFn([ # 待发布
                 ['status', '=', 0],['receive_end_time', '>', $nowDate]
             ]),
-            'has_not_started' => $modelFn([
+            'has_not_started' => $modelFn([ # 未开始
                 ['status', '=', 1],['receive_start_time', '>', $nowDate]
             ]),
-            'in_progress' => $modelFn([
+            'in_progress' => $modelFn([ # 进行中
                 ['status', '=', 1],['receive_start_time', '<', $nowDate],['receive_end_time', '>', $nowDate]
             ]),
-            'over' => $modelFn([
+            'over' => $modelFn([ # 已结束
                 ['status', '=', 1],['receive_end_time', '<', $nowDate]
             ]),
-            'cancel' => $modelFn([
+            'cancel' => $modelFn([ # 已取消
                 ['status', '=', 2]
             ])
         ];

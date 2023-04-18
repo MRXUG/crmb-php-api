@@ -32,8 +32,10 @@ class PlatformCoupon extends BaseController
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
+        $where = $request->param();
+        unset($where['page'], $where['limit']);
 
-        return app('json')->success($this->repository->platformCouponList($page, $limit));
+        return app('json')->success($this->repository->platformCouponList($page, $limit, $where));
     }
 
     /**
