@@ -5,6 +5,7 @@ namespace app\common\dao\platform;
 use app\common\dao\BaseDao;
 use app\common\dao\coupon\CouponStocksDao;
 use app\common\model\platform\PlatformCoupon;
+use app\common\model\platform\PlatformCouponPosition;
 use app\common\model\platform\PlatformCouponReceive;
 use app\common\repositories\platform\PlatformCouponRepository;
 
@@ -60,14 +61,17 @@ class PlatformCouponDao extends BaseDao
         return $platformCouponRepository->getProductId($coupon_id_arr, $scope_arr, $mer_id_arr);
     }
 
-    public function getPopupsPlatformCoupon($where=[] ,$limit = 1,$uid=0){
+    public function getPopupsPlatformCoupon($where=[] ,$limit = 1,$uid=0,$type){
        $num = $this->getModel()::getDB()->where($where)->order("discount_num desc")->count();
         $newList = [];
+
+        //获取type符合的券
+        $ids = PlatformCouponPosition::getDB()->where("position",$type)->column('platform_coupon_id');
 
         $offset = 0;
 
         QUERY_AGAIN:
-        $list =  $this->getModel()::getDB()->where($where)->order("discount_num desc")->limit($offset,$limit)->select();
+        $list =  $this->getModel()::getDB()->where($where)->whereIn('platform_coupon_id',$ids)->order("discount_num desc")->limit($offset,$limit)->select();
 
         $offset += 3;
 
