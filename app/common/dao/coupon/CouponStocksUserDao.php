@@ -29,6 +29,12 @@ class CouponStocksUserDao extends BaseDao
             });
         }
 
+        if (isset($where['type']) && $where['type'] != ''){
+            $query->hasWhere('stockDetail', function ($query) use ($where) {
+                $query->where('type', '=', $where['type']);
+            });
+        }
+
         if (isset($where['nickname']) && $where['nickname'] != ''){
             $query->hasWhere("userDetail",function ($query)use ($where){
                 $query->where('nickname', 'LIKE', "%{$where['nickname']}%");

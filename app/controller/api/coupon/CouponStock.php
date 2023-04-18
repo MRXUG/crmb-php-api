@@ -2,6 +2,8 @@
 
 namespace app\controller\api\coupon;
 
+use app\common\dao\platform\PlatformCouponDao;
+use app\common\repositories\coupon\CouponConfigRepository;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\coupon\CouponStocksUserRepository;
 use crmeb\basic\BaseController;
@@ -54,5 +56,33 @@ class CouponStock extends BaseController
         $params = $this->request->params(['stock_name', 'nickname','written_off', 'coupon_user_id', 'stock_id', 'uid']);
         $params['time'] = date('Y-m-d H:i:s');
         return app('json')->success($this->userRepository->list($page, $limit, $params, 0));
+    }
+
+    //获取用户弹窗（平台券）
+    public function getPlatformCoupon(){
+        $uid = $this->request->param('uid',0);
+        $type = $this->request->param('type',0);
+
+        $couponConfigRepository = app()->make(CouponConfigRepository::class);
+
+        //查询用户是那种类型
+        $userType = $couponConfigRepository->getUserType($uid);
+
+        //用户是否可以发券(返回的是可发券数量)
+        $userIssueCoupons = $couponConfigRepository->userSuitablePlatformCoupon($uid,$type);
+
+        if ($userIssueCoupons == 0)return app('json')->fail('无券');
+
+        $date = date('Y-m-d H:i:s');
+        // 查询平台优惠券
+        $platformCouponDao = app()->make(PlatformCouponDao::class);
+        $list = $platformCouponDao->getPopupsPlatformCoupon([
+            ['crowd','in',[1,$userType]],
+            ['receive_start_time','>',$date],
+            ['receive_end_time','<',$date],
+        ],$userIssueCoupons);
+
+        return app('json')->success($list);
+
     }
 }

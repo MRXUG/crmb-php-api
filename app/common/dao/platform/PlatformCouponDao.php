@@ -58,4 +58,8 @@ class PlatformCouponDao extends BaseDao
         $mer_id_arr = explode(',', $model['mer_id_arr']);
         return $platformCouponRepository->getProductId($coupon_id_arr, $scope_arr, $mer_id_arr);
     }
+
+    public function getPopupsPlatformCoupon($where=[] ,$limit = 1){
+       return $this->getModel()::getDB()->where($where)->order("discount_num desc")->limit($limit)->select();
+    }
 }
