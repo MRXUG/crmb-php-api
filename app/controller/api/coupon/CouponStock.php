@@ -78,8 +78,8 @@ class CouponStock extends BaseController
         $platformCouponDao = app()->make(PlatformCouponDao::class);
         $list = $platformCouponDao->getPopupsPlatformCoupon([
             ['crowd','in',[1,$userType]],
-            ['receive_start_time','>',$date],
-            ['receive_end_time','<',$date],
+            ['receive_start_time','<',$date],
+            ['receive_end_time','>',$date],
         ],$userIssueCoupons);
 
         return app('json')->success($list);
