@@ -44,6 +44,7 @@ class EstimatePlatformCouponProduct implements JobInterface
         $productCount = 0;
         foreach ($productIdArrChunk as $item) {
             $productCount += Product::getInstance()
+                ->where('price', '>', $data['threshold'])
                 ->when($data['use_type'] == 2, function (BaseQuery $query) use ($data) {
                     $query->whereIn('cate_id', $data['scope_id_arr']);
                 })

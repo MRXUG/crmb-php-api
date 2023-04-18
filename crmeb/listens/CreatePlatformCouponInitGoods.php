@@ -48,7 +48,7 @@ class CreatePlatformCouponInitGoods implements JobInterface
                 $platformCoupon->getAttr('discount_num'),
                 $platformCoupon->getAttr('receive_start_time'),
                 $platformCoupon->getAttr('receive_end_time'),
-            ), $use_type, $platform_coupon_id);
+            ), $use_type, $platform_coupon_id, $platformCoupon->getAttr('threshold'));
             # 删除已存在
             PlatformCouponProduct::getInstance()->where('platform_coupon_id', $platform_coupon_id)->delete();
             # 将商品id写入
@@ -75,7 +75,7 @@ class CreatePlatformCouponInitGoods implements JobInterface
         $job->delete();
     }
 
-    private function getProductIdList(array $productIdArr, int $useType, int $platformCouponId): array
+    private function getProductIdList(array $productIdArr, int $useType, int $platformCouponId, int $threshold): array
     {
         if (empty($productIdArr)) return [];
         # 判断是全部或者不存在的参数使用所有
@@ -89,7 +89,9 @@ class CreatePlatformCouponInitGoods implements JobInterface
 
         $newProductIdArr = [];
         foreach (array_chunk($productIdArr, 50) as $item) {
-            $model = Product::getInstance()->whereIn('product_id', $item);
+            $model = Product::getInstance()
+                ->whereIn('product_id', $item)
+                ->where('price', '>', $threshold);
             switch ($useType) {
                 case 2:
                     $model->whereIn('cate_id', $scopeArr);
