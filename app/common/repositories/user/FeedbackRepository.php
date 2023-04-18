@@ -16,6 +16,7 @@ namespace app\common\repositories\user;
 
 use app\common\dao\user\FeedbackDao;
 use app\common\repositories\BaseRepository;
+use app\common\model\store\product\Product;
 use FormBuilder\Factory\Elm;
 use think\exception\ValidateException;
 use think\facade\Route;
@@ -72,4 +73,9 @@ class FeedbackRepository extends BaseRepository
         return $form->setTitle('回复用户')->formData($formData->toArray());
     }
 
+    //获取商品信息
+    public function getProductInfo($productId){
+        $model = new Product();
+        return $model->where(['product_id'=>$productId])->find();
+    }
 }

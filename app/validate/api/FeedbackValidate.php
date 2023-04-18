@@ -22,8 +22,10 @@ class FeedbackValidate extends Validate
     protected $rule = [
         'type|类型' => 'require',
         'images|图片' => 'array|max:6',
-        'realname|姓名' => 'require|>:1',
-        'contact|联系方式' => 'require|checkContact'
+        'realname|姓名' => 'alphaNum|max:24',
+        'contact|联系方式' => 'checkContact',
+        'order_id|订单ID' => 'integer|egt:0',
+        'order_sn|订单编号' => 'alphaNum|max:32'
     ];
 
     protected function checkContact($val)

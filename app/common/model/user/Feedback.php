@@ -13,6 +13,8 @@
 namespace app\common\model\user;
 
 use app\common\model\BaseModel;
+use app\common\model\store\order\StoreOrderProduct;
+
 
 class Feedback extends BaseModel
 {
@@ -51,5 +53,9 @@ class Feedback extends BaseModel
     public function type()
     {
         return $this->hasOne(FeedBackCategory::class,'feedback_category_id','type');
+    }
+    
+    public function orderProduct(){
+        return $this->hasOne(StoreOrderProduct::class,'order_id','order_id');
     }
 }
