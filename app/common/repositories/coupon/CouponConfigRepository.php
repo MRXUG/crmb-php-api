@@ -47,7 +47,7 @@ class CouponConfigRepository extends BaseRepository
         if ($couponConfig['closeClickToSendCoupons'] == 1)return 0;
 
         if (in_array($type,[1,2,3])){
-            $popups = $this->typePopups1($uid,$couponConfig);
+            $popups = $this->typePopups1($uid,$couponConfig,$type);
             if ($popups === false) return 0;
 
             $userCoupon = $this->getUserUseCoupon($uid,$couponConfig);
