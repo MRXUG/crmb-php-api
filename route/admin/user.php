@@ -178,12 +178,12 @@ Route::group(function () {
         ]);
 
         //黑名单操作
-        Route::post('black/operate/:uid','operate')->name('systemBlackOperate')->option([
+        Route::post('black/operate/:uid','/Operate')->name('systemBlackOperate')->option([
             '_alias' => '获取设置移除黑名单',
         ]);
 
         //写入黑名单变更记录 
-        Route::post('black/setlog/:uid','setLog')->name('systemBlackSetLog')->option([
+        Route::post('black/setlog/:uid','/setLog')->name('systemBlackSetLog')->option([
             '_alias' => '添加黑名单操作记录',
         ]);
 
