@@ -11,45 +11,31 @@
 // +----------------------------------------------------------------------
 
 
-namespace app\common\dao\black;
+namespace app\common\model\black;
 
 
-use think\Collection;
-use think\db\BaseQuery;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
-use think\facade\Db;
-use app\common\dao\BaseDao;
-use app\common\model\black\UserBlackLog;
 use app\common\model\BaseModel;
-use think\Model;
 
-class UserBlackLogDao extends BaseDao
+class UserBlackLog extends BaseModel
 {
 
     /**
-     * @return BaseModel
+     * @return string
      * @author xaboy
      * @day 2020-03-30
      */
-    protected function getModel(): string
+    public static function tablePk(): string
     {
-        return UserBlackLog::class;
+        return 'log_id';
     }
 
-
-       /**
-     * 搜索列表
-     * @param $uid
-     * @param array $where
-     * @return BaseQuery
-     * @author Qinii
+    /**
+     * @return string
+     * @author xaboy
+     * @day 2020-04-17
      */
-    public function search($uid,array $where)
+    public static function tableName(): string
     {
-        $query = UserBlackLog::getDB();
-
-        return $query->where('uid',$uid)->order('sort DESC,create_time DESC');
+        return 'user_black_log';
     }
 }
