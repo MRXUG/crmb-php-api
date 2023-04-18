@@ -11,12 +11,17 @@ use app\common\model\platform\PlatformCoupon;
 use app\common\model\store\product\Product;
 use app\common\repositories\BaseRepository;
 use crmeb\jobs\EstimatePlatformCouponProduct;
+use crmeb\listens\CreatePlatformCouponInitGoods;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
 use think\exception\ValidateException;
 use think\facade\Db;
+use think\facade\Log;
 use think\facade\Queue;
+use Exception;
+use ValueError;
+use Throwable;
 
 /**
  * @property PlatformCouponDao $dao
@@ -26,8 +31,11 @@ class PlatformCouponRepository extends BaseRepository
     private PlatformCouponUseScopeDao $useScopeDao;
     private PlatformCouponPositionDao $couponPositionDao;
 
-    public function __construct(PlatformCouponDao $dao, PlatformCouponUseScopeDao $useScopeDao, PlatformCouponPositionDao $couponPositionDao)
-    {
+    public function __construct(
+        PlatformCouponDao $dao,
+        PlatformCouponUseScopeDao $useScopeDao,
+        PlatformCouponPositionDao $couponPositionDao
+    ) {
         $this->dao = $dao;
         $this->useScopeDao = $useScopeDao;
         $this->couponPositionDao = $couponPositionDao;
@@ -176,6 +184,7 @@ class PlatformCouponRepository extends BaseRepository
      * @param int $amount
      * @param int $page
      * @param int $limit
+     * @throws null
      * @return void
      */
     public function platformCouponMerDetails(int $amount, int $page = 1, int $limit = 10): array
@@ -248,7 +257,7 @@ class PlatformCouponRepository extends BaseRepository
      * @return void
      * @throws null
      */
-    public function save(array $param, ?int $platformCouponId = null)
+    public function save(array $param, ?int $platformCouponId = null): void
     {
         # 不为空时为修改操作
         $isUpdate = !empty($platformCouponId);
@@ -259,46 +268,56 @@ class PlatformCouponRepository extends BaseRepository
         # 检测是否勾选发券位置
         if (empty($param['coupon_position'])) throw new ValidateException('发券位置必须选择');
 
-        Db::transaction(function () use ($param, $isUpdate, $platformCouponId) {
-            $nowDate = date("Y-m-d H:i:s");
-            # 获取操作对象
-            /** @var PlatformCoupon $platformCouponModel */
-            $platformCouponModel = $isUpdate
-                ? $this->dao->getModelObj()
-                    ->where('platform_coupon_id', '=', $platformCouponId)
-                    ->find()
-                : $this->dao->getModelObj();
-            # 获取是否修改了可用范围
-            $isUpdateUseType = $isUpdate && $platformCouponModel->getAttr('use_type') != $param['use_type'];
-            $platformCouponModel->save($param);
-            # 创建/修改 范围数据
-            if ($isUpdate && !empty($param['scope_id_arr'])) { # 如果有修改操作那么直接删除掉原有
-                $this->useScopeDao->getModelObj()->where('platform_coupon_id', $platformCouponId)->delete();
-            }
-            if (($isUpdate && !empty($param['scope_id_arr'])) || !$isUpdate) {
-                $this->useScopeDao->getModelObj()->insertAll((function () use ($param, $platformCouponModel, $nowDate): array {
+        try {
+            $platform_coupon_id = Db::transaction(function () use ($param, $isUpdate, $platformCouponId) {
+                $nowDate = date("Y-m-d H:i:s");
+                # 获取操作对象
+                /** @var PlatformCoupon $platformCouponModel */
+                $platformCouponModel = $isUpdate
+                    ? $this->dao->getModelObj()
+                        ->where('platform_coupon_id', '=', $platformCouponId)
+                        ->find()
+                    : $this->dao->getModelObj();
+                # 获取是否修改了可用范围
+                $isUpdateUseType = $isUpdate && $platformCouponModel->getAttr('use_type') != $param['use_type'];
+                $platformCouponModel->save($param);
+                # 创建/修改 范围数据
+                if ($isUpdate && !empty($param['scope_id_arr'])) { # 如果有修改操作那么直接删除掉原有
+                    $this->useScopeDao->getModelObj()->where('platform_coupon_id', $platformCouponId)->delete();
+                }
+                if (($isUpdate && !empty($param['scope_id_arr'])) || !$isUpdate) {
+                    $this->useScopeDao->getModelObj()->insertAll((function () use ($param, $platformCouponModel, $nowDate): array {
+                        $arr = [];
+                        foreach ($param['scope_id_arr'] as $item) $arr[] = [
+                            'scope_id' => $item,
+                            'scope_type' => $param['use_type'],
+                            'platform_coupon_id' => $platformCouponModel->getAttr('platform_coupon_id'),
+                            'create_time' => $nowDate
+                        ];
+                        return $arr;
+                    })());
+                }
+                # 创建/修改 弹窗位置
+                $this->couponPositionDao->getModelObj()->where('platform_coupon_id', $platformCouponId)->delete();
+                $this->couponPositionDao->getModelObj()->insertAll((function () use ($param, $platformCouponModel, $nowDate): array {
                     $arr = [];
-                    foreach ($param['scope_id_arr'] as $item) $arr[] = [
-                        'scope_id' => $item,
-                        'scope_type' => $param['use_type'],
+                    foreach ($param['coupon_position'] as $item) $arr[] = [
+                        'position' => $item,
                         'platform_coupon_id' => $platformCouponModel->getAttr('platform_coupon_id'),
                         'create_time' => $nowDate
                     ];
                     return $arr;
                 })());
-            }
-            # 创建/修改 弹窗位置
-            $this->couponPositionDao->getModelObj()->where('platform_coupon_id', $platformCouponId)->delete();
-            $this->couponPositionDao->getModelObj()->insertAll((function () use ($param, $platformCouponModel, $nowDate): array {
-                $arr = [];
-                foreach ($param['coupon_position'] as $item) $arr[] = [
-                    'position' => $item,
-                    'platform_coupon_id' => $platformCouponModel->getAttr('platform_coupon_id'),
-                    'create_time' => $nowDate
-                ];
-                return $arr;
-            })());
-        });
+                return $platformCouponModel->getAttr('platform_coupon_id');
+            });
+
+            # 调用初始化队列
+            Queue::push(CreatePlatformCouponInitGoods::class, [
+                'platform_coupon_id' => $platform_coupon_id
+            ]);
+        } catch (Exception|ValueError|Throwable $e) {
+            Log::error($e->getMessage() . $e->getTraceAsString());
+        }
     }
 
     /**
