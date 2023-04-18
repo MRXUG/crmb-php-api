@@ -18,7 +18,8 @@ R::group(function () {
         R::post('createEstimateGoods', 'PlatformCoupon/createEstimateGoods'); # 平台优惠券创建时预估数据
         R::get('getEstimateGoodsResult/:resultCode', 'PlatformCoupon/getEstimateGoodsResult'); # 获取预估结果数据
         R::get('getCouponOne/:discountNum', 'PlatformCoupon/getCouponOne'); # 选择优惠券数据
-        R::get('updateStatus/:id', 'PlatformCoupon/updateStatus'); # 修改优惠券状态
+        R::post('updateStatus/:id', 'PlatformCoupon/updateStatus'); # 修改优惠券状态
+        R::get('getCouponStatusCount', 'PlatformCoupon/getCouponStatusCount'); # 获取优惠券状态个数
 
     })->prefix('admin.coupon.platform.')->option([
         '_auth' => true,

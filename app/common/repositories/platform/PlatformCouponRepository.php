@@ -476,5 +476,34 @@ class PlatformCouponRepository extends BaseRepository
         $platformCoupon->save();
     }
 
+    /**
+     * 获取状态个数
+     *
+     * @throws null
+     * @return array
+     */
+    public function getStatusCount(): array
+    {
+        $modelFn = fn (array $where = []) => PlatformCoupon::getInstance()->where($where)->count('platform_coupon_id');
+        $nowDate = date("Y-m-d H:i:s");
 
+        return [
+            'all' => $modelFn(),
+            'wait_to_released' => $modelFn([
+                ['status', '=', 0],['receive_end_time', '>', $nowDate]
+            ]),
+            'has_not_started' => $modelFn([
+                ['status', '=', 1],['receive_start_time', '>', $nowDate]
+            ]),
+            'in_progress' => $modelFn([
+                ['status', '=', 1],['receive_start_time', '<', $nowDate],['receive_end_time', '>', $nowDate]
+            ]),
+            'over' => $modelFn([
+                ['status', '=', 1],['receive_end_time', '<', $nowDate]
+            ]),
+            'cancel' => $modelFn([
+                ['status', '=', 2]
+            ])
+        ];
+    }
 }

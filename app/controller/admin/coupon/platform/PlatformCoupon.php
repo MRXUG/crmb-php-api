@@ -156,4 +156,14 @@ class PlatformCoupon extends BaseController
         $this->repository->updateStatus($id, $status);
         return $this->json()->success();
     }
+
+    /**
+     * 获取优惠券个数
+     *
+     * @return mixed
+     */
+    public function getCouponStatusCount()
+    {
+        return $this->json()->success($this->repository->getStatusCount());
+    }
 }
