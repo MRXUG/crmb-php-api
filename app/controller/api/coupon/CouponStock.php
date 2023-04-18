@@ -60,7 +60,7 @@ class CouponStock extends BaseController
 
     //获取用户弹窗（平台券）
     public function getPlatformCoupon(){
-        $uid = $this->request->param('uid',0);
+        $uid = $this->request->uid();
         $type = $this->request->param('type',0);
 
         if ($uid == 0)return app('json')->fail('用户信息错误');
