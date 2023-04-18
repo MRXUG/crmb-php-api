@@ -8,6 +8,7 @@ use app\common\dao\platform\PlatformCouponPositionDao;
 use app\common\dao\platform\PlatformCouponUseScopeDao;
 use app\common\model\coupon\CouponStocks;
 use app\common\model\platform\PlatformCoupon;
+use app\common\model\platform\PlatformCouponProduct;
 use app\common\model\store\product\Product;
 use app\common\repositories\BaseRepository;
 use crmeb\jobs\EstimatePlatformCouponProduct;
@@ -243,6 +244,7 @@ class PlatformCouponRepository extends BaseRepository
      *     use_type: int,
      *     scope_id_arr: int[],
      *     coupon_position: int[],
+     *     threshold: int,
      *     receive_start_time: string,
      *     receive_end_time: string,
      *     coupon_name: string,
@@ -265,8 +267,30 @@ class PlatformCouponRepository extends BaseRepository
         if (in_array($param['use_type'], [2, 3, 4]) && empty($param['scope_id_arr'])) {
             throw new ValidateException('请选择范围');
         }
+        # 判断门槛是否小于或者等于面值
+        if ($param['threshold'] >= $param['discount_num']) {
+            throw new ValidateException('门槛必须大于面值');
+        }
+        # 判断设置了限量设置的数量必须大于0
+        if ($param['is_limit'] == 1 && $param['limit_number'] <= 0) {
+            throw new ValidateException('设置的领取限量值必须大于 0');
+        }
+        if ($param['is_user_limit'] == 1 && $param['user_limit_number'] <= 0){
+            throw new ValidateException('设置的每人领取限量值必须大于 0');
+        }
         # 检测是否勾选发券位置
         if (empty($param['coupon_position'])) throw new ValidateException('发券位置必须选择');
+
+        $build_bonds_merchant = (function (): string {
+            $conf = systemConfig('build_bonds_merchant');
+            if (count($conf) == 1) {
+                return (string) $conf[0];
+            } else {
+                return (string) $conf[mt_rand(0, count($conf) - 1)];
+            }
+        })();
+
+        $param['wechat_business_number'] = $build_bonds_merchant;
 
         try {
             $platform_coupon_id = Db::transaction(function () use ($param, $isUpdate, $platformCouponId) {
@@ -353,6 +377,14 @@ class PlatformCouponRepository extends BaseRepository
         return $jobNumber;
     }
 
+    /**
+     * 平台优惠券列表
+     *
+     * @param int $page
+     * @param int $limit
+     * @return array
+     * @throws null
+     */
     public function platformCouponList (int $page = 1, int $limit = 10): array
     {
         $platformCouponModel = fn() => $this->dao->getModelObj();
@@ -360,16 +392,55 @@ class PlatformCouponRepository extends BaseRepository
         $platformCoupon = $platformCouponModel()
             ->field([
                 'platform_coupon_id',
+                'use_type',
                 'coupon_name',
                 'receive_start_time',
                 'receive_end_time',
+                'wechat_business_number',
+                'threshold',
+                'discount_num',
+                'is_user_limit',
+                'user_limit_number',
+                'status'
             ])
             ->page($page, $limit)
-            ->select()->toArray();
+            ->select()
+            ->toArray();
+
+        $nowUnixTime = time();
 
         foreach ($platformCoupon as &$item) {
+            $endTime = strtotime($item['receive_end_time']);
+            # 领取倒计时
+            $item['receive_end_day'] = (int) ($nowUnixTime >= $endTime ? 0 : ($endTime - $nowUnixTime) / 86400);
+            # 可用商品数
+            $item['product_count'] = PlatformCouponProduct::getInstance()->where([
+                ['platform_coupon_id', '=', $item['platform_coupon_id']],
+                ['use_type', '=', $item['use_type']]
+            ])->count('id') ?? 0;
+            # 优惠信息
+            $item['discount_info'] = (function () use(&$item): string {
+                $productType = [
+                    1 => '全部商品',
+                    2 => '指定商品分类',
+                    3 => '指定商户',
+                    4 => '指定商户分类'
+                ][$item['use_type']] ?? '';
+                return "满{$item['threshold']}减{$item['discount_num']},{$productType} " .
+                    ($item['is_user_limit'] == 1 ? "每人限量{$item['user_limit_number']}次" : '每人不限量');
+            })();
             # 处理状态
-
+            $item['statusCn'] = (function () use (&$item, $nowUnixTime): string {
+                $startTime = strtotime($item['receive_start_time']);
+                $endTime = strtotime($item['receive_end_time']);
+                if ($startTime > $nowUnixTime) return '活动未开始';
+                if ($endTime < $nowUnixTime) return '已结束';
+                return [
+                    '待发布',
+                    '进行中',
+                    '已失效'
+                ][$item['status']];
+            })();
         }
 
         return [
