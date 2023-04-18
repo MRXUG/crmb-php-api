@@ -10,6 +10,7 @@ use app\common\dao\coupon\CouponStocksUserDao;
 use app\common\dao\store\order\StoreOrderDao;
 use app\common\dao\user\UserHistoryDao;
 use app\common\model\coupon\CouponStocks;
+use app\common\model\coupon\CouponStocksUser;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
 
@@ -87,7 +88,7 @@ class CouponConfigRepository extends BaseRepository
         $date = date('Y-m-d H:i:s');
 
         //查询用户未使用的券有多少
-        $userCouponNum  = CouponStocks::getDB()->where("uid",'=',$uid)
+        $userCouponNum  = CouponStocksUser::getDB()->where("uid",'=',$uid)
             ->where("start_at",'>',$date)
             ->where("end_at",'<',$date)
             ->where("written_off",'=',0)
