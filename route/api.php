@@ -58,6 +58,8 @@ Route::group('api/', function () {
         //优惠券
         Route::group('coupon', function () {
             Route::post('receive/:id', 'api.store.product.StoreCoupon/receiveCoupon');
+            Route::post('getPlatformCoupon', 'api.coupon.CouponStock/getPlatformCoupon');
+
         });
 
         //客服聊天
@@ -494,7 +496,6 @@ Route::group('api/', function () {
             Route::get('new_people', 'api.store.product.StoreCoupon/newPeople');
             Route::get('new_list', 'api.store.product.StoreCoupon/list');
             Route::get('decrypt', 'api.store.product.StoreCoupon/decrypt');
-            Route::get('getPlatformCoupon', 'api.coupon.CouponStock/getPlatformCoupon');
         });
 
         //商户

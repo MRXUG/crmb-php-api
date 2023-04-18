@@ -93,7 +93,7 @@ class CouponStock extends BaseController
             ['status','=',1],
         ],$userIssueCoupons,$uid);
 
-        return app('json')->success(['closeClickToSendCoupons'=>$couponConfigRepository['closeClickToSendCoupons'],'list'=>$list]);
+        return app('json')->success(['closeClickToSendCoupons'=>$couponConfig['closeClickToSendCoupons'],'list'=>$list]);
 
     }
 }
