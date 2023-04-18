@@ -63,13 +63,23 @@ class CouponStock extends BaseController
         $uid = $this->request->param('uid',0);
         $type = $this->request->param('type',0);
 
+        if ($uid == 0)return app('json')->fail('用户信息错误');
+        if ($type == 0)return app('json')->fail('弹窗类型错误');
+
+
+
         $couponConfigRepository = app()->make(CouponConfigRepository::class);
+
+        //查询发券风险设置
+        $couponConfig = $couponConfigRepository->getCouponConfig();
 
         //查询用户是那种类型
         $userType = $couponConfigRepository->getUserType($uid);
 
+        if ($userType == 0)return app('json')->fail('用户信息错误');
+
         //用户是否可以发券(返回的是可发券数量)
-        $userIssueCoupons = $couponConfigRepository->userSuitablePlatformCoupon($uid,$type);
+        $userIssueCoupons = $couponConfigRepository->userSuitablePlatformCoupon($uid,$type,$couponConfig);
 
         if ($userIssueCoupons == 0)return app('json')->fail('无券');
 
@@ -83,7 +93,7 @@ class CouponStock extends BaseController
             ['status','=',1],
         ],$userIssueCoupons,$uid);
 
-        return app('json')->success($list);
+        return app('json')->success(['closeClickToSendCoupons'=>$couponConfigRepository['closeClickToSendCoupons'],'list'=>$list]);
 
     }
 }

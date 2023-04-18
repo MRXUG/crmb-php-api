@@ -37,14 +37,9 @@ class CouponConfigRepository extends BaseRepository
      * @throws \think\db\exception\DbException
      * @throws \think\db\exception\ModelNotFoundException
      */
-    public function userSuitablePlatformCoupon($uid = 0,$type = 0)
+    public function userSuitablePlatformCoupon($uid = 0,$type = 0,$couponConfig = [])
     {
 
-        //查询发券风险设置
-        $couponConfig = $this->getCouponConfig();
-
-        //是否关闭弹窗
-        if ($couponConfig['closeClickToSendCoupons'] == 1)return 0;
 
         if (in_array($type,[1,2,3])){
             $popups = $this->typePopups1($uid,$couponConfig,$type);
@@ -144,6 +139,8 @@ class CouponConfigRepository extends BaseRepository
 
         //老客
         if ($payOrder > 0) return  4;
+
+        return  0;
     }
 
 
