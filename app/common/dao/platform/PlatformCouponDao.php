@@ -90,7 +90,7 @@ class PlatformCouponDao extends BaseDao
                }
            }
 
-           $newList = $v;
+           $newList = $v->toArray();
        }
 
        $count = count($newList);
