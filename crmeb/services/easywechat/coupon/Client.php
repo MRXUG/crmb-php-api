@@ -327,10 +327,10 @@ class Client extends BaseClient
 
         $miniAppPath = "/pages/columnGoods/goods_coupon_list/index?coupon_id={$coupon->getAttr('platform_coupon_id')}&type=3";
 
-        $couponData = [
+        return [
             'out_request_no'   => $this->generateOutRequestNo($appId, $mchId),
             'belong_merchant'  => $mchId,
-            'goods_name'       => '平台商品可用',
+            'goods_name'       => '部分商品可用',
             'stock_name'       => $coupon->getAttr('coupon_name'),
             'stock_type'       => CouponStocks::STOCK_TYPE_REDUCE,
             'coupon_code_mode' => CouponStocks::WECHATPAY_MODE,
@@ -354,18 +354,17 @@ class Client extends BaseClient
             ],
             'custom_entrance' => [
                 'mini_programs_info' => [
-                    'entrance_words'      => '测试入口',
-//                    'guiding_words'       => $params['guiding_words'],
+                    'entrance_words'      => '关闭提醒',
+                    'guiding_words'       => '投诉商家',
                     'mini_programs_path'  => $miniAppPath,
                     'mini_programs_appid' => $appId,
                 ],
             ],
             'notify_config' => [
                 'notify_appid' => $appId, // 用于回调通知时，计算返回操作用户的openid（诸如领券用户），支持小程序or公众号的APPID
-            ]
+            ],
+            'available_day_after_receive' => $coupon->getAttr('effective_day_number'),
         ];
-
-        return $couponData;
     }
 
     /**

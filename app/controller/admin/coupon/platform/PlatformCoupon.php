@@ -168,4 +168,15 @@ class PlatformCoupon extends BaseController
     {
         return $this->json()->success($this->repository->getStatusCount());
     }
+
+    /**
+     * 获取编辑优惠券商品基本信息
+     *
+     * @param int $id
+     * @return mixed
+     */
+    public function getEditCouponProductInfo(int $id)
+    {
+        return $this->json()->success($this->repository->getEditCouponProductInfo($id));
+    }
 }
