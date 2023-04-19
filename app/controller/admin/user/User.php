@@ -599,8 +599,18 @@ class User extends BaseController
         $uid = $this->request->param('uid');
         if($uid){
             $this->user = $this->repository->get($uid);
-            
+            //判断是否白名单
+            if($this->user->white){
+                return app('json')->fail('白名单用户不可以加入黑名单');
+            }
+
             $operate = $this->request->param('operate');
+            $log = [
+                'uid' => $uid,
+                'type' => 1,
+                'operate' => 2,
+            ];
+  
             if($this->user){
 
                 switch($operate){
@@ -608,13 +618,19 @@ class User extends BaseController
                         //拉入黑名单
                         $data = ['black'=>1,'wb_time'=>time()];
                         $this->repository->update($uid,$data);
-                        
+                        //记录日志
+                        $this->setBlackLog($log);
+    
                         return app('json')->success('黑名单设置成功');
                         break;
                     case 'del':
                         //移除黑名单
                         $data = ['black'=>0,'wb_time'=>time()];
                         $this->repository->update($uid,$data);
+                        
+                        //记录日志
+                        $log['type'] = 0;
+                        $this->setBlackLog($log);
                         
                         return app('json')->success('黑名单移除成功');
                         break;
@@ -627,6 +643,29 @@ class User extends BaseController
                         return app('json')->success($this->repository->getPulbicLst($where, $page, $limit));
                 }
             }
+        }else{
+            return app('json')->fail('参数错误');
+        }
+    }
+    
+    
+    /**
+     * 黑名单操作记录平台调用
+     * $type 变更形式1系统判定2人工添加3用户主动
+     * $uid  用户id
+     * $operate  1加入黑名单0移出黑名单
+     */
+    public function setBlackLog($data){
+        if(isset($data['uid']) && $data['uid'] > 0){
+            $arr = [
+                'uid' => $data['uid'],
+                'type' => $data['type'],
+                'operate' => $data['operate'],
+                'create_time' => time()
+            ];
+            $info = app()->make(UserBlackLogRepository::class)->create($arr);
+            
+            return app('json')->success('记录成功');
         }else{
             return app('json')->fail('参数错误');
         }
@@ -705,6 +744,10 @@ class User extends BaseController
         $where = [
             'white' => 1
         ];
+        
+        if($this->request->has('uid')){
+            $where['uid'] = intval($this->request->param('uid'));
+        }
         return app('json')->success($this->repository->getPulbicLst($where, $page, $limit));
     }
 
