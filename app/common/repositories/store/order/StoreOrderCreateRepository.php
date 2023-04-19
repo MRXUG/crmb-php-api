@@ -3234,7 +3234,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         $merId2                  = (int)$merId;
         $returnCouponCode        = $refluxCoil['coupon_code'] ?? '';
         $returnCouponType        = $refluxCoil['type'] ?? '1';
-        $returnCouponMerId       = (int)$refluxCoil['mer_id'] ?? 0;
+        $returnCouponMerId       = (int) ($refluxCoil['mer_id'] ?? 0);
         if (!empty($returnCouponCode) && $returnCouponType == '2' && $merId2 == $returnCouponMerId) {
             $isReturnCoupon = true;
         }
