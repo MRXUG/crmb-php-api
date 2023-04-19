@@ -9,10 +9,12 @@ use app\common\dao\platform\PlatformCouponUseScopeDao;
 use app\common\model\coupon\CouponStocks;
 use app\common\model\platform\PlatformCoupon;
 use app\common\model\platform\PlatformCouponProduct;
+use app\common\model\platform\PlatformCouponReceive;
 use app\common\model\store\product\Product;
 use app\common\repositories\BaseRepository;
 use crmeb\jobs\EstimatePlatformCouponProduct;
 use crmeb\listens\CreatePlatformCouponInitGoods;
+use crmeb\services\MerchantCouponService;
 use think\db\BaseQuery;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -282,17 +284,6 @@ class PlatformCouponRepository extends BaseRepository
         # 检测是否勾选发券位置
         if (empty($param['coupon_position'])) throw new ValidateException('发券位置必须选择');
 
-        $build_bonds_merchant = (function (): string {
-            $conf = systemConfig('build_bonds_merchant');
-            if (count($conf) == 1) {
-                return (string) $conf[0];
-            } else {
-                return (string) $conf[mt_rand(0, count($conf) - 1)];
-            }
-        })();
-
-        $param['wechat_business_number'] = $build_bonds_merchant;
-
         try {
             $platform_coupon_id = Db::transaction(function () use ($param, $isUpdate, $platformCouponId) {
                 $nowDate = date("Y-m-d H:i:s");
@@ -335,7 +326,6 @@ class PlatformCouponRepository extends BaseRepository
                 })());
                 return $platformCouponModel->getAttr('platform_coupon_id');
             });
-
             # 调用初始化队列
             Queue::push(CreatePlatformCouponInitGoods::class, [
                 'platform_coupon_id' => $platform_coupon_id
@@ -383,16 +373,17 @@ class PlatformCouponRepository extends BaseRepository
      *
      * @param int $page
      * @param int $limit
+     * @param array $where
      * @return array
      * @throws null
      */
     public function platformCouponList (int $page = 1, int $limit = 10, array $where = []): array
     {
         $nowDate = date("Y-m-d H:i:s");
-        # TODO 券id搜索 发放位置搜索
+
         $platformCouponModel = fn() => $this->dao->getModelObj()->alias('a')->when(!empty($where), function (BaseQuery $query) use($where, $nowDate) {
             # 根据状态筛选
-            if (isset($where['status']) && $where['status'] >= 0) {
+            if (!empty($where['status']) && $where['status'] >= 0) {
                 switch ($where['status']) {
                     case 0: # 待发布
                         $query->where([
@@ -433,6 +424,16 @@ class PlatformCouponRepository extends BaseRepository
             if (isset($where['crowd']) && $where['crowd'] > 0) {
                 $query->where('a.crowd', '=', $where['crowd']);
             }
+            # 优惠券id查询
+            if (isset($where['stock_id']) && $where['stock_id'] > 0) {
+                $query->where('a.stock_id', 'like', "%{$where['stock_id']}%");
+            }
+            # 发放位置搜索
+            if (!empty($where['position']) && $where['position'] > 0) {
+                $query->whereIn('a.platform_coupon_id', Db::raw(<<<SQL
+                    select platform_coupon_id from eb_platform_coupon_position where position = {$where['position']} group by platform_coupon_id
+                SQL));
+            }
         });
 
         $platformCoupon = $platformCouponModel()
@@ -448,7 +449,11 @@ class PlatformCouponRepository extends BaseRepository
                 'a.is_user_limit',
                 'a.user_limit_number',
                 'a.status',
-                'a.crowd'
+                'a.crowd',
+                'a.stock_id',
+                'a.is_limit',
+                'a.limit_number',
+                'a.received',
             ])
             ->page($page, $limit)
             ->order('a.platform_coupon_id', 'desc')
@@ -456,6 +461,9 @@ class PlatformCouponRepository extends BaseRepository
             ->toArray();
 
         $nowUnixTime = time();
+        # 声明优惠券领取表操作模型
+        $platformCouponReceive = fn (int $platformCouponId) => PlatformCouponReceive::getInstance()
+            ->where('platform_coupon_id', $platformCouponId);
 
         foreach ($platformCoupon as &$item) {
             $endTime = strtotime($item['receive_end_time']);
@@ -495,6 +503,24 @@ class PlatformCouponRepository extends BaseRepository
                     '已失效'
                 ][$item['status']];
             })();
+            # 使用数量
+            $item['use_count'] = [
+                'received' => $platformCouponReceive($item['platform_coupon_id'])->count('id'),
+                'used' => $platformCouponReceive($item['platform_coupon_id'])->where('status', 1)->count('id'),
+            ];
+            # 库存
+            $item['stock'] = (function () use (&$item): array {
+                $a = [];
+                if ($item['is_limit'] == 1) {
+                    $remain = $item['limit_number'] - $item['received'];
+                    $remain = max($remain, 0);
+                    $a[] = "总量:{$item['limit_number']}";
+                    $a[] = "剩余:{$remain}";
+                } else {
+                    $a[] = '不限量';
+                }
+                return $a;
+            })();
         }
 
         return [
@@ -519,9 +545,39 @@ class PlatformCouponRepository extends BaseRepository
             ['platform_coupon_id', '=', $platformCouponId],
         ])->find();
         if (!$platformCoupon) throw new ValidateException('操作错误');
-        # 修改状态
-        $platformCoupon->setAttr('status', $status);
-        $platformCoupon->save();
+
+        Db::transaction(function () use ($platformCoupon, $status) {
+            # 判断状态进行对应操作
+            if ($status == 1) { # 发布
+                $res = $this->buildPlatformCoupon($platformCoupon);
+                $platformCoupon['wechat_business_number'] = $res['params']['belong_merchant']; # 填入生成优惠券的商户号
+                $platformCoupon['stock_id'] = $res['result']['stock_id']; # 填入批次号
+            }
+            if ($status == 2) { # 失效
+                $this->failPlatformCoupon($platformCoupon);
+            }
+            # 修改状态
+            $platformCoupon->setAttr('status', $status);
+            $platformCoupon->save();
+        });
+    }
+
+    public function buildPlatformCoupon(PlatformCoupon $coupon): array
+    {
+        return MerchantCouponService::create(MerchantCouponService::BUILD_COUPON, [], $merchantConfig)
+            ->coupon()
+            ->buildPlatformCoupon($coupon, $merchantConfig);
+    }
+
+    /**
+     * 将平台优惠券失效
+     *
+     * @param PlatformCoupon $coupon
+     * @return void
+     */
+    public function failPlatformCoupon(PlatformCoupon $coupon)
+    {
+
     }
 
     /**
