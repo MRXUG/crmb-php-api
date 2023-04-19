@@ -39,11 +39,18 @@ class Risk extends BaseController
     }
 
     public function setRisk(){
+        
         $param = $this->request->params(['usecoupon','day30coupon','day30feedback','day30applet','day30mppay','blacklist_vid','voidReceivedCoupon','platformCouponGrantPop','platformCouponGrantList','adReflowCouponPop']);
-        if($param){
-            $rid = $this->repository->getRisk();
 
-            $this->repository->update($param);
+        if($param){
+            $rid = $this->repository->getRiskId();
+            if($rid){
+                $this->repository->update($rid,$param);
+                
+                return app('json')->success('保存成功');
+            }else{
+                return app('json')->fail('参数错误');
+            }
         }
     }
 

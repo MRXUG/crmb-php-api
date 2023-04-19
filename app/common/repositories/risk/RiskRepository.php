@@ -23,6 +23,7 @@ use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
 use think\facade\Route;
+use app\common\model\risk\Risk;
 
 /**
  * Class ArticleCategoryRepository
@@ -40,8 +41,9 @@ class RiskRepository extends BaseRepository{
         $this->dao = $dao;
     }
 
-    public function getRisk(){
-        return $this->dao->find();
+    public function getRiskId(){
+        $model = new Risk;
+        return $model->order('rid DESC')->value('rid');
     }
 
 }
