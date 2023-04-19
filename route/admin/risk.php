@@ -18,13 +18,12 @@ use app\common\middleware\LogMiddleware;
 Route::group(function () {
 
     Route::group('risk', function () {
-        Route::get('setrisk', '/setRisk')->name('systemSetRisk')->option([
+        Route::post('setrisk', '/setRisk')->name('systemSetRisk')->option([
             '_alias' => '风险数据设置',
-        ])->prefix('admin.system.risk.Risk')->option([
-            '_alias' => '风险数据',
         ]);
-    }
-
+    })->prefix('admin.risk.Risk')->option([
+        '_auth' => true,
+    ]);
 
 
 
