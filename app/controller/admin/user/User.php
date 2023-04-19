@@ -607,8 +607,8 @@ class User extends BaseController
             $operate = $this->request->param('operate');
             $log = [
                 'uid' => $uid,
-                'type' => 1,
-                'operate' => 2,
+                'type' => 2,
+                'operate' => 1,
             ];
   
             if($this->user){
@@ -629,7 +629,7 @@ class User extends BaseController
                         $this->repository->update($uid,$data);
                         
                         //记录日志
-                        $log['type'] = 0;
+                        $log['operate'] = 0;
                         $this->setBlackLog($log);
                         
                         return app('json')->success('黑名单移除成功');
