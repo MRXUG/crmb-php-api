@@ -65,6 +65,7 @@ Route::group('api/', function () {
         Route::group('coupon', function () {
             Route::post('receive/:id', 'api.store.product.StoreCoupon/receiveCoupon');
             Route::post('getPlatformCoupon', 'api.coupon.CouponStock/getPlatformCoupon');
+            Route::post('userReceivePlatformCoupon', 'api.coupon.CouponStock/userReceivePlatformCoupon');
 
         });
 

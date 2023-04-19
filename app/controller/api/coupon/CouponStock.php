@@ -3,6 +3,7 @@
 namespace app\controller\api\coupon;
 
 use app\common\dao\platform\PlatformCouponDao;
+use app\common\model\platform\PlatformCouponReceive;
 use app\common\repositories\coupon\CouponConfigRepository;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\coupon\CouponStocksUserRepository;
@@ -95,5 +96,17 @@ class CouponStock extends BaseController
 
         return app('json')->success(['closeClickToSendCoupons'=>$couponConfig['closeClickToSendCoupons'],'list'=>$list]);
 
+    }
+
+    //用户平台券转商家券记录次数
+    public function userReceivePlatformCoupon()
+    {
+        $platform_coupon_id = $this->request->param('platform_coupon_id',0);
+        $uid = $this->request->uid();
+
+        if (!$platform_coupon_id)return app('json')->fail('无券');
+
+        $res = PlatformCouponReceive::getDB()->where([['user_id','=',$uid],['platform_coupon_id','=',$platform_coupon_id]])->inc('transform_num',1);
+        return app('json')->success('保存成功');
     }
 }
