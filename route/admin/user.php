@@ -193,12 +193,12 @@ Route::group(function () {
         ]);
 
         //操作白名单
-        Route::get('white/operate/:uid','/whiteOperate')->name('systemWhiteOperate')->option([
+        Route::post('white/operate/:uid','/whiteOperate')->name('systemWhiteOperate')->option([
             '_alias' => '白名单操作',
         ]);
 
         //获取白名单列表
-        Route::get('white/list/:uid','/getWhite')->name('systemGetWhite')->option([
+        Route::get('white/list','/getWhite')->name('systemGetWhite')->option([
             '_alias' => '获取白名单列表',
         ]);
 

@@ -60,9 +60,9 @@ class UserBlackLogRepository extends BaseRepository{
      * @return array
      * @author stone
      */
-    public function search(int $uid, array $where, $page, $limit)
+    public function search(array $where, $page, $limit)
     {
-        $query = $this->dao->search($uid, $where)->order('create_time DESC');
+        $query = $this->dao->search($where)->order('create_time DESC');
         $count = $query->count($this->dao->getPk());
         $list = $query->page($page, $limit)->select();
         return compact('count', 'list');

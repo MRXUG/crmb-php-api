@@ -112,17 +112,17 @@ class Black extends BaseController{
     /**
      * 用户详情 黑名单记录
      */
-    public function getLog($uid=0,$page=1,$limit=10){
+    public function getLog(){
         if($this->request->has('uid')){
             $uid = $this->request->param('uid');
-            $page = $this->request->param('page',1);
-            $limit = $this->request->param('limit',10);
-        }
 
-        if($uid > 0){
-            [$page, $limit] = $this->getPage();
-            $where = [];
-            return app('json')->success($this->userblackLogRepository->search($uid,$where, $page, $limit));
+            if($uid > 0){
+                [$page, $limit] = $this->getPage();
+                $where = [];
+                return app('json')->success($this->userblackLogRepository->search($where, $page, $limit));
+            }
+        }else{
+            return app('json')->fail('参数错误');
         }
     }
 

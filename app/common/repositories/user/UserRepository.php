@@ -193,7 +193,7 @@ class UserRepository extends BaseRepository
     {
         $query = $this->dao->search($where);
         $count = $query->count();
-        $list = $query->page($page, $limit)->setOption('field',[])->field('uid,nickname,avatar')->select();
+        $list = $query->page($page, $limit)->setOption('field',[])->field('uid,nickname,avatar,wb_time')->select();
         return compact('count', 'list');
     }
 
