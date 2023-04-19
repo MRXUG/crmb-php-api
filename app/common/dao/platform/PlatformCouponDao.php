@@ -94,7 +94,7 @@ class PlatformCouponDao extends BaseDao
                }
            }
 
-           $newList = $v->toArray();
+           $newList[] = $v->toArray();
        }
 
        $count = count($newList);
@@ -103,5 +103,18 @@ class PlatformCouponDao extends BaseDao
        }
 
        return $newList;
+    }
+
+
+    public function receivePlatformCoupon($data = [],$uid = 0,$type = 0)
+    {
+        $receive = [];
+        foreach ($data as $k=>$v){
+            $receive[$k]['platform_coupon_id'] = $v['platform_coupon_id'];
+            $receive[$k]['user_id'] = $uid;
+            $receive[$k]['use_type'] = $type;
+        }
+
+        $this->getModel()::getDB()->insertAll($receive);
     }
 }
