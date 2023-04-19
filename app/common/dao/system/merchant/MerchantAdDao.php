@@ -58,11 +58,11 @@ class MerchantAdDao extends BaseDao
      */
     public function getInfo2($id)
     {
-        $result = $this->getModelObj()->find($id)->toArray();
+        $result = $this->getModelObj()->find($id);
         if (empty($result)) {
             return [];
         } else {
-            return $result;
+            return $result->toArray();
         }
     }
 

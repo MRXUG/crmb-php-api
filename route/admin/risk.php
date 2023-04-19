@@ -15,24 +15,24 @@ use app\common\middleware\AdminTokenMiddleware;
 use app\common\middleware\AllowOriginMiddleware;
 use app\common\middleware\LogMiddleware;
 //用户风险管控
-Route::group(function () {
+// Route::group(function () {
 
-    Route::group('risk', function () {
-        Route::get('setrisk', '/setRisk')->name('systemSetRisk')->option([
-            '_alias' => '风险数据设置',
-        ])->prefix('admin.system.risk.Risk')->option([
-            '_alias' => '风险数据',
-        ]);
-    }
-
-
+//     Route::group('risk', function () {
+//         Route::get('setrisk', '/setRisk')->name('systemSetRisk')->option([
+//             '_alias' => '风险数据设置',
+//         ])->prefix('admin.system.risk.Risk')->option([
+//             '_alias' => '风险数据',
+//         ]);
+//     })
 
 
 
 
 
 
-})->middleware(AllowOriginMiddleware::class)
-    ->middleware(AdminTokenMiddleware::class, true)
-    ->middleware(AdminAuthMiddleware::class)
-    ->middleware(LogMiddleware::class);
+
+
+// })->middleware(AllowOriginMiddleware::class)
+//     ->middleware(AdminTokenMiddleware::class, true)
+//     ->middleware(AdminAuthMiddleware::class)
+//     ->middleware(LogMiddleware::class);

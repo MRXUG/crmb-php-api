@@ -3172,7 +3172,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             'merchant_source' => $merchantSource,
             'discount_total'  => $discountTotal,
             'merchant_coupon' => $bestCoupon,
-            'ad_channel_id' => $adInfo2['ad_channel_id'],
+            'ad_channel_id' => $adInfo2 && $adInfo2['ad_channel_id'] ? $adInfo2['ad_channel_id'] : 0,
         ];
     }
 
@@ -3407,7 +3407,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             'merchant_source' => $merchantSource,
             'discount_total'  => $discountTotal,
             'merchant_coupon' => $bestCoupon,
-            'ad_channel_id' => $adInfo2['ad_channel_id'],
+            'ad_channel_id' => $adInfo2 && $adInfo2['ad_channel_id'] ? $adInfo2['ad_channel_id'] : 0,
         ];
     }
 
