@@ -13,10 +13,4 @@ class PlatformCouponReceiveDao extends BaseDao
     {
         return PlatformCouponReceive::class;
     }
-
-
-    public function createUpdate($where, $data)
-    {
-        return $this->getModel()::getDB()->createOrUpdate($where, $data);
-    }
 }
