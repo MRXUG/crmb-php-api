@@ -6,8 +6,11 @@
 namespace app\controller\api\coupon;
 
 use app\common\dao\platform\PlatformCouponDao;
+use app\common\dao\platform\PlatformCouponReceiveDao;
+use app\common\model\platform\PlatformCouponReceive;
 use app\common\repositories\coupon\BuildCouponRepository;
 use app\common\repositories\coupon\CouponStocksUserRepository;
+use app\common\repositories\platform\PlatformCouponRepository;
 use app\common\repositories\wechat\WechatUserRepository;
 use crmeb\basic\BaseController;
 use think\exception\ValidateException;
@@ -120,7 +123,7 @@ class ReceiveCoupon extends BaseController
 
 
 
-    public function receivePlatformCoupon(CouponStocksUserRepository $couponStocksUserRepository)
+    public function receivePlatformCoupon(PlatformCouponReceiveDao $platformCouponReceiveDao)
     {
         $params = $this->request->post();
         $uid = $this->request->uid();
@@ -171,7 +174,7 @@ class ReceiveCoupon extends BaseController
                 'create_time' => date('Y-m-d H:i:s'),
             ];
 
-            $couponStocksUserRepository->createUpdate($where, $data);
+            $platformCouponReceiveDao->createUpdate($where, $data);
         }
 
         return app('json')->success([]);
