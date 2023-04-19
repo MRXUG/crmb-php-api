@@ -5,6 +5,7 @@
 
 namespace app\controller\api\coupon;
 
+use app\common\dao\platform\PlatformCouponDao;
 use app\common\repositories\coupon\BuildCouponRepository;
 use app\common\repositories\coupon\CouponStocksUserRepository;
 use app\common\repositories\wechat\WechatUserRepository;
@@ -106,6 +107,65 @@ class ReceiveCoupon extends BaseController
                 'stock_id'    => $stockId,
                 'start_at'    => $start,
                 'end_at'      => $end,
+                'appid'      => $out_request_no[0],
+                'mch_id'      => $out_request_no[1],
+                'create_time' => date('Y-m-d H:i:s'),
+            ];
+
+            $couponStocksUserRepository->createUpdate($where, $data);
+        }
+
+        return app('json')->success([]);
+    }
+
+
+
+    public function receivePlatformCoupon(CouponStocksUserRepository $couponStocksUserRepository)
+    {
+        $params = $this->request->post();
+        $uid = $this->request->uid();
+        $user = $this->request->userInfo();
+        $wechatUserId = $user->wechat_user_id;
+
+        /**
+         * @var WechatUserRepository $wechatUserRepository
+         */
+        $wechatUserRepository = app()->make(WechatUserRepository::class);
+        $wechatUser = $wechatUserRepository->getOne(['wechat_user_id' => $wechatUserId], 'wechat_user_id, unionid, routine_openid');
+
+        /**
+         * @var BuildCouponRepository $buildCouponRepository
+         */
+        $platformCouponDao = app()->make(PlatformCouponDao::class);
+
+        $date = date('Y-m-d H:i:s');
+        foreach ($params['coupon'] as $item) {
+            $couponCode = $item['coupon_code'] ?? '';
+            $stockId = $item['stock_id'] ?? '';
+            $stockInfo = $platformCouponDao->getWhere(['stock_id' => $stockId]);
+            if (empty($couponCode) || empty($stockInfo)) {
+                throw new ValidateException('券编码不能为空');
+            }
+
+            $where = [
+                'coupon_code' => $item['coupon_code'],
+            ];
+            if (!$item["out_request_no"]){
+                throw new ValidateException('商户号不存在');
+            }
+            $out_request_no = explode("_",$item["out_request_no"]);
+
+            if (count($out_request_no) < 2){
+                throw new ValidateException('商户号不存在');
+            }
+            $data = [
+                'platform_coupon_id'       => $stockInfo['platform_coupon_id'] ?? 0,
+                'user_id'         => $uid,
+                'coupon_code' => $item['coupon_code'],
+                'discount_num'     => $stockInfo['discount_num'],
+                'stock_id'    => $stockId,
+                'start_use_time'    => $date,
+                'end_use_time'      => date('Y-m-d H:i:s',strtotime($date) *$stockInfo['effective_day_number']),
                 'appid'      => $out_request_no[0],
                 'mch_id'      => $out_request_no[1],
                 'create_time' => date('Y-m-d H:i:s'),
