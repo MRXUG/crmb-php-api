@@ -78,7 +78,8 @@ class PlatformCoupon extends BaseController
      */
     public function getEstimateGoodsResult(string $resultCode)
     {
-        return $this->json()->success(Cache::get("EstimatePlatformCouponProduct:{$resultCode}"));
+        $data = Cache::get("EstimatePlatformCouponProduct:{$resultCode}") ?? [];
+        return $this->json()->success($data);
     }
 
     /**

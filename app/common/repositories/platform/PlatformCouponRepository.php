@@ -11,13 +11,13 @@ use app\common\model\platform\PlatformCoupon;
 use app\common\model\platform\PlatformCouponProduct;
 use app\common\model\platform\PlatformCouponReceive;
 use app\common\model\store\product\Product;
-use app\common\model\store\product\ProductCate;
 use app\common\model\store\StoreCategory;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\store\StoreCategoryRepository;
 use crmeb\jobs\EstimatePlatformCouponProduct;
 use crmeb\listens\CreatePlatformCouponInitGoods;
 use crmeb\services\MerchantCouponService;
+use Exception;
 use think\db\BaseQuery;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -26,9 +26,8 @@ use think\exception\ValidateException;
 use think\facade\Db;
 use think\facade\Log;
 use think\facade\Queue;
-use Exception;
-use ValueError;
 use Throwable;
+use ValueError;
 
 /**
  * @property PlatformCouponDao $dao
@@ -70,9 +69,12 @@ class PlatformCouponRepository extends BaseRepository
             ['start_at', '<', $nowDate],
             ['discount_num', '=', $discount_num]
         ];
-
+        /** @var CouponStocks $model */
         $model = $couponDao->getModelObj()->where($where)->group('discount_num')->field($field)->find();
-
+        # 保证有优惠券在范围内
+        $model->setAttr('min_start_time', date("Y-m-d H:i:s", strtotime($model->getAttr('min_start_time')) + 10));
+        $model->setAttr('max_end_time', date("Y-m-d H:i:s", strtotime($model->getAttr('max_end_time')) - 10));
+        # 返回数据
         return method_exists($model, 'toArray') ? $model->toArray() : [];
     }
 
