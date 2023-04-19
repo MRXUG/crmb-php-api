@@ -192,6 +192,16 @@ Route::group(function () {
             '_alias' => '获取黑名单记录',
         ]);
 
+        //操作白名单
+        Route::get('white/operate/:uid','/whiteOperate')->name('systemWhiteOperate')->option([
+            '_alias' => '白名单操作',
+        ]);
+
+        //获取白名单列表
+        Route::get('white/list/:uid','/getWhite')->name('systemGetWhite')->option([
+            '_alias' => '获取白名单列表',
+        ]);
+
     })->prefix('admin.user.User')->option([
         '_path' => '/user/list',
         '_auth' => true,

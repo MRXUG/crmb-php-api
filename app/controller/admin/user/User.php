@@ -663,4 +663,44 @@ class User extends BaseController
             return app('json')->success($this->repository->search($uid,$where, $page, $limit));
         }
     }
+
+    /**
+     * 白名单操作
+     */
+    public function whiteOperate($uid){
+        if($uid > 0){
+            $this->user = $this->repository->get($uid);
+            
+            $operate = $this->request->param('operate');
+            if($operate == 'del'){
+                //移出白名单
+                $data = ['white'=>0];
+                $this->repository->update($uid,$data);
+                
+                return app('json')->success('移出白名单成功');
+            }else{
+                //加入白名单
+                $data = ['white'=>1];
+                $this->repository->update($uid,$data);
+                
+                return app('json')->success('白名单设置成功');
+            }
+        }
+    }
+
+    /**
+     * 白名单列表
+     */
+    public function getWhite(){
+
+        [$page, $limit] = $this->getPage();
+        $where = [
+            'white' => 1
+        ];
+        return app('json')->success($this->repository->getList($where, $page, $limit));
+    }
+
+
+
+
 }
