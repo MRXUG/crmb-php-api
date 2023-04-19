@@ -58,6 +58,7 @@ Route::group('api/', function () {
         Route::group('platform/coupon', function () {
             // 领券签名
             Route::post('sign', 'api.coupon.GenerateCouponSign/generatePlatformCouponSign');
+            Route::post('receive', 'api.coupon.ReceiveCoupon/receivePlatformCoupon');
         });
 
         //优惠券
