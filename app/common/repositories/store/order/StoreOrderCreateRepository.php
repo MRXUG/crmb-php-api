@@ -2,6 +2,7 @@
 
 namespace app\common\repositories\store\order;
 
+use app\common\dao\system\merchant\MerchantAdDao;
 use app\common\model\coupon\CouponStocks;
 use app\common\model\store\order\StoreOrder;
 use app\common\repositories\coupon\CouponStocksRepository;
@@ -2146,7 +2147,8 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 'platform_coupon_price' => $merchantCart['order']['platform_coupon_price'],
                 'pay_type' => $pay_type,
                 'ad_id' => $marketingDiscount['ad_id'] ?? '',
-                'ad_channel_id' => $ad_channel_id, // 广告渠道，腾讯广告1. 抖音广告2
+                // 'ad_channel_id' => $ad_channel_id, // 广告渠道，腾讯广告1. 抖音广告2
+                'ad_channel_id'=> $marketingData['ad_channel_id'],
                 'platform_source'=> $marketingData['platform_source'],
                 'merchant_source'=> $marketingData['merchant_source'],
                 'ad_query'=> $ad_query,
@@ -2659,7 +2661,8 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 'platform_coupon_price' => $merchantCart['order']['platform_coupon_price'],
                 'pay_type' => $pay_type,
                 'ad_id' => $marketingDiscount['ad_id'] ?? '',
-                'ad_channel_id' => $ad_channel_id, // 广告渠道，腾讯广告1. 抖音广告2
+                // 'ad_channel_id' => $ad_channel_id, // 广告渠道，腾讯广告1. 抖音广告2
+                'ad_channel_id'=> $marketingData['ad_channel_id'],
                 'platform_source'=> $marketingData['platform_source'],
                 'merchant_source'=> $marketingData['merchant_source'],
                 'ad_query'=> $ad_query,
@@ -2961,7 +2964,8 @@ class StoreOrderCreateRepository extends StoreOrderRepository
     {
         $adId = (int)($marketingDiscount['ad_id'] ?? 0);
         $adInfo = app()->make(MerchantAdRepository::class)->getInfo($adId);
-        if ($adId && empty($adInfo)) {
+        $adInfo2 = app()->make(MerchantAdDao::class)->getInfo2($adId);
+        if ($adId && empty($adInfo) && empty($adInfo2)) {
             throw new ValidateException('营销信息异常,请重新加购');
         }
 
@@ -3168,7 +3172,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             'merchant_source' => $merchantSource,
             'discount_total'  => $discountTotal,
             'merchant_coupon' => $bestCoupon,
-            'ad_channel_id' => $adInfo['ad_channel_id'],
+            'ad_channel_id' => $adInfo2['ad_channel_id'],
         ];
     }
 
@@ -3189,7 +3193,8 @@ class StoreOrderCreateRepository extends StoreOrderRepository
     {
         $adId = (int)($marketingDiscount['ad_id'] ?? 0);
         $adInfo = app()->make(MerchantAdRepository::class)->getInfo($adId);
-        if ($adId && empty($adInfo)) {
+        $adInfo2 = app()->make(MerchantAdDao::class)->getInfo2($adId);
+        if ($adId && empty($adInfo) && empty($adInfo2)) {
             throw new ValidateException('营销信息异常,请重新加购');
         }
 
@@ -3402,7 +3407,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             'merchant_source' => $merchantSource,
             'discount_total'  => $discountTotal,
             'merchant_coupon' => $bestCoupon,
-            'ad_channel_id' => $adInfo['ad_channel_id'],
+            'ad_channel_id' => $adInfo2['ad_channel_id'],
         ];
     }
 
