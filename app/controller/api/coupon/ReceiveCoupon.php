@@ -123,10 +123,11 @@ class ReceiveCoupon extends BaseController
     }
 
 
-
+//平台券领取
     public function receivePlatformCoupon(PlatformCouponReceiveRepository $platformCouponReceiveRepository)
     {
         $params = $this->request->post();
+        $type = $this->request->post('type',0);
         $uid = $this->request->uid();
         $user = $this->request->userInfo();
         $wechatUserId = $user->wechat_user_id;
@@ -172,6 +173,7 @@ class ReceiveCoupon extends BaseController
                 'end_use_time'      => date('Y-m-d H:i:s',strtotime($date) *$stockInfo['effective_day_number']),
                 'appid'      => $out_request_no[0],
                 'mch_id'      => $out_request_no[1],
+                'use_type'      =>$type,
                 'create_time' => date('Y-m-d H:i:s'),
             ];
 
