@@ -27,6 +27,7 @@ use app\common\repositories\user\UserLabelRepository;
 use app\common\repositories\user\UserRepository;
 use app\common\repositories\wechat\WechatNewsRepository;
 use app\common\repositories\wechat\WechatUserRepository;
+use app\common\repositories\black\UserBlackLogRepository;
 use app\validate\admin\UserNowMoneyValidate;
 use app\validate\admin\UserValidate;
 use crmeb\services\ExcelService;
@@ -590,4 +591,122 @@ class User extends BaseController
         $this->repository->svipUpdate($id, $data,$this->request->adminId());
         return app('json')->success('修改成功');
     }
+
+    /**
+     * 设置黑名单
+     */
+    public function Operate($uid){
+
+        if($uid){
+            $this->user = $this->repository->get($uid);
+            
+            $operate = $this->request->param('operate');
+            if($this->user){
+
+                switch($operate){
+                    case 'add':
+                        //拉入黑名单
+                        $data = ['black'=>1,'wb_time'=>time()];
+                        $this->repository->update($uid,$data);
+                        
+                        return app('json')->success('黑名单设置成功');
+                        break;
+                    case 'del':
+                        //移除黑名单
+                        $data = ['black'=>0,'wb_time'=>time()];
+                        $this->repository->update($uid,$data);
+                        
+                        return app('json')->success('黑名单移除成功');
+                        break;
+                    default:
+                        
+                        [$page, $limit] = $this->getPage();
+                        $where = [
+                            'black' => 1
+                        ];
+                        return app('json')->success($this->repository->getPulbicLst($where, $page, $limit));
+                }
+            }
+        }else{
+            return app('json')->fail('参数错误');
+        }
+    }
+
+
+    /**
+     * 黑名单操作记录
+     * $type 变更形式1系统判定2人工添加3用户主动
+     * $uid  用户id
+     * $operate  1加入黑名单0移出黑名单
+     */
+    public function setLog($uid){
+
+        if(isset($uid)){
+            $param = $this->request->param();
+            $arr = [
+                'uid' => $uid,
+                'type' => $param['type'],
+                'operate' => $param['operate'],
+                'create_time' => time()
+            ];
+            $info = app()->make(UserBlackLogRepository::class)->create($arr);
+            
+            return app('json')->success('记录成功');
+        
+        }else{
+            return app('json')->fail('参数错误');
+        }
+    }
+
+
+    /**
+     * 获取用户黑名单日志
+     */
+    public function blackLog($uid){
+        if($uid > 0){
+            [$page, $limit] = $this->getPage();
+            $where = ['uid'=>$uid];
+            return app('json')->success(app()->make(UserBlackLogRepository::class)->search($where, $page, $limit));
+        }
+    }
+
+    /**
+     * 白名单操作
+     */
+    public function whiteOperate($uid){
+        if($uid > 0){
+            $this->user = $this->repository->get($uid);
+            
+            $operate = $this->request->param('operate');
+            if($operate == 'del'){
+                //移出白名单
+                $data = ['white'=>0,'wb_time'=>time()];
+                $this->repository->update($uid,$data);
+                
+                return app('json')->success('移出白名单成功');
+            }else{
+                //加入白名单
+                $data = ['white'=>1,'wb_time'=>time()];
+                $this->repository->update($uid,$data);
+                
+                return app('json')->success('白名单设置成功');
+            }
+        }
+    }
+
+    /**
+     * 白名单列表
+     */
+    public function getWhite(){
+
+        [$page, $limit] = $this->getPage();
+        $where = [
+            'white' => 1
+        ];
+        return app('json')->success($this->repository->getPulbicLst($where, $page, $limit));
+    }
+
+
+
+
 }

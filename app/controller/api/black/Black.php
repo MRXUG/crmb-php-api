@@ -39,10 +39,10 @@ class Black extends BaseController{
         if($this->request->has('uid')){
             $uid = $this->request->param('uid');
 
-            $this->user = $this->repository->get($uid);
+            $this->user = $this->userRepository->get($uid);
         }else{
             if($uid){
-                $this->user = $this->repository->get($uid);
+                $this->user = $this->userRepository->get($uid);
             }
         }
 
@@ -112,14 +112,17 @@ class Black extends BaseController{
     /**
      * 用户详情 黑名单记录
      */
-    public function getLog($uid=0){
+    public function getLog(){
         if($this->request->has('uid')){
             $uid = $this->request->param('uid');
-        }
 
-        if($uid > 0){
-            [$page, $limit] = $this->getPage();
-            return app('json')->success($this->repository->search($uid,$where, $page, $limit));
+            if($uid > 0){
+                [$page, $limit] = $this->getPage();
+                $where = [];
+                return app('json')->success($this->userblackLogRepository->search($where, $page, $limit));
+            }
+        }else{
+            return app('json')->fail('参数错误');
         }
     }
 

@@ -177,6 +177,31 @@ Route::group(function () {
             '_alias' => '用户标签编辑',
         ]);
 
+        //黑名单操作
+        Route::post('black/operate/:uid','/Operate')->name('systemBlackOperate')->option([
+            '_alias' => '获取设置移除黑名单',
+        ]);
+
+        //写入黑名单变更记录 
+        Route::post('black/setlog/:uid','/setLog')->name('systemBlackSetLog')->option([
+            '_alias' => '添加黑名单操作记录',
+        ]);
+
+        //获取黑名单记录
+        Route::get('black/getlog/:uid','/blackLog')->name('systemBlackLog')->option([
+            '_alias' => '获取黑名单记录',
+        ]);
+
+        //操作白名单
+        Route::post('white/operate/:uid','/whiteOperate')->name('systemWhiteOperate')->option([
+            '_alias' => '白名单操作',
+        ]);
+
+        //获取白名单列表
+        Route::get('white/list','/getWhite')->name('systemGetWhite')->option([
+            '_alias' => '获取白名单列表',
+        ]);
+
     })->prefix('admin.user.User')->option([
         '_path' => '/user/list',
         '_auth' => true,

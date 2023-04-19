@@ -148,8 +148,6 @@ class MerchantAdRepository extends BaseRepository
 
         $key = "adGenerateSchemeAdId=".$id;
         //获取缓存是否有数据
-        $scheme = Cache::get($key);
-        if (!$scheme){
 
             $params = [
                 'jump_wxa'=>[
@@ -183,12 +181,7 @@ class MerchantAdRepository extends BaseRepository
 //                throw new WechatException('获取scheme失败：');
 //            }
 
-            //保存到缓存
-            Cache::set($key,$scheme,60*60*24*28);
-
-        }
-
-
+        
        return [
             'goType'=>$deliveryMethod['jumpMethod']??"",
             'title'=>$deliveryMethod['landingPageTitle']??"",
