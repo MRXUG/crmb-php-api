@@ -96,11 +96,4 @@ class CouponStock extends BaseController
         return app('json')->success(['closeClickToSendCoupons'=>$couponConfig['closeClickToSendCoupons'],'list'=>$list]);
 
     }
-
-    public function userReceivePlatformCoupon(){
-        $data = $this->request->param('data',[]);
-
-
-
-    }
 }

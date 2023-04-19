@@ -170,7 +170,7 @@ class ReceiveCoupon extends BaseController
                 'discount_num'     => $stockInfo['discount_num'],
                 'stock_id'    => $stockId,
                 'start_use_time'    => $date,
-                'end_use_time'      => date('Y-m-d H:i:s',strtotime($date) *$stockInfo['effective_day_number']),
+                'end_use_time'      => date('Y-m-d H:i:s',strtotime($date) + ($stockInfo['effective_day_number']*60*60*24)),
                 'appid'      => $out_request_no[0],
                 'mch_id'      => $out_request_no[1],
                 'use_type'      =>$type,
