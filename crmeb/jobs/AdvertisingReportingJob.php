@@ -14,6 +14,7 @@
 namespace crmeb\jobs;
 
 
+use app\common\dao\store\order\StoreOrderDao;
 use app\common\dao\system\merchant\MerchantAdDao;
 use crmeb\interfaces\JobInterface;
 
@@ -26,17 +27,22 @@ class AdvertisingReportingJob implements JobInterface
         if (!$data['type']) return;
         if (!$data['query']) return;
         if (!$data['orderId']) return;
+        if (!$data['merchant_source']) return;
         try {
             //查询订单对应的广告
             $ad = app()->make(MerchantAdDao::class);
             $adPostbackProportion = $ad->getValue(['ad_id'=>$data['ad_id']],'postback_proportion');
 
-            if ($adPostbackProportion == 0) return ;
+            if ($data['merchant_source'] == 1){
+                //回流流量判断是否回传
+                if ($adPostbackProportion == 0) return ;
 
-            //回传几率
-            $num = rand(1, 100);
+                //回传几率
+                $num = rand(1, 100);
 
-            if ($adPostbackProportion <  $num) return;
+                if ($adPostbackProportion <  $num) return;
+            }
+
 
             $query = json_decode($data['query']);
             if ($data['type'] == 1){
@@ -51,6 +57,11 @@ class AdvertisingReportingJob implements JobInterface
                 $this->videoSendData($click_id);
                 file_put_contents('orderApplets.txt',json_encode($query).PHP_EOL,FILE_APPEND);
 
+            }
+
+            if ($data['merchant_source'] == 1){
+                $order = app()->make(StoreOrderDao::class);
+                $order->update($data['orderId'],['merchant_source'=>2]);
             }
 
         } catch (\Exception $e) {
