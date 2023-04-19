@@ -483,6 +483,9 @@ Route::group('api/', function () {
             Route::get('/get/:id', 'StoreSpu/get');
             //优惠券商品列表
             Route::get('/coupon_product', 'StoreSpu/getProductByCoupon');
+
+            //平台优惠券商品列表
+            Route::get('/platform_coupon_product', 'StoreSpu/getProductByPlatformCoupon');
             //热卖排行
             Route::get('/get_hot_ranking', 'StoreSpu/getHotRanking');
         })->prefix('api.store.product.');

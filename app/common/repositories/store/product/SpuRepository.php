@@ -11,7 +11,10 @@
 namespace app\common\repositories\store\product;
 
 use app\common\dao\coupon\CouponStocksDao;
+use app\common\dao\platform\PlatformCouponDao;
 use app\common\model\coupon\CouponStocks;
+use app\common\model\platform\PlatformCoupon;
+use app\common\model\platform\PlatformCouponPosition;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\coupon\StoreCouponProductRepository;
 use app\common\repositories\store\coupon\StoreCouponRepository;
@@ -486,6 +489,31 @@ class SpuRepository extends BaseRepository
             $where['is_coupon'] = 1;
             $product = $this->getApiSearch($where, $page, $limit, $userInfo,$coupon->getAttr('discount_num'));
 //            dd([$product, $where]);
+        }
+
+        $data['count'] = $product['count'] ?? 0;
+        $data['list'] = $product['list'] ?? [];
+        return $data;
+    }
+
+
+    public function getApiSearchByPlatformCoupon($where, $page, $limit, $userInfo,$platform_coupon_id = 0)
+    {
+        $coupon = PlatformCoupon::getDB()->where([
+            'platform_coupon_id' => $platform_coupon_id
+        ])->find();
+        $data['coupon'] = $coupon;
+        if ($coupon) {
+
+            // 商品获取模式
+            $where['product_ids'] = [];
+            /** @var Collection $productList */
+            $productList = PlatformCouponPosition::getDB()->where('platform_coupon_id',$platform_coupon_id)->column('product_id');
+            if ($productList) {
+                $where['product_ids'] = $productList;
+            }
+            $where['is_coupon'] = 1;
+            $product = $this->getApiSearch($where, $page, $limit, $userInfo,$coupon['discount_num']);
         }
 
         $data['count'] = $product['count'] ?? 0;
