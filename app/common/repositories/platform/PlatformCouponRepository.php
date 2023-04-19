@@ -276,7 +276,7 @@ class PlatformCouponRepository extends BaseRepository
             throw new ValidateException('请选择范围');
         }
         # 判断门槛是否小于或者等于面值
-        if ($param['threshold'] >= $param['discount_num']) {
+        if ($param['threshold'] < $param['discount_num']) {
             throw new ValidateException('门槛必须大于面值');
         }
         # 判断设置了限量设置的数量必须大于0
@@ -286,6 +286,11 @@ class PlatformCouponRepository extends BaseRepository
         if ($param['is_user_limit'] == 1 && $param['user_limit_number'] <= 0){
             throw new ValidateException('设置的每人领取限量值必须大于 0');
         }
+        if (empty($param['scope_id_arr'])) {
+            throw new ValidateException('没有选择范围');
+        }
+        $param['limit_number'] = (int) $param['limit_number'];
+        $param['user_limit_number'] = (int) $param['user_limit_number'];
         # 检测是否勾选发券位置
         if (empty($param['coupon_position'])) throw new ValidateException('发券位置必须选择');
 
@@ -459,7 +464,8 @@ class PlatformCouponRepository extends BaseRepository
                 'a.is_limit',
                 'a.limit_number',
                 'a.received',
-                'a.effective_day_number'
+                'a.effective_day_number',
+                'a.is_init'
             ])
             ->page($page, $limit)
             ->order('a.platform_coupon_id', 'desc')
@@ -760,4 +766,34 @@ class PlatformCouponRepository extends BaseRepository
             'count' => $platformCouponModel()->count('a.product_id')
         ];
     }
+
+    /**
+     * 范围计数
+     *
+     * @param array $searchStatus 1 进行中 3 未开始
+     * @return array
+     */
+//    public function scopeCount(array $searchStatus): array
+//    {
+//        foreach ($searchStatus as $item) if (!in_array($item, [1, 3])) throw new ValidateException('参数错误 不支持的状态');
+//
+//        $arr = [];
+//
+//        $nowDate = date("Y-m-d H:i:s");
+//
+//        $searchFn = function (int $type) use ($nowDate): array {
+//
+//            return [
+//                ''
+//            ];
+//        };
+//
+//        foreach ($searchStatus as $item) {
+//            $arr[$item] = [
+//                'home' =>
+//            ];
+//        }
+//
+//        return $arr;
+//    }
 }

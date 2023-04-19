@@ -217,4 +217,16 @@ class PlatformCoupon extends BaseController
         $productDao->update($productId, $params);
         return $this->json()->success();
     }
+
+    /**
+     * 范围计数
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function scopeCount(Request $request)
+    {
+
+        return $this->json()->success();
+    }
 }
