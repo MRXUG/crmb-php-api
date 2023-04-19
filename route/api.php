@@ -55,6 +55,11 @@ Route::group('api/', function () {
             Route::get('bestOffer/:id', 'api.coupon.BestOfferCoupon/productBestOffer');
         });
 
+        Route::group('platform/coupon', function () {
+            // 领券签名
+            Route::post('sign', 'api.coupon.GenerateCouponSign/generatePlatformCouponSign');
+        });
+
         //优惠券
         Route::group('coupon', function () {
             Route::post('receive/:id', 'api.store.product.StoreCoupon/receiveCoupon');

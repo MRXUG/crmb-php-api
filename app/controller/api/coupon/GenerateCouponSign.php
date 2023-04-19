@@ -48,9 +48,9 @@ class GenerateCouponSign extends BaseController
          */
         $params = $this->request->post();
         $sendCouponValidate->check($params);
-        $sendCouponValidate->validateReceivePlatformCoupon($params['stock_list'], $this->request->uid());
+        $list = $sendCouponValidate->validateReceivePlatformCoupon($params['stock_list'], $this->request->uid());
 
-        $data = MerchantCouponService::create(MerchantCouponService::SEND_COUPON, [], $merchantConfig)->coupon()->generateSign($params['stock_list'], $merchantConfig);
+        $data = MerchantCouponService::create(MerchantCouponService::SEND_COUPON, [], $merchantConfig)->coupon()->generateSign($list, $merchantConfig);
 
         return app('json')->success($data);
     }

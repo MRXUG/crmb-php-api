@@ -6,6 +6,7 @@
 namespace app\validate\api;
 
 use app\common\dao\platform\PlatformCouponDao;
+use app\common\model\platform\PlatformCouponReceive;
 use app\common\repositories\coupon\CouponStocksUserRepository;
 use think\Validate;
 
@@ -60,22 +61,36 @@ class SendCouponValidate extends Validate
 
     /**
      * 校验平台领券数量
-     *
-     * @param array $stockIdList
-     * @param $uid
-     *
-     * @return void
-     * @throws \think\db\exception\DataNotFoundException
-     * @throws \think\db\exception\DbException
-     * @throws \think\db\exception\ModelNotFoundException
      */
     public function validateReceivePlatformCoupon(array $stockIdList, $uid)
     {
         $platformCouponDao = app()->make(PlatformCouponDao::class);
 
+        $newlist = [];
         foreach ($stockIdList as $k=>$v){
-//            $platformCouponDao->
+            $platformCoupon = $platformCouponDao->getWhere(['stock_id'=>$v['stock_id']],'*');
+
+            if ($platformCoupon['is_limit'] == 1){
+                //查询已经领取了多少张
+                $lnum = PlatformCouponReceive::getDB()->where('platform_coupon_id',$platformCoupon['platform_coupon_id'])->count();
+
+                if ($lnum >= $platformCoupon['limit_number']){
+                    continue;
+                }
+            }
+
+            if ($platformCoupon['is_user_limit'] == 1){
+                //查询已经领取了多少张
+                $lnum = PlatformCouponReceive::getDB()->where('platform_coupon_id',$platformCoupon['platform_coupon_id'])->where("user_id",$uid)->count();
+
+                if ($lnum >= $platformCoupon['user_limit_number']){
+                    continue;
+                }
+            }
+            $newlist[]=$v;
         }
+
+        return $newlist;
     }
 
 }
