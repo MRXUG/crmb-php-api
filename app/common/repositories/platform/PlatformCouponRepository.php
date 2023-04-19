@@ -454,6 +454,7 @@ class PlatformCouponRepository extends BaseRepository
                 'a.is_limit',
                 'a.limit_number',
                 'a.received',
+                'a.effective_day_number'
             ])
             ->page($page, $limit)
             ->order('a.platform_coupon_id', 'desc')
@@ -521,6 +522,8 @@ class PlatformCouponRepository extends BaseRepository
                 }
                 return $a;
             })();
+
+            $item['use_time'] = "领券{$item['effective_day_number']}天内有效";
         }
 
         return [
@@ -609,5 +612,74 @@ class PlatformCouponRepository extends BaseRepository
                 ['status', '=', 2]
             ])
         ];
+    }
+
+    /**
+     * 获取编辑优惠券商品信息
+     *
+     * @param int $platformCouponId 平台优惠券id
+     * @throws null
+     * @return void
+     */
+    public function getEditCouponProductInfo(int $platformCouponId): array
+    {
+        $coupon = PlatformCoupon::getInstance()->where('platform_coupon_id', $platformCouponId)->find();
+
+        if (!$coupon) return [];
+
+        $nowUnixTime = date("Y-m-d H:i:s");
+
+        $arr = [
+            'platform_coupon_id' => $platformCouponId,
+            'name' => $coupon->getAttr('coupon_name'),
+            'stock_id' => $coupon->getAttr('stock_id'),
+            "stock" => (function () use ($coupon) {
+                $a = [];
+                if ($coupon['is_limit'] == 1) {
+                    $remain = $coupon['limit_number'] - $coupon['received'];
+                    $remain = max($remain, 0);
+                    $a[] = "总量:{$coupon['limit_number']}";
+                    $a[] = "剩余:{$remain}";
+                } else {
+                    $a[] = '不限量';
+                }
+                return implode(" ", $a);
+            })(),
+            'status' => $coupon->getAttr('status'),
+            'build_business_number' => $coupon->getAttr('wechat_business_number'),
+            'receive_start_time' => $coupon->getAttr('receive_start_time'),
+            'receive_end_time' => $coupon->getAttr('receive_end_time'),
+        ];
+
+        $arr['status_cn'] = (function () use (&$arr, $nowUnixTime, $coupon): string {
+            $startTime = strtotime($coupon->getAttr('receive_start_time'));
+            $endTime = strtotime($coupon->getAttr('receive_end_time'));
+            if ($startTime > $nowUnixTime) {
+                $arr['status'] = 3;
+                return '活动未开始';
+            }
+            if ($endTime < $nowUnixTime) {
+                $arr['status'] = 4;
+                return '已结束';
+            }
+            return [
+                '待发布',
+                '进行中',
+                '已失效'
+            ][$arr['status']];
+        })();
+
+        # 声明优惠券领取表操作模型
+        $platformCouponReceive = fn (int $platformCouponId) => PlatformCouponReceive::getInstance()
+            ->where('platform_coupon_id', $platformCouponId);
+
+        $arr['use_count'] = [
+            'received' => $platformCouponReceive($platformCouponId)->count('id'),
+            'used' => $platformCouponReceive($platformCouponId)->where('status', 1)->count('id'),
+        ];
+
+        $arr['use_time'] = "领券{$coupon->getAttr('effective_day_number')}天内有效";
+
+        return $arr;
     }
 }

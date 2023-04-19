@@ -20,6 +20,7 @@ R::group(function () {
         R::get('getCouponOne/:discountNum', 'PlatformCoupon/getCouponOne'); # 选择优惠券数据
         R::post('updateStatus/:id', 'PlatformCoupon/updateStatus'); # 修改优惠券状态
         R::get('getCouponStatusCount', 'PlatformCoupon/getCouponStatusCount'); # 获取优惠券状态个数
+        R::get('getEditCouponProductInfo/:id', 'PlatformCoupon/getEditCouponProductInfo'); # 获取编辑优惠券商品基本信息
 
     })->prefix('admin.coupon.platform.')->option([
         '_auth' => true,
