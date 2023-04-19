@@ -2,6 +2,7 @@
 
 namespace app\controller\admin\coupon\platform;
 
+use app\common\dao\store\product\ProductDao;
 use app\common\repositories\platform\PlatformCouponRepository;
 use crmeb\basic\BaseController;
 use think\App;
@@ -178,5 +179,41 @@ class PlatformCoupon extends BaseController
     public function getEditCouponProductInfo(int $id)
     {
         return $this->json()->success($this->repository->getEditCouponProductInfo($id));
+    }
+
+    /**
+     * 获取编辑优惠券商品列表
+     *
+     * @param int $id
+     * @param Request $request
+     * @return void
+     */
+    public function getEditCouponProductList(int $id, Request $request)
+    {
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 10);
+        $params = $request->param();
+        unset($params['page'], $params['limit']);
+
+        return $this->json()->success($this->repository->getEditCouponProductList($id, $page, $limit, $params));
+    }
+
+    /**
+     * 修改商品信息
+     *
+     * @param int $productId
+     * @param Request $request
+     * @return void
+     * @throws null
+     */
+    public function updateProduct(int $productId, Request $request)
+    {
+        $params = $request->post();
+        if (empty($params)) throw new ValidateException('没有需要处理的数据');
+        foreach ($params as $k => $v) if (!in_array($k, ['is_used', 'sort'])) throw new ValidateException('参数错误');
+        /** @var ProductDao $productDao */
+        $productDao = app()->make(ProductDao::class);
+        $productDao->update($productId, $params);
+        return $this->json()->success();
     }
 }

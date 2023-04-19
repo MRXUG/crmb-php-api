@@ -21,6 +21,8 @@ R::group(function () {
         R::post('updateStatus/:id', 'PlatformCoupon/updateStatus'); # 修改优惠券状态
         R::get('getCouponStatusCount', 'PlatformCoupon/getCouponStatusCount'); # 获取优惠券状态个数
         R::get('getEditCouponProductInfo/:id', 'PlatformCoupon/getEditCouponProductInfo'); # 获取编辑优惠券商品基本信息
+        R::get('getEditCouponProductList/:id', 'PlatformCoupon/getEditCouponProductList'); # 获取编辑优惠券商品列表
+        R::post('updateProduct/:productId', 'PlatformCoupon/updateProduct'); # 编辑商品信息
 
     })->prefix('admin.coupon.platform.')->option([
         '_auth' => true,

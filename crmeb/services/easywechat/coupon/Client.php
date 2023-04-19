@@ -341,6 +341,7 @@ class Client extends BaseClient
                 'coupon_available_time' => [
                     'available_begin_time'        => date(DATE_RFC3339, strtotime($coupon->getAttr('receive_start_time'))),
                     'available_end_time'          => date(DATE_RFC3339, strtotime($coupon->getAttr('receive_end_time'))),
+                    'available_day_after_receive' => (int) $coupon->getAttr('effective_day_number'),
                 ],
                 'fixed_normal_coupon' => [
                     'discount_amount'     => (int)(bcmul($coupon->getAttr('discount_num'), 100)), // 参数使用的单位是：元
@@ -363,7 +364,6 @@ class Client extends BaseClient
             'notify_config' => [
                 'notify_appid' => $appId, // 用于回调通知时，计算返回操作用户的openid（诸如领券用户），支持小程序or公众号的APPID
             ],
-            'available_day_after_receive' => $coupon->getAttr('effective_day_number'),
         ];
     }
 

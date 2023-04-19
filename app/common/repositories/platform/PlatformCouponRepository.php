@@ -11,7 +11,10 @@ use app\common\model\platform\PlatformCoupon;
 use app\common\model\platform\PlatformCouponProduct;
 use app\common\model\platform\PlatformCouponReceive;
 use app\common\model\store\product\Product;
+use app\common\model\store\product\ProductCate;
+use app\common\model\store\StoreCategory;
 use app\common\repositories\BaseRepository;
+use app\common\repositories\store\StoreCategoryRepository;
 use crmeb\jobs\EstimatePlatformCouponProduct;
 use crmeb\listens\CreatePlatformCouponInitGoods;
 use crmeb\services\MerchantCouponService;
@@ -553,8 +556,8 @@ class PlatformCouponRepository extends BaseRepository
             # 判断状态进行对应操作
             if ($status == 1) { # 发布
                 $res = $this->buildPlatformCoupon($platformCoupon);
-                $platformCoupon['wechat_business_number'] = $res['params']['belong_merchant']; # 填入生成优惠券的商户号
-                $platformCoupon['stock_id'] = $res['result']['stock_id']; # 填入批次号
+                $platformCoupon->setAttr('wechat_business_number', $res['params']['belong_merchant']); # 填入生成优惠券的商户号
+                $platformCoupon->setAttr('stock_id', $res['result']['stock_id']); # 填入批次号
             }
             if ($status == 2) { # 失效
                 $this->failPlatformCoupon($platformCoupon);
@@ -681,5 +684,78 @@ class PlatformCouponRepository extends BaseRepository
         $arr['use_time'] = "领券{$coupon->getAttr('effective_day_number')}天内有效";
 
         return $arr;
+    }
+
+    /**
+     * 获取编辑优惠券商品列表
+     *
+     * @param int $platformCouponId
+     * @param int $page
+     * @param int $limit
+     * @param array $where
+     * @return void
+     * @throws null
+     */
+    public function getEditCouponProductList(int $platformCouponId, int $page = 1, int $limit = 10, array $where = []): array
+    {
+        $platformCouponModel = fn () => Product::getInstance()
+            ->alias('a')
+            ->field([
+                'a.product_id',
+                'a.store_name',
+                'a.store_info',
+                'a.keyword',
+                'a.is_used',
+                'a.mer_id',
+                'a.sort',
+                'a.image',
+                'a.slider_image',
+                'a.price',
+                'a.sales',
+                'c.mer_name',
+                'c.real_name',
+                'd.path'
+            ])
+            ->leftJoin('eb_platform_coupon_product b', 'a.product_id = b.product_id')
+            ->leftJoin('eb_merchant c', 'a.mer_id = c.mer_id')
+            ->leftJoin('eb_store_category d', 'a.cate_id = d.store_category_id')
+            ->where('b.platform_coupon_id', $platformCouponId)
+            ->when(!empty($where), function (BaseQuery $query) use ($where) {
+                if (!empty($where['store_name'])) {
+                    $query->whereLike('a.store_name', "%{$where['store_name']}%");
+                }
+                if (!empty($where['mer_id']) && $where['mer_id'] > 0) {
+                    $query->where('a.mer_id', $where['mer_id']);
+                }
+                if (!empty($where['pid']) && $where['pid'] > 0) {
+                    $storeCategoryRepository = app()->make(StoreCategoryRepository::class);
+                    $ids = array_merge($storeCategoryRepository->findChildrenId((int)$where['pid']), [(int)$where['pid']]);
+                    if (count($ids)) $query->whereIn('a.cate_id', $ids);
+                }
+            });
+
+        $platformCoupon = $platformCouponModel()->page($page, $limit)
+            ->select()
+            ->toArray();
+
+        /** @var CouponStocksDao $couponStockDao */
+        $couponStockDao = app()->make(CouponStocksDao::class);
+
+        foreach ($platformCoupon as &$item) {
+            # 获取分类路径
+            $pathArr = array_merge(array_filter(explode('/', $item['path'])), []);
+            $pathInfo = array_column(StoreCategory::getInstance()->field(['store_category_id', 'cate_name'])->whereIn('store_category_id', $pathArr)->select()->toArray(), null, 'store_category_id');
+            $item['path_cn'] = (function () use ($pathArr,$pathInfo): string {
+                $a = [];
+                foreach ($pathArr as $v) $a[] = $pathInfo[$v]['cate_name'];
+                return implode('/', $a);
+            })();
+            $item['couponList'] = $couponStockDao->getCouponListFromProductId($item['product_id']);
+        }
+
+        return [
+            'list' => $platformCoupon,
+            'count' => $platformCouponModel()->count('a.product_id')
+        ];
     }
 }
