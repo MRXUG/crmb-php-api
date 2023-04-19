@@ -595,8 +595,8 @@ class User extends BaseController
     /**
      * 设置黑名单
      */
-    public function Operate($uid){
-
+    public function Operate(){
+        $uid = $this->request->param('uid');
         if($uid){
             $this->user = $this->repository->get($uid);
             
@@ -639,8 +639,8 @@ class User extends BaseController
      * $uid  用户id
      * $operate  1加入黑名单0移出黑名单
      */
-    public function setLog($uid){
-
+    public function setLog(){
+        $uid = $this->request->param('uid');
         if(isset($uid)){
             $param = $this->request->param();
             $arr = [
@@ -662,7 +662,8 @@ class User extends BaseController
     /**
      * 获取用户黑名单日志
      */
-    public function blackLog($uid){
+    public function blackLog(){
+        $uid = $this->request->param('uid');
         if($uid > 0){
             [$page, $limit] = $this->getPage();
             $where = ['uid'=>$uid];
@@ -673,7 +674,8 @@ class User extends BaseController
     /**
      * 白名单操作
      */
-    public function whiteOperate($uid){
+    public function whiteOperate(){
+        $uid = $this->request->param('uid');
         if($uid > 0){
             $this->user = $this->repository->get($uid);
             
