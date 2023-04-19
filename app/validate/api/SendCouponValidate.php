@@ -5,6 +5,7 @@
 
 namespace app\validate\api;
 
+use app\common\dao\platform\PlatformCouponDao;
 use app\common\repositories\coupon\CouponStocksUserRepository;
 use think\Validate;
 
@@ -55,4 +56,26 @@ class SendCouponValidate extends Validate
             $couponStocksUserRepository->validateReceiveCoupon($stockId, $uid);
         }
     }
+
+
+    /**
+     * 校验平台领券数量
+     *
+     * @param array $stockIdList
+     * @param $uid
+     *
+     * @return void
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function validateReceivePlatformCoupon(array $stockIdList, $uid)
+    {
+        $platformCouponDao = app()->make(PlatformCouponDao::class);
+
+        foreach ($stockIdList as $k=>$v){
+//            $platformCouponDao->
+        }
+    }
+
 }
