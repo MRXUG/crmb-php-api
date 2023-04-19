@@ -45,5 +45,10 @@ class RiskRepository extends BaseRepository{
         $model = new Risk;
         return $model->order('rid DESC')->value('rid');
     }
+    
+    public function getRisk(){
+        $model = new Risk;
+        return $model->order('rid DESC')->find();
+    }
 
 }

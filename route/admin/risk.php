@@ -21,6 +21,10 @@ Route::group(function () {
         Route::post('setrisk', '/setRisk')->name('systemSetRisk')->option([
             '_alias' => '风险数据设置',
         ]);
+        
+        Route::get('getrisk','/getRisk')->name('systemGetRisk')->option([
+            '_alias' => '风险数据获取',
+        ]);
     })->prefix('admin.risk.Risk')->option([
         '_auth' => true,
     ]);

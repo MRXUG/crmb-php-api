@@ -38,6 +38,7 @@ class Risk extends BaseController
         $this->repository = $repository;
     }
 
+    //添加风控设置
     public function setRisk(){
         
         $param = $this->request->params(['usecoupon','day30coupon','day30feedback','day30applet','day30mppay','blacklist_vid','voidReceivedCoupon','platformCouponGrantPop','platformCouponGrantList','adReflowCouponPop']);
@@ -53,6 +54,14 @@ class Risk extends BaseController
             }
         }
     }
+    
+    //获取风控设置
+    public function getRisk(){
+        $risk = $this->repository->getRisk();
+        return app('json')->success($risk);
+    }
+    
+    
 
 
 
