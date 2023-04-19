@@ -15,6 +15,7 @@ use app\common\dao\platform\PlatformCouponDao;
 use app\common\model\coupon\CouponStocks;
 use app\common\model\platform\PlatformCoupon;
 use app\common\model\platform\PlatformCouponPosition;
+use app\common\model\platform\PlatformCouponProduct;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\coupon\StoreCouponProductRepository;
 use app\common\repositories\store\coupon\StoreCouponRepository;
@@ -508,7 +509,7 @@ class SpuRepository extends BaseRepository
             // 商品获取模式
             $where['product_ids'] = [];
             /** @var Collection $productList */
-            $productList = PlatformCouponPosition::getDB()->where('platform_coupon_id',$platform_coupon_id)->column('product_id');
+            $productList = PlatformCouponProduct::getDB()->where('platform_coupon_id',$platform_coupon_id)->column('product_id');
             if ($productList) {
                 $where['product_ids'] = $productList;
             }
