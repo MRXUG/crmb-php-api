@@ -106,7 +106,7 @@ class CouponStock extends BaseController
 
         if (!$platform_coupon_id)return app('json')->fail('无券');
 
-        $res = PlatformCouponReceive::getDB()->where([['user_id','=',$uid],['platform_coupon_id','=',$platform_coupon_id]])->inc('transform_num',1);
+        $res = PlatformCouponReceive::getDB()->where([['user_id','=',$uid],['platform_coupon_id','=',$platform_coupon_id]])->inc('transform_num',1)->update();
         return app('json')->success('保存成功');
     }
 }
