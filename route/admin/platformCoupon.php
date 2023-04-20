@@ -24,6 +24,7 @@ R::group(function () {
         R::get('getEditCouponProductList/:id', 'PlatformCoupon/getEditCouponProductList'); # 获取编辑优惠券商品列表
         R::post('updateProduct/:productId', 'PlatformCoupon/updateProduct'); # 编辑商品信息
         R::post('scopeCount', 'PlatformCoupon/scopeCount'); # 范围计数
+        R::get('getEditPlatformCouponData/:id', 'PlatformCoupon/getEditPlatformCouponData'); # 获取编辑平台优惠券数据
 
     })->prefix('admin.coupon.platform.')->option([
         '_auth' => true,

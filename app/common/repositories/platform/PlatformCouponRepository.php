@@ -8,10 +8,13 @@ use app\common\dao\platform\PlatformCouponPositionDao;
 use app\common\dao\platform\PlatformCouponUseScopeDao;
 use app\common\model\coupon\CouponStocks;
 use app\common\model\platform\PlatformCoupon;
+use app\common\model\platform\PlatformCouponPosition;
 use app\common\model\platform\PlatformCouponProduct;
 use app\common\model\platform\PlatformCouponReceive;
+use app\common\model\platform\PlatformCouponUseScope;
 use app\common\model\store\product\Product;
 use app\common\model\store\StoreCategory;
+use app\common\model\system\merchant\Merchant;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\store\StoreCategoryRepository;
 use crmeb\jobs\EstimatePlatformCouponProduct;
@@ -470,7 +473,7 @@ class PlatformCouponRepository extends BaseRepository
                 'a.received',
                 'a.effective_day_number',
                 'a.is_init',
-                '(select count(platform_coupon_id) as productNum from eb_platform_coupon_product where platform_coupon_id = a.platform_coupon_id) as productNum',
+                '(select count(platform_coupon_id) as productNum from eb_platform_coupon_product where platform_coupon_id = a.platform_coupon_id) as product_count',
             ])
             ->page($page, $limit)
             ->order('a.platform_coupon_id', 'desc')
@@ -487,10 +490,10 @@ class PlatformCouponRepository extends BaseRepository
             # 领取倒计时
             $item['receive_end_day'] = (int) ($nowUnixTime >= $endTime ? 0 : ($endTime - $nowUnixTime) / 86400);
             # 可用商品数
-            $item['product_count'] = PlatformCouponProduct::getInstance()->where([
-                ['platform_coupon_id', '=', $item['platform_coupon_id']],
-                ['use_type', '=', $item['use_type']]
-            ])->count('id') ?? 0;
+//            $item['product_count'] = PlatformCouponProduct::getInstance()->where([
+//                ['platform_coupon_id', '=', $item['platform_coupon_id']],
+//                ['use_type', '=', $item['use_type']]
+//            ])->count('id') ?? 0;
             # 优惠信息
             $item['discount_info'] = (function () use(&$item): string {
                 $productType = [
@@ -776,6 +779,7 @@ class PlatformCouponRepository extends BaseRepository
      * <a href="https://www.apifox.cn/link/project/2413062/apis/api-76534942">范围计数</a>
      *
      * @param array $searchStatus 1 进行中 3 未开始
+     * @param int $discount_num
      * @return array
      */
     public function scopeCount(array $searchStatus, int $discount_num = 0): array
@@ -830,5 +834,38 @@ class PlatformCouponRepository extends BaseRepository
         }
 
         return $arr;
+    }
+
+    /**
+     * 获取一条平台优惠券信息
+     *
+     * @param int $platformCouponId
+     * @throws null
+     * @return array
+     */
+    public function getPlatformCouponOne(int $platformCouponId): array
+    {
+        $couponModel = PlatformCoupon::getInstance()
+            ->alias('a')
+            ->where('platform_coupon_id', $platformCouponId)
+            ->find();
+        if (!$couponModel) return [];
+        # 获取使用范围
+        $couponModel->setAttr('scope_id_arr', PlatformCouponUseScope::getInstance()->where([
+            ['platform_coupon_id', '=', $platformCouponId],
+            ['scope_type', '=', $couponModel->getAttr('use_type')]
+        ])->column('scope_id'));
+
+        if ($couponModel->getAttr('use_type') == 3) {
+            $couponModel->setAttr('scope_id_arr', Merchant::getInstance()->field([
+                'mer_id', 'mer_avatar', 'mer_name'
+            ])->whereIn('mer_id', $couponModel->getAttr('scope_id_arr'))->select());
+        }
+        # 优惠券展示位置
+        $couponModel->setAttr('coupon_position', PlatformCouponPosition::getInstance()
+            ->where('platform_coupon_id', $platformCouponId)
+            ->column('position'));
+
+        return $couponModel->toArray();
     }
 }

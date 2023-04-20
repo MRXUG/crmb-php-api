@@ -108,6 +108,25 @@ class MerchantCouponService
     }
 
     /**
+     * 通过商户号创建操作对象
+     *
+     * @param string $businessNumber
+     * @return self
+     * @throws null
+     */
+    public static function createFromBusinessNumber(string $businessNumber, array &$config): self
+    {
+        /**
+         * @var PlatformMerchantRepository $platformMerchantRepository
+         */
+        $platformMerchantRepository = app()->make(PlatformMerchantRepository::class);
+
+        $config = self::formatMerchantConfig($platformMerchantRepository->formatMerchantByMchId($businessNumber));
+
+        return new self($config);
+    }
+
+    /**
      * @param $type string build=建券 send=发券 use=核销 return=退券 entrust=委托 deactivate=使失效
      * @param array $params
      *                  + mch_id

@@ -228,4 +228,9 @@ class PlatformCoupon extends BaseController
     {
         return $this->json()->success($this->repository->scopeCount($request->post('scope', [])));
     }
+
+    public function getEditPlatformCouponData(int $id)
+    {
+        return $this->json()->success($this->repository->getPlatformCouponOne($id));
+    }
 }
