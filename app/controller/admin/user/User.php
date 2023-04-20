@@ -642,6 +642,8 @@ class User extends BaseController
                         ];
                         return app('json')->success($this->repository->getPulbicLst($where, $page, $limit));
                 }
+            }else{
+                return app('json')->fail('请填写已存在用户ID');
             }
         }else{
             return app('json')->fail('参数错误');
@@ -717,6 +719,15 @@ class User extends BaseController
         $uid = $this->request->param('uid');
         if($uid > 0){
             $this->user = $this->repository->get($uid);
+
+            //监测黑名单
+            if($this->user->black == 1){
+                return app('json')->fail('黑名单用户无法加入白名单');
+            }
+
+            if($this->user->white == 1){
+                return app('json')->fail('用户已经加入白名单，不能重复加入');
+            }
             
             $operate = $this->request->param('operate');
             if($operate == 'del'){
@@ -732,6 +743,8 @@ class User extends BaseController
                 
                 return app('json')->success('白名单设置成功');
             }
+        }else{
+            return app('json')->fail('请输入正确用户ID');
         }
     }
 
