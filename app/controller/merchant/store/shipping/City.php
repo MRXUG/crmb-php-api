@@ -90,9 +90,9 @@ class City extends BaseController
 
         // 返回结果
         $result = [
-            'province' => $province,
-            'city' => $city,
-            'district' => $district
+            $province,
+            $city,
+            $district
         ];
         return app('json')->success($result);
     }
