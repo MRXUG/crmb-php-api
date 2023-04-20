@@ -79,7 +79,7 @@ class PlatformCouponDao extends BaseDao
             ->limit($offset,$limit)
             ->select();
 
-        $offset += 3;
+        $offset += $limit;
 
         foreach ($list as $k=>$v){
            if ($v['is_limit'] == 1){
@@ -104,7 +104,7 @@ class PlatformCouponDao extends BaseDao
        }
 
        $count = count($newList);
-       if (($limit < $count) && ($offset <  $num)){
+       if (($count < $limit) && ($offset <  $num)){
            goto QUERY_AGAIN;
        }
 
