@@ -111,6 +111,7 @@ class MerchantCouponService
      * 通过商户号创建操作对象
      *
      * @param string $businessNumber
+     * @param array $config
      * @return self
      * @throws null
      */
