@@ -340,8 +340,8 @@ class Client extends BaseClient
 //            ],
             'custom_entrance' => [
                 'mini_programs_info' => [
-                    'entrance_words'      => $params['entrance_words'],
-                    'guiding_words'       => $params['guiding_words'],
+                    'entrance_words'      => '关闭提醒',
+                    'guiding_words'       => '投诉商家',
                     'mini_programs_path'  => "/pages/columnGoods/goods_coupon_list/index?type={$params['type']}&mer_id={$params['mer_id']}", //小程序首页
 //                    'mini_programs_path'  => 'pages/columnGoods/goods_coupon_list/index', //小程序首页
                     'mini_programs_appid' => $appId,
