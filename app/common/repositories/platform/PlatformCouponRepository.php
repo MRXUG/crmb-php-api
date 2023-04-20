@@ -394,7 +394,7 @@ class PlatformCouponRepository extends BaseRepository
      * @return array
      * @throws null
      */
-    public function platformCouponList (int $page = 1, int $limit = 10, array $where = []): array
+    public function platformCouponList (int $page = 1, int $limit = 10, array $where = [],$orderProductCount = 'product_count ASC',$orderReceiveEndDay = 'receive_end_day ASC'): array
     {
         $nowDate = date("Y-m-d H:i:s");
 
@@ -452,6 +452,7 @@ class PlatformCouponRepository extends BaseRepository
                 SQL));
             }
         });
+        $nowUnixTime = time();
 
         $platformCoupon = $platformCouponModel()
             ->field([
@@ -474,13 +475,18 @@ class PlatformCouponRepository extends BaseRepository
                 'a.effective_day_number',
                 'a.is_init',
                 '(select count(platform_coupon_id) as productNum from eb_platform_coupon_product where platform_coupon_id = a.platform_coupon_id) as product_count',
+                "(
+	IF
+		(unix_timestamp(NOW())  >= unix_timestamp( a.receive_end_time ), 0,( unix_timestamp( a.receive_end_time ) - unix_timestamp(NOW()))/ 86400 ) 
+	) AS receive_end_day ",
             ])
             ->page($page, $limit)
             ->order('a.platform_coupon_id', 'desc')
+            ->order($orderProductCount)
+            ->order($orderReceiveEndDay)
             ->select()
             ->toArray();
 
-        $nowUnixTime = time();
         # 声明优惠券领取表操作模型
         $platformCouponReceive = fn (int $platformCouponId) => PlatformCouponReceive::getInstance()
             ->where('platform_coupon_id', $platformCouponId);
