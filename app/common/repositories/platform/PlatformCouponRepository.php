@@ -469,7 +469,8 @@ class PlatformCouponRepository extends BaseRepository
                 'a.limit_number',
                 'a.received',
                 'a.effective_day_number',
-                'a.is_init'
+                'a.is_init',
+                '(select count(platform_coupon_id) as productNum from eb_platform_coupon_product where platform_coupon_id = a.platform_coupon_id) as productNum',
             ])
             ->page($page, $limit)
             ->order('a.platform_coupon_id', 'desc')
