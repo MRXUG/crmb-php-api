@@ -13,6 +13,7 @@ use app\common\repositories\coupon\CouponStocksUserRepository;
 use crmeb\exceptions\WechatException;
 use crmeb\services\easywechat\BaseClient;
 use think\facade\Log;
+use think\helper\Str;
 
 /**
  * 商家券
@@ -248,6 +249,20 @@ class Client extends BaseClient
             throw new WechatException($this->wechatError($result));
         }
         return compact('params', 'result');
+    }
+
+
+    public function expiredCoupon(string $couponCode, string $stockId)
+    {
+        $deactivate_request_no = 'PC' . Str::random(30);
+
+        return $this->request('/v3/marketing/busifavor/coupons/deactivate', 'POST', [
+            'sign_body' => json_encode([
+                'coupon_code' => $couponCode,
+                'stock_id' => $stockId,
+                'deactivate_request_no' => $deactivate_request_no
+            ])
+        ]);
     }
 
     /**
