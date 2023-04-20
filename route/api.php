@@ -666,6 +666,7 @@ Route::group('api/', function () {
     //风控
     Route::group('risk',function(){
         Route::get('getrisk','/getRisk');
+        Route::get('check/black',/checkBlack);
     })->prefix('api.risk.Risk');
     
     // 新优惠券
