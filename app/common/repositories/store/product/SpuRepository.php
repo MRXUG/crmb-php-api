@@ -532,7 +532,7 @@ class SpuRepository extends BaseRepository
         $data['coupon'] = $coupon;
         if ($coupon) {
             //查询最大面额得值
-            $discountNum = PlatformCoupon::getDB()->whereIn("platform_coupon_id",$platform_coupon_ids)->order("discount_num")->value("discount_num");
+            $discountNum = PlatformCoupon::getDB()->whereIn("platform_coupon_id",$platform_coupon_ids)->order("discount_num desc")->value("discount_num");
 
             // 商品获取模式
             $where['product_ids'] = [];
