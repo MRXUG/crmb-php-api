@@ -401,8 +401,8 @@ class StoreRefundOrderRepository extends BaseRepository
         $productRefundPrice = app()->make(StoreRefundProductRepository::class)->userRefundPrice([$productId])[$productId] ?? [];
 
         //计算可退运费
-        $postagePrice = (!$order->status || $order->status == 9) ? bcsub($product['postage_price'], $productRefundPrice['refund_postage'] ?? 0, 2) : 0;
-
+        // $postagePrice = (!$order->status || $order->status == 9) ? bcsub($product['postage_price'], $productRefundPrice['refund_postage'] ?? 0, 2) : 0;
+        $postagePrice = bcsub($product['postage_price'], $productRefundPrice['refund_postage'] ?? 0, 2);
         $refundPrice = 0;
         //计算可退金额
         if ($product['product_price'] > 0) {

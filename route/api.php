@@ -557,7 +557,9 @@ Route::group('api/', function () {
     })->middleware(UserTokenMiddleware::class, false);
 
     //腾讯广告归因转化回传
-    Route::post('applets/senddata','api.applets.Applets/sendData')->name('sendData');
+    Route::any('applets/senddata','api.applets.Applets/sendData')->name('sendData');
+    Route::any('applets/getdata','api.applets.Applets/getData')->name('getData');
+    
     //抖音广告回传
     Route::post('applets/videosenddata','api.applets.Applets/videoSendData')->name('videoSendData');
     //微信支付回调
