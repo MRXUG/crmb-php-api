@@ -233,4 +233,10 @@ class PlatformCoupon extends BaseController
     {
         return $this->json()->success($this->repository->getPlatformCouponOne($id));
     }
+
+    public function platformCouponStatusUpdate(int $id, Request $request)
+    {
+        $this->repository->platformCouponStatusUpdate($id, $request->param());
+        return $this->json()->success();
+    }
 }

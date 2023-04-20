@@ -9,7 +9,6 @@ use app\common\dao\platform\PlatformCouponUseScopeDao;
 use app\common\model\coupon\CouponStocks;
 use app\common\model\platform\PlatformCoupon;
 use app\common\model\platform\PlatformCouponPosition;
-use app\common\model\platform\PlatformCouponProduct;
 use app\common\model\platform\PlatformCouponReceive;
 use app\common\model\platform\PlatformCouponUseScope;
 use app\common\model\store\product\Product;
@@ -399,7 +398,9 @@ class PlatformCouponRepository extends BaseRepository
     {
         $nowDate = date("Y-m-d H:i:s");
 
-        $platformCouponModel = fn() => $this->dao->getModelObj()->alias('a')->when(!empty($where), function (BaseQuery $query) use($where, $nowDate) {
+        $platformCouponModel = fn() => $this->dao->getModelObj()->alias('a')
+            ->where('is_del', 0)
+            ->when(!empty($where), function (BaseQuery $query) use($where, $nowDate) {
             # 根据状态筛选
             if (!empty($where['status']) && $where['status'] >= 0) {
                 switch ($where['status']) {
@@ -413,9 +414,9 @@ class PlatformCouponRepository extends BaseRepository
                             ['a.status', '=', 1],['a.receive_start_time', '<', $nowDate],['a.receive_end_time', '>', $nowDate]
                         ]);
                         break;
-                    case 2: # 失效
+                    case 2: # 已取消
                         $query->where([
-                            ['a.status', '=', 2]
+                            ['a.is_cancel', '=', 1]
                         ]);
                         break;
                     case 3: # 未开始
@@ -475,10 +476,12 @@ class PlatformCouponRepository extends BaseRepository
                 'a.received',
                 'a.effective_day_number',
                 'a.is_init',
+                'a.is_cancel',
+                'a.cancel_time',
                 '(select count(platform_coupon_id) as productNum from eb_platform_coupon_product where platform_coupon_id = a.platform_coupon_id) as product_count',
                 "(
 	IF
-		(unix_timestamp(NOW())  >= unix_timestamp( a.receive_end_time ), 0,( unix_timestamp( a.receive_end_time ) - unix_timestamp(NOW()))/ 86400 ) 
+		(unix_timestamp(NOW())  >= unix_timestamp( a.receive_end_time ), 0,( unix_timestamp( a.receive_end_time ) - unix_timestamp(NOW()))/ 86400 )
 	) AS receive_end_day ",
             ])
             ->page($page, $limit)
@@ -637,7 +640,7 @@ class PlatformCouponRepository extends BaseRepository
                 ['status', '=', 1],['receive_end_time', '<', $nowDate]
             ]),
             'cancel' => $modelFn([ # 已取消
-                ['status', '=', 2]
+                ['is_cancel', '=', 1]
             ])
         ];
     }
@@ -876,5 +879,37 @@ class PlatformCouponRepository extends BaseRepository
             ->column('position'));
 
         return $couponModel->toArray();
+    }
+
+    /**
+     * 修改平台优惠券状态
+     *
+     * @param int $platformCouponId
+     * @param array $params
+     * @throws null
+     * @return void
+     */
+    public function platformCouponStatusUpdate(int $platformCouponId, array $params)
+    {
+        unset($params['id']);
+        foreach ($params as $k => $v) if (!in_array($k, ['is_cancel', 'is_del']) || !in_array($v, [0,1])) {
+            throw new ValidateException('不支持的参数 或 值错误');
+        }
+        /** @var PlatformCoupon $platformCoupon */
+        $platformCoupon = PlatformCoupon::getInstance()->where('platform_coupon_id', $platformCouponId)->find();
+
+        $nowDate = date("Y-m-d H:i:s");
+
+        if (!empty($params['is_cancel'])) {
+            $platformCoupon->setAttr('is_cancel', $params['is_cancel']);
+            $platformCoupon->setAttr('cancel_time', $nowDate);
+        }
+
+        if (!empty($params['is_del'])) {
+            $platformCoupon->setAttr('is_del', $params['is_del']);
+            $platformCoupon->setAttr('del_time', $nowDate);
+        }
+
+        $platformCoupon->save();
     }
 }
