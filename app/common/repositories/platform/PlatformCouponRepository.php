@@ -17,6 +17,7 @@ use app\common\model\store\StoreCategory;
 use app\common\model\system\merchant\Merchant;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\store\StoreCategoryRepository;
+use crmeb\jobs\CancelPlatformCouponJob;
 use crmeb\jobs\EstimatePlatformCouponProduct;
 use crmeb\listens\CreatePlatformCouponInitGoods;
 use crmeb\services\MerchantCouponService;
@@ -599,7 +600,9 @@ class PlatformCouponRepository extends BaseRepository
      */
     public function failPlatformCoupon(PlatformCoupon $coupon)
     {
-
+        Queue::push(CancelPlatformCouponJob::class, [
+            'platform_coupon_id' => $coupon->getAttr('platform_coupon_id'),
+        ]);
     }
 
     /**
