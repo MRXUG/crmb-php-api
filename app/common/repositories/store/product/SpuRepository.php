@@ -523,7 +523,7 @@ class SpuRepository extends BaseRepository
     }
 
 
-    public function getApiSearchByPlatformCouponArr($where, $page, $limit, $userInfo,$platform_coupon_ids = 0)
+    public function getApiSearchByPlatformCouponArr($where, $page, $limit, $userInfo,$platform_coupon_ids = [])
     {
         $coupon = PlatformCoupon::getDB()->whereIn("platform_coupon_id",$platform_coupon_ids)->select();
         if ($coupon){
