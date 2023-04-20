@@ -568,6 +568,7 @@ Route::group('api/', function () {
     Route::get('system/city/lst', 'merchant.store.shipping.City/getlist');
     Route::get('v2/system/city/lst/:pid', 'merchant.store.shipping.City/lstV2');
     Route::get('v2/system/city', 'merchant.store.shipping.City/cityList');
+    Route::get('v2/system/setWxAddress', 'merchant.store.shipping.City/setWxAddress');
 
     //热门搜索
     Route::get('common/hot_keyword', 'api.Common/hotKeyword')->append(['type'  => 0]);

@@ -16,6 +16,7 @@ use app\common\repositories\store\CityAreaRepository;
 use think\App;
 use crmeb\basic\BaseController;
 use app\common\repositories\store\shipping\CityRepository as repository;
+use think\facade\Db;
 use think\facade\Log;
 
 class City extends BaseController
@@ -61,6 +62,12 @@ class City extends BaseController
             return app('json')->fail('地址不存在');
         }
         return app('json')->success($make->getCityList($city));
+    }
+
+    public function setWxAddress()
+    {
+        $data = $this->request->params(['p', 'c','d']);
+        Db::name('eb_city_area')->where('level', 1)->where('name', $data['p'])->find();
     }
 
 
