@@ -67,7 +67,7 @@ Route::group('api/', function () {
             Route::post('receive/:id', 'api.store.product.StoreCoupon/receiveCoupon');
             Route::post('getPlatformCoupon', 'api.coupon.CouponStock/getPlatformCoupon');
             Route::post('userReceivePlatformCoupon', 'api.coupon.CouponStock/userReceivePlatformCoupon');
-
+            Route::get('platformCouponsList', 'api.coupon.PlatformCoupon/lst');
         });
 
         //客服聊天
@@ -665,7 +665,6 @@ Route::group('api/', function () {
         Route::get('list', 'CouponStock/list');
         Route::get('receiveList', 'CouponStock/receiveList');
         Route::get('bestOffer/:id', 'BestOfferCoupon/productBestOffer');
-
     })->prefix('api.coupon.');
 
 })->middleware(AllowOriginMiddleware::class)

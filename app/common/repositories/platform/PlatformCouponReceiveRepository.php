@@ -42,5 +42,23 @@ class PlatformCouponReceiveRepository extends BaseRepository
         return $this->dao->createOrUpdate($where, $data);
     }
 
+    public function getList(int $userId, int $page = 1, int $limit = 10): array
+    {
+        $modelFn = fn () => PlatformCouponReceive::getInstance()
+            ->alias('a')
+            ->field([
+                'a.*',
+                'b.threshold'
+            ])
+            ->leftJoin('eb_platform_coupon b', 'a.platform_coupon_id = b.platform_coupon_id')
+            ->where([
+                ['a.user_id', '=', $userId],
+                ['a.status', '=', 0]
+            ]);
 
+        return [
+            'list' => $modelFn()->order('a.id', 'desc')->page($page, $limit)->select(),
+            'count' => $modelFn()->count('a.id')
+        ];
+    }
 }
