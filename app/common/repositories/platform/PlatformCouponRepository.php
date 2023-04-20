@@ -391,6 +391,8 @@ class PlatformCouponRepository extends BaseRepository
      * @param int $page
      * @param int $limit
      * @param array $where
+     * @param string $orderProductCount
+     * @param string $orderReceiveEndDay
      * @return array
      * @throws null
      */
@@ -399,7 +401,7 @@ class PlatformCouponRepository extends BaseRepository
         $nowDate = date("Y-m-d H:i:s");
 
         $platformCouponModel = fn() => $this->dao->getModelObj()->alias('a')
-            ->where('is_del', 0)
+            ->where('a.is_del', '=', 0)
             ->when(!empty($where), function (BaseQuery $query) use($where, $nowDate) {
             # 根据状态筛选
             if (isset($where['status']) && $where['status'] !== '' && $where['status'] >= 0) {
@@ -425,11 +427,13 @@ class PlatformCouponRepository extends BaseRepository
                         ]);
                         break;
                     case 4: # 已结束
-                        $query->where([
-                            ['a.status', '=', 1],['a.receive_end_time', '<', $nowDate]
-                        ])->whereOr([
-                            ['a.status', '=', 2]
-                        ]);
+                        $query->where(function (BaseQuery $query) use($nowDate) {
+                            $query->where([
+                                ['a.status', '=', 1],['a.receive_end_time', '<', $nowDate]
+                            ])->whereOr([
+                                ['a.status', '=', 2]
+                            ]);
+                        });
                         break;
                 }
             }
@@ -490,8 +494,10 @@ class PlatformCouponRepository extends BaseRepository
             ->order('a.platform_coupon_id', 'desc')
             ->order($orderProductCount)
             ->order($orderReceiveEndDay)
+//            ->fetchSQL()
             ->select()
             ->toArray();
+
 
         # 声明优惠券领取表操作模型
         $platformCouponReceive = fn (int $platformCouponId) => PlatformCouponReceive::getInstance()
@@ -521,7 +527,11 @@ class PlatformCouponRepository extends BaseRepository
             $item['statusCn'] = (function () use (&$item, $nowUnixTime): string {
                 $startTime = strtotime($item['receive_start_time']);
                 $endTime = strtotime($item['receive_end_time']);
+
                 if ($startTime > $nowUnixTime) {
+                    if ($item['status'] == 0) {
+                        return '待发布';
+                    }
                     $item['status'] = 3;
                     return '活动未开始';
                 }
@@ -627,7 +637,7 @@ class PlatformCouponRepository extends BaseRepository
      */
     public function getStatusCount(): array
     {
-        $modelFn = fn (array $where = [], ?callable $callback = null) => PlatformCoupon::getInstance()->where('is_del', 0)
+        $modelFn = fn ($where = [], ?callable $callback = null) => PlatformCoupon::getInstance()->where('is_del', 0)
             ->where($where)
             ->when(is_callable($callback), $callback)
             ->count('platform_coupon_id');
@@ -645,10 +655,12 @@ class PlatformCouponRepository extends BaseRepository
             'in_progress' => $modelFn([ # 进行中
                 ['status', '=', 1],['receive_start_time', '<', $nowDate],['receive_end_time', '>', $nowDate],['is_cancel', '=', 0]
             ]),
-            'over' => $modelFn([ # 已结束
-                ['status', '=', 1],['receive_end_time', '<', $nowDate]
-            ], function (BaseQuery $query) {
-                $query->whereOr('status', '=', 2);
+            'over' => $modelFn(function (BaseQuery $query) use($nowDate) {
+                $query->where([
+                    ['status', '=', 1],['receive_end_time', '<', $nowDate]
+                ])->whereOr([
+                    ['status', '=', 2]
+                ]);
             }),
             'cancel' => $modelFn([ # 已取消
                 ['is_cancel', '=', 1]
