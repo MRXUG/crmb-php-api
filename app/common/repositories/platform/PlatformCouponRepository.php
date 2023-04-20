@@ -818,9 +818,9 @@ class PlatformCouponRepository extends BaseRepository
                 ->alias('a')
                 ->leftJoin('eb_platform_coupon_position b', 'a.platform_coupon_id = b.platform_coupon_id')
                 ->when($type == 0, fn (BaseQuery $query) => $query->where([['a.status', '=', 0],['a.receive_end_time', '>', $nowDate]]))
-                ->when($type == 1, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_start_time', '<', $nowDate],['a.receive_end_time', '>', $nowDate]]))
+                ->when($type == 1, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_start_time', '<', $nowDate],['a.receive_end_time', '>', $nowDate],['a.is_cancel','=',0]]))
                 ->when($type == 2, fn (BaseQuery $query) => $query->where([['a.status', '=', 2]]))
-                ->when($type == 3, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_start_time', '>', $nowDate]]))
+                ->when($type == 3, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_start_time', '>', $nowDate],['a.is_cancel','=',0]]))
                 ->when($type == 4, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_end_time', '<', $nowDate]]))
                 ->when($discount_num > 0, function (BaseQuery $query) use ($discount_num) {
                     $query->where('a.discount_num', $discount_num);
