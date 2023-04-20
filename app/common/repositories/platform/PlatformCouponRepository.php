@@ -97,7 +97,7 @@ class PlatformCouponRepository extends BaseRepository
         $field = [
             'discount_num', # 面值
             'count(distinct(`mer_id`)) as `mer_count`', # 商户数
-            'count(distinct(`id`)) as `platform_coupon_count`', # 平台卷优惠券数量
+//            'count(distinct(`id`)) as `platform_coupon_count`', # 平台卷优惠券数量
             'group_concat(`id` order by `id` desc) as `coupon_id_arr`', # 优惠券id组
             'group_concat(`scope` order by `id` desc) as `scope_arr`', # 优惠券id组
             'group_concat(`mer_id` order by `id` desc) as `mer_id_arr`', # 优惠券id组
@@ -134,6 +134,10 @@ class PlatformCouponRepository extends BaseRepository
 
             $item['goods_count'] = (int)$goodsInfo['goods_count'];
             $item['goods_sales'] = (int)$goodsInfo['goods_sales'];
+
+            $item['platform_coupon_count'] = PlatformCoupon::getInstance()->where('discount_num', $item['discount_num'])->count('platform_coupon_id');
+
+            $item['scope_count'] = $this->scopeCount([1,3], $item['discount_num']);
 
             unset($item['scope_arr'], $item['coupon_id_arr'], $item['mer_id_arr']);
         }
@@ -768,32 +772,62 @@ class PlatformCouponRepository extends BaseRepository
     }
 
     /**
-     * 范围计数
+     * <a href="https://www.apifox.cn/link/project/2413062/apis/api-76534942">范围计数</a>
      *
      * @param array $searchStatus 1 进行中 3 未开始
      * @return array
      */
-//    public function scopeCount(array $searchStatus): array
-//    {
-//        foreach ($searchStatus as $item) if (!in_array($item, [1, 3])) throw new ValidateException('参数错误 不支持的状态');
-//
-//        $arr = [];
-//
-//        $nowDate = date("Y-m-d H:i:s");
-//
-//        $searchFn = function (int $type) use ($nowDate): array {
-//
-//            return [
-//                ''
-//            ];
-//        };
-//
-//        foreach ($searchStatus as $item) {
-//            $arr[$item] = [
-//                'home' =>
-//            ];
-//        }
-//
-//        return $arr;
-//    }
+    public function scopeCount(array $searchStatus, int $discount_num = 0): array
+    {
+        foreach ($searchStatus as $item) if (!in_array($item, [0,1,2,3,4])) throw new ValidateException('参数错误 不支持的状态');
+
+        $arr = [];
+
+        $nowDate = date("Y-m-d H:i:s");
+
+        $searchFn = function (int $type) use ($nowDate, $discount_num): array {
+            $func = fn (int $position) => PlatformCoupon::getInstance()
+                ->alias('a')
+                ->leftJoin('eb_platform_coupon_position b', 'a.platform_coupon_id = b.platform_coupon_id')
+                ->when($type == 0, fn (BaseQuery $query) => $query->where([['a.status', '=', 0],['a.receive_end_time', '>', $nowDate]]))
+                ->when($type == 1, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_start_time', '<', $nowDate],['a.receive_end_time', '>', $nowDate]]))
+                ->when($type == 2, fn (BaseQuery $query) => $query->where([['a.status', '=', 2]]))
+                ->when($type == 3, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_start_time', '>', $nowDate]]))
+                ->when($type == 4, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_end_time', '<', $nowDate]]))
+                ->when($discount_num > 0, function (BaseQuery $query) use ($discount_num) {
+                    $query->where('a.discount_num', $discount_num);
+                })
+                ->where('b.position', '=', $position)
+                ->count('a.platform_coupon_id');
+
+            return [
+                'home' => $func(1), # 首页
+                'personal_center' => $func(2), # 个人中心
+                'card_pack_recall' => $func(3), # 卡包召回
+                'ad_reflow' => $func(4), # 广告回流
+                'pay' => $func(5), # 支付/下单
+            ];
+        };
+
+        foreach ($searchStatus as $item) {
+            $arr[(function (int $type) {
+                switch ($type) {
+                    case 0:
+                        return 'wait_release';
+                    case 1:
+                        return 'in_progress';
+                    case 2:
+                        return 'fail';
+                    case 3:
+                        return 'not_started';
+                    case 4:
+                        return 'over';
+                    default:
+                        return $type;
+                }
+            })($item)] = $searchFn($item);
+        }
+
+        return $arr;
+    }
 }

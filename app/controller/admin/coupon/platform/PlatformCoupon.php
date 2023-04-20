@@ -226,7 +226,6 @@ class PlatformCoupon extends BaseController
      */
     public function scopeCount(Request $request)
     {
-
-        return $this->json()->success();
+        return $this->json()->success($this->repository->scopeCount($request->post('scope', [])));
     }
 }
