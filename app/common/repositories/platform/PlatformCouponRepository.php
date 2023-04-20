@@ -293,7 +293,7 @@ class PlatformCouponRepository extends BaseRepository
         if ($param['is_user_limit'] == 1 && $param['user_limit_number'] <= 0){
             throw new ValidateException('设置的每人领取限量值必须大于 0');
         }
-        if (empty($param['scope_id_arr'])) {
+        if ($param['use_type'] != 1 && empty($param['scope_id_arr'])) {
             throw new ValidateException('没有选择范围');
         }
         $param['limit_number'] = (int) $param['limit_number'];
@@ -402,16 +402,16 @@ class PlatformCouponRepository extends BaseRepository
             ->where('is_del', 0)
             ->when(!empty($where), function (BaseQuery $query) use($where, $nowDate) {
             # 根据状态筛选
-            if (!empty($where['status']) && $where['status'] >= 0) {
+            if (isset($where['status']) && $where['status'] !== '' && $where['status'] >= 0) {
                 switch ($where['status']) {
                     case 0: # 待发布
                         $query->where([
-                            ['a.status', '=', 0],['a.receive_end_time', '>', $nowDate]
+                            ['a.status', '=', 0],['a.receive_end_time', '>', $nowDate],['a.is_cancel', '=', 0]
                         ]);
                         break;
                     case 1: # 进行中
                         $query->where([
-                            ['a.status', '=', 1],['a.receive_start_time', '<', $nowDate],['a.receive_end_time', '>', $nowDate]
+                            ['a.status', '=', 1],['a.receive_start_time', '<', $nowDate],['a.receive_end_time', '>', $nowDate],['a.is_cancel', '=', 0]
                         ]);
                         break;
                     case 2: # 已取消
@@ -421,12 +421,14 @@ class PlatformCouponRepository extends BaseRepository
                         break;
                     case 3: # 未开始
                         $query->where([
-                            ['a.status', '=', 1],['a.receive_start_time', '>', $nowDate]
+                            ['a.status', '=', 1],['a.receive_start_time', '>', $nowDate],['a.is_cancel', '=', 0]
                         ]);
                         break;
                     case 4: # 已结束
                         $query->where([
                             ['a.status', '=', 1],['a.receive_end_time', '<', $nowDate]
+                        ])->whereOr([
+                            ['a.status', '=', 2]
                         ]);
                         break;
                 }
@@ -523,9 +525,12 @@ class PlatformCouponRepository extends BaseRepository
                     $item['status'] = 3;
                     return '活动未开始';
                 }
-                if ($endTime < $nowUnixTime) {
+                if ($endTime < $nowUnixTime || $item['status'] == 2) {
                     $item['status'] = 4;
                     return '已结束';
+                }
+                if ($item['is_cancel'] == 1) {
+                    return '已取消';
                 }
                 return [
                     '待发布',
@@ -622,23 +627,29 @@ class PlatformCouponRepository extends BaseRepository
      */
     public function getStatusCount(): array
     {
-        $modelFn = fn (array $where = []) => PlatformCoupon::getInstance()->where($where)->count('platform_coupon_id');
+        $modelFn = fn (array $where = [], ?callable $callback = null) => PlatformCoupon::getInstance()->where('is_del', 0)
+            ->where($where)
+            ->when(is_callable($callback), $callback)
+            ->count('platform_coupon_id');
+
         $nowDate = date("Y-m-d H:i:s");
 
         return [
             'all' => $modelFn(),
             'wait_to_released' => $modelFn([ # 待发布
-                ['status', '=', 0],['receive_end_time', '>', $nowDate]
+                ['status', '=', 0],['receive_end_time', '>', $nowDate],['is_cancel', '=', 0]
             ]),
             'has_not_started' => $modelFn([ # 未开始
-                ['status', '=', 1],['receive_start_time', '>', $nowDate]
+                ['status', '=', 1],['receive_start_time', '>', $nowDate],['is_cancel', '=', 0]
             ]),
             'in_progress' => $modelFn([ # 进行中
-                ['status', '=', 1],['receive_start_time', '<', $nowDate],['receive_end_time', '>', $nowDate]
+                ['status', '=', 1],['receive_start_time', '<', $nowDate],['receive_end_time', '>', $nowDate],['is_cancel', '=', 0]
             ]),
             'over' => $modelFn([ # 已结束
                 ['status', '=', 1],['receive_end_time', '<', $nowDate]
-            ]),
+            ], function (BaseQuery $query) {
+                $query->whereOr('status', '=', 2);
+            }),
             'cancel' => $modelFn([ # 已取消
                 ['is_cancel', '=', 1]
             ])
@@ -807,14 +818,15 @@ class PlatformCouponRepository extends BaseRepository
                 ->alias('a')
                 ->leftJoin('eb_platform_coupon_position b', 'a.platform_coupon_id = b.platform_coupon_id')
                 ->when($type == 0, fn (BaseQuery $query) => $query->where([['a.status', '=', 0],['a.receive_end_time', '>', $nowDate]]))
-                ->when($type == 1, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_start_time', '<', $nowDate],['a.receive_end_time', '>', $nowDate]]))
+                ->when($type == 1, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_start_time', '<', $nowDate],['a.receive_end_time', '>', $nowDate],['a.is_cancel','=',0]]))
                 ->when($type == 2, fn (BaseQuery $query) => $query->where([['a.status', '=', 2]]))
-                ->when($type == 3, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_start_time', '>', $nowDate]]))
+                ->when($type == 3, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_start_time', '>', $nowDate],['a.is_cancel','=',0]]))
                 ->when($type == 4, fn (BaseQuery $query) => $query->where([['a.status', '=', 1],['a.receive_end_time', '<', $nowDate]]))
                 ->when($discount_num > 0, function (BaseQuery $query) use ($discount_num) {
                     $query->where('a.discount_num', $discount_num);
                 })
                 ->where('b.position', '=', $position)
+                ->where('a.is_del', '=', 0)
                 ->count('a.platform_coupon_id');
 
             return [
