@@ -283,7 +283,7 @@ class StoreSpu extends BaseController
         ]);
         $where['is_gift_bag'] = 0;
         $where['order'] = $where['order'] ? $where['order'] : 'star';
-        $platform_coupon_id = $this->request->param('platform_coupon_id',0);
+        $platform_coupon_id = $this->request->param('coupon_id',0);
         $data = $this->repository->getApiSearchByPlatformCoupon($where, $page, $limit, $this->userInfo,$platform_coupon_id);
         return app('json')->success($data);
     }
