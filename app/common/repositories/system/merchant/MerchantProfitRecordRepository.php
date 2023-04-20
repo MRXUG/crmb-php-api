@@ -82,6 +82,18 @@ class MerchantProfitRecordRepository extends BaseRepository
             $orderIds2MerIds = array_column($chunk, 'profit_mer_id', 'order_id');
             $orderIdsFitCondition = $orderStatusRepo->selectOrders15DaysAfterReceive($orderIds);
             if (!$orderIdsFitCondition) {
+
+                $profitDaoInfo = $profitDayLogDao->getWhere(['update_time'=>$today,"mer_id"=>$mId],"profit_id");
+                if (!$profitDaoInfo){
+                    $profitDayLogDao->create(
+                        [
+                            'mer_id'      => $mId,
+                            'total_money' => 0,
+                            'update_time' => date('Y-m-d')." 00:00:00"
+                        ]
+                    );
+                }
+
                 continue;
             }
 

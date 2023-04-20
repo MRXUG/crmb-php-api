@@ -58,6 +58,8 @@ class FeedbackDao extends BaseDao
             $query->where('realname','like', '%'.$where['realname'].'%');
         })->when(isset($where['is_del']) && $where['is_del'] !== '', function ($query) use ($where) {
             $query->where('is_del',$where['is_del']);
+        })->when(isset($where['order_sn']) && $where['order_sn'] !== '', function ($query) use ($where) {
+            $query->where('order_sn',$where['order_sn']);
         })->order('create_time DESC');
     }
 
