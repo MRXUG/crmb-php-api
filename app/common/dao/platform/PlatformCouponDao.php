@@ -66,12 +66,18 @@ class PlatformCouponDao extends BaseDao
         $newList = [];
 
         //获取type符合的券
-        $ids = PlatformCouponPosition::getDB()->where("position",$type)->column('platform_coupon_id');
+//        $ids = PlatformCouponPosition::getDB()->where("position",$type)->column('platform_coupon_id');
 
         $offset = 0;
 
         QUERY_AGAIN:
-        $list =  $this->getModel()::getDB()->where($where)->whereIn('platform_coupon_id',$ids)->order("discount_num desc")->limit($offset,$limit)->select();
+        $list =  $this->getModel()::getDB()->alias("P")
+            ->leftJoin('PlatformCouponPosition PP', 'PP.platform_coupon_id = P.platform_coupon_id')
+            ->where($where)
+            ->where("PP.position",$type)
+            ->order("discount_num desc")
+            ->limit($offset,$limit)
+            ->select();
 
         $offset += 3;
 
