@@ -14,6 +14,7 @@ namespace app\controller\api\applets;
 
 use think\App;
 use crmeb\basic\BaseController;
+use app\common\model\applet\AppletsTx;
 
 class Applets extends BaseController{
     
@@ -29,11 +30,6 @@ class Applets extends BaseController{
 
 // {"account_id":"30845926","adgroup_id":"9880016918","click_id":"npxuazadaaaeh5wph5dq","click_time":"1681977198","request_id":"suawdqwsu4tha","wechat_openid":"ofQbV5UgbCjo7S8HmcAEIx4jLBvM","callback":"http:\/\/tracking.e.qq.com\/conv?cb=7-wD3EfpRf9gNiPufDoSexOsW5ElqXnW6BkHlwyjaVw%3D&conv_id=17235723"}
 
-// 'user_id' => [
-//     'wechat_openid' => $param['wechat_openid'], // wechat_openid 和 wechat_unionid 二者必填一
-//     'wechat_unionid' => '', // 企业微信必填
-//     'wechat_app_id' => ''  // 微信类上报必填，且必须通过授权。授权请参考微信数据接入
-// ],
         $param = $this->request->param();
         file_put_contents('applets.txt',json_encode($param).PHP_EOL,FILE_APPEND);
         // return app('json')->success('success');
@@ -71,6 +67,29 @@ class Applets extends BaseController{
 
             return app('json')->success(json_decode($result,true));
         // }
+    }
+    
+    //腾讯点击监测接口数据保存
+    public function getData(){
+        //监测链接
+// https://dianshang.sasz.cn//api/applets/getdata?account_id=__ACCOUNT_ID__&adgroup_id=__ADGROUP_ID__&ad_id=__AD_ID__&click_id=__CLICK_ID__&click_time=__CLICK_TIME__&request_id=__REQUEST_ID__&wechat_openid=__WECHAT_OPEN_ID__&c=__CALLBACK__
+
+// 获取的参数 {"account_id":"30845926","adgroup_id":"9880016918","click_id":"npxuazadaaaeh5wph5dq","click_time":"1681977198","request_id":"suawdqwsu4tha","wechat_openid":"ofQbV5UgbCjo7S8HmcAEIx4jLBvM","callback":"http:\/\/tracking.e.qq.com\/conv?cb=7-wD3EfpRf9gNiPufDoSexOsW5ElqXnW6BkHlwyjaVw%3D&conv_id=17235723"}
+        
+        $param = $this->request->param();
+        file_put_contents('applets.txt',json_encode($param).PHP_EOL,FILE_APPEND);
+        
+        $model = new AppletsTx();
+        $info = $model->where(['request_id'=>$param['request_id']])->find();
+        if(!$info){
+            //组织数组
+            $data = [
+                'request_id' => $param['request_id'],
+                'wechat_openid' => $param['wechat_openid'],
+                'content' => json_encode($param)
+            ];
+            $insert = $model->save($data);
+        }
     }
 
     /**
