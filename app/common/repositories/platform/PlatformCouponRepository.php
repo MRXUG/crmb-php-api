@@ -11,10 +11,13 @@ use app\common\model\platform\PlatformCoupon;
 use app\common\model\platform\PlatformCouponProduct;
 use app\common\model\platform\PlatformCouponReceive;
 use app\common\model\store\product\Product;
+use app\common\model\store\StoreCategory;
 use app\common\repositories\BaseRepository;
+use app\common\repositories\store\StoreCategoryRepository;
 use crmeb\jobs\EstimatePlatformCouponProduct;
 use crmeb\listens\CreatePlatformCouponInitGoods;
 use crmeb\services\MerchantCouponService;
+use Exception;
 use think\db\BaseQuery;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -23,9 +26,8 @@ use think\exception\ValidateException;
 use think\facade\Db;
 use think\facade\Log;
 use think\facade\Queue;
-use Exception;
-use ValueError;
 use Throwable;
+use ValueError;
 
 /**
  * @property PlatformCouponDao $dao
@@ -67,9 +69,12 @@ class PlatformCouponRepository extends BaseRepository
             ['start_at', '<', $nowDate],
             ['discount_num', '=', $discount_num]
         ];
-
+        /** @var CouponStocks $model */
         $model = $couponDao->getModelObj()->where($where)->group('discount_num')->field($field)->find();
-
+        # 保证有优惠券在范围内
+        $model->setAttr('min_start_time', date("Y-m-d H:i:s", strtotime($model->getAttr('min_start_time')) + 10));
+        $model->setAttr('max_end_time', date("Y-m-d H:i:s", strtotime($model->getAttr('max_end_time')) - 10));
+        # 返回数据
         return method_exists($model, 'toArray') ? $model->toArray() : [];
     }
 
@@ -271,7 +276,7 @@ class PlatformCouponRepository extends BaseRepository
             throw new ValidateException('请选择范围');
         }
         # 判断门槛是否小于或者等于面值
-        if ($param['threshold'] >= $param['discount_num']) {
+        if ($param['threshold'] < $param['discount_num']) {
             throw new ValidateException('门槛必须大于面值');
         }
         # 判断设置了限量设置的数量必须大于0
@@ -281,6 +286,11 @@ class PlatformCouponRepository extends BaseRepository
         if ($param['is_user_limit'] == 1 && $param['user_limit_number'] <= 0){
             throw new ValidateException('设置的每人领取限量值必须大于 0');
         }
+        if (empty($param['scope_id_arr'])) {
+            throw new ValidateException('没有选择范围');
+        }
+        $param['limit_number'] = (int) $param['limit_number'];
+        $param['user_limit_number'] = (int) $param['user_limit_number'];
         # 检测是否勾选发券位置
         if (empty($param['coupon_position'])) throw new ValidateException('发券位置必须选择');
 
@@ -454,7 +464,8 @@ class PlatformCouponRepository extends BaseRepository
                 'a.is_limit',
                 'a.limit_number',
                 'a.received',
-                'a.effective_day_number'
+                'a.effective_day_number',
+                'a.is_init'
             ])
             ->page($page, $limit)
             ->order('a.platform_coupon_id', 'desc')
@@ -553,8 +564,8 @@ class PlatformCouponRepository extends BaseRepository
             # 判断状态进行对应操作
             if ($status == 1) { # 发布
                 $res = $this->buildPlatformCoupon($platformCoupon);
-                $platformCoupon['wechat_business_number'] = $res['params']['belong_merchant']; # 填入生成优惠券的商户号
-                $platformCoupon['stock_id'] = $res['result']['stock_id']; # 填入批次号
+                $platformCoupon->setAttr('wechat_business_number', $res['params']['belong_merchant']); # 填入生成优惠券的商户号
+                $platformCoupon->setAttr('stock_id', $res['result']['stock_id']); # 填入批次号
             }
             if ($status == 2) { # 失效
                 $this->failPlatformCoupon($platformCoupon);
@@ -682,4 +693,107 @@ class PlatformCouponRepository extends BaseRepository
 
         return $arr;
     }
+
+    /**
+     * 获取编辑优惠券商品列表
+     *
+     * @param int $platformCouponId
+     * @param int $page
+     * @param int $limit
+     * @param array $where
+     * @return void
+     * @throws null
+     */
+    public function getEditCouponProductList(int $platformCouponId, int $page = 1, int $limit = 10, array $where = []): array
+    {
+        $platformCouponModel = fn () => Product::getInstance()
+            ->alias('a')
+            ->field([
+                'a.product_id',
+                'a.store_name',
+                'a.store_info',
+                'a.keyword',
+                'a.is_used',
+                'a.mer_id',
+                'a.sort',
+                'a.image',
+                'a.slider_image',
+                'a.price',
+                'a.sales',
+                'c.mer_name',
+                'c.real_name',
+                'd.path'
+            ])
+            ->leftJoin('eb_platform_coupon_product b', 'a.product_id = b.product_id')
+            ->leftJoin('eb_merchant c', 'a.mer_id = c.mer_id')
+            ->leftJoin('eb_store_category d', 'a.cate_id = d.store_category_id')
+            ->where('b.platform_coupon_id', $platformCouponId)
+            ->when(!empty($where), function (BaseQuery $query) use ($where) {
+                if (!empty($where['store_name'])) {
+                    $query->whereLike('a.store_name', "%{$where['store_name']}%");
+                }
+                if (!empty($where['mer_id']) && $where['mer_id'] > 0) {
+                    $query->where('a.mer_id', $where['mer_id']);
+                }
+                if (!empty($where['pid']) && $where['pid'] > 0) {
+                    $storeCategoryRepository = app()->make(StoreCategoryRepository::class);
+                    $ids = array_merge($storeCategoryRepository->findChildrenId((int)$where['pid']), [(int)$where['pid']]);
+                    if (count($ids)) $query->whereIn('a.cate_id', $ids);
+                }
+            });
+
+        $platformCoupon = $platformCouponModel()->page($page, $limit)
+            ->select()
+            ->toArray();
+
+        /** @var CouponStocksDao $couponStockDao */
+        $couponStockDao = app()->make(CouponStocksDao::class);
+
+        foreach ($platformCoupon as &$item) {
+            # 获取分类路径
+            $pathArr = array_merge(array_filter(explode('/', $item['path'])), []);
+            $pathInfo = array_column(StoreCategory::getInstance()->field(['store_category_id', 'cate_name'])->whereIn('store_category_id', $pathArr)->select()->toArray(), null, 'store_category_id');
+            $item['path_cn'] = (function () use ($pathArr,$pathInfo): string {
+                $a = [];
+                foreach ($pathArr as $v) $a[] = $pathInfo[$v]['cate_name'];
+                return implode('/', $a);
+            })();
+            $item['couponList'] = $couponStockDao->getCouponListFromProductId($item['product_id']);
+        }
+
+        return [
+            'list' => $platformCoupon,
+            'count' => $platformCouponModel()->count('a.product_id')
+        ];
+    }
+
+    /**
+     * 范围计数
+     *
+     * @param array $searchStatus 1 进行中 3 未开始
+     * @return array
+     */
+//    public function scopeCount(array $searchStatus): array
+//    {
+//        foreach ($searchStatus as $item) if (!in_array($item, [1, 3])) throw new ValidateException('参数错误 不支持的状态');
+//
+//        $arr = [];
+//
+//        $nowDate = date("Y-m-d H:i:s");
+//
+//        $searchFn = function (int $type) use ($nowDate): array {
+//
+//            return [
+//                ''
+//            ];
+//        };
+//
+//        foreach ($searchStatus as $item) {
+//            $arr[$item] = [
+//                'home' =>
+//            ];
+//        }
+//
+//        return $arr;
+//    }
 }
