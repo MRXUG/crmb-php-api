@@ -522,6 +522,36 @@ class SpuRepository extends BaseRepository
         return $data;
     }
 
+
+    public function getApiSearchByPlatformCouponArr($where, $page, $limit, $userInfo,$platform_coupon_ids = 0)
+    {
+        $coupon = PlatformCoupon::getDB()->whereIn("platform_coupon_id",$platform_coupon_ids)->select();
+        if ($coupon){
+            $coupon = $coupon->toArray();
+        }
+        $data['coupon'] = $coupon;
+        if ($coupon) {
+            //查询最大面额得值
+            $discountNum = PlatformCoupon::getDB()->whereIn("platform_coupon_id",$platform_coupon_ids)->order("discount_num")->value("discount_num");
+
+            // 商品获取模式
+            $where['product_ids'] = [];
+            /** @var Collection $productList */
+            $productList = PlatformCouponProduct::getDB()->whereIn('platform_coupon_id',$platform_coupon_ids)->column('product_id');
+            if ($productList) {
+                $where['product_ids'] = $productList;
+            }
+            $where['is_coupon'] = 1;
+            $product = $this->getApiSearch($where, $page, $limit, $userInfo,$discountNum);
+        }
+
+        $data['count'] = $product['count'] ?? 0;
+        $data['list'] = $product['list'] ?? [];
+        return $data;
+    }
+
+
+
     public function getHotRanking(int $cateId)
     {
         $RedisCacheService = app()->make(RedisCacheService::class);

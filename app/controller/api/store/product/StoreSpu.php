@@ -289,6 +289,28 @@ class StoreSpu extends BaseController
     }
 
 
+    public function getProductByPlatformCouponArr()
+    {
+        [$page, $limit] = $this->getPage();
+        $where = $this->request->params([
+            'keyword',
+            'cate_id',
+            'cate_pid',
+            'order',
+            'price_on',
+            'price_off',
+            'brand_id',
+            'pid',
+            'mer_cate_id',
+        ]);
+        $where['is_gift_bag'] = 0;
+        $where['order'] = $where['order'] ? $where['order'] : 'star';
+        $platform_coupon_ids = $this->request->param('coupon_id',[]);
+        $data = $this->repository->getApiSearchByPlatformCouponArr($where, $page, $limit, $this->userInfo,$platform_coupon_id);
+        return app('json')->success($data);
+    }
+
+
     public function getHotRanking()
     {
         $cateId = $this->request->param('cate_pid',0);
