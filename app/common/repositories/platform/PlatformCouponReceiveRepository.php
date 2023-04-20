@@ -48,7 +48,8 @@ class PlatformCouponReceiveRepository extends BaseRepository
             ->alias('a')
             ->field([
                 'a.*',
-                'b.threshold'
+                'b.threshold',
+                'b.coupon_name'
             ])
             ->leftJoin('eb_platform_coupon b', 'a.platform_coupon_id = b.platform_coupon_id')
             ->where([
