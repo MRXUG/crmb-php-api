@@ -595,33 +595,77 @@ class User extends BaseController
     /**
      * 设置黑名单
      */
-    public function Operate($uid){
-
+    public function Operate(){
+        $uid = $this->request->param('uid');
         if($uid){
             $this->user = $this->repository->get($uid);
-            
+            //判断是否白名单
+            if($this->user->white){
+                return app('json')->fail('白名单用户不可以加入黑名单');
+            }
+
             $operate = $this->request->param('operate');
+            $log = [
+                'uid' => $uid,
+                'type' => 2,
+                'operate' => 1,
+            ];
+  
             if($this->user){
 
                 switch($operate){
                     case 'add':
                         //拉入黑名单
-                        $data = ['black'=>1];
+                        $data = ['black'=>1,'wb_time'=>time()];
                         $this->repository->update($uid,$data);
-                        
+                        //记录日志
+                        $this->setBlackLog($log);
+    
                         return app('json')->success('黑名单设置成功');
                         break;
                     case 'del':
                         //移除黑名单
-                        $data = ['black'=>0];
+                        $data = ['black'=>0,'wb_time'=>time()];
                         $this->repository->update($uid,$data);
+                        
+                        //记录日志
+                        $log['operate'] = 0;
+                        $this->setBlackLog($log);
                         
                         return app('json')->success('黑名单移除成功');
                         break;
                     default:
-                        return app('json')->success('黑名单状态获取成功');
+                        
+                        [$page, $limit] = $this->getPage();
+                        $where = [
+                            'black' => 1
+                        ];
+                        return app('json')->success($this->repository->getPulbicLst($where, $page, $limit));
                 }
             }
+        }else{
+            return app('json')->fail('参数错误');
+        }
+    }
+    
+    
+    /**
+     * 黑名单操作记录平台调用
+     * $type 变更形式1系统判定2人工添加3用户主动
+     * $uid  用户id
+     * $operate  1加入黑名单0移出黑名单
+     */
+    public function setBlackLog($data){
+        if(isset($data['uid']) && $data['uid'] > 0){
+            $arr = [
+                'uid' => $data['uid'],
+                'type' => $data['type'],
+                'operate' => $data['operate'],
+                'create_time' => time()
+            ];
+            $info = app()->make(UserBlackLogRepository::class)->create($arr);
+            
+            return app('json')->success('记录成功');
         }else{
             return app('json')->fail('参数错误');
         }
@@ -630,24 +674,24 @@ class User extends BaseController
 
     /**
      * 黑名单操作记录
-     * $type 1加入黑名单0移出黑名单
+     * $type 变更形式1系统判定2人工添加3用户主动
      * $uid  用户id
-     * $operate  变更形式1系统判定2人工添加3用户主动	
+     * $operate  1加入黑名单0移出黑名单
      */
-    public function setLog($data=[]){
-
-        if(isset($data['uid'])){
+    public function setLog(){
+        $uid = $this->request->param('uid');
+        if(isset($uid)){
+            $param = $this->request->param();
             $arr = [
-                'uid' => $data['uid'],
-                'type' => $data['type'],
-                'operate' => $data['operate'],
+                'uid' => $uid,
+                'type' => $param['type'],
+                'operate' => $param['operate'],
                 'create_time' => time()
             ];
-        }
-
-        $info = app()->make(UserBlackLogRepository::class)->create($arr);
-        if($info){
+            $info = app()->make(UserBlackLogRepository::class)->create($arr);
+            
             return app('json')->success('记录成功');
+        
         }else{
             return app('json')->fail('参数错误');
         }
@@ -657,10 +701,57 @@ class User extends BaseController
     /**
      * 获取用户黑名单日志
      */
-    public function blackLog($uid){
+    public function blackLog(){
+        $uid = $this->request->param('uid');
         if($uid > 0){
             [$page, $limit] = $this->getPage();
-            return app('json')->success($this->repository->search($uid,$where, $page, $limit));
+            $where = ['uid'=>$uid];
+            return app('json')->success(app()->make(UserBlackLogRepository::class)->search($where, $page, $limit));
         }
     }
+
+    /**
+     * 白名单操作
+     */
+    public function whiteOperate(){
+        $uid = $this->request->param('uid');
+        if($uid > 0){
+            $this->user = $this->repository->get($uid);
+            
+            $operate = $this->request->param('operate');
+            if($operate == 'del'){
+                //移出白名单
+                $data = ['white'=>0,'wb_time'=>time()];
+                $this->repository->update($uid,$data);
+                
+                return app('json')->success('移出白名单成功');
+            }else{
+                //加入白名单
+                $data = ['white'=>1,'wb_time'=>time()];
+                $this->repository->update($uid,$data);
+                
+                return app('json')->success('白名单设置成功');
+            }
+        }
+    }
+
+    /**
+     * 白名单列表
+     */
+    public function getWhite(){
+
+        [$page, $limit] = $this->getPage();
+        $where = [
+            'white' => 1
+        ];
+        
+        if($this->request->has('uid')){
+            $where['uid'] = intval($this->request->param('uid'));
+        }
+        return app('json')->success($this->repository->getPulbicLst($where, $page, $limit));
+    }
+
+
+
+
 }

@@ -660,6 +660,11 @@ Route::group('api/', function () {
         Route::get('getlog','Black/getLog');
     })->prefix('api.black.');
 
+    //风控
+    Route::group('risk',function(){
+        Route::get('getrisk','/getRisk');
+    })->prefix('api.risk.Risk');
+    
     // 新优惠券
     Route::group('stock/coupon', function () {
         Route::get('list', 'CouponStock/list');

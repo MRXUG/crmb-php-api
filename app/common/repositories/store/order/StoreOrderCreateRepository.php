@@ -2,6 +2,7 @@
 
 namespace app\common\repositories\store\order;
 
+use app\common\dao\system\merchant\MerchantAdDao;
 use app\common\model\coupon\CouponStocks;
 use app\common\model\store\order\StoreOrder;
 use app\common\repositories\coupon\CouponStocksRepository;
@@ -2146,7 +2147,8 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 'platform_coupon_price' => $merchantCart['order']['platform_coupon_price'],
                 'pay_type' => $pay_type,
                 'ad_id' => $marketingDiscount['ad_id'] ?? '',
-                'ad_channel_id' => $ad_channel_id, // 广告渠道，腾讯广告1. 抖音广告2
+                // 'ad_channel_id' => $ad_channel_id, // 广告渠道，腾讯广告1. 抖音广告2
+                'ad_channel_id'=> $marketingData['ad_channel_id'],
                 'platform_source'=> $marketingData['platform_source'],
                 'merchant_source'=> $marketingData['merchant_source'],
                 'ad_query'=> $ad_query,
@@ -2659,7 +2661,8 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 'platform_coupon_price' => $merchantCart['order']['platform_coupon_price'],
                 'pay_type' => $pay_type,
                 'ad_id' => $marketingDiscount['ad_id'] ?? '',
-                'ad_channel_id' => $ad_channel_id, // 广告渠道，腾讯广告1. 抖音广告2
+                // 'ad_channel_id' => $ad_channel_id, // 广告渠道，腾讯广告1. 抖音广告2
+                'ad_channel_id'=> $marketingData['ad_channel_id'],
                 'platform_source'=> $marketingData['platform_source'],
                 'merchant_source'=> $marketingData['merchant_source'],
                 'ad_query'=> $ad_query,
@@ -2961,7 +2964,8 @@ class StoreOrderCreateRepository extends StoreOrderRepository
     {
         $adId = (int)($marketingDiscount['ad_id'] ?? 0);
         $adInfo = app()->make(MerchantAdRepository::class)->getInfo($adId);
-        if ($adId && empty($adInfo)) {
+        $adInfo2 = app()->make(MerchantAdDao::class)->getInfo2($adId);
+        if ($adId && empty($adInfo) && empty($adInfo2)) {
             throw new ValidateException('营销信息异常,请重新加购');
         }
 
@@ -3080,6 +3084,10 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $adFissionAmount = $adInfo['fission_amount'];
             $adFailureDiscountAmount = $adInfo['pay_failure_discount_amount'];
 
+            $productId = $productInfo['goods_id'];
+            $adProductId = $adInfo['goods_id'];
+
+
             $hasError = false;
             // 广告
             // 当前优惠
@@ -3087,7 +3095,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 case 2:
                 case 3:
                     // 营销优惠
-                    if ($marketingDiscountAmount != $adMarketingDiscountAmount) {
+                    if ($marketingDiscountAmount != $adMarketingDiscountAmount && $productId == $adProductId) {
                         $hasError = true;
                     }
                     $discountTotal = $adMarketingDiscountAmount;
@@ -3096,11 +3104,11 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 case 5:
                     // 营销 + 红包
                     // 优惠裂变开关：1-开启，2-关闭
-                    if ($fissionAmount && (($adInfo['discount_fission_switch'] == 2) || ($fissionAmount != $adFissionAmount))) {
+                    if ($fissionAmount && (($adInfo['discount_fission_switch'] == 2) || ($fissionAmount != $adFissionAmount)) && $productId == $adProductId) {
                         $hasError = true;
                     }
 
-                    if ($marketingDiscountAmount && $marketingDiscountAmount != $adMarketingDiscountAmount) {
+                    if ($marketingDiscountAmount && $marketingDiscountAmount != $adMarketingDiscountAmount && $productId == $adProductId) {
                         $hasError = true;
                     }
                     $discountTotal = $marketingDiscountAmount;
@@ -3114,7 +3122,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                         $maxCurrentDiscount = bcadd($adFissionAmount, $adMarketingDiscountAmount, 2);
                     }
                     // var_dump([$failureDiscount, $adFailureDiscountAmount, $failureDiscount, $maxCurrentDiscount]);die;
-                    if (($failureDiscount != $adFailureDiscountAmount) || ($failureDiscount < $maxCurrentDiscount)) {
+                    if ((($failureDiscount != $adFailureDiscountAmount) || ($failureDiscount < $maxCurrentDiscount)) && $productId == $adProductId) {
                         // 当前优惠是否比支付失败优惠大
                         $hasError = false;
                     }
@@ -3164,6 +3172,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             'merchant_source' => $merchantSource,
             'discount_total'  => $discountTotal,
             'merchant_coupon' => $bestCoupon,
+            'ad_channel_id' => $adInfo2 && $adInfo2['ad_channel_id'] ? $adInfo2['ad_channel_id'] : 0,
         ];
     }
 
@@ -3184,7 +3193,8 @@ class StoreOrderCreateRepository extends StoreOrderRepository
     {
         $adId = (int)($marketingDiscount['ad_id'] ?? 0);
         $adInfo = app()->make(MerchantAdRepository::class)->getInfo($adId);
-        if ($adId && empty($adInfo)) {
+        $adInfo2 = app()->make(MerchantAdDao::class)->getInfo2($adId);
+        if ($adId && empty($adInfo) && empty($adInfo2)) {
             throw new ValidateException('营销信息异常,请重新加购');
         }
 
@@ -3224,7 +3234,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         $merId2                  = (int)$merId;
         $returnCouponCode        = $refluxCoil['coupon_code'] ?? '';
         $returnCouponType        = $refluxCoil['type'] ?? '1';
-        $returnCouponMerId       = (int)$refluxCoil['mer_id'] ?? 0;
+        $returnCouponMerId       = (int) ($refluxCoil['mer_id'] ?? 0);
         if (!empty($returnCouponCode) && $returnCouponType == '2' && $merId2 == $returnCouponMerId) {
             $isReturnCoupon = true;
         }
@@ -3310,6 +3320,9 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $adFissionAmount = $adInfo['fission_amount'];
             $adFailureDiscountAmount = $adInfo['pay_failure_discount_amount'];
 
+            $productId = $productInfo['goods_id'];
+            $adProductId = $adInfo['goods_id'];
+
             $hasError = false;
             // 广告
             // 当前优惠
@@ -3317,7 +3330,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 case 2:
                 case 3:
                     // 营销优惠
-                    if ($marketingDiscountAmount != $adMarketingDiscountAmount) {
+                    if ($marketingDiscountAmount != $adMarketingDiscountAmount && $productId == $adProductId) {
                         $hasError = true;
                     }
                     $discountTotal = $adMarketingDiscountAmount;
@@ -3326,11 +3339,11 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 case 5:
                     // 营销 + 红包
                     // 优惠裂变开关：1-开启，2-关闭
-                    if ($fissionAmount && (($adInfo['discount_fission_switch'] == 2) || ($fissionAmount != $adFissionAmount))) {
+                    if ($fissionAmount && (($adInfo['discount_fission_switch'] == 2) || ($fissionAmount != $adFissionAmount)) && $productId == $adProductId) {
                         $hasError = true;
                     }
 
-                    if ($marketingDiscountAmount && $marketingDiscountAmount != $adMarketingDiscountAmount) {
+                    if ($marketingDiscountAmount && $marketingDiscountAmount != $adMarketingDiscountAmount && $productId == $adProductId) {
                         $hasError = true;
                     }
                     $discountTotal = $marketingDiscountAmount;
@@ -3344,7 +3357,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                         $maxCurrentDiscount = bcadd($adFissionAmount, $adMarketingDiscountAmount, 2);
                     }
                     // var_dump([$failureDiscount, $adFailureDiscountAmount, $failureDiscount, $maxCurrentDiscount]);die;
-                    if (($failureDiscount != $adFailureDiscountAmount) || ($failureDiscount < $maxCurrentDiscount)) {
+                    if ((($failureDiscount != $adFailureDiscountAmount) || ($failureDiscount < $maxCurrentDiscount)) && $productId == $adProductId) {
                         // 当前优惠是否比支付失败优惠大
                         $hasError = false;
                     }
@@ -3394,6 +3407,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             'merchant_source' => $merchantSource,
             'discount_total'  => $discountTotal,
             'merchant_coupon' => $bestCoupon,
+            'ad_channel_id' => $adInfo2 && $adInfo2['ad_channel_id'] ? $adInfo2['ad_channel_id'] : 0,
         ];
     }
 

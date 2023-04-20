@@ -51,6 +51,21 @@ class MerchantAdDao extends BaseDao
         return $res;
     }
 
+    /**
+     * @throws ModelNotFoundException
+     * @throws DbException
+     * @throws DataNotFoundException
+     */
+    public function getInfo2($id)
+    {
+        $result = $this->getModelObj()->find($id);
+        if (empty($result)) {
+            return [];
+        } else {
+            return $result->toArray();
+        }
+    }
+
     public function getDeliveryMethod($id){
         return $this->getModelObj()->where("ad_id","=",$id)->value("deliveryMethod");
     }

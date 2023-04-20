@@ -11,10 +11,10 @@
 // +----------------------------------------------------------------------
 
 
-namespace app\common\repositories\black;
+namespace app\common\repositories\risk;
 
 
-use app\common\dao\black\UserBlackLogDao;
+use app\common\dao\risk\RiskDao;
 use app\common\repositories\BaseRepository;
 use FormBuilder\Exception\FormBuilderException;
 use FormBuilder\Factory\Elm;
@@ -23,6 +23,7 @@ use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
 use think\facade\Route;
+use app\common\model\risk\Risk;
 
 /**
  * Class ArticleCategoryRepository
@@ -31,41 +32,23 @@ use think\facade\Route;
  * @day 2020-04-20
  * @mixin ArticleCategoryDao
  */
-class UserBlackLogRepository extends BaseRepository{
+class RiskRepository extends BaseRepository{
     /**
      * ArticleCategoryRepository constructor.
-     * @param UserBlackLogDao $dao
+     * @param RiskDao $dao
      */
-    public function __construct(UserBlackLogDao $dao){
+    public function __construct(RiskDao $dao){
         $this->dao = $dao;
     }
 
-
-     /**
-     * TODO 添加记录
-     * $data 参数数组
-     * @day 2020-10-27
-     */
-    public function create(array $data){
-        $result = $this->dao->create($data);
-        return $result;
+    public function getRiskId(){
+        $model = new Risk;
+        return $model->order('rid DESC')->value('rid');
     }
-
-
-    /**
-     * @param int $uid
-     * @param array $where
-     * @param $page
-     * @param $limit
-     * @return array
-     * @author stone
-     */
-    public function search(array $where, $page, $limit)
-    {
-        $query = $this->dao->search($where)->order('create_time DESC');
-        $count = $query->count($this->dao->getPk());
-        $list = $query->page($page, $limit)->select();
-        return compact('count', 'list');
+    
+    public function getRisk(){
+        $model = new Risk;
+        return $model->order('rid DESC')->find();
     }
 
 }

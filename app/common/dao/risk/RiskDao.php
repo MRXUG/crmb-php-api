@@ -11,7 +11,7 @@
 // +----------------------------------------------------------------------
 
 
-namespace app\common\dao\black;
+namespace app\common\dao\risk;
 
 
 use think\Collection;
@@ -21,11 +21,11 @@ use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
 use think\facade\Db;
 use app\common\dao\BaseDao;
-use app\common\model\black\UserBlackLog;
+use app\common\model\risk\Risk;
 use app\common\model\BaseModel;
 use think\Model;
 
-class UserBlackLogDao extends BaseDao
+class RiskDao extends BaseDao
 {
 
     /**
@@ -35,7 +35,7 @@ class UserBlackLogDao extends BaseDao
      */
     protected function getModel(): string
     {
-        return UserBlackLog::class;
+        return Risk::class;
     }
 
 
@@ -48,8 +48,8 @@ class UserBlackLogDao extends BaseDao
      */
     public function search(array $where)
     {
-        $query = UserBlackLog::getDB();
+        $query = Risk::getDB();
 
-        return $query->where($where)->order('create_time DESC');
+        return $query->where($where)->order('update_time DESC');
     }
 }

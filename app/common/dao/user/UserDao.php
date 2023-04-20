@@ -126,6 +126,10 @@ class UserDao extends BaseDao
             return $query->where('User.is_svip','>',0);
         })->when(isset($where['svip_type']) && $where['svip_type'] !== '', function (BaseQuery $query) use ($where) {
             return $query->where('User.is_svip',$where['svip_type']);
+        })->when(isset($where['white']), function (BaseQuery $query) use ($where) {
+            return $query->where('User.white',$where['white']);
+        })->when(isset($where['black']), function (BaseQuery $query) use ($where) {
+            return $query->where('User.black',$where['black']);
         });
 
         return $query;

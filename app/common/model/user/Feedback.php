@@ -14,6 +14,7 @@ namespace app\common\model\user;
 
 use app\common\model\BaseModel;
 use app\common\model\store\order\StoreOrderProduct;
+use app\common\model\store\order\StoreOrder;
 
 
 class Feedback extends BaseModel
@@ -57,5 +58,9 @@ class Feedback extends BaseModel
     
     public function orderProduct(){
         return $this->hasOne(StoreOrderProduct::class,'order_id','order_id');
+    }
+    
+    public function orderInfo(){
+        return $this->hasOne(StoreOrder::class,'order_id','order_id');
     }
 }

@@ -63,15 +63,18 @@ class Feedback extends BaseController
         if (!$this->repository->uidExists($id, $this->request->uid()))
             return app('json')->fail('数据不存在');
         $feedback = $this->repository->get($id);
-        
-        //获取商品id
-        $productId = $feedback->orderProduct->product_id;
 
-        //获取商品信息
-        $product  = $this->repository->getProductInfo($productId);
-        //商户信息
-        $feedback->merchant = $product->merchant;
- 
+        if($feedback->orderInfo){
+            $feedback->orderInfo->takeOrderCount = count($feedback->orderInfo->takeOrderList);
+            //获取商品id
+            $productId = $feedback->orderProduct->product_id;
+    
+            //获取商品信息
+            $product  = $this->repository->getProductInfo($productId);
+            //商户信息
+            $feedback->merchant = $product->merchant;
+        }
+        
         return app('json')->success($feedback);
     }
 }

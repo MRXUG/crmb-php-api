@@ -150,6 +150,10 @@ class User extends BaseModel
     {
         return self::getDB()->where('uid', $this->spread_uid)->value('spread_uid') ?: 0;
     }
+    
+    public function getWbTimeAttr($value){
+        return $value > 0 ? date('Y-m-d H:i:s',$value) : $value;
+    }
 
     /**
      * @return \think\model\relation\HasOne

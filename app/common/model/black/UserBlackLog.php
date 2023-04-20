@@ -28,7 +28,7 @@ class UserBlackLog extends BaseModel{
     //操作类型
     protected $logoperate = [
       0 => '移除黑名单',
-      1 => '拉入黑名单'
+      1 => '加入黑名单'
     ];
     
     
