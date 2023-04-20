@@ -27,6 +27,7 @@ use app\common\repositories\user\UserLabelRepository;
 use app\common\repositories\user\UserRepository;
 use app\common\repositories\wechat\WechatNewsRepository;
 use app\common\repositories\wechat\WechatUserRepository;
+use app\common\repositories\black\UserBlackLogRepository;
 use app\validate\admin\UserNowMoneyValidate;
 use app\validate\admin\UserValidate;
 use crmeb\services\ExcelService;
@@ -589,5 +590,77 @@ class User extends BaseController
         $data = $this->request->params(['is_svip','add_time','type']);
         $this->repository->svipUpdate($id, $data,$this->request->adminId());
         return app('json')->success('修改成功');
+    }
+
+    /**
+     * 设置黑名单
+     */
+    public function Operate($uid){
+
+        if($uid){
+            $this->user = $this->repository->get($uid);
+            
+            $operate = $this->request->param('operate');
+            if($this->user){
+
+                switch($operate){
+                    case 'add':
+                        //拉入黑名单
+                        $data = ['black'=>1];
+                        $this->repository->update($uid,$data);
+                        
+                        return app('json')->success('黑名单设置成功');
+                        break;
+                    case 'del':
+                        //移除黑名单
+                        $data = ['black'=>0];
+                        $this->repository->update($uid,$data);
+                        
+                        return app('json')->success('黑名单移除成功');
+                        break;
+                    default:
+                        return app('json')->success('黑名单状态获取成功');
+                }
+            }
+        }else{
+            return app('json')->fail('参数错误');
+        }
+    }
+
+
+    /**
+     * 黑名单操作记录
+     * $type 1加入黑名单0移出黑名单
+     * $uid  用户id
+     * $operate  变更形式1系统判定2人工添加3用户主动	
+     */
+    public function setLog($data=[]){
+
+        if(isset($data['uid'])){
+            $arr = [
+                'uid' => $data['uid'],
+                'type' => $data['type'],
+                'operate' => $data['operate'],
+                'create_time' => time()
+            ];
+        }
+
+        $info = app()->make(UserBlackLogRepository::class)->create($arr);
+        if($info){
+            return app('json')->success('记录成功');
+        }else{
+            return app('json')->fail('参数错误');
+        }
+    }
+
+
+    /**
+     * 获取用户黑名单日志
+     */
+    public function blackLog($uid){
+        if($uid > 0){
+            [$page, $limit] = $this->getPage();
+            return app('json')->success($this->repository->search($uid,$where, $page, $limit));
+        }
     }
 }

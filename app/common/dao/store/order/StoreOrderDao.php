@@ -42,6 +42,8 @@ class StoreOrderDao extends BaseDao
     const ORDER_STATUS_BE_RECEIVE = 1;
     const ORDER_STATUS_REPLY = 2;
     const ORDER_STATUS_SUCCESS = 3;
+    const ORDER_STATUS_REDUNDING = 4;
+    const ORDER_STATUS_REDUND_FAIL = 5;
     const ORDER_STATUS_SPELL = 9;
     const ORDER_STATUS_TAIL = 10;
     const ORDER_STATUS_TAIL_FAIL = 11;
@@ -52,6 +54,8 @@ class StoreOrderDao extends BaseDao
         self::ORDER_STATUS_BE_RECEIVE => '待收货',
         self::ORDER_STATUS_REPLY      => '待评价',
         self::ORDER_STATUS_SUCCESS    => '已完成',
+        self::ORDER_STATUS_REDUNDING  => '退款中',
+        self::ORDER_STATUS_REDUND_FAIL=> '退款失败',
         self::ORDER_STATUS_SPELL      => '拼团中',
         self::ORDER_STATUS_TAIL       => '待付尾款',
         self::ORDER_STATUS_TAIL_FAIL  => '尾款超时未付',

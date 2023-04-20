@@ -28,6 +28,7 @@ Route::group('api/', function () {
             Route::group('order', function () {
                 Route::post('check', '/v2CheckOrder');
                 Route::post('create', '/v2CreateOrder');
+                Route::post('create2', '/v2CreateOrder2');
                 Route::post('getUserBeforeOneCoupon', '/getUserBeforeOneCoupon');//获取可用优惠券列表
             })->prefix('api.store.order.StoreOrder');
         });
@@ -656,6 +657,7 @@ Route::group('api/', function () {
     Route::group('black',function(){
         Route::post('operate','Black/Operate');
         Route::post('setlog','Black/setLog');
+        Route::get('getlog','Black/getLog');
     })->prefix('api.black.');
 
     // 新优惠券

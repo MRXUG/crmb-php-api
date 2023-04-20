@@ -86,12 +86,14 @@ class StoreOrder extends BaseModel
     const MERCHANT_SOURCE_BACK_TRANSMITTED = 2;
     const MERCHANT_SOURCE_NATURE = 3;
     const MERCHANT_SOURCE_AD = 4;
+    const MERCHANT_SOURCE_BACK_FLOW = 5;
 
     const MERCHANT_SOURCE_TEXT = [
         self::MERCHANT_SOURCE_BACK_NOT_TRANSMIT => '回流流量（未回传）',
         self::MERCHANT_SOURCE_BACK_TRANSMITTED  => '回流流量（已回传）',
         self::MERCHANT_SOURCE_NATURE                 => '自然流量',
         self::MERCHANT_SOURCE_AD                     => '广告流量',
+        self::MERCHANT_SOURCE_BACK_FLOW         => '回流流量',
     ];
 
     public static function getMerchantSourceText($source)

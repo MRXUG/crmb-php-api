@@ -15,6 +15,7 @@ namespace app\controller\api\user;
 
 use crmeb\basic\BaseController;
 use app\common\repositories\user\FeedbackRepository;
+use app\common\repositories\store\order\StoreOrderProductRepository;
 use app\validate\api\FeedbackValidate;
 use think\App;
 
@@ -37,7 +38,7 @@ class Feedback extends BaseController
      */
     public function feedback(FeedbackValidate $validate)
     {
-        $data = $this->request->params(['type', 'content', ['images', []], 'realname', 'contact',['status',0]]);
+        $data = $this->request->params(['type', 'order_id', 'order_sn', 'content', ['images', []], 'realname', 'contact',['status',0]]);
         $validate->check($data);
         $data['uid'] = $this->request->uid();
         $FeedBack = $this->repository->create($data);
@@ -62,6 +63,15 @@ class Feedback extends BaseController
         if (!$this->repository->uidExists($id, $this->request->uid()))
             return app('json')->fail('数据不存在');
         $feedback = $this->repository->get($id);
+        
+        //获取商品id
+        $productId = $feedback->orderProduct->product_id;
+
+        //获取商品信息
+        $product  = $this->repository->getProductInfo($productId);
+        //商户信息
+        $feedback->merchant = $product->merchant;
+ 
         return app('json')->success($feedback);
     }
 }
