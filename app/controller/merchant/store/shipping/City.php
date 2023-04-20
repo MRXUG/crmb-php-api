@@ -67,7 +67,34 @@ class City extends BaseController
     public function setWxAddress()
     {
         $data = $this->request->params(['p', 'c','d']);
-        Db::name('eb_city_area')->where('level', 1)->where('name', $data['p'])->find();
+        // 查询或插入第一级地址信息
+        $province = Db::name('eb_city_area')->where('level', 1)->where('name', $data['p'])->find();
+        if (!$province) {
+            $province = ['name' => $data['p'], 'level' => 1];
+            $province['id'] = Db::name('eb_city_area')->insertGetId($province);
+        }
+
+        // 查询或插入第二级地址信息
+        $city = Db::name('eb_city_area')->where('level', 2)->where('name', $data['c'])->where('parent_id', $province['id'])->find();
+        if (!$city) {
+            $city = ['name' => $data['c'], 'level' => 2, 'parent_id' => $province['id']];
+            $city['id'] = Db::name('eb_city_area')->insertGetId($city);
+        }
+
+        // 查询或插入第三级地址信息
+        $district = Db::name('eb_city_area')->where('level', 3)->where('name', $data['d'])->where('parent_id', $city['id'])->find();
+        if (!$district) {
+            $district = ['name' => $data['d'], 'level' => 3, 'parent_id' => $city['id']];
+            $district['id'] = Db::name('eb_city_area')->insertGetId($district);
+        }
+
+        // 返回结果
+        $result = [
+            'province' => $province,
+            'city' => $city,
+            'district' => $district
+        ];
+        return app('json')->success($result);
     }
 
 
