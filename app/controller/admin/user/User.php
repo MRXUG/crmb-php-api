@@ -14,6 +14,7 @@
 namespace app\controller\admin\user;
 
 
+use app\common\repositories\coupon\CouponStocksUserRepository;
 use app\common\repositories\store\ExcelRepository;
 use app\common\repositories\user\UserSpreadLogRepository;
 use app\common\repositories\user\UserVisitRepository;
@@ -478,12 +479,12 @@ class User extends BaseController
         return app('json')->success($repository->userList($id, $page, $limit));
     }
 
-    public function coupon($id, StoreCouponUserRepository $repository)
+    public function coupon($id, CouponStocksUserRepository $repository)
     {
         if (!$this->repository->exists($id))
             return app('json')->fail('数据不存在');
         [$page, $limit] = $this->getPage();
-        return app('json')->success($repository->userList(['uid' => $id], $page, $limit));
+        return app('json')->success($repository->list($page, $limit, ['uid' => $id],0));
     }
 
     public function bill($id, UserBillRepository $repository)
