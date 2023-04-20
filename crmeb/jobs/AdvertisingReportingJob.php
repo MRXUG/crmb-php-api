@@ -44,7 +44,7 @@ class AdvertisingReportingJob implements JobInterface
             }
 
 
-            $query = json_decode($data['query']);
+            $query = json_decode($data['query'],true);
             if ($data['type'] == 1){
                 $click_id = $query['qz_gdt']?$query['qz_gdt']:$query['gdt_vid'];
                 //腾讯广告
