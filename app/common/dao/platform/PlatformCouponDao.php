@@ -61,7 +61,7 @@ class PlatformCouponDao extends BaseDao
         return $platformCouponRepository->getProductId($coupon_id_arr, $scope_arr, $mer_id_arr);
     }
 
-    public function getPopupsPlatformCoupon($where=[] ,$limit = 1,$uid=0,$type){
+    public function getPopupsPlatformCoupon($where=[] ,$limit = 1,$uid=0,$type = 0){
        $num = $this->getModel()::getDB()->where($where)->order("discount_num desc")->count();
         $newList = [];
 
