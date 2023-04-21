@@ -1477,7 +1477,8 @@ class UserRepository extends BaseRepository
     }
 
     //使用户领取的所有优惠券失效
-    public function cancelUserCoupon($uid,PlatformCouponRepository $platformcouponrepository){
-        $platformcouponrepository->cancelPlatformUserCoupon($uid);
+    public function cancelUserCoupon($uid){
+        $make = app()->make(PlatformCouponRepository::class);
+        $make->cancelPlatformUserCoupon($uid);
     }
 }

@@ -28,7 +28,7 @@ class CanceUserCouponJob implements JobInterface
                 $platformCouponReceive = PlatformCouponReceive::getInstance()
                     ->field(['user_id,stock_id,coupon_code,mch_id'])
                     ->where([
-                        ['user_id', '=', $data['uid']],
+                        ['user_id', '=', $data['user_id']],
                         ['status', '=', 0]
                     ])->select();
 

@@ -632,13 +632,13 @@ class PlatformCouponRepository extends BaseRepository
     /**
      * 用户加入黑名单时调用，使用户所用未使用优惠券失效
      * 
-     * @param PlatformCoupon $coupon
+     * @param $uid 
      * @return void
      */
-    public function cancelPlatformUserCoupon(PlatformCouponReceive $coupon)
+    public function cancelPlatformUserCoupon($uid)
     {
         Queue::push(CanceUserCouponJob::class, [
-            'user_id' => $coupon->getAttr('uid'),
+            'user_id' => $uid,
         ]);
     }
 

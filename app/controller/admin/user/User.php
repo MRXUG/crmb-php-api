@@ -617,7 +617,12 @@ class User extends BaseController
                     case 'add':
                         //拉入黑名单
                         $data = ['black'=>1,'wb_time'=>time()];
-                        $this->repository->update($uid,$data);
+                        $info = $this->repository->update($uid,$data);
+                        
+                        if($info){
+                            //优惠券失效
+                            $this->userRepository->cancelUserCoupon($uid);
+                        }
                         //记录日志
                         $this->setBlackLog($log);
     
