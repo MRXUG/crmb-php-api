@@ -53,14 +53,14 @@ class Black extends BaseController{
                 switch($operate){
                     case 'add':
                         //拉入黑名单
-                        $data = ['black'=>1];
+                        $data = ['black'=>1,'wb_time'=>time()];
                         $this->userRepository->update($uid,$data);
                         
                         return app('json')->success('黑名单设置成功');
                         break;
                     case 'del':
                         //移除黑名单
-                        $data = ['black'=>0];
+                        $data = ['black'=>0,'wb_time'=>time()];
                         $this->userRepository->update($uid,$data);
                         
                         return app('json')->success('黑名单移除成功');
