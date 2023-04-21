@@ -6,9 +6,6 @@ use app\common\dao\store\product\ProductDao;
 use app\common\repositories\platform\PlatformCouponRepository;
 use crmeb\basic\BaseController;
 use think\App;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
 use think\exception\ValidateException;
 use think\facade\Cache;
 use think\Request;
@@ -238,5 +235,15 @@ class PlatformCoupon extends BaseController
     {
         $this->repository->platformCouponStatusUpdate($id, $request->param());
         return $this->json()->success();
+    }
+
+    public function receiveLog(Request $request, int $id = 0)
+    {
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 10);
+        $params = $request->param();
+        unset($params['page'], $params['limit'], $params['id']);
+
+        return $this->json()->success($this->repository->receiveLog($page, $limit, $id, $params));
     }
 }

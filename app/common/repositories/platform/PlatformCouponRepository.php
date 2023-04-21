@@ -936,4 +936,82 @@ class PlatformCouponRepository extends BaseRepository
 
         $platformCoupon->save();
     }
+
+    /**
+     * 领取日志
+     *
+     * @param int $page
+     * @param int $limit
+     * @param int|null $platformCouponId
+     * @param array $search
+     * @throws null
+     * @return array
+     */
+    public function receiveLog(int $page = 1, int $limit = 10, ?int $platformCouponId = null, array $search = []): array
+    {
+        $modelFn = fn () => PlatformCouponReceive::getInstance()->alias('a')->field([
+            'b.coupon_name',
+            'a.stock_id',
+            'a.coupon_code',
+            'c.nickname',
+            'a.discount_num',
+            'b.threshold',
+            'a.start_use_time',
+            'a.end_use_time',
+            'a.status',
+            'b.status as couponStatus',
+            'b.is_cancel',
+            'b.is_del',
+            'b.receive_end_time',
+        ])->when(!empty($platformCouponId), function (BaseQuery $query) use ($platformCouponId) {
+            $query->where([
+                ['a.platform_coupon_id', '=', $platformCouponId],
+            ]);
+        })->leftJoin('eb_platform_coupon b', 'a.platform_coupon_id = b.platform_coupon_id')
+            ->leftJoin('eb_user c', 'c.uid = a.user_id')
+            ->when(!empty($search), function (BaseQuery $query) use (&$search) {
+                # 使用状态
+                if (isset($search['status']) && is_numeric($search['status'])) {
+                    $query->where('a.status', $search['status']);
+                }
+                # 领取人
+                if (!empty($search['nickname'])) {
+                    $query->where('c.nickname', 'like', "%{$search['nickname']}%");
+                }
+                # 优惠券名称
+                if (!empty($search['coupon_name'])) {
+                    $query->where('b.coupon_name', 'like', "%{$search['coupon_name']}%");
+                }
+                # 批次号
+                if (!empty($search['stock_id'])) {
+                    $query->where('a.stock_id', 'like', "%{$search['stock_id']}%");
+                }
+                # 券id
+                if (!empty($search['coupon_code'])) {
+                    $query->where('a.coupon_code', 'like', "%{$search['coupon_code']}%");
+                }
+            });
+
+        $unixTime = time();
+
+        return [
+            'list' => $modelFn()->page($page, $limit)->order('a.id', 'desc')->select()->each(function (PlatformCouponReceive $receive) use($unixTime) {
+                $receive->setAttr('available', (function () use ($receive, $unixTime) {
+                    # 0 不可用 1 可用
+                    $status = $receive->getAttr('status') == 0 ? 1 : 0;
+                    if (
+                        $receive->getAttr('couponStatus') != 1
+                        || $receive->getAttr('is_cancel') == 1
+                        || $receive->getAttr('is_del')
+                        || strtotime($receive->getAttr('receive_end_time')) < $unixTime
+                    ) {
+                        $status = 0;
+                    }
+
+                    return $status;
+                })());
+            }),
+            'count' => $modelFn()->count('a.platform_coupon_id')
+        ];
+    }
 }
