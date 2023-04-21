@@ -53,6 +53,15 @@ class Black extends BaseController{
                 switch($operate){
                     case 'add':
                         //拉入黑名单
+
+                        if($this->user->black == 1){
+                            return app('json')->success('用户已经加入黑名单');
+                        }
+                        
+                        if($this->user->white == 1){
+                            return app('json')->success('白名单用户不能加入黑名单');
+                        }
+                        
                         $data = ['black'=>1,'wb_time'=>time()];
                         $info = $this->userRepository->update($uid,$data);
                         if($info){

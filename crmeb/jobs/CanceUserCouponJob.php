@@ -3,6 +3,7 @@
 namespace crmeb\jobs;
 
 use app\common\model\platform\PlatformCouponReceive;
+use app\common\model\coupon\CouponStocksUser;
 use crmeb\interfaces\JobInterface;
 use crmeb\services\MerchantCouponService;
 use think\facade\Db;
@@ -25,19 +26,38 @@ class CanceUserCouponJob implements JobInterface
         try {
             Db::transaction(function () use ($data) {
                 /** @var PlatformCouponReceive[] $platformCouponReceive */
-                $platformCouponReceive = PlatformCouponReceive::getInstance()
-                    ->field(['user_id,stock_id,coupon_code,mch_id'])
+                $platformCouponReceive = PlatformCouponReceive::getInstance();
+                $couponReceiveData = $platformCouponReceive->field(['id,user_id,stock_id,coupon_code,mch_id'])
                     ->where([
                         ['user_id', '=', $data['user_id']],
                         ['status', '=', 0]
                     ])->select();
 
-                foreach ($platformCouponReceive as $item) {
+                foreach ($couponReceiveData as $item) {
                     $config = [];
 
                     $wx = MerchantCouponService::createFromBusinessNumber($item['mch_id'], $config);
 
-                    @$wx->coupon()->expiredCoupon($item->getAttr('coupon_code'), $item->getAttr('stock_id'));
+                    $info = @$wx->coupon()->expiredCoupon($item->getAttr('coupon_code'), $item->getAttr('stock_id'));
+                   
+                    $platformCouponReceive->where(['id'=>$item->getAttr('id')])->limit(1)->delete();
+                }
+                
+                $couponStocksUser = CouponStocksUser::getInstance();
+                $couponStocksUserDate = $couponStocksUser->field(['sss,uid,stock_id,coupon_code,mch_id'])
+                    ->where([
+                        ['uid', '=', $data['user_id']],
+                        ['is_del', '=', 0]
+                    ])->select();
+
+                foreach ($couponStocksUserDate as $item) {
+                    $config = [];
+
+                    $wx = MerchantCouponService::createFromBusinessNumber($item['mch_id'], $config);
+
+                    $info = @$wx->coupon()->expiredCoupon($item->getAttr('coupon_code'), $item->getAttr('stock_id'));
+                   
+                    $platformCouponReceive->where(['id'=>$item->getAttr('sss')])->limit(1)->delete();
                 }
             });
         } catch (Exception|ValueError|Throwable $e) {
