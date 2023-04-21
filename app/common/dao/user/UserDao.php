@@ -293,12 +293,22 @@ class UserDao extends BaseDao
 
     public function userOrderDetail($uid)
     {
-        return User::getDB()->alias('A')
+        $info =  User::getDB()->alias('A')
             ->join('StoreOrder B', 'A.uid = B.uid and B.paid = 1 and B.pay_time between \'' . date('Y/m/d', strtotime('first day of')) . ' 00:00:00\' and \'' . date('Y/m/d H:i:s') . '\'')
             ->join('PresellOrder C', 'C.order_id = B.order_id and C.paid = 1', 'LEFT')
             ->field('A.uid,A.avatar,A.nickname,A.now_money,A.pay_price,A.pay_count, sum(B.pay_price + IFNULL(C.pay_price,0)) as total_pay_price, count(B.order_id) as total_pay_count,is_svip,svip_endtime,svip_save_money')
             ->where('A.uid', $uid)
             ->find();
+        $userInfo = User::getDB()->field('uid,avatar,nickname,now_money,pay_price,pay_count')->where('A.uid', $uid)->find();
+
+        $info['uid'] = $userInfo['uid'];
+        $info['avatar'] = $userInfo['avatar'];
+        $info['nickname'] = $userInfo['nickname'];
+        $info['now_money'] = $userInfo['now_money'];
+        $info['pay_price'] = $userInfo['pay_price'];
+        $info['pay_count'] = $userInfo['pay_count'];
+
+        return  array_merge($info,$userInfo);
     }
 
     public function userNumGroup($date)
