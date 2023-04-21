@@ -49,7 +49,9 @@ class AdvertisingReportingJob implements JobInterface
             if ($data['type'] == 1){
                 $click_id = $query['gdt_vid']?$query['gdt_vid']:$query['qz_gdt'];
                 if (!$click_id) return;
-                $click_id = substr($click_id, 0, -2);
+                $clickArr = explode("01",$click_id);
+                if (!$clickArr) return;
+                $click_id = $clickArr[0];
                 //查询腾讯回调信息
                 $callbackQuery = AppletsTx::getDB()->where("request_id","=",$click_id)->value("content");
 
