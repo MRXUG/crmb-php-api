@@ -484,7 +484,7 @@ class User extends BaseController
         if (!$this->repository->exists($id))
             return app('json')->fail('数据不存在');
         [$page, $limit] = $this->getPage();
-        return app('json')->success($repository->list($page, $limit, ['uid' => $id],0));
+        return app('json')->success($repository->list($page, $limit, ['uid' => $id,'time'=>date("Y-m-d H:i:s"),'status'=>0],0));
     }
 
     public function bill($id, UserBillRepository $repository)
