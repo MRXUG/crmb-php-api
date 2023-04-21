@@ -54,7 +54,11 @@ class Black extends BaseController{
                     case 'add':
                         //拉入黑名单
                         $data = ['black'=>1,'wb_time'=>time()];
-                        $this->userRepository->update($uid,$data);
+                        $info = $this->userRepository->update($uid,$data);
+                        if($info){
+                            //优惠券失效
+                            $this->userRepository->cancelUserCoupon($uid);
+                        }
                         
                         return app('json')->success('黑名单设置成功');
                         break;

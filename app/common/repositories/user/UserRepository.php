@@ -23,6 +23,7 @@ use app\common\repositories\store\order\StoreOrderRepository;
 use app\common\repositories\store\service\StoreServiceRepository;
 use app\common\repositories\system\attachment\AttachmentRepository;
 use app\common\repositories\wechat\WechatUserRepository;
+use app\common\repositories\platform\PlatformCouponRepository;
 use crmeb\exceptions\AuthException;
 use crmeb\jobs\SendNewPeopleCouponJob;
 use crmeb\jobs\UserBrokerageLevelJob;
@@ -1473,5 +1474,10 @@ class UserRepository extends BaseRepository
                 ]));
             }
         });
+    }
+
+    //使用户领取的所有优惠券失效
+    public function cancelUserCoupon($uid,PlatformCouponRepository $platformcouponrepository){
+        $platformcouponrepository->cancelPlatformUserCoupon($uid);
     }
 }

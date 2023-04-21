@@ -17,6 +17,7 @@ use app\common\model\system\merchant\Merchant;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\store\StoreCategoryRepository;
 use crmeb\jobs\CancelPlatformCouponJob;
+use crmeb\jobs\CanceUserCouponJob;
 use crmeb\jobs\EstimatePlatformCouponProduct;
 use crmeb\listens\CreatePlatformCouponInitGoods;
 use crmeb\services\MerchantCouponService;
@@ -625,6 +626,19 @@ class PlatformCouponRepository extends BaseRepository
     {
         Queue::push(CancelPlatformCouponJob::class, [
             'platform_coupon_id' => $coupon->getAttr('platform_coupon_id'),
+        ]);
+    }
+
+    /**
+     * 用户加入黑名单时调用，使用户所用未使用优惠券失效
+     * 
+     * @param PlatformCoupon $coupon
+     * @return void
+     */
+    public function cancelPlatformUserCoupon(PlatformCouponReceive $coupon)
+    {
+        Queue::push(CanceUserCouponJob::class, [
+            'user_id' => $coupon->getAttr('uid'),
         ]);
     }
 
