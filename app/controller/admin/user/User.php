@@ -617,7 +617,12 @@ class User extends BaseController
                     case 'add':
                         //拉入黑名单
                         $data = ['black'=>1,'wb_time'=>time()];
-                        $this->repository->update($uid,$data);
+                        $info = $this->repository->update($uid,$data);
+                        
+                        if($info){
+                            //优惠券失效
+                            $this->userRepository->cancelUserCoupon($uid);
+                        }
                         //记录日志
                         $this->setBlackLog($log);
     
@@ -720,15 +725,10 @@ class User extends BaseController
         if($uid > 0){
             $this->user = $this->repository->get($uid);
 
-            //监测黑名单
-            if($this->user->black == 1){
-                return app('json')->fail('黑名单用户无法加入白名单');
+            if(!$this->user){
+                return app('json')->fail('请输入正确用户ID');
             }
 
-            if($this->user->white == 1){
-                return app('json')->fail('用户已经加入白名单，不能重复加入');
-            }
-            
             $operate = $this->request->param('operate');
             if($operate == 'del'){
                 //移出白名单
@@ -737,6 +737,15 @@ class User extends BaseController
                 
                 return app('json')->success('移出白名单成功');
             }else{
+                //监测黑名单
+                if($this->user->black == 1){
+                    return app('json')->fail('黑名单用户无法加入白名单');
+                }
+
+                if($this->user->white == 1){
+                    return app('json')->fail('用户已经加入白名单，不能重复加入');
+                }
+
                 //加入白名单
                 $data = ['white'=>1,'wb_time'=>time()];
                 $this->repository->update($uid,$data);

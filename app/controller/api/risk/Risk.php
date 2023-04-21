@@ -77,7 +77,11 @@ class Risk extends BaseController{
              
             if($risk['usecoupon'] < $platcouponnum){
                 $data = ['black'=>1,'wb_time'=>time()];
-                $this->userRepository->update($uid,$data);
+                $info = $this->userRepository->update($uid,$data);
+
+                if($info){
+                    $this->userRepository->cancelUserCoupon($uid);
+                }
 
                 return app('json')->success('用户触发风控,加入黑名单成功');
             }
@@ -91,10 +95,13 @@ class Risk extends BaseController{
             //30天反馈次数规则
             $feednum = $this->feedbackrepository->get30day($uid,$start,$now);
             if($feednum >= $risk['day30feedback']){
-                
-                $data = ['black'=>1,'wb_time'=>time()];
-                $this->userRepository->update($uid,$data);
 
+                $data = ['black'=>1,'wb_time'=>time()];
+                $info = $this->userRepository->update($uid,$data);
+
+                if($info){
+                    $this->userRepository->cancelUserCoupon($uid);
+                }
                 return app('json')->success('用户触发风控,加入黑名单成功');
             }
 
