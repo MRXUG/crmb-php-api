@@ -94,7 +94,7 @@ class PlatformCoupon extends BaseController
         $limit = $request->get('limit', 10);
         $order = $request->get('order', 'discount_num asc');
 
-        return app('json')->success($this->repository->selectCoupon($page, $limit,$order));
+        return app('json')->success($this->repository->selectCoupon($page, $limit, [], $order));
     }
 
     /**
