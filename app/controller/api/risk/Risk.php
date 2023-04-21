@@ -29,7 +29,7 @@ class Risk extends BaseController{
     protected $repository;
     protected $userrepository;
     protected $platformCouponReceiveRepository;
-    protected $feedbackrepository
+    protected $feedbackrepository;
 
     /**
      * Article constructor.
@@ -42,6 +42,7 @@ class Risk extends BaseController{
         $this->repository = $repository;
         $this->userrepository = $userrepository;
         $this->platformCouponReceiveRepository = $platformCouponReceiveRepository;
+        $this->feedbackrepository = $feedbackrepository;
     }
     
     
@@ -54,6 +55,7 @@ class Risk extends BaseController{
     //黑名单规则监测
     public function checkBlack(){
         $uid = $this->request->param('uid');
+        
         if($uid > 0){
             $info = $this->userrepository->get($uid);
             if($info->white == 1){
@@ -62,32 +64,35 @@ class Risk extends BaseController{
 
             if($info->black == 1){
                 return app('json')->success('用户已经在黑名单中');
-            }else{
-
-                //获取设置的参数
-                $risk = $this->repository->getRisk();
-
-                //获取平台券数量
-                $platcouponinfo = $this->platformCouponReceiveRepository->getList($userId, 1, 1);
-                $platcouponnum = $platcouponinfo['count'];
-                if($risk['usecoupon'] <= $platcouponnum){
-                    return app('json')->success('用户触发风控,加入黑名单成功');
-                }
-                
-                //近30天
-                $now = time();
-                $start = $now - 30*86400;
-
-                //30天卡券召回次数规则
-
-                //30天反馈次数规则
-                $feednum = $this->feedbackrepository->get30day($uid,$start,$now);
-                if($feednum >= $risk['day30feedback']){
-                    return app('json')->success('用户触发风控,加入黑名单成功');
-                }
-
-                return app('json')->success('未触发风控');
             }
+
+
+            //获取设置的参数
+            $risk = $this->repository->getRisk();
+            
+
+            //获取平台券数量
+            $platcouponinfo = $this->platformCouponReceiveRepository->getList($uid, 1, 1);
+           
+            $platcouponnum = $platcouponinfo['count'];
+             
+            if($risk['usecoupon'] < $platcouponnum){
+                return app('json')->success('用户触发风控,加入黑名单成功');
+            }
+            
+            //近30天
+            $now = time();
+            $start = $now - 30*86400;
+
+            //30天卡券召回次数规则
+
+            //30天反馈次数规则
+            $feednum = $this->feedbackrepository->get30day($uid,$start,$now);
+            if($feednum >= $risk['day30feedback']){
+                return app('json')->success('用户触发风控,加入黑名单成功');
+            }
+
+            return app('json')->success('未触发风控');
         }
     }
 }
