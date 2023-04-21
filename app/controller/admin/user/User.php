@@ -720,6 +720,10 @@ class User extends BaseController
         if($uid > 0){
             $this->user = $this->repository->get($uid);
 
+            if(!$this->user){
+                return app('json')->fail('请输入正确用户ID');
+            }
+
             $operate = $this->request->param('operate');
             if($operate == 'del'){
                 //移出白名单
