@@ -27,6 +27,7 @@ R::group(function () {
         R::get('getEditPlatformCouponData/:id', 'PlatformCoupon/getEditPlatformCouponData'); # 获取编辑平台优惠券数据
         R::post('platformCouponStatusUpdate/:id', 'PlatformCoupon/platformCouponStatusUpdate'); # 平台优惠券状态修改
         R::get('receiveLog/[:id]', 'PlatformCoupon/receiveLog'); # 平台优惠券状态修改
+        R::get('refresh', 'PlatformCoupon/refresh'); # 刷新平台优惠券包含商品
 
     })->prefix('admin.coupon.platform.')->option([
         '_auth' => true,

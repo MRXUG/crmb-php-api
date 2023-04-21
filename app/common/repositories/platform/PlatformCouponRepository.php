@@ -631,8 +631,8 @@ class PlatformCouponRepository extends BaseRepository
 
     /**
      * 用户加入黑名单时调用，使用户所用未使用优惠券失效
-     * 
-     * @param $uid 
+     *
+     * @param $uid
      * @return void
      */
     public function cancelPlatformUserCoupon($uid)
