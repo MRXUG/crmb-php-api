@@ -299,7 +299,7 @@ class UserDao extends BaseDao
             ->field('A.uid,A.avatar,A.nickname,A.now_money,A.pay_price,A.pay_count, sum(B.pay_price + IFNULL(C.pay_price,0)) as total_pay_price, count(B.order_id) as total_pay_count,is_svip,svip_endtime,svip_save_money')
             ->where('A.uid', $uid)
             ->find();
-        $userInfo = User::getDB()->field('uid,avatar,nickname,now_money,pay_price,pay_count')->where('A.uid', $uid)->find();
+        $userInfo = User::getDB()->field('uid,avatar,nickname,now_money,pay_price,pay_count')->where('uid', $uid)->find();
 
         $info['uid'] = $userInfo['uid'];
         $info['avatar'] = $userInfo['avatar'];
