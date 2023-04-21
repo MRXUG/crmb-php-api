@@ -308,7 +308,7 @@ class UserDao extends BaseDao
         $info['pay_price'] = $userInfo['pay_price'];
         $info['pay_count'] = $userInfo['pay_count'];
 
-        return  array_merge($info,$userInfo);
+        return  $info;
     }
 
     public function userNumGroup($date)
