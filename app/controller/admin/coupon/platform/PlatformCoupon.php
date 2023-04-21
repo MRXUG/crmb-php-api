@@ -33,7 +33,9 @@ class PlatformCoupon extends BaseController
         $where = $request->param();
         unset($where['page'], $where['limit']);
 
-        return app('json')->success($this->repository->platformCouponList($page, $limit, $where));
+        $order = $request->get("order",'platform_coupon_id desc');
+
+        return app('json')->success($this->repository->platformCouponList($page, $limit, $where,$order));
     }
 
     /**
@@ -90,8 +92,9 @@ class PlatformCoupon extends BaseController
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
+        $order = $request->get('order', 'discount_num asc');
 
-        return app('json')->success($this->repository->selectCoupon($page, $limit));
+        return app('json')->success($this->repository->selectCoupon($page, $limit,$order));
     }
 
     /**
@@ -116,8 +119,9 @@ class PlatformCoupon extends BaseController
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
+        $order = $request->get('order', '');
 
-        return app('json')->success($this->repository->platformCouponMerDetails($amount, $page, $limit));
+        return app('json')->success($this->repository->platformCouponMerDetails($amount, $page, $limit,$order));
     }
 
     /**
@@ -192,8 +196,8 @@ class PlatformCoupon extends BaseController
         $limit = $request->get('limit', 10);
         $params = $request->param();
         unset($params['page'], $params['limit']);
-
-        return $this->json()->success($this->repository->getEditCouponProductList($id, $page, $limit, $params));
+        $order = $request->get('order', 'product_id desc');
+        return $this->json()->success($this->repository->getEditCouponProductList($id, $page, $limit, $params,$order));
     }
 
     /**

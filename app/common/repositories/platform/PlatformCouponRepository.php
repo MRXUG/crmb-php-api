@@ -92,7 +92,7 @@ class PlatformCouponRepository extends BaseRepository
      * @throws DbException
      * @throws ModelNotFoundException
      */
-    public function selectCoupon(int $page = 1, int $limit = 10, array $where = []): array
+    public function selectCoupon(int $page = 1, int $limit = 10, array $where = [],$order = 'discount_num asc'): array
     {
         $nowDate = date("Y-m-d H:i:s");
         /** @var CouponStocksDao $couponDao */
@@ -119,7 +119,7 @@ class PlatformCouponRepository extends BaseRepository
 
         $model = $couponDao->getModelObj()->where($where)->group('discount_num');
 
-        $list = (clone $model)->field($field)->page($page, $limit)->select()->toArray();
+        $list = (clone $model)->field($field)->order($order)->page($page, $limit)->select()->toArray();
 
         $productModel = fn() => Product::getInstance();
 
@@ -203,7 +203,7 @@ class PlatformCouponRepository extends BaseRepository
      * @throws null
      * @return void
      */
-    public function platformCouponMerDetails(int $amount, int $page = 1, int $limit = 10): array
+    public function platformCouponMerDetails(int $amount, int $page = 1, int $limit = 10,$order='mer_id asc'): array
     {
         $couponModel = fn() => CouponStocks::getInstance()->alias('a')
             ->where([
@@ -222,6 +222,7 @@ class PlatformCouponRepository extends BaseRepository
         ])
             ->leftJoin('eb_merchant b', 'a.mer_id = b.mer_id')
             ->leftJoin('eb_merchant_category c', 'b.category_id = c.merchant_category_id')
+            ->order($order)
             ->page($page, $limit)
             ->select()->toArray();
 
@@ -396,7 +397,7 @@ class PlatformCouponRepository extends BaseRepository
      * @return array
      * @throws null
      */
-    public function platformCouponList (int $page = 1, int $limit = 10, array $where = [],$orderProductCount = 'product_count ASC',$orderReceiveEndDay = 'receive_end_day ASC'): array
+    public function platformCouponList (int $page = 1, int $limit = 10, array $where = [],$order = 'platform_coupon_id desc'): array
     {
         $nowDate = date("Y-m-d H:i:s");
 
@@ -491,9 +492,7 @@ class PlatformCouponRepository extends BaseRepository
 	) AS receive_end_day ",
             ])
             ->page($page, $limit)
-            ->order('a.platform_coupon_id', 'desc')
-            ->order($orderProductCount)
-            ->order($orderReceiveEndDay)
+            ->order($order)
 //            ->fetchSQL()
             ->select()
             ->toArray();
@@ -747,8 +746,16 @@ class PlatformCouponRepository extends BaseRepository
      * @return void
      * @throws null
      */
-    public function getEditCouponProductList(int $platformCouponId, int $page = 1, int $limit = 10, array $where = []): array
+    public function getEditCouponProductList(int $platformCouponId, int $page = 1, int $limit = 10, array $where = [],$order= 'product_id desc'): array
     {
+        $orderArr = explode(" ",$order);
+
+        if ($orderArr[0] == "product_id" || $orderArr[0] == "sales" || $orderArr[0] == "sort" || $orderArr[0] == 'price'){
+            $order = 'a.'.$order;
+        }
+
+
+
         $platformCouponModel = fn () => Product::getInstance()
             ->alias('a')
             ->field([
@@ -785,7 +792,7 @@ class PlatformCouponRepository extends BaseRepository
                 }
             });
 
-        $platformCoupon = $platformCouponModel()->page($page, $limit)
+        $platformCoupon = $platformCouponModel()->order($order)->page($page, $limit)
             ->select()
             ->toArray();
 
