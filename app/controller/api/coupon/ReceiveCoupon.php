@@ -65,6 +65,9 @@ class ReceiveCoupon extends BaseController
             $couponCode = $item['coupon_code'] ?? '';
             $stockId = $item['stock_id'] ?? '';
             $stockInfo = $buildCouponRepository->stockProduct(['stock_id' => $stockId]);
+            // 券核销类型
+            $typeData = (int)$stockInfo['type_date'] ?: 0;
+
             if (empty($couponCode) || empty($stockInfo)) {
                 throw new ValidateException('券编码不能为空');
             }
@@ -74,10 +77,28 @@ class ReceiveCoupon extends BaseController
             $availableTime = $stockInfo['start_at'];
             // 券停止核销时间
             $unAvailableTime = $stockInfo['end_at'];
+            // 核销时间段时间
+            $dateRange = $stockInfo['date_range'];
             // 领取后N天内有效
             $availableDayAfterReceive = (int)$stockInfo['available_day_after_receive'] ?: 0;
             // 领取第N天后生效
             $waitDaysAfterReceive = (int)$stockInfo['wait_days_after_receive'] ?: 0;
+
+            if ($typeData == 1 || $typeData == 3) {
+                // 领券后立即生效天数 领券N天后立即生效天数
+                // 开始
+                $startTime = date('Y-m-d H:i:s', strtotime("+$waitDaysAfterReceive day"));
+                // 结束
+                $delay = $waitDaysAfterReceive + $availableDayAfterReceive;
+                $endTime = date('Y-m-d H:i:s', strtotime("+$delay day"));
+                $start = $waitDaysAfterReceive == 0 ? $availableTime : ($startTime > $availableTime ? $startTime : $availableTime);
+                $end = $availableDayAfterReceive == 0 ? $unAvailableTime : ($endTime < $unAvailableTime ? $endTime : $unAvailableTime);
+            } else if ($typeData == 2 || $typeData == 4) {
+
+            } else {
+                throw new ValidateException('券核销类型异常');
+            }
+            
             // 开始
             $startTime = date('Y-m-d H:i:s', strtotime("+$waitDaysAfterReceive day"));
             // 结束
@@ -106,7 +127,7 @@ class ReceiveCoupon extends BaseController
                 'stock_id'    => $stockId,
                 'start_at'    => $start,
                 'end_at'      => $end,
-                'appid'      => $out_request_no[0],
+                'appid'       => $out_request_no[0],
                 'mch_id'      => $out_request_no[1],
                 'create_time' => date('Y-m-d H:i:s'),
             ];
