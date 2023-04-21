@@ -5,10 +5,11 @@ namespace crmeb\listens;
 use crmeb\interfaces\ListenerInterface;
 use crmeb\services\TimerService;
 use crmeb\utils\platformCoupon\RefreshPlatformCouponProduct;
-use think\facade\Queue;
 
 class RefreshPlatformCouponListen extends TimerService implements ListenerInterface
 {
+
+    protected string $name = '刷新平台优惠券商品: ' . __CLASS__;
 
     public function handle($event): void
     {
