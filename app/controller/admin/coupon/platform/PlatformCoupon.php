@@ -5,6 +5,7 @@ namespace app\controller\admin\coupon\platform;
 use app\common\dao\store\product\ProductDao;
 use app\common\repositories\platform\PlatformCouponRepository;
 use crmeb\basic\BaseController;
+use crmeb\utils\platformCoupon\RefreshPlatformCouponProduct;
 use think\App;
 use think\exception\ValidateException;
 use think\facade\Cache;
@@ -94,7 +95,7 @@ class PlatformCoupon extends BaseController
         $limit = $request->get('limit', 10);
         $order = $request->get('order', 'discount_num asc');
 
-        return app('json')->success($this->repository->selectCoupon($page, $limit,$order));
+        return app('json')->success($this->repository->selectCoupon($page, $limit, [], $order));
     }
 
     /**
@@ -249,5 +250,12 @@ class PlatformCoupon extends BaseController
         unset($params['page'], $params['limit'], $params['id']);
 
         return $this->json()->success($this->repository->receiveLog($page, $limit, $id, $params));
+    }
+
+
+    public function refresh()
+    {
+        RefreshPlatformCouponProduct::runQueue();
+        return $this->json()->success();
     }
 }

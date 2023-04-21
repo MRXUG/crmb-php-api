@@ -376,6 +376,9 @@ class Client extends BaseClient
                     'mini_programs_appid' => $appId,
                 ],
             ],
+            'display_pattern_info' => [
+                'merchant_logo_url' => 'https://wxpaylogo.qpic.cn/wxpaylogo/PiajxSqBRaEIPAeia7ImvtspSPygfJa3Xic4HoWt1r42fuEAYgABZ2j3A/0'
+            ],
             'notify_config' => [
                 'notify_appid' => $appId, // 用于回调通知时，计算返回操作用户的openid（诸如领券用户），支持小程序or公众号的APPID
             ],
@@ -439,6 +442,9 @@ class Client extends BaseClient
                     'mini_programs_appid' => $appId,
                 ],
 //                'appid' => 'wxee403b4ddd3978bd',  // TODO 公众号appid，提示与商户没有关联
+            ],
+            'display_pattern_info' => [
+                'merchant_logo_url' => 'https://wxpaylogo.qpic.cn/wxpaylogo/PiajxSqBRaEIPAeia7ImvtspSPygfJa3Xic4HoWt1r42fuEAYgABZ2j3A/0'
             ],
             'notify_config' => [
                 'notify_appid' => $appId, // 用于回调通知时，计算返回操作用户的openid（诸如领券用户），支持小程序or公众号的APPID

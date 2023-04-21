@@ -11,6 +11,7 @@ use app\common\repositories\BaseRepository;
 use crmeb\exceptions\WechatException;
 use crmeb\jobs\CouponEntrustJob;
 use crmeb\services\MerchantCouponService;
+use crmeb\utils\platformCoupon\RefreshPlatformCouponProduct;
 use think\exception\ValidateException;
 use think\facade\Db;
 use think\facade\Log;
@@ -34,6 +35,8 @@ class BuildCouponRepository extends BaseRepository
      */
     public function createCoupon($params, $adminId, $id)
     {
+        RefreshPlatformCouponProduct::runQueue();
+
         Db::startTrans();
         try {
             // 2.调微信接口
