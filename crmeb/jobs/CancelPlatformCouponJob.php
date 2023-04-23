@@ -36,9 +36,17 @@ class CancelPlatformCouponJob implements JobInterface
                 foreach ($platformCouponReceive as $item) {
                     $config = [];
 
-                    $wx = MerchantCouponService::createFromBusinessNumber($item['wechat_business_number'], $config);
+                    Db::startTrans();
+                    try {
+                        $wx = MerchantCouponService::createFromBusinessNumber($item['wechat_business_number'], $config);
 
-                    @$wx->coupon()->expiredCoupon($item->getAttr('coupon_code'), $item->getAttr('stock_id'));
+                        $wx->coupon()->expiredCoupon($item->getAttr('coupon_code'), $item->getAttr('stock_id'));
+
+                        PlatformCouponReceive::destroyWxCouponStatus($item->getAttr('id'));
+                        Db::commit();
+                    } catch (Exception|Throwable|ValueError $e) {
+                        Db::rollback();
+                    }
                 }
             });
         } catch (Exception|ValueError|Throwable $e) {

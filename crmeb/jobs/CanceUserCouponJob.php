@@ -25,9 +25,8 @@ class CanceUserCouponJob implements JobInterface
     {
         try {
             Db::transaction(function () use ($data) {
-                /** @var PlatformCouponReceive[] $platformCouponReceive */
-                $platformCouponReceive = PlatformCouponReceive::getInstance();
-                $couponReceiveData = $platformCouponReceive->field(['id,user_id,stock_id,coupon_code,mch_id'])
+                $platformCouponReceive = fn() => PlatformCouponReceive::getInstance();
+                $couponReceiveData = $platformCouponReceive()->field(['id,user_id,stock_id,coupon_code,mch_id'])
                     ->where([
                         ['user_id', '=', $data['user_id']],
                         ['status', '=', 0]
@@ -36,13 +35,22 @@ class CanceUserCouponJob implements JobInterface
                 foreach ($couponReceiveData as $item) {
                     $config = [];
 
-                    $wx = MerchantCouponService::createFromBusinessNumber($item['mch_id'], $config);
+                    Db::startTrans();
+                    try {
+                        $wx = MerchantCouponService::createFromBusinessNumber($item['mch_id'], $config);
 
-                    $info = @$wx->coupon()->expiredCoupon($item->getAttr('coupon_code'), $item->getAttr('stock_id'));
-                   
-                    $platformCouponReceive->where(['id'=>$item->getAttr('id')])->limit(1)->delete();
+                        $wx->coupon()->expiredCoupon($item->getAttr('coupon_code'), $item->getAttr('stock_id'));
+
+                        PlatformCouponReceive::destroyWxCouponStatus($item->getAttr('id'));
+
+                        $platformCouponReceive()->where(['id'=>$item->getAttr('id')])->limit(1)->delete();
+                        Db::commit();
+                    } catch (Exception|Throwable|ValueError $e) {
+                        Db::rollback();
+                    }
+
                 }
-                
+
                 $couponStocksUser = CouponStocksUser::getInstance();
                 $couponStocksUserDate = $couponStocksUser->field(['sss,uid,stock_id,coupon_code,mch_id'])
                     ->where([
@@ -53,11 +61,19 @@ class CanceUserCouponJob implements JobInterface
                 foreach ($couponStocksUserDate as $item) {
                     $config = [];
 
-                    $wx = MerchantCouponService::createFromBusinessNumber($item['mch_id'], $config);
+                    Db::startTrans();
+                    try {
+                        $wx = MerchantCouponService::createFromBusinessNumber($item['mch_id'], $config);
 
-                    $info = @$wx->coupon()->expiredCoupon($item->getAttr('coupon_code'), $item->getAttr('stock_id'));
-                   
-                    $platformCouponReceive->where(['id'=>$item->getAttr('sss')])->limit(1)->delete();
+                        $wx->coupon()->expiredCoupon($item->getAttr('coupon_code'), $item->getAttr('stock_id'));
+
+                        PlatformCouponReceive::destroyWxCouponStatus($item->getAttr('id'));
+
+                        $platformCouponReceive()->where(['id'=>$item->getAttr('sss')])->limit(1)->delete();
+                        Db::commit();
+                    } catch (Exception|Throwable|ValueError $e) {
+                        Db::rollback();
+                    }
                 }
             });
         } catch (Exception|ValueError|Throwable $e) {
