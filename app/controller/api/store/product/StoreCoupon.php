@@ -15,6 +15,7 @@ namespace app\controller\api\store\product;
 
 
 use app\common\dao\coupon\CouponStocksDao;
+use app\common\model\platform\PlatformCoupon;
 use crmeb\services\MerchantCouponService;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\coupon\CouponStocksUserRepository;
@@ -191,6 +192,24 @@ class StoreCoupon extends BaseController
             'stock_id' => $raw['stock_id'],
             'mchId' => $mchId,
             'couponId' => $orderStock
+        ]);
+    }
+
+
+    public function decryptPlatform()
+    {
+        $raw = request()->get();
+        $orderStock = PlatformCoupon::getDB()->where('stock_id', $raw['stock_id'])->field('platform_coupon_id,wechat_business_number')->find();
+        if (!$orderStock) return app('json')->fail('优惠券不存在');
+        $couponCode = MerchantCouponService::create(MerchantCouponService::CALLBACK_COUPON, ['mch_id' => $orderStock['wechat_business_number']])->decrypt($raw);
+//        $adId = $repository->getValue(['coupon_code' => $couponCode], 'ad_id');
+
+        return app('json')->success([
+//            'ad_id' => $adId,
+            'coupon_code' => $couponCode,
+            'stock_id' => $raw['stock_id'],
+            'mchId' => $orderStock['wechat_business_number'],
+            'couponId' => $orderStock['platform_coupon_id']
         ]);
     }
 }
