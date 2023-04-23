@@ -64,6 +64,7 @@ class StoreProduct extends BaseController
         $mer_id = $this->request->param('mer_id','');
         $merId = $mer_id ? $mer_id : null;
         $where['is_gift_bag'] = 0;
+        $where['mer_state'] = 1;
         $_where = $this->repository->switchType($where['type'], null,0);
         unset($_where['star']);
         $where = array_merge($where, $_where);

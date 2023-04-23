@@ -133,6 +133,10 @@ class ProductDao extends BaseDao
             ->when((isset($where['is_trader']) && $where['is_trader'] !== ''), function ($query) use ($where) {
                 $query->where('M.is_trader', $where['is_trader']);
             })
+
+            ->when((isset($where['mer_state']) && $where['mer_state'] !== ''), function ($query) use ($where) {
+                $query->where('M.mer_state', $where['mer_state']);
+            })
             ->where('U.product_type', $where['product_type'] ?? 0)
             ->when(($merId !== null), function ($query) use ($merId) {
                 $query->where('Product.mer_id', $merId);

@@ -117,6 +117,7 @@ class PlatformCouponRepository extends BaseRepository
             ['a.end_at', '>', $nowDate],
             ['b.status', '=', 1],
             ['b.is_del', '=', 0],
+            ['b.mer_state', '=', 1],
         ]);
 
         $model = $couponDao->getModelObj()->alias('a')
