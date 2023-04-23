@@ -100,6 +100,10 @@ class PlatformCouponDao extends BaseDao
                }
            }
 
+           if (time() < $v['release_time']+300){
+               continue;
+           }
+
            $newList[] = $v->toArray();
        }
 

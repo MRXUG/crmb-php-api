@@ -91,7 +91,6 @@ class CouponStock extends BaseController
             ['crowd','in',[1,$userType]],
             ['receive_start_time','<',$date],
             ['receive_end_time','>',$date],
-            ['release_time','>',time()+300],
             ['status','=',1],
         ],$userIssueCoupons,$uid,$type);
 
