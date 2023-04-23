@@ -293,6 +293,7 @@ class ReceiveCoupon extends BaseController
 
         foreach ($params['coupon'] as $item) {
             $stockId = $item['stock_id'] ?? '';
+            $couponCode = $item['coupon_code'] ?? '';
 
             //平台券
             $stockInfoPlatform = $platformCouponDao->getWhere(['stock_id' => $stockId]);
