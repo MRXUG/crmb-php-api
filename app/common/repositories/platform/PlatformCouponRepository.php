@@ -115,7 +115,6 @@ class PlatformCouponRepository extends BaseRepository
             ['type', '=', 1],
             ['status', 'in', [1, 2]],
             ['end_at', '>', $nowDate],
-            ['start_at', '<', $nowDate]
         ]);
 
         $model = $couponDao->getModelObj()->where($where)->group('discount_num');
