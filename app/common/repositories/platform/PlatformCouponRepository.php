@@ -205,9 +205,14 @@ class PlatformCouponRepository extends BaseRepository
      */
     public function platformCouponMerDetails(int $amount, int $page = 1, int $limit = 10,$order='mer_id asc'): array
     {
+        $nowDate = date("Y-m-d H:i:s");
+
         $couponModel = fn() => CouponStocks::getInstance()->alias('a')
             ->where([
-                ['a.discount_num', '=', $amount]
+                ['a.discount_num', '=', $amount],
+                ['a.type', '=', 1],
+                ['a.status', '=', 2],
+                ['a.end_at', '>', $nowDate]
             ])
             ->group('a.mer_id');
 
