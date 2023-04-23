@@ -785,8 +785,6 @@ class PlatformCouponRepository extends BaseRepository
             $order = 'a.'.$order;
         }
 
-
-
         $platformCouponModel = fn () => Product::getInstance()
             ->alias('a')
             ->field([

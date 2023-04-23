@@ -13,7 +13,7 @@ class RefreshPlatformCouponListen extends TimerService implements ListenerInterf
 
     public function handle($event): void
     {
-        $this->tick(1000 * 60 * 30, function () {
+        $this->tick(1000 * 60 * 1, function () {
             RefreshPlatformCouponProduct::runQueue();
         });
     }
