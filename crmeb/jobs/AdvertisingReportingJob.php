@@ -16,6 +16,7 @@ namespace crmeb\jobs;
 
 use app\common\dao\store\order\StoreOrderDao;
 use app\common\dao\system\merchant\MerchantAdDao;
+use app\common\model\applet\AppletsTx;
 use crmeb\interfaces\JobInterface;
 
 class AdvertisingReportingJob implements JobInterface
@@ -46,9 +47,18 @@ class AdvertisingReportingJob implements JobInterface
 
             $query = json_decode($data['query'],true);
             if ($data['type'] == 1){
-                $click_id = $query['qz_gdt']?$query['qz_gdt']:$query['gdt_vid'];
+                $click_id = $query['gdt_vid']?$query['gdt_vid']:$query['qz_gdt'];
+                if (!$click_id) return;
+                $clickArr = explode("01",$click_id);
+                if (!$clickArr) return;
+                $click_id = $clickArr[0];
+                //查询腾讯回调信息
+                $callbackQuery = AppletsTx::getDB()->where("request_id","=",$click_id)->value("content");
+
+                if (!$callbackQuery) return;
+                $query = json_decode($callbackQuery,true);
                 //腾讯广告
-                $this->sendData($click_id);
+                $this->sendData($query);
 
                 file_put_contents('orderApplets.txt',json_encode($query).PHP_EOL,FILE_APPEND);
             }elseif ($data['type'] == 2){
@@ -78,9 +88,9 @@ class AdvertisingReportingJob implements JobInterface
 
 
     //腾讯广告回传
-    public function sendData($click_id){
+    public function sendData($param){
 
-        $url = 'http://tracking.e.qq.com/conv';
+        $url  = urldecode($param['callback']);
 
         $data = [
             'actions' => [
@@ -88,13 +98,13 @@ class AdvertisingReportingJob implements JobInterface
                     // 'outer_action_id' => 'outer_action_identity',
                     'action_time' => time(),
                     'user_id' => [
-                        'wechat_openid' => '', // wechat_openid 和 wechat_unionid 二者必填一
+                        'wechat_openid' => $param['wechat_openid'], // wechat_openid 和 wechat_unionid 二者必填一
                         'wechat_unionid' => '', // 企业微信必填
-                        'wechat_app_id' => 'gh_339196192718'  // 微信类上报必填，且必须通过授权。授权请参考微信数据接入
+                        'wechat_app_id' => 'wx3ed327fd1af68e86'  // 微信类上报必填，且必须通过授权。授权请参考微信数据接入
                     ],
                     'action_type' => 'LANDING_PAGE_CLICK', //必填 行为类型  下单 COMPLETE_ORDER   点击 LANDING_PAGE_CLICK
                     "trace" => [
-                        "click_id" => $click_id // 不设置监测链接，必填 click_id
+                        "click_id" => $param['click_id'] // 不设置监测链接，必填 click_id
                     ],
                     'action_param' => [
                         'value' => '100',

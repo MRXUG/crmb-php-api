@@ -7,6 +7,7 @@ use app\common\dao\store\order\StoreRefundOrderDao;
 use app\common\model\store\order\OrderFlow;
 use app\common\model\store\order\StoreRefundOrder;
 use app\common\model\store\RefundTask;
+use app\common\model\system\merchant\MerchantGoodsPayment;
 use app\common\repositories\store\order\OrderFlowRepository;
 use app\common\repositories\store\order\StoreRefundOrderRepository;
 use app\common\repositories\store\order\StoreRefundStatusRepository;
@@ -118,6 +119,10 @@ class RefundCheckJob implements JobInterface
                 'remark' => OrderFlow::SALE_AFTER_REFUND_CN
             ]);
         }
+        # 修改商户支付信息记录
+        MerchantGoodsPayment::getInstance()->where('order_id', $refundTask->getAttr('order_id'))->update([
+            'settlement_status' => 4
+        ]);
     }
 
     public function failed($data)
