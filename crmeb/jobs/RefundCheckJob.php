@@ -107,7 +107,7 @@ class RefundCheckJob implements JobInterface
         $amount = 0;
         foreach ($amountList as $item)  $amount = bcadd($item, $amount, 2);
 
-        if ($amount == 0) {
+        if ($amount > 0) {
             app()->make(OrderFlowRepository::class)->refundOrderFlowWrite([
                 'amount' => '-' . $amount,
                 'type' => OrderFlow::FLOW_TYPE_OUT,
