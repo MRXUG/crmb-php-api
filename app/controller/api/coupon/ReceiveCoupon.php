@@ -73,26 +73,54 @@ class ReceiveCoupon extends BaseController
             $couponCode = $item['coupon_code'] ?? '';
             $stockId = $item['stock_id'] ?? '';
             $stockInfo = $buildCouponRepository->stockProduct(['stock_id' => $stockId]);
+            // 券核销类型
+            $typeData = (int)$stockInfo['type_date'] ?: 0;
+
             if (empty($couponCode) || empty($stockInfo)) {
                 throw new ValidateException('券编码不能为空');
             }
 
             // 计算券的开始和结束时间
-            // 券开始核销时间
+            // 领券开始时间
             $availableTime = $stockInfo['start_at'];
-            // 券停止核销时间
+            // 领券停止时间
             $unAvailableTime = $stockInfo['end_at'];
+
+            // 判断券领取时间是否过期
+            // 核销时间段时间
+            $dateRange = json_decode($stockInfo['date_range'] ?? [], true);
             // 领取后N天内有效
             $availableDayAfterReceive = (int)$stockInfo['available_day_after_receive'] ?: 0;
             // 领取第N天后生效
             $waitDaysAfterReceive = (int)$stockInfo['wait_days_after_receive'] ?: 0;
-            // 开始
-            $startTime = date('Y-m-d H:i:s', strtotime("+$waitDaysAfterReceive day"));
-            // 结束
-            $delay = $waitDaysAfterReceive + $availableDayAfterReceive;
-            $endTime = date('Y-m-d H:i:s', strtotime("+$delay day"));
-            $start = $waitDaysAfterReceive == 0 ? $availableTime : ($startTime > $availableTime ? $startTime : $availableTime);
-            $end = $availableDayAfterReceive == 0 ? $unAvailableTime : ($endTime < $unAvailableTime ? $endTime : $unAvailableTime);
+
+            if ($typeData == 1 || $typeData == 3) {
+                // 领券后立即生效天数 领券N天后立即生效天数
+                // 开始
+                $startTime = date('Y-m-d H:i:s', strtotime("+$waitDaysAfterReceive day"));
+                // 结束
+                $delay = $waitDaysAfterReceive + $availableDayAfterReceive;
+                $endTime = date('Y-m-d H:i:s', strtotime("+$delay day"));
+            } else if ($typeData == 2 || $typeData == 4) {
+                try {
+                    // 开始
+                    $startTime = $dateRange[0];
+                    // 结束
+                    $endTime = $dateRange[1];
+                } catch (\Throwable $th) {
+                    throw new ValidateException('券核销时间异常');
+                }
+            } else {
+                throw new ValidateException('券核销类型异常');
+            }
+            
+            // // 开始
+            // $startTime = date('Y-m-d H:i:s', strtotime("+$waitDaysAfterReceive day"));
+            // // 结束
+            // $delay = $waitDaysAfterReceive + $availableDayAfterReceive;
+            // $endTime = date('Y-m-d H:i:s', strtotime("+$delay day"));
+            // $start = $waitDaysAfterReceive == 0 ? $availableTime : ($startTime > $availableTime ? $startTime : $availableTime);
+            // $end = $availableDayAfterReceive == 0 ? $unAvailableTime : ($endTime < $unAvailableTime ? $endTime : $unAvailableTime);
 
             $where = [
                 'coupon_code' => $item['coupon_code'],
@@ -112,12 +140,25 @@ class ReceiveCoupon extends BaseController
                 'coupon_code' => $item['coupon_code'],
                 'unionid'     => $wechatUser['unionid'],
                 'stock_id'    => $stockId,
-                'start_at'    => $start,
-                'end_at'      => $end,
-                'appid'      => $out_request_no[0],
+                'start_at'    => $startTime,
+                'end_at'      => $endTime,
+                'appid'       => $out_request_no[0],
                 'mch_id'      => $out_request_no[1],
                 'create_time' => date('Y-m-d H:i:s'),
             ];
+            // $data = [
+            //     'mer_id'      => $stockInfo['mer_id'] ?? 0,
+            //     'ad_id'       => $item['ad_id'] ?? 0,
+            //     'uid'         => $uid,
+            //     'coupon_code' => $item['coupon_code'],
+            //     'unionid'     => $wechatUser['unionid'],
+            //     'stock_id'    => $stockId,
+            //     'start_at'    => $start,
+            //     'end_at'      => $end,
+            //     'appid'       => $out_request_no[0],
+            //     'mch_id'      => $out_request_no[1],
+            //     'create_time' => date('Y-m-d H:i:s'),
+            // ];
 
             $couponStocksUserRepository->createUpdate($where, $data);
         }

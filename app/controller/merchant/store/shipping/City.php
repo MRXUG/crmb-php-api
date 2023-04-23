@@ -16,6 +16,7 @@ use app\common\repositories\store\CityAreaRepository;
 use think\App;
 use crmeb\basic\BaseController;
 use app\common\repositories\store\shipping\CityRepository as repository;
+use think\facade\Db;
 use think\facade\Log;
 
 class City extends BaseController
@@ -61,6 +62,39 @@ class City extends BaseController
             return app('json')->fail('地址不存在');
         }
         return app('json')->success($make->getCityList($city));
+    }
+
+    public function setWxAddress()
+    {
+        $data = $this->request->params(['p', 'c','d']);
+        // 查询或插入第一级地址信息
+        $province = Db::name('city_area')->where('level', 1)->where('name', $data['p'])->find();
+        if (!$province) {
+            $province = ['name' => $data['p'], 'level' => 1, 'parent_id' => 0, 'type' => 'province', 'path' => '/', 'snum' => 1];
+            $province['id'] = Db::name('city_area')->insertGetId($province);
+        }
+
+        // 查询或插入第二级地址信息
+        $city = Db::name('city_area')->where('level', 2)->where('name', $data['c'])->where('parent_id', $province['id'])->find();
+        if (!$city) {
+            $city = ['name' => $data['c'], 'level' => 2, 'parent_id' => $province['id'], 'type' => 'city', 'path' => '/' . (string)$province['id'] . '/', 'snum' => 1];
+            $city['id'] = Db::name('city_area')->insertGetId($city);
+        }
+
+        // 查询或插入第三级地址信息
+        $district = Db::name('city_area')->where('level', 3)->where('name', $data['d'])->where('parent_id', $city['id'])->find();
+        if (!$district) {
+            $district = ['name' => $data['d'], 'level' => 3, 'parent_id' => $city['id'], 'type' => 'area', 'path' => '/' . (string)$province['id'] . '/' . (string)$city['id'] . '/', 'snum' => 0];
+            $district['id'] = Db::name('city_area')->insertGetId($district);
+        }
+
+        // 返回结果
+        $result = [
+            $province,
+            $city,
+            $district
+        ];
+        return app('json')->success($result);
     }
 
 
