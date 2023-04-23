@@ -133,14 +133,17 @@ class RefreshPlatformCouponProduct
     private function getOnePlatformCouponProductIdList(array $productIdArr, int $useType, int $platformCouponId, int $threshold): array
     {
         if (empty($productIdArr)) return [];
-        # 判断是全部或者不存在的参数使用所有
-        if (!in_array($useType, [2, 3, 4])) return $productIdArr;
         # 获取涉及的id
-        $scopeArr = PlatformCouponUseScope::getInstance()->where([
-            ['platform_coupon_id', '=', $platformCouponId],
-            ['scope_type', '=', $useType]
-        ])->column('scope_id');
-        if (empty($scopeType)) return [];
+        $scopeArr = [];
+
+        if (in_array($useType, [2, 3, 4])) {
+            $scopeArr = PlatformCouponUseScope::getInstance()->where([
+                ['platform_coupon_id', '=', $platformCouponId],
+                ['scope_type', '=', $useType]
+            ])->column('scope_id');
+
+            if (empty($scopeType)) return [];
+        }
 
         $newProductIdArr = [];
         foreach (array_chunk($productIdArr, 50) as $item) {
