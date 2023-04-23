@@ -99,27 +99,32 @@ class PlatformCouponRepository extends BaseRepository
         /** @var CouponStocksDao $couponDao */
         $couponDao = app()->make(CouponStocksDao::class);
         $field = [
-            'discount_num', # 面值
-            'count(distinct(`mer_id`)) as `mer_count`', # 商户数
+            'a.discount_num', # 面值
+            'count(distinct(a.mer_id)) as `mer_count`', # 商户数
 //            'count(distinct(`id`)) as `platform_coupon_count`', # 平台卷优惠券数量
-            'group_concat(`id` order by `id` desc) as `coupon_id_arr`', # 优惠券id组
-            'group_concat(`scope` order by `id` desc) as `scope_arr`', # 优惠券id组
-            'group_concat(`mer_id` order by `id` desc) as `mer_id_arr`', # 优惠券id组
-            'max(`transaction_minimum`) as `threshold`', # 最大门槛
-            'min(`start_at`) as `min_start_time`', # 最早发券开始时间
-            'max(`end_at`)  as `max_end_time`' # 最晚发券结束时间
+            'group_concat(a.id order by a.id desc) as `coupon_id_arr`', # 优惠券id组
+            'group_concat(a.scope order by id desc) as `scope_arr`', # 优惠券id组
+            'group_concat(a.mer_id order by id desc) as `mer_id_arr`', # 优惠券id组
+            'max(a.transaction_minimum) as `threshold`', # 最大门槛
+            'min(a.start_at) as `min_start_time`', # 最早发券开始时间
+            'max(a.end_at)  as `max_end_time`' # 最晚发券结束时间
         ];
 
         $where = array_merge($where, [
-            ['is_del', '=', 0],
-            ['type', '=', 1],
-            ['status', 'in', [1, 2]],
-            ['end_at', '>', $nowDate],
+            ['a.is_del', '=', 0],
+            ['a.type', '=', 1],
+            ['a.status', 'in', [1, 2]],
+            ['a.end_at', '>', $nowDate],
+            ['b.status', '=', 1],
+            ['b.is_del', '=', 0],
         ]);
 
-        $model = $couponDao->getModelObj()->where($where)->group('discount_num');
+        $model = $couponDao->getModelObj()->alias('a')
+            ->leftJoin('eb_merchant b', 'a.mer_id = b.mer_id')
+            ->where($where)
+            ->group('a.discount_num');
 
-        $list = (clone $model)->field($field)->order($order)->page($page, $limit)->select()->toArray();
+        $list = (clone $model)->field($field)->order('a.' . $order)->page($page, $limit)->select()->toArray();
 
         $productModel = fn() => Product::getInstance();
 
@@ -208,11 +213,14 @@ class PlatformCouponRepository extends BaseRepository
         $nowDate = date("Y-m-d H:i:s");
 
         $couponModel = fn() => CouponStocks::getInstance()->alias('a')
+            ->leftJoin('eb_merchant b', 'a.mer_id = b.mer_id')
             ->where([
                 ['a.discount_num', '=', $amount],
                 ['a.type', '=', 1],
                 ['a.status', '=', 2],
-                ['a.end_at', '>', $nowDate]
+                ['a.end_at', '>', $nowDate],
+                ['b.status', '=', 1],
+                ['b.is_del', '=', 0],
             ])
             ->group('a.mer_id');
 
@@ -225,7 +233,6 @@ class PlatformCouponRepository extends BaseRepository
             'group_concat(`a`.`scope` order by `id` desc) as `scope_arr`', # 优惠券id组
             'group_concat(`a`.`mer_id` order by `id` desc) as `mer_id_arr`', # 优惠券id组
         ])
-            ->leftJoin('eb_merchant b', 'a.mer_id = b.mer_id')
             ->leftJoin('eb_merchant_category c', 'b.category_id = c.merchant_category_id')
             ->order($order)
             ->page($page, $limit)

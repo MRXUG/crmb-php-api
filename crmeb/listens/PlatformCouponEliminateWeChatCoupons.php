@@ -44,7 +44,6 @@ class PlatformCouponEliminateWeChatCoupons extends TimerService implements Liste
 
 
             $count = $model()->count('a.id');
-            dump($count);
             # 计算十分之一
             $num = (int) ceil(bcmul($count, 0.1, 2));
             /** @var PlatformCouponReceive[] $list */
