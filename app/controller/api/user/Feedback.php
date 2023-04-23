@@ -13,6 +13,7 @@
 
 namespace app\controller\api\user;
 
+use app\controller\api\risk\Risk;
 use crmeb\basic\BaseController;
 use app\common\repositories\user\FeedbackRepository;
 use app\common\repositories\store\order\StoreOrderProductRepository;
@@ -44,6 +45,14 @@ class Feedback extends BaseController
         $FeedBack = $this->repository->create($data);
 
         event('user.feedback',compact('FeedBack'));
+
+        //调用黑名单规则
+        /**
+         * @var Risk $risk
+         */
+        $risk =  app()->make(Risk::class);
+        $risk->checkBlackApi($data['uid']);
+
         return app('json')->success('反馈成功');
     }
 
