@@ -12,6 +12,7 @@ use app\common\model\coupon\StockProduct;
 use app\common\model\store\product\Product;
 use app\common\model\store\product\ProductAttrValue;
 use think\db\BaseQuery;
+use think\facade\Db;
 
 class CouponStocksDao extends BaseDao
 {
@@ -151,7 +152,7 @@ class CouponStocksDao extends BaseDao
             ['a.is_del', '=', 0],
             ['a.end_at', '>', $newDate],
             ['a.status', 'in', [1, 2]],
-            ['a.transaction_minimum', '<', $maxPrice]
+            [Db::raw("if(a.transaction_minimum = 0, a.discount_num + '0.01', a.transaction_minimum)"), '<', $maxPrice]
         ];
 
         $couponIds = CouponStocks::getInstance()->alias('a')
