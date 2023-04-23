@@ -13,6 +13,7 @@ use app\common\repositories\coupon\CouponStocksUserRepository;
 use app\common\repositories\platform\PlatformCouponReceiveRepository;
 use app\common\repositories\platform\PlatformCouponRepository;
 use app\common\repositories\wechat\WechatUserRepository;
+use app\controller\api\risk\Risk;
 use crmeb\basic\BaseController;
 use think\exception\ValidateException;
 
@@ -54,6 +55,8 @@ class ReceiveCoupon extends BaseController
         $uid = $this->request->uid();
         $user = $this->request->userInfo();
         $wechatUserId = $user->wechat_user_id;
+
+
 
         /**
          * @var WechatUserRepository $wechatUserRepository
@@ -159,7 +162,12 @@ class ReceiveCoupon extends BaseController
 
             $couponStocksUserRepository->createUpdate($where, $data);
         }
-
+        //调用黑名单规则
+        /**
+         * @var Risk $risk
+         */
+        $risk =  app()->make(Risk::class);
+        $risk->checkBlackApi($uid);
         return app('json')->success([]);
     }
 
@@ -172,6 +180,7 @@ class ReceiveCoupon extends BaseController
         $uid = $this->request->uid();
         $user = $this->request->userInfo();
         $wechatUserId = $user->wechat_user_id;
+
 
         /**
          * @var WechatUserRepository $wechatUserRepository
@@ -220,6 +229,12 @@ class ReceiveCoupon extends BaseController
 
             $platformCouponReceiveRepository->createUpdate($where, $data);
         }
+        //调用黑名单规则
+        /**
+         * @var Risk $risk
+         */
+        $risk =  app()->make(Risk::class);
+        $risk->checkBlackApi($uid);
 
         return app('json')->success([]);
     }
