@@ -508,6 +508,7 @@ Route::group('api/', function () {
             Route::get('new_people', 'api.store.product.StoreCoupon/newPeople');
             Route::get('new_list', 'api.store.product.StoreCoupon/list');
             Route::get('decrypt', 'api.store.product.StoreCoupon/decrypt');
+            Route::get('decryptPlatform', 'api.store.product.StoreCoupon/decryptPlatform');
         });
 
         //商户
