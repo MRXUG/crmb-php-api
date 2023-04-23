@@ -10,6 +10,7 @@ use app\common\model\applet\WxAppletModel;
 use app\common\model\coupon\CouponStocks;
 use app\common\model\coupon\StockProduct;
 use app\common\model\store\product\Product;
+use app\common\model\store\product\ProductAttrValue;
 use think\db\BaseQuery;
 
 class CouponStocksDao extends BaseDao
@@ -141,13 +142,16 @@ class CouponStocksDao extends BaseDao
     {
         $newDate = date("Y-m-d H:i:s");
         $mer_id = Product::getInstance()->where('product_id', $productId)->value('mer_id');
+        // eb_store_product_attr_value
+        $maxPrice = ProductAttrValue::getInstance()->where('product_id', $productId)->max('price');
         # 以获取优惠券id的方式获取优惠券数据
         # 先获取匹配的商户优惠券
         $where = [
             ['a.scope', '=', 1],
             ['a.is_del', '=', 0],
             ['a.end_at', '>', $newDate],
-            ['a.status', 'in', [1, 2]]
+            ['a.status', 'in', [1, 2]],
+            ['a.transaction_minimum', '<', $maxPrice]
         ];
 
         $couponIds = CouponStocks::getInstance()->alias('a')
