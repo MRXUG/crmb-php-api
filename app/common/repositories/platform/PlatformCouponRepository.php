@@ -57,24 +57,28 @@ class PlatformCouponRepository extends BaseRepository
         /** @var CouponStocksDao $couponDao */
         $couponDao = app()->make(CouponStocksDao::class);
         $field = [
-            'discount_num', # 面值
-            'count(distinct(`mer_id`)) as `mer_count`', # 商户数
-            'count(distinct(`id`)) as `platform_coupon_count`', # 平台卷优惠券数量
-            'max(`transaction_minimum`) as `threshold`', # 最大门槛
-            'min(`start_at`) as `min_start_time`', # 最早发券开始时间
-            'max(`end_at`)  as `max_end_time`' # 最晚发券结束时间
+            'a.discount_num', # 面值
+            'count(distinct(a.mer_id)) as `mer_count`', # 商户数
+            'count(distinct(a.id)) as `platform_coupon_count`', # 平台卷优惠券数量
+            'max(a.transaction_minimum) as `threshold`', # 最大门槛
+            'min(a.start_at) as `min_start_time`', # 最早发券开始时间
+            'max(a.end_at)  as `max_end_time`' # 最晚发券结束时间
         ];
 
         $where = [
-            ['is_del', '=', 0],
-            ['type', '=', 1],
-            ['status', 'in', [1, 2]],
-            ['end_at', '>', $nowDate],
-            ['start_at', '<', $nowDate],
-            ['discount_num', '=', $discount_num]
+            ['a.is_del', '=', 0],
+            ['a.type', '=', 1],
+            ['a.status', 'in', [1, 2]],
+            ['a.end_at', '>', $nowDate],
+            ['a.start_at', '<', $nowDate],
+            ['a.discount_num', '=', $discount_num],
+            ['b.is_del', '=', 0],
+            ['b.mer_state', '=', 1],
         ];
         /** @var CouponStocks $model */
-        $model = $couponDao->getModelObj()->where($where)->group('discount_num')->field($field)->find();
+        $model = $couponDao->getModelObj()->alias('a')
+            ->leftJoin('eb_merchant b', 'a.mer_id = b.mer_id')
+            ->where($where)->group('discount_num')->field($field)->find();
         # 保证有优惠券在范围内
         $model->setAttr('min_start_time', date("Y-m-d H:i:s", strtotime($model->getAttr('min_start_time')) + 10));
         $model->setAttr('max_end_time', date("Y-m-d H:i:s", strtotime($model->getAttr('max_end_time')) - 10));

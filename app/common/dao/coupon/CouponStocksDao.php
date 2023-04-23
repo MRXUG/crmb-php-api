@@ -171,6 +171,14 @@ class CouponStocksDao extends BaseDao
                 'status'
             ])
             ->select()
+            ->each(function (CouponStocks $item) {
+                $item->setAttr(
+                    'transaction_minimum',
+                    $item->getAttr('transaction_minimum') == 0
+                        ? bcadd($item->getAttr('discount_num'), '0.01', 2)
+                        : $item->getAttr('transaction_minimum')
+                );
+            })
             ->toArray();
     }
 
