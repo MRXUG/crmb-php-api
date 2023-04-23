@@ -30,7 +30,7 @@ class PlatformCouponEliminateWeChatCoupons extends TimerService implements Liste
      */
     public function handle($event): void
     {
-        $this->tick(1000 * 3, function () {
+        $this->tick(1000 * 60 * 30, function () {
             # 获取还剩一天就到期 进行失效处理
             $nowDate = date("Y-m-d H:i:s", strtotime("-1 day"));
 
