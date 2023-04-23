@@ -80,7 +80,7 @@ class SendCouponValidate extends Validate
                     continue;
                 }
             }
-            $newList = $v;
+            $newList[] = $v;
         }
 
         return $newList;
