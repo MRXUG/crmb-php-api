@@ -615,6 +615,7 @@ class PlatformCouponRepository extends BaseRepository
                 $res = $this->buildPlatformCoupon($platformCoupon);
                 $platformCoupon->setAttr('wechat_business_number', $res['params']['belong_merchant']); # 填入生成优惠券的商户号
                 $platformCoupon->setAttr('stock_id', $res['result']['stock_id']); # 填入批次号
+                $platformCoupon->setAttr('release_time', time());
             }
             if ($status == 2) { # 失效
                 $this->failPlatformCoupon($platformCoupon);
