@@ -64,33 +64,53 @@ class SendCouponValidate extends Validate
      */
     public function validateReceivePlatformCoupon(array $stockIdList, $uid)
     {
-        $platformCouponDao = app()->make(PlatformCouponDao::class);
+        /**
+         * @var CouponStocksUserRepository $couponStocksUserRepository
+         */
+        $couponStocksUserRepository = app()->make(CouponStocksUserRepository::class);
 
-        $newlist = [];
+        $newList = [];
         foreach ($stockIdList as $k=>$v){
-            $platformCoupon = $platformCouponDao->getWhere(['stock_id'=>$v['stock_id']],'*');
-
-            if ($platformCoupon['is_limit'] == 1){
-                //查询已经领取了多少张
-                $lnum = PlatformCouponReceive::getDB()->where('platform_coupon_id',$platformCoupon['platform_coupon_id'])->count();
-
-                if ($lnum >= $platformCoupon['limit_number']){
+            if ($v['type'] == 1){
+                $couponStocksUserRepository->validateReceiveCoupon($v['stock_id'], $uid);
+            }
+            if ($v['type'] == 2){
+                $res = $this->filteratePlatformCoupon($v['stock_id'], $uid);
+                if ($res === false){
                     continue;
                 }
             }
-
-            if ($platformCoupon['is_user_limit'] == 1){
-                //查询已经领取了多少张
-                $lnum = PlatformCouponReceive::getDB()->where('platform_coupon_id',$platformCoupon['platform_coupon_id'])->where("user_id",$uid)->count();
-
-                if ($lnum >= $platformCoupon['user_limit_number']){
-                    continue;
-                }
-            }
-            $newlist[]=$v;
+            $newList = $v;
         }
 
-        return $newlist;
+        return $newList;
+    }
+
+    public function filteratePlatformCoupon($stock_id= '',$uid=0){
+
+        $platformCouponDao = app()->make(PlatformCouponDao::class);
+
+
+        $platformCoupon = $platformCouponDao->getWhere(['stock_id'=>$stock_id],'*');
+
+        if ($platformCoupon['is_limit'] == 1){
+            //查询已经领取了多少张
+            $lnum = PlatformCouponReceive::getDB()->where('platform_coupon_id',$platformCoupon['platform_coupon_id'])->count();
+
+            if ($lnum >= $platformCoupon['limit_number']){
+                return false;
+            }
+        }
+
+        if ($platformCoupon['is_user_limit'] == 1){
+            //查询已经领取了多少张
+            $lnum = PlatformCouponReceive::getDB()->where('platform_coupon_id',$platformCoupon['platform_coupon_id'])->where("user_id",$uid)->count();
+
+            if ($lnum >= $platformCoupon['user_limit_number']){
+                return false;
+            }
+        }
+        return true;
     }
 
 }
