@@ -147,6 +147,22 @@ class ProductDao extends BaseDao
                 else if ($where['hot_type'] == 'good')
                     $query->where('is_benefit', 1);
             })
+
+            ->when(isset($where['discount_num']) && $where['discount_num'] !== '', function ($query) use ($where) {
+                $query->leftJoin('eb_coupon_stocks CS', 'CS.mer_id = M.mer_id');
+                $query->leftJoin('eb_stock_goods SG', 'SG.coupon_stocks_id = CS.id');
+                $newDate = date("Y-m-d H:i:s");
+                $query->where( [
+                    ['CS.scope', '=', 1],
+                    ['CS.is_del', '=', 0],
+                    ['CS.discount_num', '=', $where['discount_num']],
+                    ['CS.end_at', '>', $newDate],
+                    ['CS.status', 'in', [1, 2]]
+                ]);
+
+
+            })
+
             ->when(isset($where['pid']) && $where['pid'] !== '', function ($query) use ($where) {
                 $storeCategoryRepository = app()->make(StoreCategoryRepository::class);
                 $ids = array_merge($storeCategoryRepository->findChildrenId((int)$where['pid']), [(int)$where['pid']]);
