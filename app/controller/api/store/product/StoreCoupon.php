@@ -199,7 +199,7 @@ class StoreCoupon extends BaseController
     public function decryptPlatform()
     {
         $raw = request()->get();
-        $orderStock = PlatformCoupon::getDB()->where('stock_id', $raw['stock_id'])->field('platform_coupon_id,wechat_business_number')->find();
+        $orderStock = PlatformCoupon::getDB()->where('stock_id', $raw['stock_id'])->field('platform_coupon_id,wechat_business_number,discount_num')->find();
         if (!$orderStock) return app('json')->fail('优惠券不存在');
         $couponCode = MerchantCouponService::create(MerchantCouponService::CALLBACK_COUPON, ['mch_id' => $orderStock['wechat_business_number']])->decrypt($raw);
 //        $adId = $repository->getValue(['coupon_code' => $couponCode], 'ad_id');
@@ -209,7 +209,8 @@ class StoreCoupon extends BaseController
             'coupon_code' => $couponCode,
             'stock_id' => $raw['stock_id'],
             'mchId' => $orderStock['wechat_business_number'],
-            'couponId' => $orderStock['platform_coupon_id']
+            'couponId' => $orderStock['platform_coupon_id'],
+            'discount_num' => $orderStock['discount_num'],
         ]);
     }
 }
