@@ -185,12 +185,12 @@ class Auth extends BaseController
         $data['total_coupon'] += PlatformCouponReceive::getInstance()->alias('a')
             ->leftJoin('eb_platform_coupon b', 'a.platform_coupon_id = b.platform_coupon_id')
             ->where([
-                ['user_id', '=', $user['uid']],
-                ['status', '=', 1],
-                ['is_init', '=', 1],
-                ['is_del', '=', 0],
-                ['is_cancel', '=', 0],
-                ['wx_coupon_destroy', '=', 1],
+                ['a.user_id', '=', $user['uid']],
+                ['b.status', '=', 1],
+                ['b.is_init', '=', 1],
+                ['b.is_del', '=', 0],
+                ['b.is_cancel', '=', 0],
+                ['a.wx_coupon_destroy', '=', 1],
             ])->count('a.id');
 
         if ($data['is_svip'] == 3) {
