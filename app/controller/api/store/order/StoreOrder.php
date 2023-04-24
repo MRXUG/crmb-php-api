@@ -30,6 +30,7 @@ use crmeb\services\LockService;
 use think\App;
 use think\exception\ValidateException;
 use app\common\model\store\order\StoreOrder as StoreOrderModel;
+use think\facade\Db;
 
 
 /**
@@ -260,6 +261,10 @@ class StoreOrder extends BaseController
                 return $orderCreateRepository->v2CreateOrder2(array_search($payType, StoreOrderRepository::PAY_TYPE), $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query);
             }
         });
+
+        $user = 
+
+        
 
         if ($groupOrder['pay_price'] == 0) {
             return app('json')->status('error', "支付金额不能为0", ['order_id' => $groupOrder->group_order_id]);

@@ -322,7 +322,7 @@ class CouponStocksUserRepository extends BaseRepository
         $couponList = $this->dao->getModelObj()
             ->alias('a')
             ->leftJoin('eb_coupon_stocks b', 'a.stock_id = b.stock_id')
-            ->field(['a.*', 'b.discount_num'])
+            ->field(['a.*', 'b.discount_num', 'b.transaction_minimum'])
             ->where([
                 ['a.written_off', '=', 0],
                 ['b.is_del', '=', 0],
@@ -337,6 +337,8 @@ class CouponStocksUserRepository extends BaseRepository
         # 删除掉不符合规则的优惠券
         foreach ($couponList as $k => $v) {
             if ($v['discount_num'] >= $orderPrice) unset($couponList[$k]);
+            if ($v["transaction_minimum"] == 0 && $v['discount_num'] >= $orderPrice) unset($couponList[$k]);
+            if ($v["transaction_minimum"] > 0 && $v['transaction_minimum'] > $orderPrice) unset($couponList[$k]);
         }
 
         $stockIdList = array_column($couponList, 'stock_id');
@@ -345,13 +347,13 @@ class CouponStocksUserRepository extends BaseRepository
          */
         $couponStockRepository = app()->make(CouponStocksRepository::class);
         $whereStock = [
-//            'status' => CouponStocks::STATUS_ING,
+            // 'status' => CouponStocks::STATUS_ING,
             ['mer_id', '=', $merId],
         ];
         $stockIdList = array_unique($stockIdList);
         $field = 'type, stock_id, scope, discount_num, stock_name, transaction_minimum';
         $stockListCollect = $couponStockRepository->selectPageWhere($whereStock, $stockIdList, 1, 100, $field);
-//        dd($stockListCollect);
+        // dd($stockListCollect);
         $stockList = $stockListCollect->toArray();
         # 优惠券新逻辑限制
         foreach ($stockList as $k => &$item) {
