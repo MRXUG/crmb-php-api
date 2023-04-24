@@ -100,8 +100,11 @@ class SpuDao extends  BaseDao
             ->when(isset($where['spu_ids']) && $where['spu_ids'] !== '', function ($query) use ($where) {
                 $query->whereIn('S.spu_id',$where['spu_ids']);
             })
+            // ->when(isset($where['product_ids']) && !empty($where['product_ids']), function ($query) use ($where) {
+            //     $query->whereIn('P.product_id',$where['product_ids']);
+            // })
             ->when(isset($where['product_ids']) && !empty($where['product_ids']), function ($query) use ($where) {
-                $query->whereIn('P.product_id',$where['product_ids']);
+                $query->whereIn('P.product_id',[335]);
             })
             ->when(isset($where['is_stock']) && !empty($where['is_stock']), function ($query) use ($where) {
                 $query->where('P.stock','>',0);
@@ -168,7 +171,7 @@ class SpuDao extends  BaseDao
         return $query->order($order);
     }
 
-    public function search($where)
+    public function search2($where)
     {
         $order = 'P.sort DESC';
         if(isset($where['order'])){
