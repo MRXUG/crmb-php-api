@@ -85,8 +85,8 @@ class CouponConfigRepository extends BaseRepository
 
         //查询用户未使用的券有多少
         $userCouponNum  = CouponStocksUser::getDB()->where("uid",'=',$uid)
-            ->where("start_at",'>',$date)
-            ->where("end_at",'<',$date)
+            ->where("start_at",'<',$date)
+            ->where("end_at",'>',$date)
             ->where("written_off",'=',0)
             ->where("is_del",'=',0)
             ->count();

@@ -78,7 +78,7 @@ class WechatTemplateMessageService
     public function subscribeSendTemplate($data)
     {
         event('wechat.subscribeTemplate.before',compact('data'));
-        $res = $this->subscribeTemplateMessage($data['tempCode'],$data['id']);
+        $res = $this->subscribeTemplateMessage($data);
         if(!$res || !is_array($res))return true;
 
         foreach($res as $item){
