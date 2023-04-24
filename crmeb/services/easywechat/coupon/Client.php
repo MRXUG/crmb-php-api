@@ -372,7 +372,7 @@ class Client extends BaseClient
                 'mini_programs_info' => [
                     'entrance_words'      => '关闭提醒',
                     'guiding_words'       => '投诉商家',
-                    'mini_programs_path'  => $miniAppPath,
+                    'mini_programs_path'  => '/pages/users/feedback/index',
                     'mini_programs_appid' => $appId,
                 ],
             ],
@@ -437,7 +437,7 @@ class Client extends BaseClient
                 'mini_programs_info' => [
                     'entrance_words'      => '关闭提醒',
                     'guiding_words'       => '投诉商家',
-                    'mini_programs_path'  => "/pages/columnGoods/goods_coupon_list/index?type={$params['type']}&mer_id={$params['mer_id']}", //小程序首页
+                    'mini_programs_path'  => '/pages/users/feedback/index', //小程序首页
 //                    'mini_programs_path'  => 'pages/columnGoods/goods_coupon_list/index', //小程序首页
                     'mini_programs_appid' => $appId,
                 ],
