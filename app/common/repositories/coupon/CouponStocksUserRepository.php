@@ -336,9 +336,15 @@ class CouponStocksUserRepository extends BaseRepository
 //        dd($couponList);
         # 删除掉不符合规则的优惠券
         foreach ($couponList as $k => $v) {
-            if ($v['discount_num'] >= $orderPrice) unset($couponList[$k]);
-            if ($v["transaction_minimum"] == 0 && $v['discount_num'] >= $orderPrice) unset($couponList[$k]);
-            if ($v["transaction_minimum"] > 0 && $v['transaction_minimum'] > $orderPrice) unset($couponList[$k]);
+            if ($v['discount_num'] >= $orderPrice) {
+                unset($couponList[$k]);
+            } elseif ($v["transaction_minimum"] == 0 && $v['discount_num'] >= $orderPrice) {
+                unset($couponList[$k]);
+            } elseif ($v["transaction_minimum"] > 0 && $v['transaction_minimum'] > $orderPrice) {
+                unset($couponList[$k]);
+            };
+            // if ($v["transaction_minimum"] == 0 && $v['discount_num'] >= $orderPrice) unset($couponList[$k]);
+            // if ($v["transaction_minimum"] > 0 && $v['transaction_minimum'] > $orderPrice) unset($couponList[$k]);
         }
 
         $stockIdList = array_column($couponList, 'stock_id');
