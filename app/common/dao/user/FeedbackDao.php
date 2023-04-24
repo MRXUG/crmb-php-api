@@ -81,7 +81,7 @@ class FeedbackDao extends BaseDao
     }
 
     //获取30天内反馈数量 
-    public function get30day(int $uid,int $start,int $end){
+    public function get30day(int $uid, $start, $end){
         return Feedback::getDB()->whereBetween('create_time',[$start,$end])->where('uid',$uid)->count();
     }
 }
