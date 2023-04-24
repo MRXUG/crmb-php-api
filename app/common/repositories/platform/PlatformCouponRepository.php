@@ -187,20 +187,23 @@ class PlatformCouponRepository extends BaseRepository
         $couponArr = array_unique($couponArr);
         $couponStr = implode(",", $couponArr);
         # 定义公共部分模型
-        $productModel = fn() => Product::getInstance()->where([
-            ['is_del', '=', 0],
-            ['status', '=', 1],
-            ['is_show', '=', 1],
-            ['mer_status', '=', 1],
-            ['product_type', '=', 0],
-        ]);
+        $productModel = fn() => Product::getInstance()->alias('a')
+            ->leftJoin('eb_store_spu b', 'a.product_id = b.product_id')
+            ->where([
+                ['a.is_del', '=', 0],
+                ['a.status', '=', 1],
+                ['a.is_show', '=', 1],
+                ['a.mer_status', '=', 1],
+                ['a.product_type', '=', 0],
+                ['b.status', '=', 1],
+            ]);
         # 根据商户id获取所有的商品id
-        $merProductId = $productModel()->whereIn('mer_id', $merArr)->column('product_id');
+        $merProductId = $productModel()->whereIn('a.mer_id', $merArr)->column('a.product_id');
         # 根据优惠券id获取选择的商品id
-        $couponProductId = empty($couponArr) ? [] : $productModel()->whereIn('product_id', Db::raw(<<<SQL
+        $couponProductId = empty($couponArr) ? [] : $productModel()->whereIn('a.product_id', Db::raw(<<<SQL
             select product_id from eb_stock_goods where coupon_stocks_id in ({$couponStr})
         SQL
-        ))->column('product_id');
+        ))->column('a.product_id');
 
         return array_merge(array_unique(array_merge($couponProductId, $merProductId)), []);
     }
