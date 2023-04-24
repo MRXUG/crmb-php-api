@@ -502,7 +502,11 @@ class PlatformCouponRepository extends BaseRepository
                 'a.is_init',
                 'a.is_cancel',
                 'a.cancel_time',
-                '(select count(platform_coupon_id) as productNum from eb_platform_coupon_product where platform_coupon_id = a.platform_coupon_id) as product_count',
+                '(select count(platform_coupon_id) as productNum
+from eb_platform_coupon_product ab
+         left join eb_store_product bb on ab.product_id = bb.product_id
+where ab.platform_coupon_id = a.platform_coupon_id
+    and bb.is_used = 1) as product_count',
                 "(
 	IF
 		(unix_timestamp(NOW())  >= unix_timestamp( a.receive_end_time ), 0,( unix_timestamp( a.receive_end_time ) - unix_timestamp(NOW()))/ 86400 )
