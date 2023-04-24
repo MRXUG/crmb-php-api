@@ -186,11 +186,12 @@ class Auth extends BaseController
             ->leftJoin('eb_platform_coupon b', 'a.platform_coupon_id = b.platform_coupon_id')
             ->where([
                 ['a.user_id', '=', $user['uid']],
+                ['a.status', '=', 0],
                 ['b.status', '=', 1],
                 ['b.is_init', '=', 1],
                 ['b.is_del', '=', 0],
                 ['b.is_cancel', '=', 0],
-                ['a.wx_coupon_destroy', '=', 1],
+                ['a.wx_coupon_destroy', '=', 0],
             ])->count('a.id');
 
         if ($data['is_svip'] == 3) {
