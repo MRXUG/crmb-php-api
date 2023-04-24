@@ -1479,13 +1479,6 @@ class UserRepository extends BaseRepository
 
     //使用户领取的所有优惠券失效
     public function cancelUserCoupon($uid){
-        UserBlackLog::getInstance()->insert([
-            'operate' => 1,
-            'uid' => $uid,
-            'type' => 1,
-            'create_time' => time()
-        ]);
-
         $make = app()->make(PlatformCouponRepository::class);
         $make->cancelPlatformUserCoupon($uid);
     }

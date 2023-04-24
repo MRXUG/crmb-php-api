@@ -93,7 +93,12 @@ class Risk extends BaseController{
                 if($info){
                     $this->userrepository->cancelUserCoupon($uid);
                 }
-
+                UserBlackLog::getInstance()->insert([
+                    'operate' => 1,
+                    'uid' => $uid,
+                    'type' => 1,
+                    'create_time' => time()
+                ]);
                 return app('json')->success('用户触发风控,加入黑名单成功');
             }
 
@@ -159,7 +164,12 @@ class Risk extends BaseController{
                 if($info){
                     $this->userrepository->cancelUserCoupon($uid);
                 }
-
+                UserBlackLog::getInstance()->insert([
+                    'operate' => 1,
+                    'uid' => $uid,
+                    'type' => 1,
+                    'create_time' => time()
+                ]);
                 return app('json')->success('用户触发风控,加入黑名单成功');
             }
 
