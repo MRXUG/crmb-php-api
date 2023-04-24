@@ -103,8 +103,8 @@ class Risk extends BaseController{
             }
 
             //近30天
-            $now = time();
-            $start = $now - 30*86400;
+            $now = date("Y-m-d H:i:s");
+            $start = date("Y-m-d H:i:s",strtotime($now) - 30*86400);
 
             //30天卡券召回次数规则
 
@@ -174,8 +174,8 @@ class Risk extends BaseController{
             }
 
             //近30天
-            $now = time();
-            $start = $now - 30*86400;
+            $now = date("Y-m-d H:i:s");
+            $start = date("Y-m-d H:i:s",strtotime($now) - 30*86400);
 
             //30天卡券召回次数规则
 
