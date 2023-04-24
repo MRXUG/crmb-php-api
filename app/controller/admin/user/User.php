@@ -616,7 +616,7 @@ class User extends BaseController
                 'type' => 2,
                 'operate' => 1,
             ];
-  
+
             if($this->user){
 
                 switch($operate){
@@ -624,29 +624,29 @@ class User extends BaseController
                         //拉入黑名单
                         $data = ['black'=>1,'wb_time'=>time()];
                         $info = $this->repository->update($uid,$data);
-                        
+
                         if($info){
                             //优惠券失效
-                            $this->userRepository->cancelUserCoupon($uid);
+                            $this->repository->cancelUserCoupon($uid);
                         }
                         //记录日志
                         $this->setBlackLog($log);
-    
+
                         return app('json')->success('黑名单设置成功');
                         break;
                     case 'del':
                         //移除黑名单
                         $data = ['black'=>0,'wb_time'=>time()];
                         $this->repository->update($uid,$data);
-                        
+
                         //记录日志
                         $log['operate'] = 0;
                         $this->setBlackLog($log);
-                        
+
                         return app('json')->success('黑名单移除成功');
                         break;
                     default:
-                        
+
                         [$page, $limit] = $this->getPage();
                         $where = [
                             'black' => 1
@@ -660,8 +660,8 @@ class User extends BaseController
             return app('json')->fail('参数错误');
         }
     }
-    
-    
+
+
     /**
      * 黑名单操作记录平台调用
      * $type 变更形式1系统判定2人工添加3用户主动
@@ -677,7 +677,7 @@ class User extends BaseController
                 'create_time' => time()
             ];
             $info = app()->make(UserBlackLogRepository::class)->create($arr);
-            
+
             return app('json')->success('记录成功');
         }else{
             return app('json')->fail('参数错误');
@@ -702,9 +702,9 @@ class User extends BaseController
                 'create_time' => time()
             ];
             $info = app()->make(UserBlackLogRepository::class)->create($arr);
-            
+
             return app('json')->success('记录成功');
-        
+
         }else{
             return app('json')->fail('参数错误');
         }
@@ -740,7 +740,7 @@ class User extends BaseController
                 //移出白名单
                 $data = ['white'=>0,'wb_time'=>time()];
                 $this->repository->update($uid,$data);
-                
+
                 return app('json')->success('移出白名单成功');
             }else{
                 //监测黑名单
@@ -755,7 +755,7 @@ class User extends BaseController
                 //加入白名单
                 $data = ['white'=>1,'wb_time'=>time()];
                 $this->repository->update($uid,$data);
-                
+
                 return app('json')->success('白名单设置成功');
             }
         }else{
@@ -772,7 +772,7 @@ class User extends BaseController
         $where = [
             'white' => 1
         ];
-        
+
         if($this->request->has('uid')){
             $where['uid'] = intval($this->request->param('uid'));
         }
