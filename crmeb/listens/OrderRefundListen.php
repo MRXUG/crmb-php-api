@@ -29,7 +29,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
     public function handle($event): void
     {
         # 每半分钟检测一次
-        $this->tick(1000 * 15, function () {
+        $this->tick(1000 * 30, function () {
             Log::info("开始运行 {$this->name} ". date("Y-m-d H:i:s"));
             try {
                 Db::transaction(function () {
@@ -64,7 +64,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
         # 收集还需要检测的
         $newParam = [];
         # 循环进行查询
-        foreach ($param as $item) {
+        foreach (is_array($param) ? $param : [] as $item) {
             # 调用查询分账回退结果
             $res = WechatService::getMerPayObj($item['merId'], $item['appId'])
                 ->profitSharing()
