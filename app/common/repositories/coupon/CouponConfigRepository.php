@@ -111,7 +111,7 @@ class CouponConfigRepository extends BaseRepository
 //        $diff_days = floor($diff_seconds/86400);
         $diff_days = floor($diff_seconds/60);
         //发券弹窗间隔天数
-        if ($diff_days >= $couponConfig['issueCouponsIntervalDate']) return  false;
+        if ($diff_days <= $couponConfig['issueCouponsIntervalDate']) return  false;
 
         return  true;
 
