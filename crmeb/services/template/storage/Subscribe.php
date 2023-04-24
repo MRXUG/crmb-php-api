@@ -59,7 +59,11 @@ class Subscribe extends BaseMessage
         }
 
         try {
-            $res = MiniProgramService::create()->sendSubscribeTemlate($this->openId, $tempid, $data, $this->toUrl);
+
+            //查询appid
+            $appId = systemConfig('routine_appId');
+            if (!$appId) return;
+            $res = MiniProgramService::create(0,$appId)->sendSubscribeTemlate($this->openId, $tempid, $data, $this->toUrl);;
             $this->clear();
             return $res;
         } catch (\Throwable $e) {
