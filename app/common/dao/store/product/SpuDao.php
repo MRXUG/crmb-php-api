@@ -192,44 +192,7 @@ class SpuDao extends  BaseDao
             $order = '';
         }
         $query = Spu::getDB()->alias('S')->join('StoreProduct P','S.product_id = P.product_id', 'left');
-        $query->when(isset($where['is_del']) && $where['is_del'] !== '',function($query)use($where){
-                $query->where('P.is_del',$where['is_del']);
-            })
-            ->when(isset($where['mer_id']) && $where['mer_id'] !== '',function($query)use($where){
-                $query->where('P.mer_id',$where['mer_id']);
-            })
-            ->when(isset($where['mer_ids']) && $where['mer_ids'] !== '',function($query)use($where){
-                $query->whereIn('P.mer_id',$where['mer_ids']);
-            })
-            ->when(isset($where['keyword']) && $where['keyword'] !== '',function($query)use($where){
-                if (is_numeric($where['keyword'])) {
-                    $query->whereLike("S.store_name|S.keyword|S.product_id", "%{$where['keyword']}%");
-                } else {
-                    $word = app()->make(VicWordService::class)->getWord($where['keyword']);
-                    $query->where(function ($query) use ($word) {
-                        foreach ($word as $item) {
-                            $query->whereOr('S.store_name|S.keyword', 'LIKE', "%$item%");
-                        }
-                    });
-                }
-            })
-            ->when(isset($where['is_trader']) && $where['is_trader'] !== '',function($query)use($where){
-                $merId = app()->make(MerchantRepository::class)->search([
-                    'is_trader' => $where['is_trader'],
-                    'status' => 1,
-                    'mer_state' => 1,
-                    'is_del' => 1,
-                ])->column('mer_id');
-
-                $query->whereIn('P.mer_id',$merId);
-            })
-            ->when(isset($where['spu_id']) && $where['spu_id'] !== '', function ($query) use ($where) {
-                $query->where('S.spu_id',$where['spu_id']);
-            })
-            ->when(isset($where['spu_ids']) && $where['spu_ids'] !== '', function ($query) use ($where) {
-                $query->whereIn('S.spu_id',$where['spu_ids']);
-            })
-            ->when(isset($where['product_ids']) && !empty($where['product_ids']), function ($query) use ($where) {
+        $query->when(isset($where['product_ids']) && !empty($where['product_ids']), function ($query) use ($where) {
                 $query->whereIn('P.product_id',$where['product_ids']);
             })
             ->when(isset($where['is_stock']) && !empty($where['is_stock']), function ($query) use ($where) {
