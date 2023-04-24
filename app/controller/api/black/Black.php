@@ -170,7 +170,7 @@ class Black extends BaseController{
 
         //移除黑名单id数组
         $del = [];
-        if($user){
+        if(count($user) > 0){
             foreach($user as $k => $v){
                 if($v['wb_time'] > 0){
                     $start = strtotime(date('Y-m-d'),strtotime($v['wb_time']));
@@ -183,6 +183,8 @@ class Black extends BaseController{
                     }
                 }
             }
+        }else{
+            echo '没有需要移除的用户';
         }
     }
 
