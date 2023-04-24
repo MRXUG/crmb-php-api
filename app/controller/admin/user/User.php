@@ -600,6 +600,11 @@ class User extends BaseController
         $uid = $this->request->param('uid');
         if($uid){
             $this->user = $this->repository->get($uid);
+
+            if(!$this->user){
+                return app('json')->fail('参数错误，用户不存在!');
+            }
+
             //判断是否白名单
             if($this->user->white){
                 return app('json')->fail('白名单用户不可以加入黑名单');

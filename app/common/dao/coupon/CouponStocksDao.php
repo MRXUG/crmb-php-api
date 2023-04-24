@@ -10,7 +10,9 @@ use app\common\model\applet\WxAppletModel;
 use app\common\model\coupon\CouponStocks;
 use app\common\model\coupon\StockProduct;
 use app\common\model\store\product\Product;
+use app\common\model\store\product\ProductAttrValue;
 use think\db\BaseQuery;
+use think\facade\Db;
 
 class CouponStocksDao extends BaseDao
 {
@@ -141,13 +143,16 @@ class CouponStocksDao extends BaseDao
     {
         $newDate = date("Y-m-d H:i:s");
         $mer_id = Product::getInstance()->where('product_id', $productId)->value('mer_id');
+        // eb_store_product_attr_value
+        $maxPrice = ProductAttrValue::getInstance()->where('product_id', $productId)->max('price');
         # 以获取优惠券id的方式获取优惠券数据
         # 先获取匹配的商户优惠券
         $where = [
             ['a.scope', '=', 1],
             ['a.is_del', '=', 0],
             ['a.end_at', '>', $newDate],
-            ['a.status', 'in', [1, 2]]
+            ['a.status', 'in', [1, 2]],
+            [Db::raw("if(a.transaction_minimum = 0, a.discount_num + '0.01', a.transaction_minimum)"), '<', $maxPrice]
         ];
 
         $couponIds = CouponStocks::getInstance()->alias('a')
@@ -171,6 +176,14 @@ class CouponStocksDao extends BaseDao
                 'status'
             ])
             ->select()
+            ->each(function (CouponStocks $item) {
+                $item->setAttr(
+                    'transaction_minimum',
+                    $item->getAttr('transaction_minimum') == 0
+                        ? bcadd($item->getAttr('discount_num'), '0.01', 2)
+                        : $item->getAttr('transaction_minimum')
+                );
+            })
             ->toArray();
     }
 

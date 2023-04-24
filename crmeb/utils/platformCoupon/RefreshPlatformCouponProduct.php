@@ -133,30 +133,34 @@ class RefreshPlatformCouponProduct
     private function getOnePlatformCouponProductIdList(array $productIdArr, int $useType, int $platformCouponId, int $threshold): array
     {
         if (empty($productIdArr)) return [];
-        # 判断是全部或者不存在的参数使用所有
-        if (!in_array($useType, [2, 3, 4])) return $productIdArr;
         # 获取涉及的id
-        $scopeArr = PlatformCouponUseScope::getInstance()->where([
-            ['platform_coupon_id', '=', $platformCouponId],
-            ['scope_type', '=', $useType]
-        ])->column('scope_id');
-        if (empty($scopeType)) return [];
+        $scopeArr = [];
+
+        if (in_array($useType, [2, 3, 4])) {
+            $scopeArr = PlatformCouponUseScope::getInstance()->where([
+                ['platform_coupon_id', '=', $platformCouponId],
+                ['scope_type', '=', $useType]
+            ])->column('scope_id');
+
+            if (empty($scopeType)) return [];
+        }
 
         $newProductIdArr = [];
         foreach (array_chunk($productIdArr, 50) as $item) {
             $model = Product::getInstance()
-                ->whereIn('product_id', $item)
-                ->where('price', '>', $threshold);
+                ->alias('a')
+                ->whereIn('a.product_id', $item)
+                ->whereRaw("(select max(price) from eb_store_product_attr_value where product_id = a.product_id) > {$threshold}");
             switch ($useType) {
                 case 2:
-                    $model->whereIn('cate_id', $scopeArr);
+                    $model->whereIn('a.cate_id', $scopeArr);
                     break;
                 case 3:
-                    $model->whereIn('mer_id', $scopeArr);
+                    $model->whereIn('a.mer_id', $scopeArr);
                     break;
                 case 4:
                     $whereInStr = implode(',', $scopeArr);
-                    $model->whereIn('mer_id', Db::raw(<<<SQL
+                    $model->whereIn('a.mer_id', Db::raw(<<<SQL
                         select mer_id
                         from eb_merchant a
                             left join eb_merchant_category b on a.category_id = b.merchant_category_id
@@ -164,7 +168,7 @@ class RefreshPlatformCouponProduct
                     SQL));
                     break;
             }
-            array_push($newProductIdArr, ...($model->column('product_id') ?? []));
+            array_push($newProductIdArr, ...($model->column('a.product_id') ?? []));
         }
 
         return $newProductIdArr;
