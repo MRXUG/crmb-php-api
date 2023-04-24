@@ -14,6 +14,7 @@ namespace app\controller\api;
 
 
 use app\common\dao\coupon\CouponStocksDao;
+use app\common\model\platform\PlatformCouponReceive;
 use app\common\model\store\RefundTask;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
@@ -180,6 +181,19 @@ class Auth extends BaseController
             ['start_at','<',date('Y-m-d H:i:s')],
             ['end_at','>',date('Y-m-d H:i:s')],
             ]);
+
+        $data['total_coupon'] += PlatformCouponReceive::getInstance()->alias('a')
+            ->leftJoin('eb_platform_coupon b', 'a.platform_coupon_id = b.platform_coupon_id')
+            ->where([
+                ['a.user_id', '=', $user['uid']],
+                ['a.status', '=', 0],
+                ['b.status', '=', 1],
+                ['b.is_init', '=', 1],
+                ['b.is_del', '=', 0],
+                ['b.is_cancel', '=', 0],
+                ['a.wx_coupon_destroy', '=', 0],
+            ])->count('a.id');
+
         if ($data['is_svip'] == 3) {
             $data['svip_endtime'] = date('Y-m-d H:i:s', strtotime("+100 year"));
         }
