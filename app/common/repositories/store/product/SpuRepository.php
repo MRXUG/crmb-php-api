@@ -514,7 +514,7 @@ class SpuRepository extends BaseRepository
                 $where['product_ids'] = $productList;
             }
             $where['is_coupon'] = 1;
-            $product = $this->getApiSearch($where, $page, $limit, $userInfo,$coupon['discount_num']);
+            $product = $this->getApiSearch($where, $page, $limit, $userInfo, $coupon['discount_num']);
         }
 
         $data['count'] = $product['count'] ?? 0;
