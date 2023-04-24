@@ -14,8 +14,10 @@
 namespace app\controller\api\black;
 
 use app\common\model\black\UserBlackLog;
+use app\common\model\user\User;
 use app\common\repositories\user\UserRepository;
 use app\common\repositories\black\UserBlackLogRepository;
+use app\common\repositories\risk\RiskRepository;
 use think\App;
 use crmeb\basic\BaseController;
 
@@ -149,6 +151,38 @@ class Black extends BaseController{
             }
         }else{
             return app('json')->fail('参数错误');
+        }
+    }
+
+    //定时移除黑名单
+    public function delBlack(){
+        //获取风控设置
+        $riskModel = app()->make(RiskRepository::class);
+        $risk = $riskModel->getRisk();
+
+        //获取黑名单中的用户
+        $userModel = new User();
+        $where = ['black' => 1];
+        $user = $userModel->where($where)->field('uid,black,wb_time')->select();
+
+        //当前时间
+        $now = strtotime(date('Y-m-d'),time());
+
+        //移除黑名单id数组
+        $del = [];
+        if($user){
+            foreach($user as $k => $v){
+                if($v['wb_time'] > 0){
+                    $start = strtotime(date('Y-m-d'),strtotime($v['wb_time']));
+                    if(($now - $start) >= $risk->blacklist_vid){
+                        $save = ['black' => 0,'wb_time' => 0];
+
+                        // Queue::push(DelUserBlackJob::class,$v);
+                        $userModel->where(['uid'=>$v['uid']])->update($save);
+                        echo $v['uid'].PHP_EOL;
+                    }
+                }
+            }
         }
     }
 
