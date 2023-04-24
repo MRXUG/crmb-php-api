@@ -19,29 +19,17 @@
 // | Author: CRMEB Team <admin@crmeb.com>
 // +----------------------------------------------------------------------
 
-declare (strict_types=1);
-
-namespace app\command;
+namespace app\controller\api\black;
 
 use app\common\repositories\user\UserRepository;
 use app\common\repositories\risk\RiskRepository;
-use crmeb\jobs\DelUserBlackJob;
-use think\console\Command;
-use think\console\Input;
-use think\console\input\Argument;
-use think\console\Output;
-use think\console\input\Option;
+use think\App;
+use crmeb\basic\BaseController;
 
-class delUserBlack extends Command{
+class delUserBlack extends BaseController{
 
-    protected function configure(){
 
-        // 指令配置
-        $this->setName('delblack')
-            ->setDescription('del user black');
-    }
-
-    protected function execute(Input $input, Output $output){
+    public function delBlack(){
         //获取风控设置
         $riskModel = app()->make(RiskRepository::class);
         $risk = $riskModel->getRisk();

@@ -665,6 +665,9 @@ Route::group('api/', function () {
         Route::post('setlog','Black/setLog');
         Route::get('getlog','Black/getLog');
     })->prefix('api.black.');
+    
+    //定时移除黑名单
+    Route::any('deluserblack','api.black.delUserBlack/delBlack')->name('delBlack');
 
     //风控
     Route::group('risk',function(){
