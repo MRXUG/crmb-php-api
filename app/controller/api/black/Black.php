@@ -13,6 +13,7 @@
 
 namespace app\controller\api\black;
 
+use app\common\model\black\UserBlackLog;
 use app\common\repositories\user\UserRepository;
 use app\common\repositories\black\UserBlackLogRepository;
 use think\App;
@@ -49,7 +50,7 @@ class Black extends BaseController{
         if($this->user){
             if($this->request->has('operate')){
                 $operate = $this->request->param('operate');
-            
+
                 switch($operate){
                     case 'add':
                         //拉入黑名单
@@ -57,25 +58,37 @@ class Black extends BaseController{
                         if($this->user->black == 1){
                             return app('json')->success('用户已经加入黑名单');
                         }
-                        
+
                         if($this->user->white == 1){
                             return app('json')->success('白名单用户不能加入黑名单');
                         }
-                        
+
                         $data = ['black'=>1,'wb_time'=>time()];
                         $info = $this->userRepository->update($uid,$data);
                         if($info){
                             //优惠券失效
                             $this->userRepository->cancelUserCoupon($uid);
                         }
-                        
+                        UserBlackLog::getInstance()->insert([
+                            'operate' => 1,
+                            'uid' => $uid,
+                            'type' => 2,
+                            'create_time' => time()
+                        ]);
                         return app('json')->success('黑名单设置成功');
                         break;
                     case 'del':
                         //移除黑名单
                         $data = ['black'=>0,'wb_time'=>time()];
                         $this->userRepository->update($uid,$data);
-                        
+
+                        UserBlackLog::getInstance()->insert([
+                            'operate' => 0,
+                            'uid' => $uid,
+                            'type' => 2,
+                            'create_time' => time()
+                        ]);
+
                         return app('json')->success('黑名单移除成功');
                         break;
                     default:
@@ -92,7 +105,7 @@ class Black extends BaseController{
      * 黑名单操作记录
      * $type 1加入黑名单0移出黑名单
      * $uid  用户id
-     * $operate  变更形式1系统判定2人工添加3用户主动	
+     * $operate  变更形式1系统判定2人工添加3用户主动
      */
     public function setLog($data=[]){
         if($this->request->has('uid')){

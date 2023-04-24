@@ -13,6 +13,7 @@
 
 namespace app\controller\api\risk;
 
+use app\common\model\black\UserBlackLog;
 use app\common\repositories\coupon\CouponStocksUserRepository;
 use app\common\repositories\risk\RiskRepository;
 use think\App;
@@ -23,7 +24,7 @@ use app\common\repositories\user\FeedbackRepository;
 
 
 class Risk extends BaseController{
-    
+
     /**
      * @var RiskRepository
      */
@@ -45,8 +46,8 @@ class Risk extends BaseController{
         $this->platformCouponReceiveRepository = $platformCouponReceiveRepository;
         $this->feedbackrepository = $feedbackrepository;
     }
-    
-    
+
+
     //获取风控设置
     public function getRisk(){
         $risk = $this->repository->getRisk();
@@ -56,7 +57,7 @@ class Risk extends BaseController{
     //黑名单规则监测
     public function checkBlack(){
         $uid = $this->request->param('uid');
-        
+
         if($uid > 0){
             $info = $this->userrepository->get($uid);
             if($info->white == 1){
@@ -70,10 +71,10 @@ class Risk extends BaseController{
 
             //获取设置的参数
             $risk = $this->repository->getRisk();
-            
+
             //获取平台券数量
             $platcouponinfo = $this->platformCouponReceiveRepository->getList($uid, 1, 1);
-           
+
             $platcouponnum = $platcouponinfo['count'];
 
             //获取商户券数量
@@ -84,7 +85,7 @@ class Risk extends BaseController{
             $make = app()->make(CouponStocksUserRepository::class);
             $couponNum = $make->userNoWrittenOffCoupon($where);
             $platcouponnum +=  $couponNum;
-             
+
             if($risk['usecoupon'] < $platcouponnum){
                 $data = ['black'=>1,'wb_time'=>time()];
                 $info = $this->userrepository->update($uid,$data);
@@ -95,7 +96,7 @@ class Risk extends BaseController{
 
                 return app('json')->success('用户触发风控,加入黑名单成功');
             }
-            
+
             //近30天
             $now = time();
             $start = $now - 30*86400;
@@ -110,6 +111,7 @@ class Risk extends BaseController{
                 $info = $this->userrepository->update($uid,$data);
 
                 if($info){
+
                     $this->userrepository->cancelUserCoupon($uid);
                 }
                 return app('json')->success('用户触发风控,加入黑名单成功');

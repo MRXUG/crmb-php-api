@@ -15,6 +15,7 @@ namespace app\common\repositories\user;
 
 use app\common\dao\BaseDao;
 use app\common\dao\user\UserDao;
+use app\common\model\black\UserBlackLog;
 use app\common\model\user\User;
 use app\common\model\wechat\WechatUser;
 use app\common\repositories\BaseRepository;
@@ -1478,6 +1479,13 @@ class UserRepository extends BaseRepository
 
     //使用户领取的所有优惠券失效
     public function cancelUserCoupon($uid){
+        UserBlackLog::getInstance()->insert([
+            'operate' => 1,
+            'uid' => $uid,
+            'type' => 1,
+            'create_time' => time()
+        ]);
+
         $make = app()->make(PlatformCouponRepository::class);
         $make->cancelPlatformUserCoupon($uid);
     }
