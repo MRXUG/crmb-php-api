@@ -85,8 +85,8 @@ class CouponConfigRepository extends BaseRepository
 
         //查询用户未使用的券有多少
         $userCouponNum  = CouponStocksUser::getDB()->where("uid",'=',$uid)
-            ->where("start_at",'>',$date)
-            ->where("end_at",'<',$date)
+            ->where("start_at",'<',$date)
+            ->where("end_at",'>',$date)
             ->where("written_off",'=',0)
             ->where("is_del",'=',0)
             ->count();
@@ -106,11 +106,12 @@ class CouponConfigRepository extends BaseRepository
 
         $time2=strtotime($userPlatFormCouponDate);
 
-        $diff_seconds = $time2 - $time1;
+        $diff_seconds = $time1 - $time2;
 
-        $diff_days = floor($diff_seconds/86400);
+//        $diff_days = floor($diff_seconds/86400);
+        $diff_days = floor($diff_seconds/60);
         //发券弹窗间隔天数
-        if ($diff_days >= $couponConfig['issueCouponsIntervalDate']) return  false;
+        if ($diff_days <= $couponConfig['issueCouponsIntervalDate']) return  false;
 
         return  true;
 

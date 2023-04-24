@@ -364,7 +364,7 @@ class PlatformCouponRepository extends BaseRepository
             # 调用初始化队列
             Queue::push(CreatePlatformCouponInitGoods::class, [
                 'platform_coupon_id' => $platform_coupon_id
-            ]);
+            ], 'CreatePlatformCouponInitGoods');
         } catch (Exception|ValueError|Throwable $e) {
             Log::error($e->getMessage() . $e->getTraceAsString());
         }

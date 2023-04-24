@@ -45,7 +45,6 @@ class EstimatePlatformCouponProduct implements JobInterface
         foreach ($productIdArrChunk as $item) {
             $productCount += Product::getInstance()->alias('a')
                 ->whereRaw("(select max(price) from eb_store_product_attr_value where product_id = a.product_id) > {$data['threshold']}")
-//                ->where('b.price', '>', $data['threshold'])
                 ->when($data['use_type'] == 2, function (BaseQuery $query) use ($data) {
                     $query->whereIn('a.cate_id', $data['scope_id_arr']);
                 })
@@ -62,9 +61,7 @@ class EstimatePlatformCouponProduct implements JobInterface
                     SQL));
                 })
                 ->whereIn('a.product_id', $item)
-//                ->fetchSQL()
                 ->count('a.product_id') ?? 0;
-
         }
 
         Cache::set("EstimatePlatformCouponProduct:{$data['jobNumber']}", [

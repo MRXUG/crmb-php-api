@@ -142,7 +142,7 @@ class RefreshPlatformCouponProduct
                 ['scope_type', '=', $useType]
             ])->column('scope_id');
 
-            if (empty($scopeType)) return [];
+            if (empty($scopeArr)) return [];
         }
 
         $newProductIdArr = [];
