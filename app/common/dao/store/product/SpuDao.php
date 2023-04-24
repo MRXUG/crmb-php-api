@@ -247,7 +247,7 @@ class SpuDao extends  BaseDao
             //     $query->whereIn('P.product_id',$where['product_ids']);
             // })
             ->when(isset($where['product_ids']) && !empty($where['product_ids']), function ($query) use ($where) {
-                $query->whereIn('P.product_id',[335]);
+                $query->where('P.product_id', 335);
             })
             ->when(isset($where['is_stock']) && !empty($where['is_stock']), function ($query) use ($where) {
                 $query->where('P.stock','>',0);
