@@ -145,7 +145,7 @@ class SpuRepository extends BaseRepository
         }
         $where['spu_status'] = 1;
         $where['mer_status'] = 1;
-        $query = $this->dao->search2($where);
+        $query = $this->dao->search($where);
 
         $query->with([
             'merchant' => function ($query) {
