@@ -45,7 +45,7 @@ class CouponStocksUserRepository extends BaseRepository
     {
         $query = $this->dao->search2($merId, $where);
         $count = $query->count();
-        $list = $query->page($page, 10000)->select();
+        $list = $query->page($page, 10000)->order('stockDetail.discount_num DESC')->select();
         foreach ($list as $k=>$v){
             if (isset($v["stockDetail"]["transaction_minimum"]) && isset($v["stockDetail"]["discount_num"]) && ($v["stockDetail"]["transaction_minimum"] == 0)){
                 $list[$k]["stockDetail"]["transaction_minimum"] = $v["stockDetail"]["discount_num"]+0.01;
