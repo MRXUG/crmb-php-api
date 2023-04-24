@@ -26,6 +26,9 @@ class SendSmsJob implements JobInterface
     public function fire($job, $data)
     {
         $status = app()->make(SystemNoticeConfigRepository::class)->getNoticeStatusByConstKey($data['tempId']);
+
+        $data['tempCode'] = $data['tempId'];
+
         if ($status['notice_sms'] == 1) {
             try {
                 SmsService::sendMessage($data);
