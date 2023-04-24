@@ -106,7 +106,7 @@ class CouponConfigRepository extends BaseRepository
 
         $time2=strtotime($userPlatFormCouponDate);
 
-        $diff_seconds = $time2 - $time1;
+        $diff_seconds = $time1 - $time2;
 
 //        $diff_days = floor($diff_seconds/86400);
         $diff_days = floor($diff_seconds/60);
