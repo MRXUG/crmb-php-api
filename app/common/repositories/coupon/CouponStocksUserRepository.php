@@ -5,6 +5,7 @@ namespace app\common\repositories\coupon;
 use app\common\dao\coupon\CouponStocksUserDao;
 use app\common\dao\coupon\StockProductDao;
 use app\common\model\coupon\CouponStocks;
+use app\common\model\store\product\Product;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\store\coupon\StoreCouponProductRepository;
 use app\common\repositories\user\UserRepository;
@@ -12,6 +13,7 @@ use app\common\repositories\wechat\WechatUserRepository;
 use crmeb\services\MerchantCouponService;
 use think\exception\ValidateException;
 use think\facade\Log;
+use think\facade\Db;
 
 
 class CouponStocksUserRepository extends BaseRepository
@@ -34,6 +36,21 @@ class CouponStocksUserRepository extends BaseRepository
             if (isset($v["stockDetail"]["transaction_minimum"]) && isset($v["stockDetail"]["discount_num"]) && ($v["stockDetail"]["transaction_minimum"] == 0)){
                 $list[$k]["stockDetail"]["transaction_minimum"] = $v["stockDetail"]["discount_num"]+0.01;
             }
+        }
+
+        return compact('count', 'list');
+    }
+
+    public function list2($page, $limit, $where, $merId): array
+    {
+        $query = $this->dao->search2($merId, $where);
+        $count = $query->count();
+        $list = $query->page($page, 10000)->select();
+        foreach ($list as $k=>$v){
+            if (isset($v["stockDetail"]["transaction_minimum"]) && isset($v["stockDetail"]["discount_num"]) && ($v["stockDetail"]["transaction_minimum"] == 0)){
+                $list[$k]["stockDetail"]["transaction_minimum"] = $v["stockDetail"]["discount_num"]+0.01;
+            }
+            $list[$k]["productIds"] = Db::name('stock_goods')->where('coupon_stocks_id', $list[$k]["stockDetail"]["id"])->column('product_id');
         }
 
         return compact('count', 'list');

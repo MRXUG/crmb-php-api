@@ -27,6 +27,7 @@ Route::group('api/', function () {
             //新的下单接口,支持分账
             Route::group('order', function () {
                 Route::post('check', '/v2CheckOrder');
+                Route::post('check2', '/v2CheckOrder');
                 Route::post('create', '/v2CreateOrder');
                 Route::post('create2', '/v2CreateOrder2');
                 Route::post('getUserBeforeOneCoupon', '/getUserBeforeOneCoupon');//获取可用优惠券列表
@@ -675,6 +676,7 @@ Route::group('api/', function () {
     Route::group('stock/coupon', function () {
         Route::get('list', 'CouponStock/list');
         Route::get('receiveList', 'CouponStock/receiveList');
+        Route::get('receiveList2', 'CouponStock/receiveList2');
         Route::get('bestOffer/:id', 'BestOfferCoupon/productBestOffer');
     })->prefix('api.coupon.');
 
