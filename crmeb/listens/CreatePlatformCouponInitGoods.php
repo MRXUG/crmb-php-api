@@ -87,7 +87,7 @@ class CreatePlatformCouponInitGoods implements JobInterface
                 ['scope_type', '=', $useType]
             ])->column('scope_id');
 
-            if (empty($scopeType)) return [];
+            if (empty($scopeArr)) return [];
         }
 
         $newProductIdArr = [];
@@ -113,7 +113,7 @@ class CreatePlatformCouponInitGoods implements JobInterface
                     SQL));
                     break;
             }
-           array_push($newProductIdArr, ...($model->column('a.product_id') ?? []));
+            array_push($newProductIdArr, ...($model->column('a.product_id') ?? []));
         }
 
         return $newProductIdArr;
