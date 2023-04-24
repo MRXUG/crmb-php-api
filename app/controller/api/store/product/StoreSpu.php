@@ -82,7 +82,7 @@ class StoreSpu extends BaseController
         $where['mer_id'] = $id;
         $where['is_gift_bag'] = 0;
         $where['order'] = $where['order'] ? $where['order'] : 'sort';
-        $data = $this->repository->getApiSearch($where, $page, $limit, $this->userInfo,0,1);
+        $data = $this->repository->getApiSearch($where, $page, $limit, $this->userInfo);
         return app('json')->success($data);
     }
 

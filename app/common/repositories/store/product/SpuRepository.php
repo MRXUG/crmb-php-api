@@ -130,7 +130,7 @@ class SpuRepository extends BaseRepository
      * @author Qinii
      * @day 12/18/20
      */
-    public function getApiSearch($where, $page, $limit, $userInfo = null,$discountNum = 0,$merProductLst = 0)
+    public function getApiSearch($where, $page, $limit, $userInfo = null,$discountNum = 0,$isCouponP = 0)
     {
         if (isset($where['keyword']) && !empty($where['keyword']) && $where['keyword'] !== '') {
             if (preg_match('/^(\/@[1-9]{1}).*\*\//', $where['keyword'])) {
@@ -143,7 +143,7 @@ class SpuRepository extends BaseRepository
                 app()->make(UserVisitRepository::class)->searchProduct($userInfo ? $userInfo['uid'] : 0, $where['keyword'], (int)($where['mer_id'] ?? 0));
             }
         }
-        if ($merProductLst ==1){
+        if ($isCouponP == 0){
             $where['spu_status'] = 1;
         }
         $where['mer_status'] = 1;
@@ -516,7 +516,7 @@ class SpuRepository extends BaseRepository
                 $where['product_ids'] = $productList;
             }
             $where['is_coupon'] = 1;
-            $product = $this->getApiSearch($where, $page, $limit, $userInfo, $coupon['discount_num']);
+            $product = $this->getApiSearch($where, $page, $limit, $userInfo, $coupon['discount_num'],1);
         }
 
         $data['count'] = $product['count'] ?? 0;
@@ -544,7 +544,7 @@ class SpuRepository extends BaseRepository
                 $where['product_ids'] = $productList;
             }
             $where['is_coupon'] = 1;
-            $product = $this->getApiSearch($where, $page, $limit, $userInfo,$discountNum);
+            $product = $this->getApiSearch($where, $page, $limit, $userInfo,$discountNum,1);
         }
 
         $data['count'] = $product['count'] ?? 0;
