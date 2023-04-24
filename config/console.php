@@ -35,8 +35,6 @@ $initCommands = [
     'clear:cache' => 'app\command\clearCache',
     //更新热卖榜单
     'change:hotTop' => 'app\command\changeHotTop',
-    //定时移除黑名单
-    'del:userBlack' => 'app\command\delUserBlack',
 ];
 $commands = [
     //测试微信
