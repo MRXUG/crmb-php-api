@@ -512,9 +512,13 @@ class SpuRepository extends BaseRepository
             $productList = PlatformCouponProduct::getDB()->where('platform_coupon_id',$platform_coupon_id)->column('product_id');
             if ($productList) {
                 $where['product_ids'] = $productList;
+                $where['is_coupon'] = 1;
+                $product = $this->getApiSearch($where, $page, $limit, $userInfo, $coupon['discount_num'],1);
+            }else{
+                $product['count'] = 0;
+                $product['list'] = [];
             }
-            $where['is_coupon'] = 1;
-            $product = $this->getApiSearch($where, $page, $limit, $userInfo, $coupon['discount_num'],1);
+
         }
 
         $data['count'] = $product['count'] ?? 0;
@@ -540,9 +544,13 @@ class SpuRepository extends BaseRepository
             $productList = PlatformCouponProduct::getDB()->whereIn('platform_coupon_id',$platform_coupon_ids)->column('product_id');
             if ($productList) {
                 $where['product_ids'] = $productList;
+                $where['is_coupon'] = 1;
+                $product = $this->getApiSearch($where, $page, $limit, $userInfo,$discountNum,1);
+            }else{
+                $product['count'] = 0;
+                $product['list'] = [];
             }
-            $where['is_coupon'] = 1;
-            $product = $this->getApiSearch($where, $page, $limit, $userInfo,$discountNum,1);
+
         }
 
         $data['count'] = $product['count'] ?? 0;
