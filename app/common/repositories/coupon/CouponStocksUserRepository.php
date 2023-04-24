@@ -4,16 +4,13 @@ namespace app\common\repositories\coupon;
 
 use app\common\dao\coupon\CouponStocksUserDao;
 use app\common\dao\coupon\StockProductDao;
-use app\common\model\coupon\CouponStocks;
-use app\common\model\store\product\Product;
 use app\common\repositories\BaseRepository;
-use app\common\repositories\store\coupon\StoreCouponProductRepository;
 use app\common\repositories\user\UserRepository;
 use app\common\repositories\wechat\WechatUserRepository;
 use crmeb\services\MerchantCouponService;
 use think\exception\ValidateException;
-use think\facade\Log;
 use think\facade\Db;
+use think\facade\Log;
 
 
 class CouponStocksUserRepository extends BaseRepository
@@ -47,6 +44,7 @@ class CouponStocksUserRepository extends BaseRepository
         $count = $query->count();
         $list = $query->page($page, 10000)->select();
         foreach ($list as $k=>$v){
+            if (empty($list[$k]["stockDetail"])) continue;
             if (isset($v["stockDetail"]["transaction_minimum"]) && isset($v["stockDetail"]["discount_num"]) && ($v["stockDetail"]["transaction_minimum"] == 0)){
                 $list[$k]["stockDetail"]["transaction_minimum"] = $v["stockDetail"]["discount_num"]+0.01;
             }
@@ -196,7 +194,7 @@ class CouponStocksUserRepository extends BaseRepository
         $totalReceivedCurrentDay = $receivedCouponModel->where('create_time', date('Y-m-d H:i:s'))->count();
         // 该批次该用户总领券数量
         $totalReceivedByUser = $receivedCouponModel1->where('uid', $uid)->count();
-        
+
         $sendNumByUser = $stockIdInfo['max_coupons_per_user'] - $totalReceivedByUser;
         if ($sendNumByUser < 1) {
             // 当前用户领券达到上限
