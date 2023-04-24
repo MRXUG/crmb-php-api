@@ -211,6 +211,8 @@ class ProgramSubscribe extends AbstractAPI
         $params['data'] = $this->formatData($params['data']);
 
         $this->message = $this->messageBackup;
+        file_put_contents('subscribe_send.txt',self::API_SUBSCRIBE_SEND.PHP_EOL,FILE_APPEND);
+
 
         return $this->parseJSON('json', [self::API_SUBSCRIBE_SEND, $params]);
     }
