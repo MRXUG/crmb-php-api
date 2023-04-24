@@ -143,9 +143,7 @@ class SpuRepository extends BaseRepository
                 app()->make(UserVisitRepository::class)->searchProduct($userInfo ? $userInfo['uid'] : 0, $where['keyword'], (int)($where['mer_id'] ?? 0));
             }
         }
-        if ($isCouponP == 0){
-            $where['spu_status'] = 1;
-        }
+        $where['spu_status'] = 1;
         $where['mer_status'] = 1;
         $query = $this->dao->search($where);
 
