@@ -130,7 +130,7 @@ class SpuRepository extends BaseRepository
      * @author Qinii
      * @day 12/18/20
      */
-    public function getApiSearch($where, $page, $limit, $userInfo = null,$discountNum = 0)
+    public function getApiSearch($where, $page, $limit, $userInfo = null,$discountNum = 0,$merProductLst = 0)
     {
         if (isset($where['keyword']) && !empty($where['keyword']) && $where['keyword'] !== '') {
             if (preg_match('/^(\/@[1-9]{1}).*\*\//', $where['keyword'])) {
@@ -143,7 +143,9 @@ class SpuRepository extends BaseRepository
                 app()->make(UserVisitRepository::class)->searchProduct($userInfo ? $userInfo['uid'] : 0, $where['keyword'], (int)($where['mer_id'] ?? 0));
             }
         }
-//        $where['spu_status'] = 1;
+        if ($merProductLst ==1){
+            $where['spu_status'] = 1;
+        }
         $where['mer_status'] = 1;
         $query = $this->dao->search($where);
 
