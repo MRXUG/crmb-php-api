@@ -72,7 +72,7 @@ class Black extends BaseController{
                         UserBlackLog::getInstance()->insert([
                             'operate' => 1,
                             'uid' => $uid,
-                            'type' => 2,
+                            'type' => 3,
                             'create_time' => time()
                         ]);
                         return app('json')->success('黑名单设置成功');
@@ -85,7 +85,7 @@ class Black extends BaseController{
                         UserBlackLog::getInstance()->insert([
                             'operate' => 0,
                             'uid' => $uid,
-                            'type' => 2,
+                            'type' => 3,
                             'create_time' => time()
                         ]);
 
