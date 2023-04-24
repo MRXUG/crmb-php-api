@@ -26,52 +26,50 @@ class CreatePlatformCouponInitGoods implements JobInterface
      */
     public function fire($job, $data)
     {
-        Db::startTrans();
         try {
-            # 查询出需要初始化的平台优惠券
-            /** @var PlatformCoupon $platformCoupon */
-            $platformCoupon = PlatformCoupon::getInstance()->where([
-                ['platform_coupon_id', '=', $data['platform_coupon_id']],
-                ['is_init', '=', 0]
-            ])->find();
-            if (!$platformCoupon) goto END;
-            # 获取商品id
-            /** @var PlatformCouponDao $platformCouponDao */
-            $platformCouponDao = app()->make(PlatformCouponDao::class);
+            Db::transaction(function () use ($data) {
+                # 查询出需要初始化的平台优惠券
+                /** @var PlatformCoupon $platformCoupon */
+                $platformCoupon = PlatformCoupon::getInstance()->where([
+                    ['platform_coupon_id', '=', $data['platform_coupon_id']],
+                    ['is_init', '=', 0]
+                ])->find();
+                if (!$platformCoupon) return;
+                # 获取商品id
+                /** @var PlatformCouponDao $platformCouponDao */
+                $platformCouponDao = app()->make(PlatformCouponDao::class);
 
-            $platform_coupon_id = $platformCoupon->getAttr('platform_coupon_id');
-            $use_type = $platformCoupon->getAttr('use_type');
+                $platform_coupon_id = $platformCoupon->getAttr('platform_coupon_id');
+                $use_type = $platformCoupon->getAttr('use_type');
 
-            $newDate = date("Y-m-d H:i:s");
-            # 获取到范围的商品id
-            $productIdArr = $this->getProductIdList($platformCouponDao->getProductIdFromDenomination(
-                $platformCoupon->getAttr('discount_num'),
-                $platformCoupon->getAttr('receive_start_time'),
-                $platformCoupon->getAttr('receive_end_time'),
-            ), $use_type, $platform_coupon_id, $platformCoupon->getAttr('threshold'));
-            # 删除已存在
-            PlatformCouponProduct::getInstance()->where('platform_coupon_id', $platform_coupon_id)->delete();
-            # 将商品id写入
-            foreach (array_chunk($productIdArr, 50) as $item) {
-                $arr = [];
-                foreach ($item as $v) $arr[] = [
-                    'product_id' => $v,
-                    'platform_coupon_id' => $platform_coupon_id,
-                    'use_type' => $use_type,
-                    'create_time' => $newDate,
-                    'update_time' => $newDate
-                ];
-                PlatformCouponProduct::getInstance()->insertAll($arr);
-            }
-            $platformCoupon->setAttr('is_init', 1);
-            $platformCoupon->save();
-            Db::commit();
+                $newDate = date("Y-m-d H:i:s");
+                # 获取到范围的商品id
+                $productIdArr = $this->getProductIdList($platformCouponDao->getProductIdFromDenomination(
+                    $platformCoupon->getAttr('discount_num'),
+                    $platformCoupon->getAttr('receive_start_time'),
+                    $platformCoupon->getAttr('receive_end_time'),
+                ), $use_type, $platform_coupon_id, $platformCoupon->getAttr('threshold'));
+                # 删除已存在
+                PlatformCouponProduct::getInstance()->where('platform_coupon_id', $platform_coupon_id)->delete();
+                # 将商品id写入
+                foreach (array_chunk($productIdArr, 50) as $item) {
+                    $arr = [];
+                    foreach ($item as $v) $arr[] = [
+                        'product_id' => $v,
+                        'platform_coupon_id' => $platform_coupon_id,
+                        'use_type' => $use_type,
+                        'create_time' => $newDate,
+                        'update_time' => $newDate
+                    ];
+                    PlatformCouponProduct::getInstance()->insertAll($arr);
+                }
+                $platformCoupon->setAttr('is_init', 1);
+                $platformCoupon->save();
+            });
         } catch (Exception|ValueError|Throwable $e) {
-            Db::rollback();
             Log::error($e->getMessage() . $e->getTraceAsString());
         }
         # 结束任务
-        END:
         $job->delete();
     }
 
