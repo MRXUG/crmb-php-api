@@ -119,7 +119,12 @@ class ReceiveCoupon extends BaseController
 
             $couponStocksUserRepository->createUpdate($where, $data);
         }
-
+        //调用黑名单规则
+        /**
+         * @var Risk $risk
+         */
+        $risk =  app()->make(Risk::class);
+        $risk->checkBlackApi($uid);
         return app('json')->success([]);
     }
 
