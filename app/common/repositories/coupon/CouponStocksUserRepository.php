@@ -430,4 +430,8 @@ class CouponStocksUserRepository extends BaseRepository
     {
         return $this->dao->getValue($where, $filed);
     }
+
+    public function userNoWrittenOffCoupon($where){
+        return $this->dao->getWhereCount($where);
+    }
 }
