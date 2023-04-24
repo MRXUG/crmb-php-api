@@ -70,7 +70,7 @@ class PlatformCouponRepository extends BaseRepository
             ['a.type', '=', 1],
             ['a.status', 'in', [1, 2]],
             ['a.end_at', '>', $nowDate],
-            ['a.start_at', '<', $nowDate],
+//            ['a.start_at', '<', $nowDate],
             ['a.discount_num', '=', $discount_num],
             ['b.is_del', '=', 0],
             ['b.mer_state', '=', 1],
@@ -79,6 +79,7 @@ class PlatformCouponRepository extends BaseRepository
         $model = $couponDao->getModelObj()->alias('a')
             ->leftJoin('eb_merchant b', 'a.mer_id = b.mer_id')
             ->where($where)->group('discount_num')->field($field)->find();
+        if (!$model) throw new ValidateException('无商家优惠券数据');
         # 保证有优惠券在范围内
         $model->setAttr('min_start_time', date("Y-m-d H:i:s", strtotime($model->getAttr('min_start_time')) + 10));
         $model->setAttr('max_end_time', date("Y-m-d H:i:s", strtotime($model->getAttr('max_end_time')) - 10));
