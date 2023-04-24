@@ -145,7 +145,7 @@ class SpuRepository extends BaseRepository
         }
         $where['spu_status'] = 1;
         $where['mer_status'] = 1;
-        $query = $this->dao->search2($where);
+        $query = $this->dao->search($where);
 
         $query->with([
             'merchant' => function ($query) {
@@ -514,9 +514,7 @@ class SpuRepository extends BaseRepository
                 $where['product_ids'] = $productList;
             }
             $where['is_coupon'] = 1;
-            $product = $this->getApiSearch($where, $page, $limit, $userInfo,$coupon['discount_num']);
-            $data['productIds'] = $productList;
-            $data['where'] = $where;
+            $product = $this->getApiSearch($where, $page, $limit, $userInfo, $coupon['discount_num']);
         }
 
         $data['count'] = $product['count'] ?? 0;

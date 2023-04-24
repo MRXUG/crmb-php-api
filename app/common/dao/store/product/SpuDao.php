@@ -80,7 +80,7 @@ class SpuDao extends  BaseDao
 
                 $query->whereIn('P.mer_id',$merId);
             })
-            ->when(isset($where['cate_pid']) && $where['cate_pid'], function ($query) use ($where) {
+            ->when(isset($where['cate_pid']) && $where['cate_pid'] !== '', function ($query) use ($where) {
                 $storeCategoryRepository = app()->make(StoreCategoryRepository::class);
                 if (is_array($where['cate_pid'])) {
                     $cateIds = $storeCategoryRepository->selectChildrenId($where['cate_pid']);
@@ -164,36 +164,6 @@ class SpuDao extends  BaseDao
             })
             ->when(isset($where['svip']) && $where['svip'] !== '',function($query)use($where){
                 $query->where('svip_price_type','>',0)->where('mer_svip_status',1);
-            });
-        return $query->order($order);
-    }
-
-    public function search2($where)
-    {
-        $order = 'P.sort DESC';
-        if(isset($where['order'])){
-            if(in_array($where['order'], ['is_new', 'price_asc', 'price_desc', 'rate', 'sales'])){
-                if ($where['order'] == 'price_asc') {
-                    $order = 'S.price ASC';
-                } else if ($where['order'] == 'price_desc') {
-                    $order = 'S.price DESC';
-                } else {
-                    $order = 'P.'.$where['order'] . ' DESC';
-                }
-            }elseif($where['order'] == 'star'){
-                $order = 'S.star DESC,S.rank DESC';
-            }else{
-                $order = 'S.'. (($where['order'] !== '') ?$where['order']: 'star' ).' DESC';
-            }
-        }
-
-        $order .= ',S.create_time DESC';
-        if(isset($where['order']) && $where['order'] === 'none'){
-            $order = '';
-        }
-        $query = Spu::getDB()->alias('S')->join('StoreProduct P','S.product_id = P.product_id', 'left');
-        $query ->when(isset($where['product_ids']) && !empty($where['product_ids']), function ($query) use ($where) {
-                $query->whereIn('P.product_id',$where['product_ids']);
             });
         return $query->order($order);
     }
