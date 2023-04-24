@@ -49,10 +49,10 @@ class CouponConfigRepository extends BaseRepository
             if ($userCoupon === false) return  0 ;
         }
 
-        if ($type == 4){
-            $userReflow = $this->userReflowCoupon($uid,$couponConfig);
-            if ($userReflow === false)return  0 ;
-        }
+//        if ($type == 4){
+//            $userReflow = $this->userReflowCoupon($uid,$couponConfig);
+//            if ($userReflow === false)return  0 ;
+//        }
 
         $userCoupon = $this->getUserUseCoupon($uid,$couponConfig);
         if ($userCoupon === false) return  0 ;

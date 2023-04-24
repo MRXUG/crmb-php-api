@@ -13,6 +13,7 @@
 
 namespace app\controller\api\risk;
 
+use app\common\repositories\coupon\CouponStocksUserRepository;
 use app\common\repositories\risk\RiskRepository;
 use think\App;
 use crmeb\basic\BaseController;
@@ -74,6 +75,15 @@ class Risk extends BaseController{
             $platcouponinfo = $this->platformCouponReceiveRepository->getList($uid, 1, 1);
            
             $platcouponnum = $platcouponinfo['count'];
+
+            //获取商户券数量
+            $where = [
+                ['written_off','=',0],
+                ['uid','=',$uid],
+            ];
+            $make = app()->make(CouponStocksUserRepository::class);
+            $couponNum = $make->userNoWrittenOffCoupon($where);
+            $platcouponnum +=  $couponNum;
              
             if($risk['usecoupon'] < $platcouponnum){
                 $data = ['black'=>1,'wb_time'=>time()];
@@ -130,6 +140,15 @@ class Risk extends BaseController{
             $platcouponinfo = $this->platformCouponReceiveRepository->getList($uid, 1, 1);
 
             $platcouponnum = $platcouponinfo['count'];
+
+            //获取商户券数量
+            $where = [
+                ['written_off','=',0],
+                ['uid','=',$uid],
+            ];
+            $make = app()->make(CouponStocksUserRepository::class);
+            $couponNum = $make->userNoWrittenOffCoupon($where);
+            $platcouponnum +=  $couponNum;
 
             if($risk['usecoupon'] < $platcouponnum){
                 $data = ['black'=>1,'wb_time'=>time()];
