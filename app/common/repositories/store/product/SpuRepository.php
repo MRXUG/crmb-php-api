@@ -132,7 +132,7 @@ class SpuRepository extends BaseRepository
      */
     public function getApiSearch($where, $page, $limit, $userInfo = null,$discountNum = 0)
     {
-        if (isset($where['keyword']) && !empty($where['keyword'])) {
+        if (isset($where['keyword']) && !empty($where['keyword']) && $where['keyword'] !== '') {
             if (preg_match('/^(\/@[1-9]{1}).*\*\//', $where['keyword'])) {
                 $command = app()->make(CopyCommand::class)->getMassage($where['keyword']);
                 if (!$command || in_array($command['type'], [30, 40])) return ['count' => 0, 'list' => []];
