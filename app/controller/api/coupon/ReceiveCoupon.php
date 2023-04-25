@@ -270,6 +270,9 @@ class ReceiveCoupon extends BaseController
         ];
 
         $platformCouponReceiveRepository->createUpdate($where, $data);
+
+        //已领取数量加1
+        \app\common\model\platform\PlatformCoupon::getDB()->where(['stock_id' => $stockId])->inc("received",1)->update();
     }
 
 
