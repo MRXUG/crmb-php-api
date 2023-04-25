@@ -768,8 +768,8 @@ class WechatTemplateMessageService
                 }
 
                 $thing10  = "无";
-                if (!empty($res['mark'])){
-                    $thing10 = $res['mark'];
+                if (!empty($res['mer_mark'])){
+                    $thing10 = $res['mer_mark'];
                 }
 
                 $data[] = [
