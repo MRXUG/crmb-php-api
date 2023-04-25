@@ -667,15 +667,19 @@ class WechatTemplateMessageService
                 $res = $refund_make->get($id);
                 if(!$res) return false;
                 $name = mb_substr($res['refundProduct'][0]['product']['cart_info']['product']['store_name'],0,10);
+                $thing13 = "无";
+                if (!empty($res->fail_message)){
+                    $thing13 = $res->fail_message;
+                }
                 $data[] = [
-                    'tempCode' => 'ORDER_REFUND_NOTICE',
+                    'tempCode' => 'REFUND_CONFORM_CODE',
                     'uid' => $res->uid,
                     'data' => [
                         'thing1' => '退款成功',
                         'thing2' => '「'.$name.'」等',
                         'character_string6' => $res->refund_order_sn,
                         'amount3' => $res->refund_price,
-                        'thing13' => $res->fail_message ?? '',
+                        'thing13' => $thing13,
                     ],
                     'link' => 'pages/users/refund/detail?id='.$id,
                     'color' => null
@@ -763,6 +767,11 @@ class WechatTemplateMessageService
                     $thing1 = "商家同意退款";
                 }
 
+                $thing10  = "无";
+                if (!empty($res['mer_mark'])){
+                    $thing10 = $res['mer_mark'];
+                }
+
                 $data[] = [
                     'tempCode' => 'REFUND_REVIEW_CODE',
                     'uid' => $res->uid,
@@ -771,7 +780,7 @@ class WechatTemplateMessageService
                         'thing5' => '「'.mb_substr($res['refundProduct'][0]['product']['cart_info']['product']['store_name'],0,15).'」',
                         'character_string7' => $res['refund_order_sn'],
                         'amount3' =>$res['refund_price'],
-                        'thing10' => $res['mark'],
+                        'thing10' => $thing10,
                     ],
                     'link' =>  rtrim(systemConfig('site_url'), '/').'/pages/users/refund/detail?id='.$id,
                     'color' => null
