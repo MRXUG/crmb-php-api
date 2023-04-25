@@ -667,6 +667,10 @@ class WechatTemplateMessageService
                 $res = $refund_make->get($id);
                 if(!$res) return false;
                 $name = mb_substr($res['refundProduct'][0]['product']['cart_info']['product']['store_name'],0,10);
+                $thing13 = "无";
+                if (!empty($res->fail_message)){
+                    $thing13 = $res->fail_message;
+                }
                 $data[] = [
                     'tempCode' => 'REFUND_CONFORM_CODE',
                     'uid' => $res->uid,
@@ -675,7 +679,7 @@ class WechatTemplateMessageService
                         'thing2' => '「'.$name.'」等',
                         'character_string6' => $res->refund_order_sn,
                         'amount3' => $res->refund_price,
-                        'thing13' => $res->fail_message ?? '',
+                        'thing13' => $thing13,
                     ],
                     'link' => 'pages/users/refund/detail?id='.$id,
                     'color' => null
