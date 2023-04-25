@@ -758,9 +758,9 @@ class WechatTemplateMessageService
                 if(!$res) return false;
                 $thing1 =  '';
                 if ($res['status'] == -1){
-                    $thing1 = "审核未通过";
+                    $thing1 = "商家拒绝退款";
                 }elseif ($res['status'] !=  -1 && $res['status'] !=  0){
-                    $thing1 = "审核通过";
+                    $thing1 = "商家同意退款";
                 }
 
                 $data[] = [
