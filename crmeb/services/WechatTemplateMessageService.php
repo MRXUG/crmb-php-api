@@ -672,8 +672,7 @@ class WechatTemplateMessageService
                     'uid' => $res->uid,
                     'data' => [
                         'thing1' => '退款成功',
-//                        'thing2' => '「'.$name.'」等',
-                        'thing2' => '「商品」等',
+                        'thing2' => '「'.$name.'」等',
                         'character_string6' => $res->refund_order_sn,
                         'amount3' => $res->refund_price,
                         'thing13' => $res->fail_message ?? '',
@@ -752,7 +751,8 @@ class WechatTemplateMessageService
                 if ($takeId) $make->updates($takeId,['status' => 1]);
                 break;
 
-                //退款审核通知
+
+            //退款审核通知
             case 'REFUND_REVIEW_CODE':
                 $res = $refund_make->get($id);
                 if(!$res) return false;
@@ -764,7 +764,7 @@ class WechatTemplateMessageService
                 }
 
                 $data[] = [
-                    'tempCode' => 'REFUND_CONFORM_CODE',
+                    'tempCode' => 'REFUND_REVIEW_CODE',
                     'uid' => $res->uid,
                     'data' => [
                         'thing1' => $thing1,
