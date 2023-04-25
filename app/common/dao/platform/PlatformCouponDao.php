@@ -49,7 +49,7 @@ class PlatformCouponDao extends BaseDao
 
         $model = $couponDao->getModelObj()
             ->where($where)
-            ->whereRaw("(end_at >= '{$endTime}' and start_at <= '{$endTime}') or (end_at >= '{$startTime}' and start_at <= '{$startTime}') or (end_at <= '{$startTime}' and start_at >= '{$startTime}')")
+            ->whereRaw("(end_at >= '{$endTime}' and start_at <= '{$endTime}') or (end_at >= '{$startTime}' and start_at <= '{$startTime}') or (end_at <= '{$endTime}' and start_at >= '{$startTime}')")
             ->group('discount_num')
             ->field($field)
             ->find();
