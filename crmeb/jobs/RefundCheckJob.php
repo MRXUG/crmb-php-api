@@ -91,6 +91,8 @@ class RefundCheckJob implements JobInterface
                 $orderDao = app()->make(StoreOrderDao::class);
                 $orderDao->updateOrderStatus($refundOrder->getAttr('order_id'), -1);
                 $refundOrderRep->refundAfter($refundOrder);
+
+                Queue::push(SendSmsJob::class, ['tempId' => 'REFUND_SUCCESSFULLY', 'id' => $refundOrder->getAttr('refund_order_id')]);
             });
         } catch (Exception|Throwable|ValueError $e) {
             Log::error("确认提款成功队列出错 id:{$data['refund_task_id']}");
