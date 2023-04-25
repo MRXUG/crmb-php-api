@@ -90,7 +90,7 @@ class Risk extends BaseController{
                 $data = ['black'=>1,'wb_time'=>time()];
                 $info = $this->userrepository->update($uid,$data);
 
-                if($info){
+                if($info && $risk['voidReceivedCoupon']){
                     $this->userrepository->cancelUserCoupon($uid);
                 }
                 UserBlackLog::getInstance()->insert([
@@ -115,7 +115,7 @@ class Risk extends BaseController{
                 $data = ['black'=>1,'wb_time'=>time()];
                 $info = $this->userrepository->update($uid,$data);
 
-                if($info){
+                if($info  && $risk['voidReceivedCoupon']){
 
                     $this->userrepository->cancelUserCoupon($uid);
                 }
@@ -168,7 +168,7 @@ class Risk extends BaseController{
                 $data = ['black'=>1,'wb_time'=>time()];
                 $info = $this->userrepository->update($uid,$data);
 
-                if($info){
+                if($info  && $risk['voidReceivedCoupon']){
                     $this->userrepository->cancelUserCoupon($uid);
                 }
                 UserBlackLog::getInstance()->insert([
@@ -193,7 +193,7 @@ class Risk extends BaseController{
                 $data = ['black'=>1,'wb_time'=>time()];
                 $info = $this->userrepository->update($uid,$data);
 
-                if($info){
+                if($info  && $risk['voidReceivedCoupon']){
                     $this->userrepository->cancelUserCoupon($uid);
                 }
                 UserBlackLog::getInstance()->insert([
