@@ -750,6 +750,33 @@ class WechatTemplateMessageService
                 }
                 if ($takeId) $make->updates($takeId,['status' => 1]);
                 break;
+
+
+            //退款审核通知
+            case 'REFUND_REVIEW_CODE':
+                $res = $refund_make->get($id);
+                if(!$res) return false;
+                $thing1 =  '';
+                if ($res['status'] == -1){
+                    $thing1 = "商家拒绝退款";
+                }elseif ($res['status'] !=  -1 && $res['status'] !=  0){
+                    $thing1 = "商家同意退款";
+                }
+
+                $data[] = [
+                    'tempCode' => 'REFUND_REVIEW_CODE',
+                    'uid' => $res->uid,
+                    'data' => [
+                        'thing1' => $thing1,
+                        'thing5' => '「'.mb_substr($res['refundProduct'][0]['product']['cart_info']['product']['store_name'],0,15).'」',
+                        'character_string7' => $res['refund_order_sn'],
+                        'amount3' =>$res['refund_price'],
+                        'thing10' => $res['mark'],
+                    ],
+                    'link' =>  rtrim(systemConfig('site_url'), '/').'/pages/users/refund/detail?id='.$id,
+                    'color' => null
+                ];
+                break;
             default:
                 return false;
                 break;

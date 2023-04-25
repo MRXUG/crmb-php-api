@@ -664,7 +664,7 @@ Route::group('api/', function () {
         Route::post('operate','Black/Operate');
         Route::post('setlog','Black/setLog');
         Route::get('getlog','Black/getLog');
-        Route::post('delblack','Black/delBlack');
+        Route::any('delblack','Black/delBlack');
     })->prefix('api.black.');
 
     //风控
