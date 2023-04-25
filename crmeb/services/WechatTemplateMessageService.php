@@ -672,7 +672,8 @@ class WechatTemplateMessageService
                     'uid' => $res->uid,
                     'data' => [
                         'thing1' => '退款成功',
-                        'thing2' => '「'.$name.'」等',
+//                        'thing2' => '「'.$name.'」等',
+                        'thing2' => '「商品」等',
                         'character_string6' => $res->refund_order_sn,
                         'amount3' => $res->refund_price,
                         'thing13' => $res->fail_message ?? '',
