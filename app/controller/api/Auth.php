@@ -57,6 +57,7 @@ class Auth extends BaseController
 {
     public function test()
     {
+        
     }
 
     /**
