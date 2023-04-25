@@ -42,7 +42,11 @@ class ParameterTemplate extends BaseController
     public function lst()
     {
         [$page, $limit] = $this->getPage();
-        $where = $this->request->params(['template_name','cate_id','mer_name','mer_id']);
+        $where = $this->request->params(['template_name','cate_ids','mer_name','mer_id']);
+        if (isset($where['cate_ids']) && is_array($where['cate_ids'])){
+            $where['cate_id'] = $where['cate_ids'][count($where['cate_ids']) - 1];
+            unset($where['cate_ids']);
+        }
         $where['is_mer'] = $this->request->param('is_mer',1);
         if ($merId = $this->request->merId()) {
             $where['mer_id'] = $merId;
