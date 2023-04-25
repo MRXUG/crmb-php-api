@@ -58,8 +58,7 @@ class CanceUserCouponJob implements JobInterface
                         ['written_off', '=', 0],
                         ['is_del', '=', 0]
                     ])->select();
-                
-                dd(111, $couponStocksUserDate);
+
                 foreach ($couponStocksUserDate as $item) {
                     $config = [];
 
