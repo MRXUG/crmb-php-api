@@ -67,7 +67,12 @@ class Black extends BaseController{
 
                         $data = ['black'=>1,'wb_time'=>time()];
                         $info = $this->userRepository->update($uid,$data);
-                        if($info){
+
+                        //获取风控设置
+                        $riskModel = app()->make(RiskRepository::class);
+                        $risk = $riskModel->getRisk();
+
+                        if($info && $risk->voidReceivedCoupon){
                             //优惠券失效
                             $this->userRepository->cancelUserCoupon($uid);
                         }

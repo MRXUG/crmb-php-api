@@ -29,6 +29,7 @@ use app\common\repositories\user\UserRepository;
 use app\common\repositories\wechat\WechatNewsRepository;
 use app\common\repositories\wechat\WechatUserRepository;
 use app\common\repositories\black\UserBlackLogRepository;
+use app\common\repositories\risk\RiskRepository;
 use app\validate\admin\UserNowMoneyValidate;
 use app\validate\admin\UserValidate;
 use crmeb\services\ExcelService;
@@ -618,6 +619,9 @@ class User extends BaseController
             ];
 
             if($this->user){
+                //获取设置的参数
+                $riskRepository = $make = app()->make(RiskRepository::class);
+                $risk = $riskRepository->getRisk();
 
                 switch($operate){
                     case 'add':
@@ -625,7 +629,7 @@ class User extends BaseController
                         $data = ['black'=>1,'wb_time'=>time()];
                         $info = $this->repository->update($uid,$data);
 
-                        if($info){
+                        if($info && $risk['voidReceivedCoupon']){
                             //优惠券失效
                             $this->repository->cancelUserCoupon($uid);
                         }
