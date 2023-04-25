@@ -771,7 +771,7 @@ class WechatTemplateMessageService
                         'thing5' => '「'.mb_substr($res['refundProduct'][0]['product']['cart_info']['product']['store_name'],0,15).'」',
                         'character_string7' => $res['refund_order_sn'],
                         'amount3' =>$res['refund_price'],
-                        'thing10' => $res['mark']??" ",
+                        'thing10' => $res['mark']??"无",
                     ],
                     'link' =>  rtrim(systemConfig('site_url'), '/').'/pages/users/refund/detail?id='.$id,
                     'color' => null
