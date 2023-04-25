@@ -31,7 +31,6 @@ use think\App;
 use think\facade\Db;
 use think\exception\ValidateException;
 use app\common\model\store\order\StoreOrder as StoreOrderModel;
-use think\facade\Db;
 
 
 /**
@@ -271,16 +270,6 @@ class StoreOrder extends BaseController
         if (!empty($userBindMer) && strtotime($userBindMer['endtime']) <= $nowUnixTime) {
             // 执行让利逻辑
         }
-
-        $nowUnixTime = time();
-        $userBindMer = Db::name('stock_merchant_user')->where('user_id', $this->request->uid())
-            ->order('id desc')
-            ->limit(1)
-            ->find();
-        if (!empty($userBindMer) && strtotime($userBindMer['endtime']) <= $nowUnixTime) {
-            // 执行让利逻辑
-        }
-        dd("1111". $groupOrder);
 
         if ($groupOrder['pay_price'] == 0) {
             return app('json')->status('error', "支付金额不能为0", ['order_id' => $groupOrder->group_order_id]);
