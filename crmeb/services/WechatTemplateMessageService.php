@@ -668,7 +668,7 @@ class WechatTemplateMessageService
                 if(!$res) return false;
                 $name = mb_substr($res['refundProduct'][0]['product']['cart_info']['product']['store_name'],0,10);
                 $data[] = [
-                    'tempCode' => 'ORDER_REFUND_NOTICE',
+                    'tempCode' => 'REFUND_CONFORM_CODE',
                     'uid' => $res->uid,
                     'data' => [
                         'thing1' => '退款成功',
