@@ -763,6 +763,11 @@ class WechatTemplateMessageService
                     $thing1 = "商家同意退款";
                 }
 
+                $thing10  = "无";
+                if (!empty($res['mark'])){
+                    $thing10 = $res['mark'];
+                }
+
                 $data[] = [
                     'tempCode' => 'REFUND_REVIEW_CODE',
                     'uid' => $res->uid,
@@ -771,7 +776,7 @@ class WechatTemplateMessageService
                         'thing5' => '「'.mb_substr($res['refundProduct'][0]['product']['cart_info']['product']['store_name'],0,15).'」',
                         'character_string7' => $res['refund_order_sn'],
                         'amount3' =>$res['refund_price'],
-                        'thing10' => $res['mark']??"无",
+                        'thing10' => $thing10,
                     ],
                     'link' =>  rtrim(systemConfig('site_url'), '/').'/pages/users/refund/detail?id='.$id,
                     'color' => null
