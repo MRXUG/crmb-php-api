@@ -15,11 +15,13 @@ namespace app\controller\merchant\store\order;
 use app\common\repositories\store\ExcelRepository;
 use app\common\repositories\store\order\MerchantReconciliationRepository;
 use app\common\repositories\store\order\StoreRefundStatusRepository;
+use crmeb\jobs\SendSmsJob;
 use crmeb\services\ExcelService;
 use think\App;
 use crmeb\basic\BaseController;
 use app\common\repositories\store\order\StoreRefundOrderRepository as repository;
 use think\facade\Db;
+use think\facade\Queue;
 
 class RefundOrder extends BaseController
 {
@@ -92,6 +94,8 @@ class RefundOrder extends BaseController
             $data['fail_message'] = $fail_message;
             $this->repository->refuse($id,$data);
         }
+
+        Queue::push(SendSmsJob::class, ['tempId' => 'REFUND_REVIEW_CODE', 'id' => $id]);
         return app('json')->success('审核成功');
     }
 

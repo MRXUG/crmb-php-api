@@ -42,13 +42,14 @@ class PlatformCouponDao extends BaseDao
             ['is_del', '=', 0],
             ['type', '=', 1],
             ['status', 'in', [1, 2]],
-            ['end_at', '>', $endTime],
-            ['start_at', '<', $startTime],
+//            ['end_at', '>', $endTime],
+//            ['start_at', '<', $startTime],
             ['discount_num', '=', $discount_num]
         ];
 
         $model = $couponDao->getModelObj()
             ->where($where)
+            ->whereRaw("(end_at >= '{$endTime}' and start_at <= '{$endTime}') or (end_at >= '{$startTime}' and start_at <= '{$startTime}') or (end_at <= '{$endTime}' and start_at >= '{$startTime}')")
             ->group('discount_num')
             ->field($field)
             ->find();

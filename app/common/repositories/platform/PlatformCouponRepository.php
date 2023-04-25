@@ -719,7 +719,7 @@ where ab.platform_coupon_id = a.platform_coupon_id
 
         if (!$coupon) return [];
 
-        $nowUnixTime = date("Y-m-d H:i:s");
+        $nowUnixTime = time();
 
         $arr = [
             'platform_coupon_id' => $platformCouponId,
@@ -747,6 +747,9 @@ where ab.platform_coupon_id = a.platform_coupon_id
             $startTime = strtotime($coupon->getAttr('receive_start_time'));
             $endTime = strtotime($coupon->getAttr('receive_end_time'));
             if ($startTime > $nowUnixTime) {
+                if ($arr['status'] == 0) {
+                    return '待发布';
+                }
                 $arr['status'] = 3;
                 return '活动未开始';
             }
