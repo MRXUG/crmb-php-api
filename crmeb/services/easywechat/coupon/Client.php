@@ -6,12 +6,14 @@
 namespace crmeb\services\easywechat\coupon;
 
 use app\common\model\coupon\CouponStocks;
+use app\common\model\platform\PlatformCoupon;
 use app\common\repositories\coupon\BuildCouponRepository;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\coupon\CouponStocksUserRepository;
 use crmeb\exceptions\WechatException;
 use crmeb\services\easywechat\BaseClient;
 use think\facade\Log;
+use think\helper\Str;
 
 /**
  * 商家券
@@ -230,6 +232,40 @@ class Client extends BaseClient
     }
 
     /**
+     * 创建平台优惠券
+     *
+     * @param PlatformCoupon $coupon
+     * @param array $merchantConfig
+     * @return array
+     */
+    public function buildPlatformCoupon(PlatformCoupon $coupon, array $merchantConfig): array
+    {
+        $params = $this->formatBuildPlatformCoupon($coupon, $merchantConfig);
+
+        $result = $this->request('/v3/marketing/busifavor/stocks', 'POST', [
+            'sign_body' => json_encode($params)
+        ]);
+        if (!empty($result['code'])) {
+            throw new WechatException($this->wechatError($result));
+        }
+        return compact('params', 'result');
+    }
+
+
+    public function expiredCoupon(string $couponCode, string $stockId)
+    {
+        $deactivate_request_no = 'PC' . Str::random(30);
+
+        return $this->request('/v3/marketing/busifavor/coupons/deactivate', 'POST', [
+            'sign_body' => json_encode([
+                'coupon_code' => $couponCode,
+                'stock_id' => $stockId,
+                'deactivate_request_no' => $deactivate_request_no
+            ])
+        ]);
+    }
+
+    /**
      * 生成发券签名
      *
      * @param array $couponList
@@ -291,6 +327,65 @@ class Client extends BaseClient
     }
 
     /**
+     * 格式化平台优惠券参数
+     *
+     * @param PlatformCoupon $coupon
+     * @param array $merchantConfig
+     * @return array
+     */
+    private function formatBuildPlatformCoupon(PlatformCoupon $coupon, array $merchantConfig): array
+    {
+        $appId = $merchantConfig['app_id']; // 随机一个健康的小程序Id
+        $mchId = $merchantConfig['payment']['merchant_id']; // 随机获取一个健康商户
+        # 防止最小值创建失败
+        $getMaxCoupon = $coupon->getAttr('is_limit') == 1 ? $coupon->getAttr('limit_number') : 1000000000;
+
+        $miniAppPath = "/pages/columnGoods/goods_coupon_list/index?coupon_id={$coupon->getAttr('platform_coupon_id')}&type=3";
+
+        return [
+            'out_request_no'   => $this->generateOutRequestNo($appId, $mchId),
+            'belong_merchant'  => $mchId,
+            'goods_name'       => '部分商品可用',
+            'stock_name'       => $coupon->getAttr('coupon_name'),
+            'stock_type'       => CouponStocks::STOCK_TYPE_REDUCE,
+            'coupon_code_mode' => CouponStocks::WECHATPAY_MODE,
+            'coupon_use_rule'      => [
+                'use_method'            => CouponStocks::COUPON_USE_ONLINE,
+                'mini_programs_appid'   => $appId,
+                'mini_programs_path'    => $miniAppPath,
+                'coupon_available_time' => [
+                    'available_begin_time'        => date(DATE_RFC3339, strtotime($coupon->getAttr('receive_start_time'))),
+                    'available_end_time'          => date(DATE_RFC3339, strtotime($coupon->getAttr('receive_end_time'))),
+                    'available_day_after_receive' => (int) $coupon->getAttr('effective_day_number'),
+                ],
+                'fixed_normal_coupon' => [
+                    'discount_amount'     => (int)(bcmul($coupon->getAttr('discount_num'), 100)), // 参数使用的单位是：元
+                    'transaction_minimum' => empty($coupon->getAttr('threshold')) ? (int)(bcmul($coupon->getAttr('discount_num'), 100)) +1 : (int)(bcmul($coupon->getAttr('threshold'),  100)),
+                ],
+            ],
+            'stock_send_rule' => [
+                'max_coupons'          => $getMaxCoupon,
+                'max_coupons_by_day'   => $getMaxCoupon,
+                'max_coupons_per_user' => $coupon->getAttr('is_user_limit') == 1 ? $coupon->getAttr('user_limit_number') : 100,
+            ],
+            'custom_entrance' => [
+                'mini_programs_info' => [
+                    'entrance_words'      => '关闭提醒',
+                    'guiding_words'       => '投诉商家',
+                    'mini_programs_path'  => '/pages/users/feedback/index',
+                    'mini_programs_appid' => $appId,
+                ],
+            ],
+            'display_pattern_info' => [
+                'merchant_logo_url' => 'https://wxpaylogo.qpic.cn/wxpaylogo/PiajxSqBRaEIPAeia7ImvtspSPygfJa3Xic4HoWt1r42fuEAYgABZ2j3A/0'
+            ],
+            'notify_config' => [
+                'notify_appid' => $appId, // 用于回调通知时，计算返回操作用户的openid（诸如领券用户），支持小程序or公众号的APPID
+            ],
+        ];
+    }
+
+    /**
      * 格式化建券参数
      *
      * @param array $params
@@ -342,11 +437,14 @@ class Client extends BaseClient
                 'mini_programs_info' => [
                     'entrance_words'      => '关闭提醒',
                     'guiding_words'       => '投诉商家',
-                    'mini_programs_path'  => "/pages/columnGoods/goods_coupon_list/index?type={$params['type']}&mer_id={$params['mer_id']}", //小程序首页
+                    'mini_programs_path'  => '/pages/users/feedback/index', //小程序首页
 //                    'mini_programs_path'  => 'pages/columnGoods/goods_coupon_list/index', //小程序首页
                     'mini_programs_appid' => $appId,
                 ],
 //                'appid' => 'wxee403b4ddd3978bd',  // TODO 公众号appid，提示与商户没有关联
+            ],
+            'display_pattern_info' => [
+                'merchant_logo_url' => 'https://wxpaylogo.qpic.cn/wxpaylogo/PiajxSqBRaEIPAeia7ImvtspSPygfJa3Xic4HoWt1r42fuEAYgABZ2j3A/0'
             ],
             'notify_config' => [
                 'notify_appid' => $appId, // 用于回调通知时，计算返回操作用户的openid（诸如领券用户），支持小程序or公众号的APPID

@@ -43,24 +43,25 @@ class EstimatePlatformCouponProduct implements JobInterface
         # 循环查取数据
         $productCount = 0;
         foreach ($productIdArrChunk as $item) {
-            $productCount += Product::getInstance()
+            $productCount += Product::getInstance()->alias('a')
+                ->whereRaw("(select max(price) from eb_store_product_attr_value where product_id = a.product_id) > {$data['threshold']}")
                 ->when($data['use_type'] == 2, function (BaseQuery $query) use ($data) {
-                    $query->whereIn('cate_id', $data['scope_id_arr']);
+                    $query->whereIn('a.cate_id', $data['scope_id_arr']);
                 })
                 ->when($data['use_type'] == 3, function (BaseQuery $query) use ($data) {
-                    $query->whereIn('mer_id', $data['scope_id_arr']);
+                    $query->whereIn('a.mer_id', $data['scope_id_arr']);
                 })
                 ->when($data['use_type'] == 4, function (BaseQuery $query) use ($data) {
                     $whereInStr = implode(',', $data['scope_id_arr']);
-                    $query->whereIn('mer_id', Db::raw(<<<SQL
+                    $query->whereIn('a.mer_id', Db::raw(<<<SQL
                         select mer_id
                         from eb_merchant a
                             left join eb_merchant_category b on a.category_id = b.merchant_category_id
                             where b.merchant_category_id in ($whereInStr)
                     SQL));
                 })
-                ->whereIn('product_id', $item)
-                ->count('product_id') ?? 0;
+                ->whereIn('a.product_id', $item)
+                ->count('a.product_id') ?? 0;
         }
 
         Cache::set("EstimatePlatformCouponProduct:{$data['jobNumber']}", [

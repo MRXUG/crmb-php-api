@@ -79,4 +79,9 @@ class FeedbackDao extends BaseDao
     {
         return $this->getModel()::getDB()->where($this->getPk(), $id)->where('is_del', 0)->count() > 0;
     }
+
+    //获取30天内反馈数量 
+    public function get30day(int $uid, $start, $end){
+        return Feedback::getDB()->whereBetween('create_time',[$start,$end])->where('uid',$uid)->count();
+    }
 }

@@ -18,6 +18,16 @@ R::group(function () {
         R::post('createEstimateGoods', 'PlatformCoupon/createEstimateGoods'); # 平台优惠券创建时预估数据
         R::get('getEstimateGoodsResult/:resultCode', 'PlatformCoupon/getEstimateGoodsResult'); # 获取预估结果数据
         R::get('getCouponOne/:discountNum', 'PlatformCoupon/getCouponOne'); # 选择优惠券数据
+        R::post('updateStatus/:id', 'PlatformCoupon/updateStatus'); # 修改优惠券状态
+        R::get('getCouponStatusCount', 'PlatformCoupon/getCouponStatusCount'); # 获取优惠券状态个数
+        R::get('getEditCouponProductInfo/:id', 'PlatformCoupon/getEditCouponProductInfo'); # 获取编辑优惠券商品基本信息
+        R::get('getEditCouponProductList/:id', 'PlatformCoupon/getEditCouponProductList'); # 获取编辑优惠券商品列表
+        R::post('updateProduct/:productId', 'PlatformCoupon/updateProduct'); # 编辑商品信息
+        R::post('scopeCount', 'PlatformCoupon/scopeCount'); # 范围计数
+        R::get('getEditPlatformCouponData/:id', 'PlatformCoupon/getEditPlatformCouponData'); # 获取编辑平台优惠券数据
+        R::post('platformCouponStatusUpdate/:id', 'PlatformCoupon/platformCouponStatusUpdate'); # 平台优惠券状态修改
+        R::get('receiveLog/[:id]', 'PlatformCoupon/receiveLog'); # 平台优惠券状态修改
+        R::get('refresh', 'PlatformCoupon/refresh'); # 刷新平台优惠券包含商品
 
     })->prefix('admin.coupon.platform.')->option([
         '_auth' => true,

@@ -78,7 +78,7 @@ class WechatTemplateMessageService
     public function subscribeSendTemplate($data)
     {
         event('wechat.subscribeTemplate.before',compact('data'));
-        $res = $this->subscribeTemplateMessage($data['tempCode'],$data['id']);
+        $res = $this->subscribeTemplateMessage($data);
         if(!$res || !is_array($res))return true;
 
         foreach($res as $item){
@@ -623,7 +623,8 @@ class WechatTemplateMessageService
                 if(!$res) return false;
                 $name = mb_substr($res['orderProduct'][0]['cart_info']['product']['store_name'],0,10);
                 $data[] = [
-                    'tempCode' => 'ORDER_POSTAGE_SUCCESS',
+//                    'tempCode' => 'ORDER_POSTAGE_SUCCESS',
+                    'tempCode' => 'DELIVER_GOODS_CODE',
                     'uid' => $res->uid,
                     /**
                     快递单号{{character_string2.DATA}}

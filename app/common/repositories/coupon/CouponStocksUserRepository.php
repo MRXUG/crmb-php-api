@@ -4,13 +4,12 @@ namespace app\common\repositories\coupon;
 
 use app\common\dao\coupon\CouponStocksUserDao;
 use app\common\dao\coupon\StockProductDao;
-use app\common\model\coupon\CouponStocks;
 use app\common\repositories\BaseRepository;
-use app\common\repositories\store\coupon\StoreCouponProductRepository;
 use app\common\repositories\user\UserRepository;
 use app\common\repositories\wechat\WechatUserRepository;
 use crmeb\services\MerchantCouponService;
 use think\exception\ValidateException;
+use think\facade\Db;
 use think\facade\Log;
 
 
@@ -34,6 +33,22 @@ class CouponStocksUserRepository extends BaseRepository
             if (isset($v["stockDetail"]["transaction_minimum"]) && isset($v["stockDetail"]["discount_num"]) && ($v["stockDetail"]["transaction_minimum"] == 0)){
                 $list[$k]["stockDetail"]["transaction_minimum"] = $v["stockDetail"]["discount_num"]+0.01;
             }
+        }
+
+        return compact('count', 'list');
+    }
+
+    public function list2($page, $limit, $where, $merId): array
+    {
+        $query = $this->dao->search2($merId, $where);
+        $count = $query->count();
+        $list = $query->page($page, 10000)->select();
+        foreach ($list as $k=>$v){
+            if (empty($list[$k]["stockDetail"])) continue;
+            if (isset($v["stockDetail"]["transaction_minimum"]) && isset($v["stockDetail"]["discount_num"]) && ($v["stockDetail"]["transaction_minimum"] == 0)){
+                $list[$k]["stockDetail"]["transaction_minimum"] = $v["stockDetail"]["discount_num"]+0.01;
+            }
+            $list[$k]["productIds"] = Db::name('stock_goods')->where('coupon_stocks_id', $list[$k]["stockDetail"]["id"])->column('product_id');
         }
 
         return compact('count', 'list');
@@ -179,7 +194,7 @@ class CouponStocksUserRepository extends BaseRepository
         $totalReceivedCurrentDay = $receivedCouponModel->where('create_time', date('Y-m-d H:i:s'))->count();
         // 该批次该用户总领券数量
         $totalReceivedByUser = $receivedCouponModel1->where('uid', $uid)->count();
-        
+
         $sendNumByUser = $stockIdInfo['max_coupons_per_user'] - $totalReceivedByUser;
         if ($sendNumByUser < 1) {
             // 当前用户领券达到上限
@@ -305,7 +320,7 @@ class CouponStocksUserRepository extends BaseRepository
         $couponList = $this->dao->getModelObj()
             ->alias('a')
             ->leftJoin('eb_coupon_stocks b', 'a.stock_id = b.stock_id')
-            ->field(['a.*', 'b.discount_num'])
+            ->field(['a.*', 'b.discount_num', 'b.transaction_minimum'])
             ->where([
                 ['a.written_off', '=', 0],
                 ['b.is_del', '=', 0],
@@ -319,7 +334,15 @@ class CouponStocksUserRepository extends BaseRepository
 //        dd($couponList);
         # 删除掉不符合规则的优惠券
         foreach ($couponList as $k => $v) {
-            if ($v['discount_num'] >= $orderPrice) unset($couponList[$k]);
+            if ($v['discount_num'] >= $orderPrice) {
+                unset($couponList[$k]);
+            } elseif ($v["transaction_minimum"] == 0 && $v['discount_num'] >= $orderPrice) {
+                unset($couponList[$k]);
+            } elseif ($v["transaction_minimum"] > 0 && $v['transaction_minimum'] > $orderPrice) {
+                unset($couponList[$k]);
+            };
+            // if ($v["transaction_minimum"] == 0 && $v['discount_num'] >= $orderPrice) unset($couponList[$k]);
+            // if ($v["transaction_minimum"] > 0 && $v['transaction_minimum'] > $orderPrice) unset($couponList[$k]);
         }
 
         $stockIdList = array_column($couponList, 'stock_id');
@@ -328,13 +351,13 @@ class CouponStocksUserRepository extends BaseRepository
          */
         $couponStockRepository = app()->make(CouponStocksRepository::class);
         $whereStock = [
-//            'status' => CouponStocks::STATUS_ING,
+            // 'status' => CouponStocks::STATUS_ING,
             ['mer_id', '=', $merId],
         ];
         $stockIdList = array_unique($stockIdList);
         $field = 'type, stock_id, scope, discount_num, stock_name, transaction_minimum';
         $stockListCollect = $couponStockRepository->selectPageWhere($whereStock, $stockIdList, 1, 100, $field);
-//        dd($stockListCollect);
+        // dd($stockListCollect);
         $stockList = $stockListCollect->toArray();
         # 优惠券新逻辑限制
         foreach ($stockList as $k => &$item) {
@@ -404,5 +427,9 @@ class CouponStocksUserRepository extends BaseRepository
     public function getValue($where, $filed)
     {
         return $this->dao->getValue($where, $filed);
+    }
+
+    public function userNoWrittenOffCoupon($where){
+        return $this->dao->getWhereCount($where);
     }
 }

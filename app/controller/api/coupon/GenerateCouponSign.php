@@ -35,6 +35,26 @@ class GenerateCouponSign extends BaseController
         return app('json')->success($data);
     }
 
+
+    /**
+     * 领券签名
+     *
+     * @return mixed
+     */
+    public function generatePlatformCouponSign(SendCouponValidate $sendCouponValidate)
+    {
+        /**
+         * 生成券签名
+         */
+        $params = $this->request->post();
+        $sendCouponValidate->check($params);
+        $list = $sendCouponValidate->validateReceivePlatformCoupon($params['stock_list'], $this->request->uid());
+
+        $data = MerchantCouponService::create(MerchantCouponService::SEND_COUPON, [], $merchantConfig)->coupon()->generateSign($list, $merchantConfig);
+
+        return app('json')->success($data);
+    }
+
     public function generateCouponSign2(SendCouponValidate $sendCouponValidate, CouponStocksUserDao $CouponStocksUserDao)
     {
         $params = $this->request->post();

@@ -60,10 +60,11 @@ class StoreProduct extends BaseController
     public function lst()
     {
         [$page, $limit] = $this->getPage();
-        $where = $this->request->params(['cate_id', 'keyword', ['type', 1], 'mer_cate_id', 'pid','store_name','is_trader','us_status','product_id','star','sys_labels','hot_type', 'merchant_category_id']);
+        $where = $this->request->params(['cate_id', 'keyword', ['type', 1], 'mer_cate_id', 'pid','store_name','is_trader','us_status','product_id','star','sys_labels','hot_type', 'merchant_category_id','discount_num']);
         $mer_id = $this->request->param('mer_id','');
         $merId = $mer_id ? $mer_id : null;
         $where['is_gift_bag'] = 0;
+        $where['MerStatus'] = 1;
         $_where = $this->repository->switchType($where['type'], null,0);
         unset($_where['star']);
         $where = array_merge($where, $_where);

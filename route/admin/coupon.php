@@ -115,6 +115,11 @@ Route::group(function () {
         ]
     ]);
 
+    Route::group('coupon/', function () {
+        Route::post('settingRisks', 'admin.coupon.CouponConfig/settingRisks');
+        Route::post('getCouponConfig', 'admin.coupon.CouponConfig/getCouponConfig');
+    });
+
 })->middleware(AllowOriginMiddleware::class)
     ->middleware(AdminTokenMiddleware::class, true)
     ->middleware(AdminAuthMiddleware::class)

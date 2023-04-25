@@ -600,6 +600,11 @@ class User extends BaseController
         $uid = $this->request->param('uid');
         if($uid){
             $this->user = $this->repository->get($uid);
+
+            if(!$this->user){
+                return app('json')->fail('参数错误，用户不存在!');
+            }
+
             //判断是否白名单
             if($this->user->white){
                 return app('json')->fail('白名单用户不可以加入黑名单');
@@ -611,45 +616,52 @@ class User extends BaseController
                 'type' => 2,
                 'operate' => 1,
             ];
-  
+
             if($this->user){
 
                 switch($operate){
                     case 'add':
                         //拉入黑名单
                         $data = ['black'=>1,'wb_time'=>time()];
-                        $this->repository->update($uid,$data);
+                        $info = $this->repository->update($uid,$data);
+
+                        if($info){
+                            //优惠券失效
+                            $this->repository->cancelUserCoupon($uid);
+                        }
                         //记录日志
                         $this->setBlackLog($log);
-    
+
                         return app('json')->success('黑名单设置成功');
                         break;
                     case 'del':
                         //移除黑名单
                         $data = ['black'=>0,'wb_time'=>time()];
                         $this->repository->update($uid,$data);
-                        
+
                         //记录日志
                         $log['operate'] = 0;
                         $this->setBlackLog($log);
-                        
+
                         return app('json')->success('黑名单移除成功');
                         break;
                     default:
-                        
+
                         [$page, $limit] = $this->getPage();
                         $where = [
                             'black' => 1
                         ];
                         return app('json')->success($this->repository->getPulbicLst($where, $page, $limit));
                 }
+            }else{
+                return app('json')->fail('请填写已存在用户ID');
             }
         }else{
             return app('json')->fail('参数错误');
         }
     }
-    
-    
+
+
     /**
      * 黑名单操作记录平台调用
      * $type 变更形式1系统判定2人工添加3用户主动
@@ -665,7 +677,7 @@ class User extends BaseController
                 'create_time' => time()
             ];
             $info = app()->make(UserBlackLogRepository::class)->create($arr);
-            
+
             return app('json')->success('记录成功');
         }else{
             return app('json')->fail('参数错误');
@@ -690,9 +702,9 @@ class User extends BaseController
                 'create_time' => time()
             ];
             $info = app()->make(UserBlackLogRepository::class)->create($arr);
-            
+
             return app('json')->success('记录成功');
-        
+
         }else{
             return app('json')->fail('参数错误');
         }
@@ -718,21 +730,36 @@ class User extends BaseController
         $uid = $this->request->param('uid');
         if($uid > 0){
             $this->user = $this->repository->get($uid);
-            
+
+            if(!$this->user){
+                return app('json')->fail('请输入正确用户ID');
+            }
+
             $operate = $this->request->param('operate');
             if($operate == 'del'){
                 //移出白名单
                 $data = ['white'=>0,'wb_time'=>time()];
                 $this->repository->update($uid,$data);
-                
+
                 return app('json')->success('移出白名单成功');
             }else{
+                //监测黑名单
+                if($this->user->black == 1){
+                    return app('json')->fail('黑名单用户无法加入白名单');
+                }
+
+                if($this->user->white == 1){
+                    return app('json')->fail('用户已经加入白名单，不能重复加入');
+                }
+
                 //加入白名单
                 $data = ['white'=>1,'wb_time'=>time()];
                 $this->repository->update($uid,$data);
-                
+
                 return app('json')->success('白名单设置成功');
             }
+        }else{
+            return app('json')->fail('请输入正确用户ID');
         }
     }
 
@@ -745,7 +772,7 @@ class User extends BaseController
         $where = [
             'white' => 1
         ];
-        
+
         if($this->request->has('uid')){
             $where['uid'] = intval($this->request->param('uid'));
         }

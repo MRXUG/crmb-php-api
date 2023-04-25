@@ -29,6 +29,12 @@ class CouponStocksUserDao extends BaseDao
             });
         }
 
+        if (isset($where['type']) && $where['type'] != ''){
+            $query->hasWhere('stockDetail', function ($query) use ($where) {
+                $query->where('type', '=', $where['type']);
+            });
+        }
+
         if (isset($where['nickname']) && $where['nickname'] != ''){
             $query->hasWhere("userDetail",function ($query)use ($where){
                 $query->where('nickname', 'LIKE', "%{$where['nickname']}%");
@@ -39,9 +45,9 @@ class CouponStocksUserDao extends BaseDao
         $query->when(isset($where['written_off']) && $where['written_off'] !== '', function ($query) use ($where) {
             $query->where('written_off', (int)$where['written_off']);
         })
-//            ->when(isset($where['stock_id']) && $where['stock_id'] !== '', function ($query) use ($where) {
-//                $query->where('stockDetail.stock_id', (int)$where['stock_id']);
-//            })
+            // ->when(isset($where['stock_id']) && $where['stock_id'] !== '', function ($query) use ($where) {
+            //     $query->where('stockDetail.stock_id', (int)$where['stock_id']);
+            // })
             ->when(isset($where['coupon_user_id']) && $where['coupon_user_id'] !== '', function ($query) use ($where) {
                 $query->where('coupon_user_id', (int)$where['coupon_user_id']);
             })
@@ -58,6 +64,64 @@ class CouponStocksUserDao extends BaseDao
                 $query->where('CouponStocksUser.start_at', '<=', $where['time'])
                     ->where('CouponStocksUser.end_at', '>', $where['time']);
             })->when(isset($where['coupon_code']) && $where['coupon_code'], function ($query) use ($where) {
+                $query->where('CouponStocksUser.coupon_code', '=', $where['coupon_code']);
+            })->when(isset($where['stock_id']) && $where['stock_id'], function ($query) use ($where) {
+                $query->where('CouponStocksUser.stock_id', '=', $where['stock_id']);
+            })->when(isset($where['status']) && is_numeric($where['status']), function ($query) use ($where) {
+                if (intval($where['status']) === 1) $query->where('written_off', $where['status']);
+                if (intval($where['status']) === 0) $query->where('written_off', $where['status']);
+                if (intval($where['status']) === 2) {
+                    $query->where('CouponStocksUser.end_at', '<',date("Y-m-d H:i:s"));
+                }
+            })
+            ->where('CouponStocksUser.is_del', WxAppletModel::IS_DEL_NO);
+
+        return $query->order('sss DESC');
+    }
+
+    public function search2(?int $merId, array $where)
+    {
+        $query = ($this->getModel()::getDB())->alias("CouponStocksUser");
+        $query->with(['stockDetail',"userDetail"]);
+
+        if (isset($where['stock_name']) && $where['stock_name'] != ''){
+            $query->hasWhere('stockDetail', function ($query) use ($where) {
+                $query->where('stock_name', 'LIKE', "%{$where['stock_name']}%");
+            });
+        }
+
+        if (isset($where['type']) && $where['type'] != ''){
+            $query->hasWhere('stockDetail', function ($query) use ($where) {
+                $query->where('type', '=', $where['type']);
+            });
+        }
+
+        if (isset($where['nickname']) && $where['nickname'] != ''){
+            $query->hasWhere("userDetail",function ($query)use ($where){
+                $query->where('nickname', 'LIKE', "%{$where['nickname']}%");
+            });
+        }
+
+
+        $query->when(isset($where['written_off']) && $where['written_off'] !== '', function ($query) use ($where) {
+            $query->where('written_off', (int)$where['written_off']);
+        })
+            // ->when(isset($where['stock_id']) && $where['stock_id'] !== '', function ($query) use ($where) {
+            //     $query->where('stockDetail.stock_id', (int)$where['stock_id']);
+            // })
+            ->when(isset($where['coupon_user_id']) && $where['coupon_user_id'] !== '', function ($query) use ($where) {
+                $query->where('coupon_user_id', (int)$where['coupon_user_id']);
+            })
+            ->when($merId > 0, function ($query) use ($merId) {
+                $query->where('CouponStocksUser.mer_id', $merId); //建券商户id
+            })
+            ->when(isset($where['uid']) && $where['uid'] > 0, function ($query) use ($where) {
+                $query->where('uid', $where['uid']);
+            })
+            ->when(isset($where['mch_id']) && $where['mch_id'] > 0, function ($query) use ($where) {
+                $query->where('CouponStocksUser.mch_id', (int)$where['mch_id']); //发券商户号
+            })
+            ->when(isset($where['coupon_code']) && $where['coupon_code'], function ($query) use ($where) {
                 $query->where('CouponStocksUser.coupon_code', '=', $where['coupon_code']);
             })->when(isset($where['stock_id']) && $where['stock_id'], function ($query) use ($where) {
                 $query->where('CouponStocksUser.stock_id', '=', $where['stock_id']);

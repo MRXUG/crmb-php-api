@@ -2,12 +2,11 @@
 
 namespace app\controller\admin\coupon\platform;
 
+use app\common\dao\store\product\ProductDao;
 use app\common\repositories\platform\PlatformCouponRepository;
 use crmeb\basic\BaseController;
+use crmeb\utils\platformCoupon\RefreshPlatformCouponProduct;
 use think\App;
-use think\db\exception\DataNotFoundException;
-use think\db\exception\DbException;
-use think\db\exception\ModelNotFoundException;
 use think\exception\ValidateException;
 use think\facade\Cache;
 use think\Request;
@@ -32,8 +31,12 @@ class PlatformCoupon extends BaseController
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
+        $where = $request->param();
+        unset($where['page'], $where['limit']);
 
-        return app('json')->success($this->repository->platformCouponList($page, $limit));
+        $order = $request->get("order",'platform_coupon_id desc');
+
+        return app('json')->success($this->repository->platformCouponList($page, $limit, $where,$order));
     }
 
     /**
@@ -75,7 +78,8 @@ class PlatformCoupon extends BaseController
      */
     public function getEstimateGoodsResult(string $resultCode)
     {
-        return $this->json()->success(Cache::get("EstimatePlatformCouponProduct:{$resultCode}"));
+        $data = Cache::get("EstimatePlatformCouponProduct:{$resultCode}") ?? [];
+        return $this->json()->success($data);
     }
 
     /**
@@ -89,8 +93,9 @@ class PlatformCoupon extends BaseController
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
+        $order = $request->get('order', 'discount_num asc');
 
-        return app('json')->success($this->repository->selectCoupon($page, $limit));
+        return app('json')->success($this->repository->selectCoupon($page, $limit, [], $order));
     }
 
     /**
@@ -115,8 +120,9 @@ class PlatformCoupon extends BaseController
     {
         $page = $request->get('page', 1);
         $limit = $request->get('limit', 10);
+        $order = $request->get('order', '');
 
-        return app('json')->success($this->repository->platformCouponMerDetails($amount, $page, $limit));
+        return app('json')->success($this->repository->platformCouponMerDetails($amount, $page, $limit,$order));
     }
 
     /**
@@ -141,5 +147,115 @@ class PlatformCoupon extends BaseController
     public function update(int $id, Request $request) {
         $this->repository->save($request->post(), $id);
         return app('json')->success();
+    }
+
+    /**
+     * 修改优惠券状态
+     *
+     * @param int $id
+     * @param Request $request
+     * @return mixed
+     */
+    public function updateStatus(int $id, Request $request)
+    {
+        $status = $request->post('status');
+        $this->repository->updateStatus($id, $status);
+        return $this->json()->success();
+    }
+
+    /**
+     * 获取优惠券个数
+     *
+     * @return mixed
+     */
+    public function getCouponStatusCount()
+    {
+        return $this->json()->success($this->repository->getStatusCount());
+    }
+
+    /**
+     * 获取编辑优惠券商品基本信息
+     *
+     * @param int $id
+     * @return mixed
+     */
+    public function getEditCouponProductInfo(int $id)
+    {
+        return $this->json()->success($this->repository->getEditCouponProductInfo($id));
+    }
+
+    /**
+     * 获取编辑优惠券商品列表
+     *
+     * @param int $id
+     * @param Request $request
+     * @return void
+     */
+    public function getEditCouponProductList(int $id, Request $request)
+    {
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 10);
+        $params = $request->param();
+        unset($params['page'], $params['limit']);
+        $order = $request->get('order', 'product_id desc');
+        return $this->json()->success($this->repository->getEditCouponProductList($id, $page, $limit, $params,$order));
+    }
+
+    /**
+     * 修改商品信息
+     *
+     * @param int $productId
+     * @param Request $request
+     * @return void
+     * @throws null
+     */
+    public function updateProduct(int $productId, Request $request)
+    {
+        $params = $request->post();
+        if (empty($params)) throw new ValidateException('没有需要处理的数据');
+        foreach ($params as $k => $v) if (!in_array($k, ['is_used', 'sort'])) throw new ValidateException('参数错误');
+        /** @var ProductDao $productDao */
+        $productDao = app()->make(ProductDao::class);
+        $productDao->update($productId, $params);
+        return $this->json()->success();
+    }
+
+    /**
+     * 范围计数
+     *
+     * @param Request $request
+     * @return void
+     */
+    public function scopeCount(Request $request)
+    {
+        return $this->json()->success($this->repository->scopeCount($request->post('scope', [])));
+    }
+
+    public function getEditPlatformCouponData(int $id)
+    {
+        return $this->json()->success($this->repository->getPlatformCouponOne($id));
+    }
+
+    public function platformCouponStatusUpdate(int $id, Request $request)
+    {
+        $this->repository->platformCouponStatusUpdate($id, $request->param());
+        return $this->json()->success();
+    }
+
+    public function receiveLog(Request $request, int $id = 0)
+    {
+        $page = $request->get('page', 1);
+        $limit = $request->get('limit', 10);
+        $params = $request->param();
+        unset($params['page'], $params['limit'], $params['id']);
+
+        return $this->json()->success($this->repository->receiveLog($page, $limit, $id, $params));
+    }
+
+
+    public function refresh()
+    {
+        RefreshPlatformCouponProduct::runQueue();
+        return $this->json()->success();
     }
 }

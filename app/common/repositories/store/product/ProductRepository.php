@@ -38,6 +38,7 @@ use crmeb\jobs\SendSmsJob;
 use crmeb\services\QrcodeService;
 use crmeb\services\RedisCacheService;
 use crmeb\services\SwooleTaskService;
+use crmeb\utils\platformCoupon\RefreshPlatformCouponProduct;
 use FormBuilder\Factory\Elm;
 use think\exception\ValidateException;
 use think\facade\Cache;
@@ -213,6 +214,9 @@ class ProductRepository extends BaseRepository
      */
     public function create(array $data, int $productType = 0, $conType = 0)
     {
+        # 刷新平台优惠券
+        RefreshPlatformCouponProduct::runQueue();
+
         if (!$data['spec_type']) {
             $data['attr'] = [];
             if (count($data['attrValue']) > 1) throw new ValidateException('单规格商品属性错误');

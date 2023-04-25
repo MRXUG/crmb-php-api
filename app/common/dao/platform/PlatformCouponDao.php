@@ -5,6 +5,8 @@ namespace app\common\dao\platform;
 use app\common\dao\BaseDao;
 use app\common\dao\coupon\CouponStocksDao;
 use app\common\model\platform\PlatformCoupon;
+use app\common\model\platform\PlatformCouponPosition;
+use app\common\model\platform\PlatformCouponReceive;
 use app\common\repositories\platform\PlatformCouponRepository;
 
 class PlatformCouponDao extends BaseDao
@@ -57,5 +59,72 @@ class PlatformCouponDao extends BaseDao
         $scope_arr = explode(',', $model['scope_arr']);
         $mer_id_arr = explode(',', $model['mer_id_arr']);
         return $platformCouponRepository->getProductId($coupon_id_arr, $scope_arr, $mer_id_arr);
+    }
+
+    public function getPopupsPlatformCoupon($where=[] ,$limit = 1,$uid=0,$type = 0){
+       $num = $this->getModel()::getDB()->where($where)->order("discount_num desc")->count();
+        $newList = [];
+
+        //获取type符合的券
+//        $ids = PlatformCouponPosition::getDB()->where("position",$type)->column('platform_coupon_id');
+
+        $offset = 0;
+
+        QUERY_AGAIN:
+        $list =  $this->getModel()::getDB()->alias("P")
+            ->leftJoin('PlatformCouponPosition PP', 'PP.platform_coupon_id = P.platform_coupon_id')
+            ->where($where)
+            ->where("PP.position",$type)
+            ->order("discount_num desc")
+            ->limit($offset,$limit)
+            ->select();
+
+        $offset += $limit;
+
+        foreach ($list as $k=>$v){
+           if ($v['is_limit'] == 1){
+               //查询已经领取了多少张
+               $lnum = PlatformCouponReceive::getDB()->where('platform_coupon_id',$v['platform_coupon_id'])->count();
+
+               if ($lnum >= $v['limit_number']){
+                   continue;
+               }
+           }
+
+           if ($v['is_user_limit'] == 1){
+               //查询已经领取了多少张
+               $lnum = PlatformCouponReceive::getDB()->where('platform_coupon_id',$v['platform_coupon_id'])->where("user_id",$uid)->count();
+
+               if ($lnum >= $v['user_limit_number']){
+                   continue;
+               }
+           }
+
+           if (time() < $v['release_time']+300){
+               continue;
+           }
+
+           $newList[] = $v->toArray();
+       }
+
+       $count = count($newList);
+       if (($count < $limit) && ($offset <  $num)){
+           goto QUERY_AGAIN;
+       }
+
+       return $newList;
+    }
+
+
+    public function receivePlatformCoupon($data = [],$uid = 0,$type = 0)
+    {
+        $receive = [];
+        foreach ($data as $k=>$v){
+            $receive[$k]['platform_coupon_id'] = $v['platform_coupon_id'];
+            $receive[$k]['user_id'] = $uid;
+            $receive[$k]['use_type'] = $type;
+        }
+
+        $this->getModel()::getDB()->insertAll($receive);
     }
 }

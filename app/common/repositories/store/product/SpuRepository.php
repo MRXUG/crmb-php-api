@@ -11,7 +11,11 @@
 namespace app\common\repositories\store\product;
 
 use app\common\dao\coupon\CouponStocksDao;
+use app\common\dao\platform\PlatformCouponDao;
 use app\common\model\coupon\CouponStocks;
+use app\common\model\platform\PlatformCoupon;
+use app\common\model\platform\PlatformCouponPosition;
+use app\common\model\platform\PlatformCouponProduct;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\coupon\StoreCouponProductRepository;
 use app\common\repositories\store\coupon\StoreCouponRepository;
@@ -126,9 +130,9 @@ class SpuRepository extends BaseRepository
      * @author Qinii
      * @day 12/18/20
      */
-    public function getApiSearch($where, $page, $limit, $userInfo = null,$discountNum = 0)
+    public function getApiSearch($where, $page, $limit, $userInfo = null,$discountNum = 0,$isCouponP = 0)
     {
-        if (isset($where['keyword']) && !empty($where['keyword'])) {
+        if (isset($where['keyword']) && !empty($where['keyword']) && $where['keyword'] !== '') {
             if (preg_match('/^(\/@[1-9]{1}).*\*\//', $where['keyword'])) {
                 $command = app()->make(CopyCommand::class)->getMassage($where['keyword']);
                 if (!$command || in_array($command['type'], [30, 40])) return ['count' => 0, 'list' => []];
@@ -492,6 +496,69 @@ class SpuRepository extends BaseRepository
         $data['list'] = $product['list'] ?? [];
         return $data;
     }
+
+
+    public function getApiSearchByPlatformCoupon($where, $page, $limit, $userInfo,$platform_coupon_id = 0)
+    {
+        $coupon = PlatformCoupon::getDB()->where([
+            'platform_coupon_id' => $platform_coupon_id
+        ])->find();
+        $data['coupon'] = $coupon;
+        if ($coupon) {
+
+            // 商品获取模式
+            $where['product_ids'] = [];
+            /** @var Collection $productList */
+            $productList = PlatformCouponProduct::getDB()->where('platform_coupon_id',$platform_coupon_id)->column('product_id');
+            if ($productList) {
+                $where['product_ids'] = $productList;
+                $where['is_coupon'] = 1;
+                $product = $this->getApiSearch($where, $page, $limit, $userInfo, $coupon['discount_num'],1);
+            }else{
+                $product['count'] = 0;
+                $product['list'] = [];
+            }
+
+        }
+
+        $data['count'] = $product['count'] ?? 0;
+        $data['list'] = $product['list'] ?? [];
+        return $data;
+    }
+
+
+    public function getApiSearchByPlatformCouponArr($where, $page, $limit, $userInfo,$platform_coupon_ids = [])
+    {
+        $coupon = PlatformCoupon::getDB()->whereIn("platform_coupon_id",$platform_coupon_ids)->order("discount_num desc")->select();
+        if ($coupon){
+            $coupon = $coupon->toArray();
+        }
+        $data['coupon'] = $coupon;
+        if ($coupon) {
+            //查询最大面额得值
+            $discountNum = PlatformCoupon::getDB()->whereIn("platform_coupon_id",$platform_coupon_ids)->order("discount_num desc")->value("discount_num");
+
+            // 商品获取模式
+            $where['product_ids'] = [];
+            /** @var Collection $productList */
+            $productList = PlatformCouponProduct::getDB()->whereIn('platform_coupon_id',$platform_coupon_ids)->column('product_id');
+            if ($productList) {
+                $where['product_ids'] = $productList;
+                $where['is_coupon'] = 1;
+                $product = $this->getApiSearch($where, $page, $limit, $userInfo,$discountNum,1);
+            }else{
+                $product['count'] = 0;
+                $product['list'] = [];
+            }
+
+        }
+
+        $data['count'] = $product['count'] ?? 0;
+        $data['list'] = $product['list'] ?? [];
+        return $data;
+    }
+
+
 
     public function getHotRanking(int $cateId)
     {

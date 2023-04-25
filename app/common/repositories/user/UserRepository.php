@@ -15,6 +15,7 @@ namespace app\common\repositories\user;
 
 use app\common\dao\BaseDao;
 use app\common\dao\user\UserDao;
+use app\common\model\black\UserBlackLog;
 use app\common\model\user\User;
 use app\common\model\wechat\WechatUser;
 use app\common\repositories\BaseRepository;
@@ -23,6 +24,7 @@ use app\common\repositories\store\order\StoreOrderRepository;
 use app\common\repositories\store\service\StoreServiceRepository;
 use app\common\repositories\system\attachment\AttachmentRepository;
 use app\common\repositories\wechat\WechatUserRepository;
+use app\common\repositories\platform\PlatformCouponRepository;
 use crmeb\exceptions\AuthException;
 use crmeb\jobs\SendNewPeopleCouponJob;
 use crmeb\jobs\UserBrokerageLevelJob;
@@ -1473,5 +1475,11 @@ class UserRepository extends BaseRepository
                 ]));
             }
         });
+    }
+
+    //使用户领取的所有优惠券失效
+    public function cancelUserCoupon($uid){
+        $make = app()->make(PlatformCouponRepository::class);
+        $make->cancelPlatformUserCoupon($uid);
     }
 }

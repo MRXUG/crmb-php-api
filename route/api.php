@@ -27,6 +27,7 @@ Route::group('api/', function () {
             //新的下单接口,支持分账
             Route::group('order', function () {
                 Route::post('check', '/v2CheckOrder');
+                Route::post('check2', '/v2CheckOrder');
                 Route::post('create', '/v2CreateOrder');
                 Route::post('create2', '/v2CreateOrder2');
                 Route::post('getUserBeforeOneCoupon', '/getUserBeforeOneCoupon');//获取可用优惠券列表
@@ -56,9 +57,18 @@ Route::group('api/', function () {
             Route::get('bestOffer/:id', 'api.coupon.BestOfferCoupon/productBestOffer');
         });
 
+        Route::group('platform/coupon', function () {
+            // 领券签名
+            Route::post('sign', 'api.coupon.GenerateCouponSign/generatePlatformCouponSign');
+            Route::post('receive', 'api.coupon.ReceiveCoupon/receivePlatformCoupon');
+        });
+
         //优惠券
         Route::group('coupon', function () {
             Route::post('receive/:id', 'api.store.product.StoreCoupon/receiveCoupon');
+            Route::post('getPlatformCoupon', 'api.coupon.CouponStock/getPlatformCoupon');
+            Route::post('userReceivePlatformCoupon', 'api.coupon.CouponStock/userReceivePlatformCoupon');
+            Route::get('platformCouponsList', 'api.coupon.PlatformCoupon/lst');
         });
 
         //客服聊天
@@ -476,6 +486,10 @@ Route::group('api/', function () {
             Route::get('/get/:id', 'StoreSpu/get');
             //优惠券商品列表
             Route::get('/coupon_product', 'StoreSpu/getProductByCoupon');
+
+            //平台优惠券商品列表
+            Route::get('/platform_coupon_product', 'StoreSpu/getProductByPlatformCoupon');
+            Route::get('/getProductByPlatformCouponArr', 'StoreSpu/getProductByPlatformCouponArr');
             //热卖排行
             Route::get('/get_hot_ranking', 'StoreSpu/getHotRanking');
         })->prefix('api.store.product.');
@@ -495,6 +509,7 @@ Route::group('api/', function () {
             Route::get('new_people', 'api.store.product.StoreCoupon/newPeople');
             Route::get('new_list', 'api.store.product.StoreCoupon/list');
             Route::get('decrypt', 'api.store.product.StoreCoupon/decrypt');
+            Route::get('decryptPlatform', 'api.store.product.StoreCoupon/decryptPlatform');
         });
 
         //商户
@@ -649,19 +664,21 @@ Route::group('api/', function () {
         Route::post('operate','Black/Operate');
         Route::post('setlog','Black/setLog');
         Route::get('getlog','Black/getLog');
+        Route::post('delblack','Black/delBlack');
     })->prefix('api.black.');
 
     //风控
     Route::group('risk',function(){
         Route::get('getrisk','/getRisk');
+        Route::get('checkblack','/checkBlack');
     })->prefix('api.risk.Risk');
     
     // 新优惠券
     Route::group('stock/coupon', function () {
         Route::get('list', 'CouponStock/list');
         Route::get('receiveList', 'CouponStock/receiveList');
+        Route::get('receiveList2', 'CouponStock/receiveList2');
         Route::get('bestOffer/:id', 'BestOfferCoupon/productBestOffer');
-
     })->prefix('api.coupon.');
 
 })->middleware(AllowOriginMiddleware::class)
