@@ -271,6 +271,8 @@ class StoreOrder extends BaseController
             // 执行让利逻辑
         }
 
+        // dd("111", $groupOrder);
+
         if ($groupOrder['pay_price'] == 0) {
             return app('json')->status('error', "支付金额不能为0", ['order_id' => $groupOrder->group_order_id]);
 

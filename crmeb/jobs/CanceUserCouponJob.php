@@ -55,9 +55,11 @@ class CanceUserCouponJob implements JobInterface
                 $couponStocksUserDate = $couponStocksUser()->field(['sss,uid,stock_id,coupon_code,mch_id'])
                     ->where([
                         ['uid', '=', $data['user_id']],
+                        ['written_off', '=', 0],
                         ['is_del', '=', 0]
                     ])->select();
-
+                
+                dd(111, $couponStocksUserDate);
                 foreach ($couponStocksUserDate as $item) {
                     $config = [];
 
@@ -69,7 +71,7 @@ class CanceUserCouponJob implements JobInterface
 
                         PlatformCouponReceive::destroyWxCouponStatus($item->getAttr('id'));
 
-                        $couponStocksUser()->where(['id'=>$item->getAttr('sss')])->limit(1)->delete();
+                        $couponStocksUser()->where(['sss'=>$item->getAttr('sss')])->limit(1)->delete();
                         Db::commit();
                     } catch (Exception|Throwable|ValueError $e) {
                         Db::rollback();
