@@ -58,7 +58,6 @@ class CanceUserCouponJob implements JobInterface
                         ['written_off', '=', 0],
                         ['is_del', '=', 0]
                     ])->select();
-
                 foreach ($couponStocksUserDate as $item) {
                     $config = [];
 
@@ -68,7 +67,7 @@ class CanceUserCouponJob implements JobInterface
 
                         $wx->coupon()->expiredCoupon($item->getAttr('coupon_code'), $item->getAttr('stock_id'));
 
-                        PlatformCouponReceive::destroyWxCouponStatus($item->getAttr('id'));
+                        PlatformCouponReceive::destroyWxCouponStatus($item->getAttr('sss'));
 
                         $couponStocksUser()->where(['sss'=>$item->getAttr('sss')])->limit(1)->delete();
                         Db::commit();

@@ -400,4 +400,23 @@ class WxApplet extends BaseController
     {
         return app('json')->success($this->repository->healthyApplet());
     }
+
+    public function getAuditstatus(){
+        $appId = $this->request->param("appId",'');
+        $auditid = $this->request->param("auditid",'');
+        $data = $this->openPlatformRepository->getAuditstatus($appId,$auditid);
+
+    }
+
+    public function getprivacysetting(){
+        $appId = $this->request->param("appId",'');
+        $privacy_ver = $this->request->param("privacy_ver",'');
+
+        $data = $this->openPlatformRepository->getprivacysetting($appId,$privacy_ver);
+    }
+
+    public function setPrivacySetting(){
+        $appId = $this->request->param("appId",'');
+        $this->openPlatformRepository->setPrivacySetting($appId);
+    }
 }

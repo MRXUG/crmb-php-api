@@ -28,7 +28,7 @@ return [
      */
     'privacy_setting' => [
         "owner_setting" => [
-            "contact_email" => "",
+            "contact_email" => "601248452@qq.com",
             "notice_method" => "contact_email"
         ],
         "setting_list" => [
