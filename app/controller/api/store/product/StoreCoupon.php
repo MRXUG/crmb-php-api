@@ -136,6 +136,7 @@ class StoreCoupon extends BaseController
 
     public function newPeople(StoreCouponRepository $couponRepository)
     {
+        return $this->json()->success([]);
         $coupons = $couponRepository->newPeopleCoupon();
 
         foreach ($coupons as $coupon){
