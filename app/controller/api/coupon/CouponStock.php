@@ -7,6 +7,7 @@ use app\common\model\platform\PlatformCouponReceive;
 use app\common\repositories\coupon\CouponConfigRepository;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\coupon\CouponStocksUserRepository;
+use app\common\repositories\platform\PlatformCouponRepository;
 use crmeb\basic\BaseController;
 use think\App;
 
@@ -123,5 +124,25 @@ class CouponStock extends BaseController
 
         $res = PlatformCouponReceive::getDB()->where([['user_id','=',$uid],['platform_coupon_id','=',$platform_coupon_id]])->inc('transform_num',1)->update();
         return app('json')->success('保存成功');
+    }
+
+    //获取所有平台券
+    public function getAllPlatformCoupon()
+    {
+        $page = $this->request->param('page',1);
+        $limit = $this->request->param('limit',10);
+
+        //查询用户类型
+        $uid = $this->request->uid();
+        $couponConfigRepository = app()->make(CouponConfigRepository::class);
+
+        $userType = $couponConfigRepository->getUserType($uid);
+        $where["status"] = 1;
+        $where["crowd"] = $userType;
+
+        //获取平台券
+        $platformCouponRepository = app()->make(PlatformCouponRepository::class);
+        $list = $platformCouponRepository->platformCouponList($page,$limit,$where);
+        return app('json')->success($list);
     }
 }
