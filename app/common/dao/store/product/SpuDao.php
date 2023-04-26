@@ -80,7 +80,7 @@ class SpuDao extends  BaseDao
 
                 $query->whereIn('P.mer_id',$merId);
             })
-            ->when(isset($where['cate_pid']) && $where['cate_pid'] !== '', function ($query) use ($where) {
+            ->when(isset($where['cate_pid']) && $where['cate_pid'] !== '' && $where['cate_pid'] > 0, function ($query) use ($where) {
                 $storeCategoryRepository = app()->make(StoreCategoryRepository::class);
                 if (is_array($where['cate_pid'])) {
                     $cateIds = $storeCategoryRepository->selectChildrenId($where['cate_pid']);
@@ -91,7 +91,7 @@ class SpuDao extends  BaseDao
                 $cate = array_merge($cateIds, $where['cate_pid']);
                 $query->whereIn('P.cate_id', $cate);
             })
-            ->when(isset($where['cate_id']) && $where['cate_id'] !== '', function ($query) use ($where) {
+            ->when(isset($where['cate_id']) && $where['cate_id'] !== '' && $where['cate_id'] > 0, function ($query) use ($where) {
                 is_array($where['cate_id']) ? $query->whereIn('P.cate_id', $where['cate_id']) : $query->where('P.cate_id', $where['cate_id']);
             })
             ->when(isset($where['spu_id']) && $where['spu_id'] !== '', function ($query) use ($where) {
