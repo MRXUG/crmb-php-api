@@ -86,6 +86,10 @@ Route::group(function () {
             '_alias' => '随机获取一个健康可以小程序',
         ]);
 
+        Route::post('getAuditstatus', '/getAuditstatus')->name('systemAppletGetAuditstatus')->option([
+            '_alias' => '小程序审核状态',
+        ]);
+
     })->prefix('admin.applet.WxApplet')->option([
          '_path' => '/applet/wxApplet',
         '_auth' => true,

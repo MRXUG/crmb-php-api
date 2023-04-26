@@ -400,4 +400,10 @@ class WxApplet extends BaseController
     {
         return app('json')->success($this->repository->healthyApplet());
     }
+
+    public function getAuditstatus(){
+        $appId = $this->request->param("appId",'');
+        $data = $this->openPlatformRepository->getAuditstatus($appId);
+
+    }
 }

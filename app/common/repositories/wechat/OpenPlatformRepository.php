@@ -1247,4 +1247,27 @@ class OpenPlatformRepository extends BaseRepository
             return '';
         }
     }
+
+    public function getAuditstatus($appid){
+        try {
+            $token = $this->getAuthorizerToken($appid);
+            $url = 'https://api.weixin.qq.com/wxa/get_auditstatus'. '?access_token='.$token;
+            $params = [
+                'auditid'=>$appid
+            ];
+            $data = sendRequest('post', $url, $params);
+
+            var_dump($data);
+
+        } catch (\Exception $e) {
+            $msg = '获取scheme码:检测:error-'. $appid.$e->getMessage();
+            Log::error($msg);
+            sendMessageToWorkBot([
+                'msg' => $msg,
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return '';
+        }
+    }
 }
