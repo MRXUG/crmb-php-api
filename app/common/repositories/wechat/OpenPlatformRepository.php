@@ -1248,12 +1248,12 @@ class OpenPlatformRepository extends BaseRepository
         }
     }
 
-    public function getAuditstatus($appid){
+    public function getAuditstatus($appid,$auditid){
         try {
             $token = $this->getAuthorizerToken($appid);
             $url = 'https://api.weixin.qq.com/wxa/get_auditstatus'. '?access_token='.$token;
             $params = [
-                'auditid'=>$appid
+                'auditid'=>$auditid
             ];
             $data = sendRequest('post', $url, $params);
 
