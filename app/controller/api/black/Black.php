@@ -178,7 +178,7 @@ class Black extends BaseController{
         if(count($user) > 0){
             foreach($user as $k => $v){
                 if($v['wb_time'] > 0){
-                    $start = strtotime(date('Y-m-d'),strtotime($v['wb_time']));
+                    $start = strtotime(date('Y-m-d',strtotime($v['wb_time'])));
                     if((floor(($now - $start)/86400)) >= $risk->blacklist_vid){
                         $save = ['black' => 0,'wb_time' => 0];
 
