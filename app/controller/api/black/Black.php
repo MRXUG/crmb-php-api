@@ -179,7 +179,7 @@ class Black extends BaseController{
             foreach($user as $k => $v){
                 if($v['wb_time'] > 0){
                     $start = strtotime(date('Y-m-d'),strtotime($v['wb_time']));
-                    if(($now - $start) >= $risk->blacklist_vid){
+                    if((floor(($now - $start)/86400)) >= $risk->blacklist_vid){
                         $save = ['black' => 0,'wb_time' => 0];
 
                         // Queue::push(DelUserBlackJob::class,$v);
