@@ -578,6 +578,7 @@ class SpuRepository extends BaseRepository
         $where['spu_ids'] = $ids;
         $list = $this->dao->search($where)->setOption('field',[])->field('spu_id,S.image,S.price,S.product_type,P.product_id,P.sales,S.status,S.store_name,P.ot_price,P.cost')->select();
         if ($list) $list = $list->toArray();
+       $list = $this->getBorderList($list,0);
         return $list;
     }
 
