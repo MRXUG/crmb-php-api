@@ -1260,7 +1260,31 @@ class OpenPlatformRepository extends BaseRepository
             var_dump($data);
 
         } catch (\Exception $e) {
-            $msg = '获取scheme码:检测:error-'. $appid.$e->getMessage();
+            $msg = '检测:error-'. $appid.$e->getMessage();
+            Log::error($msg);
+            sendMessageToWorkBot([
+                'msg' => $msg,
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return '';
+        }
+    }
+
+
+    public function getprivacysetting($appid,$privacy_ver){
+        try {
+            $token = $this->getAuthorizerToken($appid);
+            $url = 'https://api.weixin.qq.com/cgi-bin/component/getprivacysetting'. '?access_token='.$token;
+            $params = [
+                'privacy_ver'=>$privacy_ver
+            ];
+            $data = sendRequest('post', $url, $params);
+
+            var_dump($data);
+
+        } catch (\Exception $e) {
+            $msg = ':检测:error-'. $appid.$e->getMessage();
             Log::error($msg);
             sendMessageToWorkBot([
                 'msg' => $msg,
