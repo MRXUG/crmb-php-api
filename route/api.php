@@ -69,6 +69,7 @@ Route::group('api/', function () {
             Route::post('getPlatformCoupon', 'api.coupon.CouponStock/getPlatformCoupon');
             Route::post('userReceivePlatformCoupon', 'api.coupon.CouponStock/userReceivePlatformCoupon');
             Route::get('platformCouponsList', 'api.coupon.PlatformCoupon/lst');
+            Route::get('getAllPlatformCoupon', 'api.coupon.CouponStock/getAllPlatformCoupon');
         });
 
         //客服聊天
