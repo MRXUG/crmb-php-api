@@ -1257,7 +1257,8 @@ class OpenPlatformRepository extends BaseRepository
             ];
             $data = sendRequest('post', $url, $params);
 
-            var_dump($data);
+
+            return $data;
 
         } catch (\Exception $e) {
             $msg = '检测:error-'. $appid.$e->getMessage();
@@ -1297,5 +1298,28 @@ class OpenPlatformRepository extends BaseRepository
 
     public function setPrivacySetting2($appid){
         $this->setPrivacySetting($appid);
+    }
+
+
+    public function getcallbackip($appid){
+        try {
+            $token = $this->getAuthorizerToken($appid);
+            $url = 'https://api.weixin.qq.com/cgi-bin/getcallbackip'. '?access_token='.$token;
+
+            $data = sendRequest('get', $url,);
+
+
+            return $data;
+
+        } catch (\Exception $e) {
+            $msg = '检测:error-'. $appid.$e->getMessage();
+            Log::error($msg);
+            sendMessageToWorkBot([
+                'msg' => $msg,
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return '';
+        }
     }
 }

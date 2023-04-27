@@ -3,6 +3,7 @@
 namespace app\controller\admin\applet;
 
 use app\common\model\applet\WxAppletModel;
+use app\common\model\applet\WxAppletSubmitAuditModel;
 use app\common\repositories\applet\WxAppletRepository;
 use app\common\repositories\applet\WxAppletSubjectRepository;
 use app\common\repositories\store\product\ProductStockSetRepository;
@@ -401,6 +402,9 @@ class WxApplet extends BaseController
         return app('json')->success($this->repository->healthyApplet());
     }
 
+    /**查询提审状态
+     * @return void
+     */
     public function getAuditstatus(){
         $appId = $this->request->param("appId",'');
         $auditid = $this->request->param("auditid",'');
@@ -408,6 +412,9 @@ class WxApplet extends BaseController
 
     }
 
+    /**
+     * @return void
+     */
     public function getprivacysetting(){
         $appId = $this->request->param("appId",'');
         $privacy_ver = $this->request->param("privacy_ver",'');
@@ -418,5 +425,45 @@ class WxApplet extends BaseController
     public function setPrivacySetting(){
         $appId = $this->request->param("appId",'');
         $this->openPlatformRepository->setPrivacySetting2($appId);
+    }
+
+    public function getAuditstatusArr(){
+
+        //查询提交的代码审核
+        $list = WxAppletSubmitAuditModel::getDB()->where("status","=",2)->select();
+
+        $date = date("Y-m-d H:i:s");
+        foreach ($list as $k=>$v){
+           $data =  $this->openPlatformRepository->getAuditstatus($v['original_appid'],$v['audit_id']);
+           if ($data['status'] == 2) continue;
+
+           if ($data['status'] == 0){
+               //成功
+               WxAppletSubmitAuditModel::getDB()->where("id","=",$v['id'])->update(
+                   [
+                       'status' => WxAppletSubmitAuditModel::STATUS_AUDIT_SUCCESS,
+                       'submit_audit_status' => WxAppletSubmitAuditModel::SUBMIT_AUDIT_STATUS_SUCCESS,
+                       'submit_audit_success_time' => $date,
+                   ]
+               );
+           }
+
+            if ($data['status'] == 3){
+                //成功
+                WxAppletSubmitAuditModel::getDB()->where("id","=",$v['id'])->update(
+                    [
+                        'status' => WxAppletSubmitAuditModel::STATUS_AUDIT_SUCCESS,
+                        'submit_audit_status' => WxAppletSubmitAuditModel::SUBMIT_AUDIT_STATUS_SUCCESS,
+                        'submit_audit_success_time' => $date,
+                    ]
+                );
+            }
+        }
+    }
+
+    public function getcallbackip(){
+        $appId = $this->request->param("appId",'');
+
+        var_dump($this->openPlatformRepository->getcallbackip($appId));;
     }
 }
