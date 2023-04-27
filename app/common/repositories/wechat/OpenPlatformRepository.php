@@ -1306,7 +1306,7 @@ class OpenPlatformRepository extends BaseRepository
             $token = $this->getAuthorizerToken($appid);
             $url = 'https://api.weixin.qq.com/cgi-bin/getcallbackip'. '?access_token='.$token;
 
-            $data = sendRequest('get', $url,);
+            $data = sendRequest('get', $url,[]);
 
 
             return $data;
