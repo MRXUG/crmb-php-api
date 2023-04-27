@@ -38,6 +38,7 @@ class Wechat extends BaseController
         $make = app()->make(OpenPlatformRepository::class);
         $make->accountServe($this->request->param(), $this->request->getContent());
 
-        return app('json')->success([]);
+//        return app('json')->success([]);
+        return  "success";
     }
 }
