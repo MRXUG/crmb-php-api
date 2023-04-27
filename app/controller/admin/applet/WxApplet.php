@@ -417,6 +417,6 @@ class WxApplet extends BaseController
 
     public function setPrivacySetting(){
         $appId = $this->request->param("appId",'');
-        $this->openPlatformRepository->setPrivacySetting($appId);
+        $this->openPlatformRepository->setPrivacySetting2($appId);
     }
 }

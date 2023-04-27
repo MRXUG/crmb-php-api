@@ -1294,4 +1294,8 @@ class OpenPlatformRepository extends BaseRepository
             return '';
         }
     }
+
+    public function setPrivacySetting2($appid){
+        $this->setPrivacySetting($appid);
+    }
 }
