@@ -98,6 +98,10 @@ Route::group(function () {
             '_alias' => '小程序隐私查询',
         ]);
 
+        Route::post('getcallbackip', '/getcallbackip')->name('systemAppletGetcallbackip')->option([
+            '_alias' => '小程序IP',
+        ]);
+
     })->prefix('admin.applet.WxApplet')->option([
          '_path' => '/applet/wxApplet',
         '_auth' => true,
