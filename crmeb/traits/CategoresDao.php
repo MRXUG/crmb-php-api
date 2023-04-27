@@ -12,6 +12,8 @@
 
 namespace crmeb\traits;
 
+use think\facade\Db;
+
 trait CategoresDao
 {
     public $path = 'path';
@@ -81,7 +83,17 @@ trait CategoresDao
      */
     public function getAll($mer_id = 0,$status = null)
     {
-        return $this->getModel()::getDB()->where('mer_id', $mer_id)->when(($status !== null),function($query)use($status){
+        return $this->getModel()::getDB()->field(['*', Db::raw("
+            (select count(a.product_id)
+                    from eb_store_product a
+                    left join eb_store_spu b on a.product_id = b.product_id
+                    where a.cate_id = eb_store_category.store_category_id
+                      and a.is_show = 1
+                      and a.status = 1
+                      and a.is_del = 0
+                      and b.status = 1
+                      and a.mer_status = 1) as goods_count
+        ")])->where('mer_id', $mer_id)->when(($status !== null),function($query)use($status){
                 $query->where($this->getStatus(),$status);
             })->order('sort DESC,'.$this->getPk().' DESC')->select();
     }
