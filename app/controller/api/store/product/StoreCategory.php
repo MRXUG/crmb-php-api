@@ -75,7 +75,7 @@ class StoreCategory extends BaseController
         }
 
 
-        $data['list'] = $ret;
+        $data['list'] = array_merge($ret, []);
         return app('json')->success($data);
     }
 
