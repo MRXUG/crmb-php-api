@@ -1326,7 +1326,7 @@ class OpenPlatformRepository extends BaseRepository
     public function thirdpartyCode2Session($appid='',$componentAppid = '',$js_code =''){
         try {
             $token = $this->getAuthorizerToken($appid);
-            $url = 'https://api.weixin.qq.com/sns/component/jscode2session'. '?component_access_token='.$token.'&appid='.$appid.'&grant_type=authorization_code&component_appid='.$componentAppid.'&js_code='.$js_code;
+            $url = 'https://api.weixin.qq.com/sns/component/jscode2session?component_access_token='.$token.'&appid='.$appid.'&grant_type=authorization_code&component_appid='.$componentAppid.'&js_code='.$js_code;
 
             $data = sendRequest('get', $url,[]);
 
@@ -1346,6 +1346,31 @@ class OpenPlatformRepository extends BaseRepository
                 'line' => $e->getLine()
             ]);
             return '';
+        }
+    }
+
+    /**
+     * 发送小程序消息
+     * @return void
+     */
+    public function sendMessage($templateId = 0 ,$openId = '',$data = [],$toUrl = '',$appid=''){
+        try {
+            $token = $this->getAuthorizerToken($appid);
+            $url = 'https://api.weixin.qq.com/cgi-bin/message/subscribe/send'. '?access_token='.$token;
+
+            $data = sendRequest('post', $url,[
+                'template_id'=>$templateId,
+                'page'=>$toUrl,
+                'touser'=>$openId,
+                'data'=>$data,
+                'miniprogram_state'=>'formal',
+                'lang'=>'zh_CN',
+            ]);
+
+            return $data;
+        } catch (\Exception $e) {
+            Log::error('发送给openid为:' . $openId . '小程序订阅消息失败,模板id为:' . $templateId . ';错误原因为:' . $e->getMessage());
+
         }
     }
 }
