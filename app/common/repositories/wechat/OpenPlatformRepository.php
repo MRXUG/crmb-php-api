@@ -1328,7 +1328,7 @@ class OpenPlatformRepository extends BaseRepository
             $token = $this->getAuthorizerToken($params['appid']);
             $url = 'https://api.weixin.qq.com/sns/component/jscode2session'. '?component_access_token='.$token;
 
-            $data = sendRequest('get', $url,[]);
+            $data = sendRequest('get', $url,$params);
 
             if (!isset($data['unionid'])){
                 throw new WechatException('获取用户unionid失败');
