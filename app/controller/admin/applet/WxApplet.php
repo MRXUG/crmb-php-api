@@ -410,6 +410,8 @@ class WxApplet extends BaseController
         $auditid = $this->request->param("auditid",'');
         $data = $this->openPlatformRepository->getAuditstatus($appId,$auditid);
 
+        var_dump($data);
+
     }
 
     /**
