@@ -1325,7 +1325,7 @@ class OpenPlatformRepository extends BaseRepository
 
     public function thirdpartyCode2Session($appid='',$componentAppid = '',$js_code =''){
         try {
-            $token = $this->getAuthorizerToken($appid);
+            $token = $this->getComponentToken();
             $url = 'https://api.weixin.qq.com/sns/component/jscode2session?component_access_token='.$token.'&appid='.$appid.'&grant_type=authorization_code&component_appid='.$componentAppid.'&js_code='.$js_code;
 
             $data = sendRequest('get', $url,[]);
@@ -1353,9 +1353,9 @@ class OpenPlatformRepository extends BaseRepository
      * 发送小程序消息
      * @return void
      */
-    public function sendMessage($templateId = 0 ,$openId = '',$data = [],$toUrl = '',$appid=''){
+    public function sendMessage($templateId = 0 ,$openId = '',$data = [],$toUrl = ''){
         try {
-            $token = $this->getAuthorizerToken($appid);
+            $token = $this->getComponentToken();
             $url = 'https://api.weixin.qq.com/cgi-bin/message/subscribe/send'. '?access_token='.$token;
 
             $data = sendRequest('post', $url,[

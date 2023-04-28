@@ -858,7 +858,7 @@ class Auth extends BaseController
         $openPlatformRepository = app()->make(OpenPlatformRepository::class);
 
         $component_appid = env('WECHAT.OPEN_PLATFORM_APPID', '');
-        
+
         $data =  $openPlatformRepository->thirdpartyCode2Session($appid,$component_appid,$js_code);
 
         //查询wechat_user_id
