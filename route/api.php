@@ -616,6 +616,7 @@ Route::group('api/', function () {
     Route::post('auth/login', 'api.Auth/login');
     //登录
     Route::post('auth', 'api.Auth/authLogin');
+    Route::post('thirdpartyCode2Session', 'api.Auth/thirdpartyCode2Session');
     //短信登录
     Route::post('auth/smslogin', 'api.Auth/smsLogin');
     //注册

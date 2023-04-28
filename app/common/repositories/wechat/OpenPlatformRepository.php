@@ -1322,4 +1322,30 @@ class OpenPlatformRepository extends BaseRepository
             return '';
         }
     }
+
+    public function thirdpartyCode2Session($params){
+        try {
+            $token = $this->getAuthorizerToken($params['appid']);
+            $url = 'https://api.weixin.qq.com/sns/component/jscode2session'. '?component_access_token='.$token;
+
+            $data = sendRequest('get', $url,[]);
+
+            if (!isset($data['unionid'])){
+                throw new WechatException('获取用户unionid失败');
+            }
+
+
+            return $data;
+
+        } catch (\Exception $e) {
+            $msg = '获取用户unionid失败'.$e->getMessage();
+            Log::error($msg);
+            sendMessageToWorkBot([
+                'msg' => $msg,
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return '';
+        }
+    }
 }

@@ -16,12 +16,14 @@ namespace app\controller\api;
 use app\common\dao\coupon\CouponStocksDao;
 use app\common\model\platform\PlatformCouponReceive;
 use app\common\model\store\RefundTask;
+use app\common\model\wechat\WechatUser;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
 use app\common\repositories\store\order\StoreRefundOrderRepository;
 use app\common\repositories\system\notice\SystemNoticeConfigRepository;
 use app\common\repositories\user\UserRepository;
 use app\common\repositories\user\UserSignRepository;
+use app\common\repositories\wechat\OpenPlatformRepository;
 use app\common\repositories\wechat\RoutineQrcodeRepository;
 use app\common\repositories\wechat\WechatUserRepository;
 use app\validate\api\ChangePasswordValidate;
@@ -845,6 +847,35 @@ class Auth extends BaseController
         } catch (\Throwable $e) {
             return app('json')->fail(400336);
         }
+    }
+
+
+    public function thirdpartyCode2Session(){
+        $appid = $this->request->param('appid', '');
+        $js_code = $this->request->param('js_code', '');
+
+        //调用微信接口
+        $openPlatformRepository = app()->make(OpenPlatformRepository::class);
+
+        $component_appid = env('WECHAT.OPEN_PLATFORM_APPID', '');
+        $params = [
+            'appid'=>$appid,
+            'grant_type'=>"authorization_code",
+            'component_appid'=>$component_appid,
+            'js_code'=>$js_code,
+        ];
+
+        $data =  $openPlatformRepository->thirdpartyCode2Session($params);
+
+        //查询wechat_user_id
+        $wechat_user_id = WechatUser::getDB()->where("unionid","=",$data['unionid'])->value("wechat_user_id");
+        if (!$wechat_user_id)   return app('json')->fail('用户不存在');
+        $userRepository = app()->make(UserRepository::class);
+        $user = $userRepository->wechatUserIdBytUser($wechat_user_id);
+
+        $tokenInfo = $userRepository->createToken($user);
+        $userRepository->loginAfter($user);
+        return app('json')->status(200, $userRepository->returnToken($user, $tokenInfo,$auth['auth']['code']??''));
     }
 
 }
