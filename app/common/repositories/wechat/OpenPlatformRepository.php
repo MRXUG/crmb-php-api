@@ -1323,12 +1323,12 @@ class OpenPlatformRepository extends BaseRepository
         }
     }
 
-    public function thirdpartyCode2Session($params){
+    public function thirdpartyCode2Session($appid='',$componentAppid = '',$js_code =''){
         try {
-            $token = $this->getAuthorizerToken($params['appid']);
-            $url = 'https://api.weixin.qq.com/sns/component/jscode2session'. '?component_access_token='.$token;
+            $token = $this->getAuthorizerToken($appid);
+            $url = 'https://api.weixin.qq.com/sns/component/jscode2session'. '?component_access_token='.$token.'&appid='.$appid.'&grant_type=authorization_code&component_appid='.$componentAppid.'&js_code='.$js_code;
 
-            $data = sendRequest('get', $url,$params);
+            $data = sendRequest('get', $url,[]);
 
             if (!isset($data['unionid'])){
                 throw new WechatException('获取用户unionid失败');
