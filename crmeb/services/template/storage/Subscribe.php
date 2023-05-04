@@ -70,7 +70,7 @@ class Subscribe extends BaseMessage
             $openPlatformRepository = app()->make(OpenPlatformRepository::class);
             $res = $openPlatformRepository->sendMessage($tempid,$this->openId,$data,$this->toUrl);
 
-
+            Log::error('发送给openid为:' . $this->openId . '小程序订阅消息,模板id为:' . $tempid . ';结果:' .json_encode($res));
             return $res;
         } catch (\Throwable $e) {
             Log::error('发送给openid为:' . $this->openId . '小程序订阅消息失败,模板id为:' . $tempid . ';错误原因为:' . $e->getMessage());
