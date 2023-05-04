@@ -13,6 +13,7 @@
 namespace crmeb\services\template\storage;
 
 use app\common\repositories\system\notice\SystemNoticeConfigRepository;
+use app\common\repositories\wechat\OpenPlatformRepository;
 use app\common\repositories\wechat\TemplateMessageRepository;
 use crmeb\basic\BaseMessage;
 use crmeb\services\MiniProgramService;
@@ -61,10 +62,15 @@ class Subscribe extends BaseMessage
         try {
 
             //查询appid
-            $appId = systemConfig('routine_appId');
-            if (!$appId) return;
-            $res = MiniProgramService::create(0,$appId)->sendSubscribeTemlate($this->openId, $tempid, $data, $this->toUrl);;
-            $this->clear();
+//            $appId = systemConfig('routine_appId');
+//            if (!$appId) return;
+//            $res = MiniProgramService::create(0,$appId)->sendSubscribeTemlate($this->openId, $tempid, $data, $this->toUrl);;
+//            $this->clear();
+
+            $openPlatformRepository = app()->make(OpenPlatformRepository::class);
+            $res = $openPlatformRepository->sendMessage($tempid,$this->openId,$data,$this->toUrl);
+
+
             return $res;
         } catch (\Throwable $e) {
             Log::error('发送给openid为:' . $this->openId . '小程序订阅消息失败,模板id为:' . $tempid . ';错误原因为:' . $e->getMessage());
