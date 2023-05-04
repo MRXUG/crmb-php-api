@@ -1353,9 +1353,9 @@ class OpenPlatformRepository extends BaseRepository
      * 发送小程序消息
      * @return void
      */
-    public function sendMessage($templateId = 0 ,$openId = '',$data = [],$toUrl = ''){
+    public function sendMessage($templateId = 0 ,$openId = '',$data = [],$toUrl = '',$appid = ''){
         try {
-            $token = $this->getComponentToken();
+            $token = $this->getAuthorizerToken($appid);
             $url = 'https://api.weixin.qq.com/cgi-bin/message/subscribe/send'. '?access_token='.$token;
 
             $data = sendRequest('post', $url,[

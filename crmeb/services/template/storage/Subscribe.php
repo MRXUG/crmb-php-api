@@ -62,13 +62,13 @@ class Subscribe extends BaseMessage
         try {
 
             //查询appid
-//            $appId = systemConfig('routine_appId');
-//            if (!$appId) return;
+            $appId = systemConfig('routine_appId');
+            if (!$appId) return;
 //            $res = MiniProgramService::create(0,$appId)->sendSubscribeTemlate($this->openId, $tempid, $data, $this->toUrl);;
 //            $this->clear();
 
             $openPlatformRepository = app()->make(OpenPlatformRepository::class);
-            $res = $openPlatformRepository->sendMessage($tempid,$this->openId,$data,$this->toUrl);
+            $res = $openPlatformRepository->sendMessage($tempid,$this->openId,$data,$this->toUrl,$appId);
 
             Log::error('发送给openid为:' . $this->openId . '小程序订阅消息,模板id为:' . $tempid . ';结果:' .json_encode($res));
             return $res;
