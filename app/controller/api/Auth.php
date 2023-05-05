@@ -14,6 +14,7 @@ namespace app\controller\api;
 
 
 use app\common\dao\coupon\CouponStocksDao;
+use app\common\dao\user\UserOpenIdRelationDao;
 use app\common\model\platform\PlatformCouponReceive;
 use app\common\model\store\RefundTask;
 use app\common\model\wechat\WechatUser;
@@ -883,6 +884,21 @@ class Auth extends BaseController
 
         $tokenInfo = $userRepository->createToken($user);
         $userRepository->loginAfter($user);
+
+        $userOpenidRelationData = [
+            'routine_openid' => $data['openid'],
+            'unionid' => $data['unionid'] ?? "",
+            'appid' => $appid,
+            'wechat_user_id' => $wechat_user_id,
+        ];
+        (new UserOpenIdRelationDao())->createOrUpdate(
+            [
+                'routine_openid' => $data['openid'],
+                'appid' => $appid,
+            ],
+            $userOpenidRelationData
+        );
+
         return app('json')->status(200, $userRepository->returnToken($user, $tokenInfo,$auth['auth']['code']??''));
     }
 
