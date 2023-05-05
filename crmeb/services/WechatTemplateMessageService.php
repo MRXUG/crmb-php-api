@@ -13,6 +13,8 @@
 
 namespace crmeb\services;
 
+use app\common\model\user\User;
+use app\common\model\user\UserOpenIdRelation;
 use app\common\repositories\store\order\StoreGroupOrderRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
 use app\common\repositories\store\order\StoreOrderStatusRepository;
@@ -80,18 +82,20 @@ class WechatTemplateMessageService
         event('wechat.subscribeTemplate.before',compact('data'));
         $res = $this->subscribeTemplateMessage($data);
         if(!$res || !is_array($res))return true;
-
+        $appId = systemConfig('routine_appId');
         foreach($res as $item){
             if(is_array($item['uid'])){
                 foreach ($item['uid'] as $value){
-                    $openid = $this->getUserOpenID($value,'min');
+//                    $openid = $this->getUserOpenID($value,'min');
+                    $openid = $this->newGetUserOpenId($value,$appId);
                     if (!$openid) {
                         continue;
                     }
                     $this->send($openid,$item['tempCode'],$item['data'],'subscribe',$item['link'],$item['color']);
                 }
             }else{
-                $openid = $this->getUserOpenID($item['uid'],'min');
+//                $openid = $this->getUserOpenID($item['uid'],'min');
+                $openid = $this->newGetUserOpenId($item['uid'],$appId);
                 if (!$openid) {
                     continue;
                 }
@@ -99,6 +103,11 @@ class WechatTemplateMessageService
             }
         }
         event('wechat.subscribeTemplate',compact('res'));
+    }
+
+    public function newGetUserOpenId($uid = 0,$appid = ''){
+        $wuid = User::getDB()->where("uid","=",$uid)->value("wechat_user_id");
+        return UserOpenIdRelation::getDB()->where("appid","=",$appid)->where("wechat_user_id","=",$wuid)->value("routine_openid");
     }
 
     /**
