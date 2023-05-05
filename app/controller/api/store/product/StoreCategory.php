@@ -104,7 +104,7 @@ class StoreCategory extends BaseController
                     foreach ($v['children'] ?? [] as $kk => $vv) {
                         $children2[] = $vv;
                     }
-
+                    $v['children'] = $children2;
                     $children1[] = $v;
                     $ret[$key]['children'][$k]['children'] = $children2;
                 }
