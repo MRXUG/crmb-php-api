@@ -62,8 +62,8 @@ class Subscribe extends BaseMessage
         try {
 
             //查询appid
-//            $appId = systemConfig('routine_appId');
-            $appId = 'wx3ed327fd1af68e86';
+            $appId = systemConfig('routine_appId');
+//            $appId = 'wx3ed327fd1af68e86';
             if (!$appId) return;
 //            $res = MiniProgramService::create(0,$appId)->sendSubscribeTemlate($this->openId, $tempid, $data, $this->toUrl);;
 //            $this->clear();
