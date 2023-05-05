@@ -64,11 +64,11 @@ class StoreCategory extends BaseController
                     # 检查三级是否存在分类商品
                     foreach ($v['children'] ?? [] as $kk => $vv) {
                         if (($vv['goods_count'] ?? 0) <= 0) {
-                            unset($v['children'][$kk]);
+                            unset($ret[$key]['children'][$k]['children'][$kk]);
                         }
                     }
 
-                    if (empty($v['children'])) unset($item['children'][$k]);
+                    if (empty($v['children']))  unset($ret[$key]['children'][$k]['children'][$kk]);
                 }
                 if (empty($item['children'])) unset($ret[$key]);
             }
