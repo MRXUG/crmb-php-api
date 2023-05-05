@@ -544,7 +544,7 @@ class Auth extends BaseController
 
                     $component_appid = env('WECHAT.OPEN_PLATFORM_APPID', '');
 
-                    $userInfoCong =  $openPlatformRepository->thirdpartyCode2Session($appid,$component_appid,$auth['code']);
+                    $userInfoCong =  $openPlatformRepository->thirdpartyCode2Session($appid,$component_appid,$code);
                     if (!isset($userInfoCong['unionid'])) throw new ValidateException('授权失败,参数有误');
 
 
