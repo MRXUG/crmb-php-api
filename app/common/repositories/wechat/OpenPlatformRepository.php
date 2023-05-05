@@ -1368,11 +1368,10 @@ class OpenPlatformRepository extends BaseRepository
                 'template_id'=>$templateId,
                 'page'=>$toUrl,
                 'touser'=>$openId,
-                'data'=>json_encode($newData),
+                'data'=>($newData),
                 'miniprogram_state'=>'formal',
                 'lang'=>'zh_CN',
             ]);
-            var_dump($res);
 
             return $res;
         } catch (\Exception $e) {
