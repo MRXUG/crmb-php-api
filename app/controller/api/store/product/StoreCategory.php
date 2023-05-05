@@ -104,7 +104,7 @@ class StoreCategory extends BaseController
                         }
                     }
 
-                    if (empty($v['children']))  unset($ret[$key]['children'][$k]);
+                    if (empty($v['children']))  unset($ret[$key]['children'][$k]['children']);
                 }
                 if (empty($item['children'])) unset($ret[$key]);
             }
