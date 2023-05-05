@@ -860,7 +860,7 @@ class Auth extends BaseController
         $component_appid = env('WECHAT.OPEN_PLATFORM_APPID', '');
 
         $data =  $openPlatformRepository->thirdpartyCode2Session($appid,$component_appid,$js_code);
-        if (!$data['unionid'])return app('json')->fail('用户授权失败');
+        if (!isset($data['unionid']))return app('json')->fail($data['errmsg']);
 
 
         //查询wechat_user_id
