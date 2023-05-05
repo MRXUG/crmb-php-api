@@ -863,15 +863,15 @@ class Auth extends BaseController
 
 
     public function thirdpartyCode2Session(){
-        $appid = $this->request->appid();
-        $auth = $this->request->param('auth', '');
+        $appid = $this->request->param("appid");
+        $js_code = $this->request->param('js_code', '');
 
         //调用微信接口
         $openPlatformRepository = app()->make(OpenPlatformRepository::class);
 
         $component_appid = env('WECHAT.OPEN_PLATFORM_APPID', '');
 
-        $data =  $openPlatformRepository->thirdpartyCode2Session($appid,$component_appid,$auth['code']);
+        $data =  $openPlatformRepository->thirdpartyCode2Session($appid,$component_appid,$js_code);
         if (!isset($data['unionid']))return app('json')->fail($data['errmsg']);
 
 
