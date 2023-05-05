@@ -86,27 +86,29 @@ class StoreCategory extends BaseController
                         }
                     }
 
-                    if (empty($v['children']))  unset($ret[$key]['children']);
+                    if (empty($v['children']))  unset($ret[$key]['children'][$k]);
                 }
                 if (empty($item['children'])) unset($ret[$key]);
+
             }
         }
 
 
         foreach ($ret as $key => $item) {
             if (isset($item['children'])) {
+                $children1 = [];
                 # 处理二级
                 foreach ($item['children'] as $k => $v) {
+                    $children2 = [];
                     # 检查三级是否存在分类商品
                     foreach ($v['children'] ?? [] as $kk => $vv) {
-                        if (($vv['goods_count'] ?? 0) <= 0) {
-                            unset($ret[$key]['children'][$k]['children'][$kk]);
-                        }
+                        $children2[] = $vv;
                     }
 
-                    if (empty($v['children']))  unset($ret[$key]['children'][$k]['children']);
+                    $children1[] = $v;
+                    $ret[$key]['children'][$k]['children'] = $children2;
                 }
-                if (empty($item['children'])) unset($ret[$key]);
+                $ret[$key]['children'] = $children1;
             }
         }
 
