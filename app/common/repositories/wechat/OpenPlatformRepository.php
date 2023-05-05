@@ -1364,7 +1364,7 @@ class OpenPlatformRepository extends BaseRepository
                 $newData[$k]['value'] = $v;
             }
 
-            $data = sendRequest('post', $url,[
+            $res = sendRequest('post', $url,[
                 'template_id'=>$templateId,
                 'page'=>$toUrl,
                 'touser'=>$openId,
@@ -1372,8 +1372,9 @@ class OpenPlatformRepository extends BaseRepository
                 'miniprogram_state'=>'formal',
                 'lang'=>'zh_CN',
             ]);
+            var_dump($res);
 
-            return $data;
+            return $res;
         } catch (\Exception $e) {
             Log::error('发送给openid为:' . $openId . '小程序订阅消息失败,模板id为:' . $templateId . ';错误原因为:' . $e->getMessage());
 
