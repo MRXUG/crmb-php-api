@@ -608,10 +608,10 @@ class WechatTemplateMessageService
                     'tempCode' => 'ORDER_PAY_SUCCESS',
                     'uid' => $res->uid,
                     'data' => [
-                        'character_string1' => '7897979',
-                        'amount2' => '0.2',
-                        'date3' => '2020-01-01 04:04:04',
-                        'amount5' => '0.2',
+                        'character_string1' => $res->group_order_sn,
+                        'amount2' => $res->pay_price,
+                        'date3' => $res->pay_time,
+                        'amount5' => $res->total_price,
                     ],
                     'link' => 'pages/users/order_list/index?status=1',
                     'color' => null
