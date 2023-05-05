@@ -1363,11 +1363,17 @@ class OpenPlatformRepository extends BaseRepository
             $token = $this->getAuthorizerToken($appid);
             $url = 'https://api.weixin.qq.com/cgi-bin/message/subscribe/send'. '?access_token='.$token;
 
+            $newData = [];
+            foreach ($data as $k=>$v){
+                $newData[$k]['value'] = $v;
+            }
+            var_dump(json_encode($newData));
+
             $data = sendRequest('post', $url,[
                 'template_id'=>$templateId,
                 'page'=>$toUrl,
                 'touser'=>$openId,
-                'data'=>$data,
+                'data'=>json_encode($newData),
                 'miniprogram_state'=>'formal',
                 'lang'=>'zh_CN',
             ]);
