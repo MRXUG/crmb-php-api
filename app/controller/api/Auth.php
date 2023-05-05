@@ -851,7 +851,7 @@ class Auth extends BaseController
 
 
     public function thirdpartyCode2Session(){
-        $appid = $this->request->param('appid', '');
+        $appid = $this->request->appid();
         $js_code = $this->request->param('js_code', '');
 
         //调用微信接口
