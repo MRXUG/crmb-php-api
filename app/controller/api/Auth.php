@@ -535,7 +535,19 @@ class Auth extends BaseController
             if ($code && !$userInfoCong) {
                 try {
                     // $userInfoCong里有session_key、openid、unionid(可能无)
-                    $userInfoCong = $miniProgramService->getUserInfo($code);
+//                    $userInfoCong = $miniProgramService->getUserInfo($code);
+
+                    $appid = $this->request->appid();
+
+                    //调用微信接口
+                    $openPlatformRepository = app()->make(OpenPlatformRepository::class);
+
+                    $component_appid = env('WECHAT.OPEN_PLATFORM_APPID', '');
+
+                    $userInfoCong =  $openPlatformRepository->thirdpartyCode2Session($appid,$component_appid,$auth['code']);
+                    if (!isset($userInfoCong['unionid'])) throw new ValidateException('授权失败,参数有误');
+
+
                     Cache::set('eb_api_code_' . $code, $userInfoCong, 86400);
                 } catch (Exception $e) {
                     Log::error("获取session_key失败，请检查您的配置！". json_encode([
@@ -852,14 +864,14 @@ class Auth extends BaseController
 
     public function thirdpartyCode2Session(){
         $appid = $this->request->appid();
-        $js_code = $this->request->param('js_code', '');
+        $auth = $this->request->param('auth', '');
 
         //调用微信接口
         $openPlatformRepository = app()->make(OpenPlatformRepository::class);
 
         $component_appid = env('WECHAT.OPEN_PLATFORM_APPID', '');
 
-        $data =  $openPlatformRepository->thirdpartyCode2Session($appid,$component_appid,$js_code);
+        $data =  $openPlatformRepository->thirdpartyCode2Session($appid,$component_appid,$auth['code']);
         if (!isset($data['unionid']))return app('json')->fail($data['errmsg']);
 
 
