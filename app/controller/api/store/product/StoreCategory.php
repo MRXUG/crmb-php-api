@@ -75,6 +75,42 @@ class StoreCategory extends BaseController
         }
 
 
+        foreach ($ret as $key => $item) {
+            if (isset($item['children'])) {
+                # 处理二级
+                foreach ($item['children'] as $k => $v) {
+                    # 检查三级是否存在分类商品
+                    foreach ($v['children'] ?? [] as $kk => $vv) {
+                        if (($vv['goods_count'] ?? 0) <= 0) {
+                            unset($ret[$key]['children'][$k]['children'][$kk]);
+                        }
+                    }
+
+                    if (empty($v['children']))  unset($ret[$key]['children']);
+                }
+                if (empty($item['children'])) unset($ret[$key]);
+            }
+        }
+
+
+        foreach ($ret as $key => $item) {
+            if (isset($item['children'])) {
+                # 处理二级
+                foreach ($item['children'] as $k => $v) {
+                    # 检查三级是否存在分类商品
+                    foreach ($v['children'] ?? [] as $kk => $vv) {
+                        if (($vv['goods_count'] ?? 0) <= 0) {
+                            unset($ret[$key]['children'][$k]['children'][$kk]);
+                        }
+                    }
+
+                    if (empty($v['children']))  unset($ret[$key]['children'][$k]);
+                }
+                if (empty($item['children'])) unset($ret[$key]);
+            }
+        }
+
+
         $data['list'] = array_merge($ret, []);
         return app('json')->success($data);
     }
