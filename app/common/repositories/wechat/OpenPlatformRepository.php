@@ -1330,9 +1330,9 @@ class OpenPlatformRepository extends BaseRepository
 
             $data = sendRequest('get', $url,[]);
 
-            if (!isset($data['unionid'])){
-                throw new WechatException('获取用户unionid失败');
-            }
+//            if (!isset($data['unionid'])){
+//                throw new WechatException('获取用户unionid失败');
+//            }
 
 
             return $data;
