@@ -971,7 +971,7 @@ class StoreOrderRepository extends BaseRepository
             $orderGroup->total_price = $_group['total_price'];
             $orderGroup->pay_price = $_group['pay_price'];
             $orderGroup->pay_postage = $_group['pay_postage'];
-            $orderGroup->group_order_sn = $this->getNewOrderId() . '0';
+//            $orderGroup->group_order_sn = $this->getNewOrderId() . '0';
             $orderGroup->save();
 
             $this->dao->update($id, $data);
