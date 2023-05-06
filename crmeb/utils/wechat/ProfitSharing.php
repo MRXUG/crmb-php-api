@@ -6,6 +6,7 @@ use app\common\dao\store\order\StoreOrderDao;
 use app\common\model\delivery\DeliveryProfitSharingStatus;
 use app\common\model\store\order\StoreRefundOrder;
 use app\common\model\store\RefundTask;
+use app\common\repositories\delivery\DeliveryProfitSharingStatusRepository;
 use app\common\repositories\store\order\StoreRefundStatusRepository;
 use crmeb\jobs\SplitReturnResultJob;
 use crmeb\services\WechatService;
@@ -33,6 +34,10 @@ class ProfitSharing
             ->leftJoin('eb_store_order b', 'a.order_id = b.order_id')
             ->where('a.refund_order_id', $refundOrderId)
             ->find();
+
+        /** @var DeliveryProfitSharingStatusRepository $make */
+        $make = app()->make(DeliveryProfitSharingStatusRepository::class);
+        $info = $make->getProfitSharingStatus($refundOrder['order_id']);
         # 检测是否二次提交
         if (RefundTask::getInstance()->where('refund_order_id', $refundOrderId)->count('refund_task_id') > 0) {
             /** @var StoreRefundStatusRepository $statusRepository */
@@ -50,7 +55,7 @@ class ProfitSharing
         # 创建用来定时循环获取回退分账结果的基础数据
         $refundBaseData = [];
         # 判断是否立即付款
-        if (!$immediatelyRefund) {
+        if (!empty($info)) {
             # 获取分账状态信息表数据
             /** @var DeliveryProfitSharingStatus[] $deliveryProfit */
             $deliveryProfit = DeliveryProfitSharingStatus::getDB()
