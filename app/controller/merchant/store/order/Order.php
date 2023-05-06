@@ -444,6 +444,7 @@ class Order extends BaseController
                 'ad_account_id',
                 'ad_id',
                 'mer_name',
+                'ids',
             ]
         );
         //没有这个参数

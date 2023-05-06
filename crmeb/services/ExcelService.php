@@ -140,6 +140,12 @@ class ExcelService
         $status = $where['status'];
         $del = $where['mer_id'] > 0 ? 0 : null;
         unset($where['status']);
+
+        if (!empty($where['ids'])){
+            $where['order_ids'] = explode(',',$where['ids']);
+
+        }
+
         $query = $make->search($where, $del)->where($make->getOrderType($status))->with([
             'orderProduct',
             'merchant' => function ($query) {

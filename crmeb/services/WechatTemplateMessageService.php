@@ -791,7 +791,7 @@ class WechatTemplateMessageService
                         'amount3' =>$res['refund_price'],
                         'thing10' => $thing10,
                     ],
-                    'link' =>  rtrim(systemConfig('site_url'), '/').'/pages/users/refund/detail?id='.$id,
+                    'link' =>  'pages/users/refund/detail?id='.$id,
                     'color' => null
                 ];
                 break;
