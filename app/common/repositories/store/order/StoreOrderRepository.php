@@ -1254,7 +1254,6 @@ class StoreOrderRepository extends BaseRepository
         if ($order['is_virtual'] && $data['delivery_type'] != 3)
             throw new ValidateException('虚拟商品只能虚拟发货');
         $statusRepository = app()->make(StoreOrderStatusRepository::class);
-        var_dump($data['delivery_name']);
         switch ($data['delivery_type']) {
             case 1:
                 $exprss = app()->make(ExpressRepository::class)->getWhere(['code' => $data['delivery_name']]);
