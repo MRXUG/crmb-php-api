@@ -55,7 +55,7 @@ class ProfitSharing
         # 创建用来定时循环获取回退分账结果的基础数据
         $refundBaseData = [];
         # 判断是否立即付款
-        if (!$immediatelyRefund && !empty($info)) {
+        if (!empty($info)) {
             # 获取分账状态信息表数据
             /** @var DeliveryProfitSharingStatus[] $deliveryProfit */
             $deliveryProfit = DeliveryProfitSharingStatus::getDB()
