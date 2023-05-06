@@ -46,7 +46,7 @@ class RefundTask extends BaseModel
         $statusRepository->status(
             $this->getAttr('refund_order_id'),
             $statusRepository::REFUND_FAILED,
-            "退款失败: {$msg} 展示微信回调的失败原因"
+            "退款失败: {$msg}"
         );
         # 变更退款状态
         StoreRefundOrder::getInstance()->where('refund_order_id', $this->getAttr('refund_order_id'))->update([
