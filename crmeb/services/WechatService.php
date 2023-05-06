@@ -593,7 +593,7 @@ class WechatService
             Log::info('微信支付成功回调' . var_export($notify, 1));
             if (!$successful) return false;
             try {
-                event('pay_success_' . $notify['attach'], ['order_sn' => $notify['out_trade_no'], 'data' => $notify, 'is_combine' => 0]);
+                event('pay_success_' . $notify['attach'], ['order_sn' => $notify['out_trade_no'], 'data' => $notify, 'is_combine' => 1]);
             } catch (\Exception $e) {
                 Log::info('微信支付回调失败:' . $e->getMessage());
                 return false;
