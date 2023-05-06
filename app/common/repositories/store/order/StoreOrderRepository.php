@@ -1285,6 +1285,7 @@ class StoreOrderRepository extends BaseRepository
         }
 
         event('order.delivery.before', compact('order', 'data'));
+        $data['delivery_time'] = date("Y-m-d H:i:s");
         $this->dao->update($id, $data);
 
         //虚拟发货后用户直接确认收获
