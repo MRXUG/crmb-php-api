@@ -34,6 +34,10 @@ class ProfitSharing
             ->leftJoin('eb_store_order b', 'a.order_id = b.order_id')
             ->where('a.refund_order_id', $refundOrderId)
             ->find();
+
+        /** @var DeliveryProfitSharingStatusRepository $make */
+        $make = app()->make(DeliveryProfitSharingStatusRepository::class);
+        $info = $make->getProfitSharingStatus($refundOrder['order_id']);
         # 检测是否二次提交
         if (RefundTask::getInstance()->where('refund_order_id', $refundOrderId)->count('refund_task_id') > 0) {
             /** @var StoreRefundStatusRepository $statusRepository */
@@ -51,7 +55,7 @@ class ProfitSharing
         # 创建用来定时循环获取回退分账结果的基础数据
         $refundBaseData = [];
         # 判断是否立即付款
-        if (!$immediatelyRefund) {
+        if (!$immediatelyRefund && !empty($info)) {
             # 获取分账状态信息表数据
             /** @var DeliveryProfitSharingStatus[] $deliveryProfit */
             $deliveryProfit = DeliveryProfitSharingStatus::getDB()
@@ -76,29 +80,23 @@ class ProfitSharing
                 if ($item->getAttr('profit_sharing_status') == DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_ING){
                     continue;
                 }
-                # 如果分过帐那么调用分账退回
-                /** @var DeliveryProfitSharingStatusRepository $make */
-                $make = app()->make(DeliveryProfitSharingStatusRepository::class);
-                $info = $make->getProfitSharingStatus($item['order_id']);
-                if (!empty($info)) {
-                    # 商户支付对象 调用分账退回 保证所有的 分账都是在申请回退状态
-                    WechatService::getMerPayObj($item['mer_id'], $item['app_id'])
-                        ->profitSharing()
-                        ->profitSharingReturn([
-                            'out_order_no' => $item['order_sn'],
-                            'out_return_no' => $item['order_sn'],
-                            'return_mchid' => $item['mch_id'],
-                            'amount' => $item['amount'],
-                            'description' => '用户退款 回退'
-                        ]);
-                    # 将发起退回的订单标记为正在退回
-                    DeliveryProfitSharingStatus::getDB()->where([
-                        'order_id' => $item['order_id'],
-                        'mch_id' => $item['mch_id']
-                    ])->update([
-                        'profit_sharing_status' => DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_ING
+                # 商户支付对象 调用分账退回 保证所有的 分账都是在申请回退状态
+                WechatService::getMerPayObj($item['mer_id'], $item['app_id'])
+                    ->profitSharing()
+                    ->profitSharingReturn([
+                        'out_order_no' => $item['order_sn'],
+                        'out_return_no' => $item['order_sn'],
+                        'return_mchid' => $item['mch_id'],
+                        'amount' => $item['amount'],
+                        'description' => '用户退款 回退'
                     ]);
-                }
+                # 将发起退回的订单标记为正在退回
+                DeliveryProfitSharingStatus::getDB()->where([
+                    'order_id' => $item['order_id'],
+                    'mch_id' => $item['mch_id']
+                ])->update([
+                    'profit_sharing_status' => DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_ING
+                ]);
             }
         }
         # 调用分账退回定时查询
