@@ -829,7 +829,7 @@ class StoreRefundOrderRepository extends BaseRepository
             $this->getProductRefundNumber($res, 1);
             $refund = $res;
             if ($res['refund_type'] == 1) {
-                $refund = $this->doRefundPrice($id, $_refund_price);
+//                $refund = $this->doRefundPrice($id, $_refund_price);
                 $data['status'] = 4;
                 # 添加退款记录
                 /** @var StoreRefundStatusRepository $statusRepository */
