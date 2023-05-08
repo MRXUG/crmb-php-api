@@ -545,6 +545,7 @@ class Auth extends BaseController
 
                     $userInfoCong =  $openPlatformRepository->thirdpartyCode2Session($appid,$code);
                     if (!isset($userInfoCong['session_key'])) throw new ValidateException('授权失败,参数有误');
+                    if (!isset($userInfoCong['unionid'])) throw new ValidateException('授权失败,参数有误');
 
 
                     Cache::set('eb_api_code_' . $code, $userInfoCong, 86400);
@@ -871,10 +872,11 @@ class Auth extends BaseController
 
         $data =  $openPlatformRepository->thirdpartyCode2Session($appid,$js_code);
         if (!isset($data['session_key']))return app('json')->status(400,'授权失败');
+        if (!isset($data['unionid']))return app('json')->status(400,'授权失败');
 
 
         //查询wechat_user_id
-        $wechat_user_id = WechatUser::getDB()->where("routine_openid","=",$data['openid'])->value("wechat_user_id");
+        $wechat_user_id = WechatUser::getDB()->where("unionid","=",$data['unionid'])->value("wechat_user_id");
         if (!$wechat_user_id)   return app('json')->status(400,"用户不存在");
         $userRepository = app()->make(UserRepository::class);
         $user = $userRepository->wechatUserIdBytUser($wechat_user_id);
