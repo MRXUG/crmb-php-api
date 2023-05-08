@@ -690,7 +690,7 @@ class WechatTemplateMessageService
                         'amount3' => $res->refund_price,
                         'thing13' => $thing13,
                     ],
-                    'link' => 'pages/index/index',
+                    'link' => 'pages/users/refund/detail?id='.$id,
                     'color' => null
                 ];
                 break;
