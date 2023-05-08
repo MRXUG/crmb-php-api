@@ -483,7 +483,7 @@ class Order extends BaseController
      */
     public function deliveryExport()
     {
-        $where = $this->request->params(['username', 'date', 'activity_type', 'order_type', 'username', 'keywords', 'id']);
+        $where = $this->request->params(['username', 'date', 'activity_type', 'order_type', 'username', 'keywords', 'id','ids']);
         $where['mer_id'] = $this->request->merId();
         $where['status'] = 0;
         $where['paid'] = 1;

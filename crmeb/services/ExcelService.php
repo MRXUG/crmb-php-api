@@ -323,6 +323,12 @@ class ExcelService
     {
         $make = app()->make(StoreOrderRepository::class);
         $where['order_type'] = 0;
+
+        if (!empty($where['ids'])){
+            $where['order_ids'] = explode(',',$where['ids']);
+
+        }
+
         $query = $make->search($where)->with(['orderProduct'])->order('order_id ASC');
         $header = ['订单编号','物流编码',  '物流公司', '物流单号', '发货地址', '用户信息', '手机号', '商品信息', '支付时间'];
         $title = [
