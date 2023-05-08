@@ -878,7 +878,7 @@ class Auth extends BaseController
 
         //查询wechat_user_id
         $wechat_user_id = WechatUser::getDB()->where("unionid","=",$data['unionid'])->value("wechat_user_id");
-        if (!$wechat_user_id)   return app('json')->fail('用户不存在');
+        if (!$wechat_user_id)   return app('json')->status(400,"用户不存在");
         $userRepository = app()->make(UserRepository::class);
         $user = $userRepository->wechatUserIdBytUser($wechat_user_id);
 
