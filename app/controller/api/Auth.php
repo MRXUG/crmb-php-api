@@ -544,6 +544,7 @@ class Auth extends BaseController
                     $openPlatformRepository = app()->make(OpenPlatformRepository::class);
 
                     $userInfoCong =  $openPlatformRepository->thirdpartyCode2Session($appid,$code);
+                    var_dump($userInfoCong);
                     if (!isset($userInfoCong['unionid'])) throw new ValidateException('授权失败,参数有误');
 
 
