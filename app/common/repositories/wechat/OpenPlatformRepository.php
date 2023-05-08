@@ -1323,8 +1323,9 @@ class OpenPlatformRepository extends BaseRepository
         }
     }
 
-    public function thirdpartyCode2Session($appid='',$componentAppid = '',$js_code =''){
+    public function thirdpartyCode2Session($appid='',$js_code =''){
         try {
+            $componentAppid = $this->component_appid;
             $token = $this->getComponentToken();
             $url = 'https://api.weixin.qq.com/sns/component/jscode2session?component_access_token='.$token.'&appid='.$appid.'&grant_type=authorization_code&component_appid='.$componentAppid.'&js_code='.$js_code;
 

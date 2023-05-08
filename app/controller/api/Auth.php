@@ -543,9 +543,7 @@ class Auth extends BaseController
                     //调用微信接口
                     $openPlatformRepository = app()->make(OpenPlatformRepository::class);
 
-                    $component_appid = env('WECHAT.OPEN_PLATFORM_APPID', '');
-
-                    $userInfoCong =  $openPlatformRepository->thirdpartyCode2Session($appid,$component_appid,$code);
+                    $userInfoCong =  $openPlatformRepository->thirdpartyCode2Session($appid,$code);
                     if (!isset($userInfoCong['unionid'])) throw new ValidateException('授权失败,参数有误');
 
 
@@ -870,9 +868,8 @@ class Auth extends BaseController
         //调用微信接口
         $openPlatformRepository = app()->make(OpenPlatformRepository::class);
 
-        $component_appid = env('WECHAT.OPEN_PLATFORM_APPID', '');
 
-        $data =  $openPlatformRepository->thirdpartyCode2Session($appid,$component_appid,$js_code);
+        $data =  $openPlatformRepository->thirdpartyCode2Session($appid,$js_code);
         if (!isset($data['unionid']))return app('json')->status(400,'授权失败');
 
 
