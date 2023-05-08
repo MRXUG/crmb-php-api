@@ -558,7 +558,7 @@ class StoreOrderRepository extends BaseRepository
         $noDeliver = $this->dao->search(['uid' => $uid, 'status' => 1, 'paid' => 1])->where('StoreOrder.is_del', 0)->count();
         $noComment = $this->dao->search(['uid' => $uid, 'status' => 2, 'paid' => 1,'is_user' => 1])->where('StoreOrder.is_del', 0)->count();
         $done = $this->dao->search(['uid' => $uid, 'status' => 3, 'paid' => 1,'is_user' => 1])->where('StoreOrder.is_del', 0)->count();
-        $refund = app()->make(StoreRefundOrderRepository::class)->getWhereCount(['uid' => $uid, 'status' => [0, 1, 2]]);
+        $refund = app()->make(StoreRefundOrderRepository::class)->getWhereCount(['uid' => $uid, 'status' => [0, 1, 2, 4, 5]]);
         //$orderPrice = $this->dao->search(['uid' => $uid, 'paid' => 1])->sum('pay_price');
         $orderCount = $this->dao->search(['uid' => $uid, 'paid' => 1,'is_user' => 1])->count();
         return compact('noComment', 'done', 'refund', 'noDeliver', 'noPay', 'noPostage', 'orderCount', 'all');
