@@ -480,6 +480,11 @@ class Client extends BaseClient
                     'end_time' => date(DATE_RFC3339, strtotime($endTime)),
                 ]
             ];
+
+            if (strtotime($endTime) > (strtotime($params['end_at']) + $jiaTime)){
+                $couponData['coupon_use_rule']['coupon_available_time']['available_end_time'] = date(DATE_RFC3339, strtotime($endTime));
+            }
+
             $couponAvailableTime['irregulary_avaliable_time'] = $irregularyAvaliableTime;
         } elseif ($params['type_date'] == CouponStocks::DATE_N) {
             // 日期区间内，用户领券后需等待x天开始生效。例如领券后当天开始生效则无需填写
