@@ -404,13 +404,10 @@ class Client extends BaseClient
         // 随机获取一个健康商户
         $mchId = $merchantConfig['payment']['merchant_id'];
 
+        $atime = $params['wait_days_after_receive'] + $params['available_day_after_receive'];
         $jiaTime = 0;
-        if ($params['wait_days_after_receive']  > 0){
-            $jiaTime = $params['wait_days_after_receive'] * (60*60*24);
-        }
-
-        if ($params['available_day_after_receive']  > 0){
-            $jiaTime = $params['available_day_after_receive'] * (60*60*24);
+        if ($atime  > 0){
+            $jiaTime = $atime * (60*60*24);
         }
 
         $couponData = [
