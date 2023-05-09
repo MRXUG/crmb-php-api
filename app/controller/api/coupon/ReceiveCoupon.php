@@ -162,7 +162,7 @@ class ReceiveCoupon extends BaseController
             // 开始
             $startTime = date('Y-m-d', strtotime("+$waitDaysAfterReceive day")).' 00:00:00';
             // 结束
-            $delay = $waitDaysAfterReceive + $availableDayAfterReceive;
+            $delay = $waitDaysAfterReceive + $availableDayAfterReceive - 1;
             $endTime = date('Y-m-d', strtotime("+$delay day")).' 23:59:59';
         } else if ($typeData == 2 || $typeData == 4) {
             try {
