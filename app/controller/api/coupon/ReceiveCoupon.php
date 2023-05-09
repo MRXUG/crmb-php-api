@@ -77,18 +77,18 @@ class ReceiveCoupon extends BaseController
 
             // 计算券的开始和结束时间
             // 券开始核销时间
-            $availableTime = $stockInfo['start_at'];
+            $availableTime = date("Y-m-d",strtotime($stockInfo['start_at'])).' 00:00:00';
             // 券停止核销时间
-            $unAvailableTime = $stockInfo['end_at'];
+            $unAvailableTime = date("Y-m-d",strtotime($stockInfo['end_at'])).' 23:59:59';
             // 领取后N天内有效
             $availableDayAfterReceive = (int)$stockInfo['available_day_after_receive'] ?: 0;
             // 领取第N天后生效
             $waitDaysAfterReceive = (int)$stockInfo['wait_days_after_receive'] ?: 0;
             // 开始
-            $startTime = date('Y-m-d H:i:s', strtotime("+$waitDaysAfterReceive day"));
+            $startTime = date('Y-m-d', strtotime("+$waitDaysAfterReceive day")).' 00:00:00';
             // 结束
             $delay = $waitDaysAfterReceive + $availableDayAfterReceive;
-            $endTime = date('Y-m-d H:i:s', strtotime("+$delay day"));
+            $endTime = date('Y-m-d', strtotime("+$delay day")).' 23:59:59';
             $start = $waitDaysAfterReceive == 0 ? $availableTime : ($startTime > $availableTime ? $startTime : $availableTime);
             $end = $availableDayAfterReceive == 0 ? $unAvailableTime : ($endTime < $unAvailableTime ? $endTime : $unAvailableTime);
 
@@ -160,16 +160,16 @@ class ReceiveCoupon extends BaseController
         if ($typeData == 1 || $typeData == 3) {
             // 领券后立即生效天数 领券N天后立即生效天数
             // 开始
-            $startTime = date('Y-m-d H:i:s', strtotime("+$waitDaysAfterReceive day"));
+            $startTime = date('Y-m-d', strtotime("+$waitDaysAfterReceive day")).' 00:00:00';
             // 结束
             $delay = $waitDaysAfterReceive + $availableDayAfterReceive;
-            $endTime = date('Y-m-d H:i:s', strtotime("+$delay day"));
+            $endTime = date('Y-m-d', strtotime("+$delay day")).' 23:59:59';
         } else if ($typeData == 2 || $typeData == 4) {
             try {
                 // 开始
-                $startTime = $dateRange[0];
+                $startTime = date('Y-m-d', strtotime($dateRange[0])).' 00:00:00';
                 // 结束
-                $endTime = $dateRange[1];
+                $endTime = date('Y-m-d', strtotime($dateRange[1])).' 00:00:00';
             } catch (\Throwable $th) {
                 throw new ValidateException('券核销时间异常');
             }
@@ -228,7 +228,7 @@ class ReceiveCoupon extends BaseController
 
 
     public function isPlatformCoupon($item,$uid,$type){
-        $date = date('Y-m-d H:i:s');
+        $date = date('Y-m-d').' 00:00:00';
 
         /**
          * @var BuildCouponRepository $buildCouponRepository
@@ -262,7 +262,7 @@ class ReceiveCoupon extends BaseController
             'discount_num'     => $stockInfo['discount_num'],
             'stock_id'    => $stockId,
             'start_use_time'    => $date,
-            'end_use_time'      => date('Y-m-d H:i:s',strtotime($date) + ($stockInfo['effective_day_number']*60*60*24)),
+            'end_use_time'      => date('Y-m-d',time() + ($stockInfo['effective_day_number']*60*60*24)).' 23:59:59' ,
             'appid'      => $out_request_no[0],
             'mch_id'      => $out_request_no[1],
             'use_type'      =>$type,

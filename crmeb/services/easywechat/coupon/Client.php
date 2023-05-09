@@ -342,6 +342,12 @@ class Client extends BaseClient
 
         $miniAppPath = "/pages/columnGoods/goods_coupon_list/index?coupon_id={$coupon->getAttr('platform_coupon_id')}&type=3";
 
+        $effective_day_number = $coupon->getAttr('effective_day_number');
+        $jiaTime = 0;
+        if ($effective_day_number  > 0){
+            $jiaTime = $effective_day_number * (60*60*24);
+        }
+
         return [
             'out_request_no'   => $this->generateOutRequestNo($appId, $mchId),
             'belong_merchant'  => $mchId,
@@ -355,7 +361,7 @@ class Client extends BaseClient
                 'mini_programs_path'    => $miniAppPath,
                 'coupon_available_time' => [
                     'available_begin_time'        => date(DATE_RFC3339, strtotime($coupon->getAttr('receive_start_time'))),
-                    'available_end_time'          => date(DATE_RFC3339, strtotime($coupon->getAttr('receive_end_time'))),
+                    'available_end_time'          => date(DATE_RFC3339, strtotime($coupon->getAttr('receive_end_time')) + $jiaTime),
                     'available_day_after_receive' => (int) $coupon->getAttr('effective_day_number'),
                 ],
                 'fixed_normal_coupon' => [
@@ -398,6 +404,15 @@ class Client extends BaseClient
         // 随机获取一个健康商户
         $mchId = $merchantConfig['payment']['merchant_id'];
 
+        $jiaTime = 0;
+        if ($params['wait_days_after_receive']  > 0){
+            $jiaTime = $params['wait_days_after_receive'] * (60*60*24);
+        }
+
+        if ($params['available_day_after_receive']  > 0){
+            $jiaTime = $params['available_day_after_receive'] * (60*60*24);
+        }
+
         $couponData = [
             'out_request_no'   => $this->generateOutRequestNo($appId, $mchId),
             'belong_merchant'  => $mchId,
@@ -411,7 +426,7 @@ class Client extends BaseClient
                 'mini_programs_path'    => "/pages/columnGoods/goods_coupon_list/index?type={$params['type']}&mer_id={$params['mer_id']}",//需要携参券类型
                 'coupon_available_time' => [
                     'available_begin_time'        => date(DATE_RFC3339, strtotime($params['start_at'])),
-                    'available_end_time'          => date(DATE_RFC3339, strtotime($params['end_at'])),
+                    'available_end_time'          => date(DATE_RFC3339, strtotime($params['end_at']) + $jiaTime),
                 ],
                 'fixed_normal_coupon' => [
                     'discount_amount'     => (int)(bcmul($params['discount_num'], 100)), // 参数使用的单位是：元
