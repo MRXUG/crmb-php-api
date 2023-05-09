@@ -605,8 +605,8 @@ class StoreRefundOrderRepository extends BaseRepository
             'agree' => $this->dao->getWhereCount(['status' => 1]),
             'backgood' => $this->dao->getWhereCount(['status' => 2]),
             'end' => $this->dao->getWhereCount(['status' => 3]),
-            'refund_number' => $this->dao->getWhereCount(['is_system_del' => 0, 'mer_id' => $where['mer_id'], 'status' => 4]),
-            'refund_failed_number' => $this->dao->getWhereCount(['is_system_del' => 0, 'mer_id' => $where['mer_id'], 'status' => 5]),
+            'refund_number' => $this->dao->getWhereCount(['is_system_del' => 0,  'status' => 4]),
+            'refund_failed_number' => $this->dao->getWhereCount(['is_system_del' => 0, 'status' => 5]),
         ];
         return compact('count', 'list', 'stat');
     }
