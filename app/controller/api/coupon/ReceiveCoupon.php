@@ -169,7 +169,7 @@ class ReceiveCoupon extends BaseController
                 // 开始
                 $startTime = date('Y-m-d', strtotime($dateRange[0])).' 00:00:00';
                 // 结束
-                $endTime = date('Y-m-d', strtotime($dateRange[1])).' 00:00:00';
+                $endTime = date('Y-m-d', strtotime($dateRange[1])).' 23:59:59';
             } catch (\Throwable $th) {
                 throw new ValidateException('券核销时间异常');
             }
