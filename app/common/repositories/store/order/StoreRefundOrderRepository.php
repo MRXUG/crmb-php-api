@@ -559,9 +559,7 @@ class StoreRefundOrderRepository extends BaseRepository
     {
         $query = $this->dao->search($where)->where('status','<>',-2)->with(['order' => function ($query) {
             $query->field('order_id,order_sn,activity_type');
-        },  'refundTask' => function ($query) {
-            $query->where('status', 1)->order('refund_task_id', 'desc');
-        },'refundProduct.product', 'user' => function ($query) {
+        }, 'refundProduct.product', 'user' => function ($query) {
             $query->field('uid,nickname,phone');
         }]);
         $count = $query->count();
@@ -591,7 +589,9 @@ class StoreRefundOrderRepository extends BaseRepository
     {
         $query = $this->dao->search($where)->with(['order' => function ($query) {
             $query->field('order_id,order_sn,activity_type');
-        }, 'merchant' => function ($query) {
+        }, 'refundTask' => function ($query) {
+            $query->where('status', 1)->order('refund_task_id', 'desc');
+        },'merchant' => function ($query) {
             $query->field('mer_id,mer_name,is_trader');
         }, 'refundProduct.product', 'user' => function ($query) {
             $query->field('uid,nickname,phone');
