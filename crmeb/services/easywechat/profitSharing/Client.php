@@ -78,6 +78,8 @@ class Client extends BaseClient
             'unfreeze_unsplit' => $options['unfreeze_unsplit'],
             'receivers' => $options['receivers'],
         ];
+
+        \think\facade\Log::info("这是打印数据".json_encode($params));
         
         $content = json_encode($params, JSON_UNESCAPED_UNICODE);
         $res = $this->request(self::PROFIT_SHARING_ORDERS, 'POST', ['sign_body' => $content], false);
