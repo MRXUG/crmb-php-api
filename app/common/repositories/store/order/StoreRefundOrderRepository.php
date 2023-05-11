@@ -843,7 +843,7 @@ class StoreRefundOrderRepository extends BaseRepository
                     $statusRepository::CHANGE_REFUND_AGREE,
                     '退款审核已通过'
                 );
-                ProfitSharing::refund($id, [1 => true, 2 => false][$res->getAttr('refund_type')]);
+                ProfitSharing::refund($id);
 //                $statusRepository = app()->make(StoreRefundStatusRepository::class);
 //                $statusRepository->status($id, $statusRepository::CHANGE_REFUND_PRICE, '退款成功');
 //                $this->refundAfter($refund);
@@ -877,7 +877,7 @@ class StoreRefundOrderRepository extends BaseRepository
             $refundOrder->setAttr('status', 4);
             $refundOrder->save();
             # 重新发布退款
-            ProfitSharing::refund($id, [1 => true, 2 => false][$refundOrder->getAttr('refund_type')]);
+            ProfitSharing::refund($id);
         });
     }
 
@@ -1183,7 +1183,7 @@ class StoreRefundOrderRepository extends BaseRepository
                 $statusRepository::CHANGE_REFUND_AGREE,
                 '退款审核已通过'
             );
-            ProfitSharing::refund($id, [1 => true, 2 => false][$res->getAttr('refund_type')]);
+            ProfitSharing::refund($id);
 //            $refund = $this->doRefundPrice($id, 0);
 //            if ($refund) $this->refundAfter($refund);
         });
