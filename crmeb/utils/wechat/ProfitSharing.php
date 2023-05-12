@@ -34,6 +34,10 @@ class ProfitSharing
             ->where('a.refund_order_id', $refundOrderId)
             ->find();
 
+        @StoreRefundOrder::getDB()->where('refund_order_id', '=', $refundOrderId)->update([
+            'status' => 4
+        ]);
+
         /** @var DeliveryProfitSharingStatusRepository $make */
         $make = app()->make(DeliveryProfitSharingStatusRepository::class);
         $info = $make->getProfitSharingStatus($refundOrder['order_id']);
