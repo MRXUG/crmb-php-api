@@ -21,11 +21,10 @@ class ProfitSharing
     /**
      * 分账退回调用
      * @param int $refundOrderId 退款订单 id
-     * @param bool $immediatelyRefund 是否直接退款
      * @return void
      * @throws null
      */
-    public static function refund(int $refundOrderId, bool $immediatelyRefund = false): void
+    public static function refund(int $refundOrderId): void
     {
         # 获取退款订单信息
         $refundOrder = StoreRefundOrder::getDB()
@@ -34,6 +33,10 @@ class ProfitSharing
             ->leftJoin('eb_store_order b', 'a.order_id = b.order_id')
             ->where('a.refund_order_id', $refundOrderId)
             ->find();
+
+        @StoreRefundOrder::getDB()->where('refund_order_id', '=', $refundOrderId)->update([
+            'status' => 4
+        ]);
 
         /** @var DeliveryProfitSharingStatusRepository $make */
         $make = app()->make(DeliveryProfitSharingStatusRepository::class);

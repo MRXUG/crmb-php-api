@@ -131,7 +131,7 @@ class MerchantAdRepository extends BaseRepository
 
         foreach ($coupon as $k=>$v){
             $arr[] = [
-                'ad_id'=>$id,
+                'ad_id'=> $id,
                 'stock_id'=>$v['stock_id']
             ];
         }
@@ -181,7 +181,7 @@ class MerchantAdRepository extends BaseRepository
 //                throw new WechatException('获取scheme失败：');
 //            }
 
-        
+
        return [
             'goType'=>$deliveryMethod['jumpMethod']??"",
             'title'=>$deliveryMethod['landingPageTitle']??"",
