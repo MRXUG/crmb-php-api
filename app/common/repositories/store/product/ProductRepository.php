@@ -843,7 +843,7 @@ class ProductRepository extends BaseRepository
             $result[] = [
                 'type' => 5,
                 'name' => '回收站' . $name,
-                'count' => $this->dao->search($merId, array_merge($this->switchType(5, $merId, $productType)))->count()
+                'count' => $this->dao->search($merId, $this->switchType(5, $merId, $productType))->count()
             ];
         }
         return $result;
