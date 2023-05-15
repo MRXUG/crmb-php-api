@@ -804,44 +804,46 @@ class ProductRepository extends BaseRepository
      */
     public function getFilter(?int $merId, $name = '', $productType = 0)
     {
+        $where['is_gift_bag'] = 0;
+        $where['MerStatus'] = 1;
         $result = [];
         $result[] = [
             'type' => 1,
             'name' => '出售中' . $name,
-            'count' => $this->dao->search($merId, $this->switchType(1, $merId, $productType))->count()
+            'count' => $this->dao->search($merId,  array_merge($this->switchType(1, $merId, $productType), $where))->count()
         ];
         $result[] = [
             'type' => 2,
             'name' => '仓库中' . $name,
-            'count' => $this->dao->search($merId, $this->switchType(2, $merId, $productType))->count()
+            'count' => $this->dao->search($merId, array_merge($this->switchType(2, $merId, $productType),$where))->count()
         ];
         if ($merId) {
             $result[] = [
                 'type' => 3,
                 'name' => '已售罄' . $name,
-                'count' => $this->dao->search($merId, $this->switchType(3, $merId, $productType))->count()
+                'count' => $this->dao->search($merId, array_merge($this->switchType(3, $merId, $productType),$where))->count()
             ];
             $result[] = [
                 'type' => 4,
                 'name' => '警戒库存',
-                'count' => $this->dao->search($merId, $this->switchType(4, $merId, $productType))->count()
+                'count' => $this->dao->search($merId, array_merge($this->switchType(4, $merId, $productType),$where))->count()
             ];
         }
         $result[] = [
             'type' => 6,
             'name' => '待审核' . $name,
-            'count' => $this->dao->search($merId, $this->switchType(6, $merId, $productType))->count()
+            'count' => $this->dao->search($merId, array_merge($this->switchType(6, $merId, $productType),$where))->count()
         ];
         $result[] = [
             'type' => 7,
             'name' => '审核未通过' . $name,
-            'count' => $this->dao->search($merId, $this->switchType(7, $merId, $productType))->count()
+            'count' => $this->dao->search($merId, array_merge($this->switchType(7, $merId, $productType),$where))->count()
         ];
         if ($merId) {
             $result[] = [
                 'type' => 5,
                 'name' => '回收站' . $name,
-                'count' => $this->dao->search($merId, $this->switchType(5, $merId, $productType))->count()
+                'count' => $this->dao->search($merId, array_merge($this->switchType(5, $merId, $productType)))->count()
             ];
         }
         return $result;
