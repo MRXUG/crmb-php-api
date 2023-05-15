@@ -87,8 +87,8 @@ trait CategoresDao
             (select count(a.product_id)
                     from eb_store_product a
                     left join eb_store_spu b on a.product_id = b.product_id
-                    where a.cate_id = eb_store_category.store_category_id
-                      and a.is_show = 1
+                    left join eb_store_category a.cate_id = eb_store_category.store_category_id
+                      where a.is_show = 1
                       and a.status = 1
                       and a.is_del = 0
                       and b.status = 1
