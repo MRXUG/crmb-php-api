@@ -138,7 +138,7 @@ class CouponStock extends BaseController
 
         $userType = $couponConfigRepository->getUserType($uid);
         $where["status"] = 1;
-        $where["crowd"] = $userType;
+//        $where["crowd"] = $userType;
 
         //获取平台券
         $platformCouponRepository = app()->make(PlatformCouponRepository::class);
