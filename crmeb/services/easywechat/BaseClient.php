@@ -267,9 +267,13 @@ class BaseClient extends AbstractAPI
      *
      * @return string
      */
-    public function decrypt(array $encryptCertificate)
+    public function decrypt(array $encryptCertificate,$type = 0)
     {
-        $ciphertext = base64_decode(urldecode($encryptCertificate['ciphertext']));
+        if ($type == 0){
+            $ciphertext = base64_decode($encryptCertificate['ciphertext']);
+        }else{
+            $ciphertext = base64_decode(urldecode($encryptCertificate['ciphertext']));
+        }
         $associatedData = $encryptCertificate['associated_data'];
         $nonceStr = $encryptCertificate['nonce'];
         $aesKey = $this->app['config']['service_payment']['apiv3_key'];

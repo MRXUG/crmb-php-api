@@ -73,7 +73,7 @@ class MerchantCouponService
         if ($eventType == 'COUPON.SEND') {
             // 领券
             try {
-                $pem = $this->coupon()->decrypt($rawCallbackData['resource']);
+                $pem = $this->coupon()->decrypt($rawCallbackData['resource'],1);
                 $callbackData = json_decode($pem, true);
                 /**
                  * @var CouponStocksUserRepository $couponStocksUserRepository
@@ -317,7 +317,7 @@ class MerchantCouponService
 
     public function decrypt($resource)
     {
-        return $this->coupon()->decrypt($resource);
+        return $this->coupon()->decrypt($resource,1);
     }
 
 
