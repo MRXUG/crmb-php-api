@@ -25,11 +25,13 @@ class Client extends BaseClient
     {
         $driver = Cache::store('file');
         $cacheKey = '_wx_new_v3' . $this->app['config']['service_payment']['serial_no'];
+        $cacheKeyOld = '_wx_v3' . $this->app['config']['service_payment']['serial_no'];
         if ($driver->has($cacheKey)) {
             return $driver->get($cacheKey);
         }
         $certficates = $this->getCertficates();
         $driver->set($cacheKey, $certficates, 3600 * 24 * 30);
+        $driver->set($cacheKeyOld, $certficates, 3600 * 24 * 30);
         return $certficates;
     }
 
