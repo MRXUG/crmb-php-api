@@ -269,7 +269,7 @@ class BaseClient extends AbstractAPI
      */
     public function decrypt(array $encryptCertificate,$type = 0)
     {
-        if ($type == 0){
+        if ($type == 1){
             $ciphertext = base64_decode($encryptCertificate['ciphertext']);
         }else{
             $ciphertext = base64_decode(urldecode($encryptCertificate['ciphertext']));

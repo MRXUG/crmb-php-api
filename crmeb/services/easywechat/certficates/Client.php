@@ -45,7 +45,7 @@ class Client extends BaseClient
         $response = $this->request('/v3/certificates', 'GET', [], false);
         if (isset($response['code']))  throw new WechatException($response['message']);
         $certificates = $response['data'][0];
-        $certificates['certificates'] = $this->decrypt($certificates['encrypt_certificate']);
+        $certificates['certificates'] = $this->decrypt($certificates['encrypt_certificate'],1);
         unset($certificates['encrypt_certificate']);
         return $certificates;
     }
