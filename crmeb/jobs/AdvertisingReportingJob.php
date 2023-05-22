@@ -102,7 +102,7 @@ class AdvertisingReportingJob implements JobInterface
                         'wechat_unionid' => '', // 企业微信必填
                         'wechat_app_id' => 'wx3ed327fd1af68e86'  // 微信类上报必填，且必须通过授权。授权请参考微信数据接入
                     ],
-                    'action_type' => 'LANDING_PAGE_CLICK', //必填 行为类型  下单 COMPLETE_ORDER   点击 LANDING_PAGE_CLICK
+                    'action_type' => 'COMPLETE_ORDER', //必填 行为类型  下单 COMPLETE_ORDER   点击 LANDING_PAGE_CLICK
                     "trace" => [
                         "click_id" => $param['click_id'] // 不设置监测链接，必填 click_id
                     ],
