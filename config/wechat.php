@@ -38,7 +38,7 @@ return [
             ],
             [
                 "privacy_key" => "Location",
-                "privacy_text" => "位置信息"
+                "privacy_text" => "给您推荐最近的柜台"
             ],
             [
                 "privacy_key" => "Invoice",
@@ -54,11 +54,11 @@ return [
             ],
             [
                 "privacy_key" => "Address",
-                "privacy_text" => "地址"
+                "privacy_text" => "提供订单配送服务"
             ],
             [
                 "privacy_key" => "PhoneNumber",
-                "privacy_text" => "手机号码"
+                "privacy_text" => "注册会员信息"
             ],
             [
                 "privacy_key" => "DeviceInfo",
