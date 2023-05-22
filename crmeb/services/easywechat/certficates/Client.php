@@ -24,12 +24,14 @@ class Client extends BaseClient
     public function get()
     {
         $driver = Cache::store('file');
-        $cacheKey = '_wx_v3' . $this->app['config']['service_payment']['serial_no'];
+        $cacheKey = '_wx_new_v3' . $this->app['config']['service_payment']['serial_no'];
+        $cacheKeyOld = '_wx_v3' . $this->app['config']['service_payment']['serial_no'];
         if ($driver->has($cacheKey)) {
             return $driver->get($cacheKey);
         }
         $certficates = $this->getCertficates();
         $driver->set($cacheKey, $certficates, 3600 * 24 * 30);
+        $driver->set($cacheKeyOld, $certficates, 3600 * 24 * 30);
         return $certficates;
     }
 
@@ -43,7 +45,7 @@ class Client extends BaseClient
         $response = $this->request('/v3/certificates', 'GET', [], false);
         if (isset($response['code']))  throw new WechatException($response['message']);
         $certificates = $response['data'][0];
-        $certificates['certificates'] = $this->decrypt($certificates['encrypt_certificate']);
+        $certificates['certificates'] = $this->decrypt($certificates['encrypt_certificate'],1);
         unset($certificates['encrypt_certificate']);
         return $certificates;
     }

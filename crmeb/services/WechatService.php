@@ -210,7 +210,20 @@ class WechatService
             'serial_no' => trim($payment['wechat_service_serial_no']),
             'apiv3_key' => trim($payment['wechat_service_v3key']),
         ];
-
+        if(!isset($config['payment']['merchant_id'])){
+            $config['payment'] = [
+                'merchant_id' => trim($payment['wechat_service_merid']),
+                'type' => 'wechat',
+                'key' => trim($payment['wechat_service_key']),
+                'cert_path' => (app()->getRootPath() . 'public' . $payment['wechat_service_client_cert']),
+                'key_path' => (app()->getRootPath() . 'public' . $payment['wechat_service_client_key']),
+                'pay_weixin_client_cert' => $payment['wechat_service_client_cert'],
+                'pay_weixin_client_key' => $payment['wechat_service_client_key'],
+                'serial_no' => trim($payment['wechat_service_serial_no']),
+                'apiv3_key' => trim($payment['wechat_service_v3key']),
+                'notify_url' => $payment['site_url'] . Route::buildUrl('wechatNotify')->build(),
+            ];
+        }
         return $config;
     }
 
