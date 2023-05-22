@@ -60,14 +60,13 @@ class AdvertisingReportingJob implements JobInterface
                 //腾讯广告
                 $this->sendData($query);
 
-                file_put_contents('orderApplets.txt',json_encode($query).PHP_EOL,FILE_APPEND);
             }elseif ($data['type'] == 2){
                 //抖音广告
                 $click_id = $query['clickid'];
                 $this->videoSendData($click_id);
-                file_put_contents('orderApplets.txt',json_encode($query).PHP_EOL,FILE_APPEND);
 
             }
+            file_put_contents('orderApplets.txt',$data['orderId']."成功回传".PHP_EOL,FILE_APPEND);
 
             if ($data['merchant_source'] == 1){
                 $order = app()->make(StoreOrderDao::class);
