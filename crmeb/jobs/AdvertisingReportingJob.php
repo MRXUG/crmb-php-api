@@ -60,14 +60,13 @@ class AdvertisingReportingJob implements JobInterface
                 //腾讯广告
                 $this->sendData($query);
 
-                file_put_contents('orderApplets.txt',json_encode($query).PHP_EOL,FILE_APPEND);
             }elseif ($data['type'] == 2){
                 //抖音广告
                 $click_id = $query['clickid'];
                 $this->videoSendData($click_id);
-                file_put_contents('orderApplets.txt',json_encode($query).PHP_EOL,FILE_APPEND);
 
             }
+            file_put_contents('orderApplets.txt',$data['orderId']."成功回传".PHP_EOL,FILE_APPEND);
 
             if ($data['merchant_source'] == 1){
                 $order = app()->make(StoreOrderDao::class);
@@ -102,7 +101,7 @@ class AdvertisingReportingJob implements JobInterface
                         'wechat_unionid' => '', // 企业微信必填
                         'wechat_app_id' => 'wx3ed327fd1af68e86'  // 微信类上报必填，且必须通过授权。授权请参考微信数据接入
                     ],
-                    'action_type' => 'LANDING_PAGE_CLICK', //必填 行为类型  下单 COMPLETE_ORDER   点击 LANDING_PAGE_CLICK
+                    'action_type' => 'COMPLETE_ORDER', //必填 行为类型  下单 COMPLETE_ORDER   点击 LANDING_PAGE_CLICK
                     "trace" => [
                         "click_id" => $param['click_id'] // 不设置监测链接，必填 click_id
                     ],
