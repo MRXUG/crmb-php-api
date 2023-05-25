@@ -561,7 +561,7 @@ Route::group('api/', function () {
     })->middleware(UserTokenMiddleware::class, false);
 
     //腾讯广告归因转化回传
-    Route::any('applets/senddata','api.applets.Applets/sendData')->name('sendData');
+    Route::any('applets/senddata','api.applets.Applets/sendData')->name('sendData')->middleware(UserTokenMiddleware::class, false);
     Route::any('applets/getdata','api.applets.Applets/getData')->name('getData');
     
     //抖音广告回传

@@ -19,6 +19,7 @@ use crmeb\exceptions\AuthException;
 use crmeb\services\JwtTokenService;
 use Firebase\JWT\ExpiredException;
 use think\exception\ValidateException;
+use think\facade\Log;
 use think\Response;
 use Throwable;
 
@@ -93,6 +94,7 @@ class UserTokenMiddleware extends BaseMiddleware
         $request->macro('uid', function () use (&$user) {
             return $user->uid;
         });
+        //Log::debug(json_encode($user));
         $request->macro('userInfo', function () use (&$user) {
             return $user;
         });

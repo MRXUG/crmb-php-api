@@ -18,12 +18,13 @@ use app\common\dao\store\order\StoreOrderDao;
 use app\common\dao\system\merchant\MerchantAdDao;
 use app\common\model\applet\AppletsTx;
 use crmeb\interfaces\JobInterface;
+use think\facade\Log;
 
 class AdvertisingReportingJob implements JobInterface
 {
     public function fire($job, $data)
     {
-
+        Log::info("广告订单回传".json_encode($data));
         if (!$data['ad_id']) return;
         if (!$data['type']) return;
         if (!$data['query']) return;
@@ -89,7 +90,7 @@ class AdvertisingReportingJob implements JobInterface
     //腾讯广告回传
     public function sendData($param){
 
-        $url  = urldecode($param['callback']);
+        $url  = $param['url'];
 
         $data = [
             'actions' => [
@@ -99,7 +100,7 @@ class AdvertisingReportingJob implements JobInterface
                     'user_id' => [
                         'wechat_openid' => $param['wechat_openid'], // wechat_openid 和 wechat_unionid 二者必填一
                         'wechat_unionid' => '', // 企业微信必填
-                        'wechat_app_id' => 'wx3ed327fd1af68e86'  // 微信类上报必填，且必须通过授权。授权请参考微信数据接入
+                        'wechat_app_id' => $param['wechat_app_id']  // 微信类上报必填，且必须通过授权。授权请参考微信数据接入
                     ],
                     'action_type' => 'COMPLETE_ORDER', //必填 行为类型  下单 COMPLETE_ORDER   点击 LANDING_PAGE_CLICK
                     "trace" => [
@@ -114,7 +115,7 @@ class AdvertisingReportingJob implements JobInterface
         ];
         //提交
         $result = $this->httpCURL($url,json_encode($data));
-
+        Log::debug("gdt 广告回传".json_encode($data)."result:".json_encode($result));
     }
 
     /**
