@@ -13,10 +13,9 @@
 namespace app\controller\api\applets;
 
 use app\common\model\applet\AppletsTx;
-use app\common\repositories\wechat\WechatUserRepository;
 use crmeb\basic\BaseController;
+use crmeb\services\ads\action\ViewContent;
 use think\App;
-use think\facade\Log;
 
 class Applets extends BaseController
 {
@@ -33,54 +32,24 @@ class Applets extends BaseController
 
         $appid   = $this->request->header('appid');
         $gdt_vid = $this->request->has('gdt_vid') ? $this->request->param('gdt_vid') : $this->request->param('qz_gdt');
-        $param   = $this->request->param();
         $uinfo   = $this->request->userInfo();
-        $make    = app()->make(WechatUserRepository::class);
-        $openid  = $make->idByRoutineId((int) $uinfo['wechat_user_id']);
-        $data    = [
-            'actions' => [
-                [
-                    'action_time'  => time(),
-                    'user_id'      => [
-                        'wechat_openid' => $openid, // wechat_openid 和 wechat_unionid 二者必填一
-                        // 'wechat_unionid' => '', // 企业微信必填
-                        'wechat_app_id' => $appid, // 微信类上报必填，且必须通过授权。授权请参考微信数据接入
-                    ],
-                    'action_type'  => 'LANDING_PAGE_CLICK', //必填 行为类型  下单 COMPLETE_ORDER   点击 LANDING_PAGE_CLICK
-                    "trace"        => [
-                        "click_id" => $gdt_vid, // 不设置监测链接，必填 click_id
-                    ],
-                    'action_param' => [
-                        'value'  => 'click',
-                        'object' => 'click',
-                    ],
-                ],
-            ],
-        ];
-        $url = "http://tracking.e.qq.com/conv";
-        Log::info("click gdt params:" . json_encode($param));
-        Log::info("click gdt request:" . json_encode($data));
-        //提交
-        $result = $this->httpCURL($url, json_encode($data));
-
-        $model = new AppletsTx();
-        $info  = $model->where(['request_id' => $gdt_vid])->find();
-        if (!$info) {
-            $param['wechat_app_id'] = $appid;
-            $param['wechat_openid'] = $openid;
-            $param['url']           = $url;
-            $param['click_id']      = $gdt_vid;
-            //组织数组
-            $data = [
-                'request_id'    => $gdt_vid,
-                'wechat_openid' => $openid,
-                'content'       => json_encode($param),
-            ];
-            $model->save($data);
+        if ($appid == '' || $gdt_vid == '' || $uinfo['unionid'] == '') {
+            sendMessageToWorkBot([
+                'module' => '广告落地页回传数据',
+                'type'   => 'error',
+                'msg'    => '参数获取异常：' . json_encode([$appid, $gdt_vid, $uinfo['unionid']]),
+            ]);
+        }
+        $result = (new ViewContent($this->request->header('appid'), $uinfo['unionid'], $gdt_vid))->handle();
+        if ($result['code'] != 0) {
+            sendMessageToWorkBot([
+                'module' => '广告落地页',
+                'type'   => 'error',
+                'msg'    => '回传失败' . json_encode($result),
+            ]);
         }
 
-        return app('json')->success(json_decode($result, true));
-        // }
+        return app('json')->success($result);
     }
 
     //腾讯点击监测接口数据保存

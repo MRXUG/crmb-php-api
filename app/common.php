@@ -1354,7 +1354,6 @@ if (!function_exists('sendMessageToWorkBot')) {
      */
     function sendMessageToWorkBot(array $params)
     {
-        return;
         $env = env('app_name', 'unknown'). '@' . env('app_server.run_server', 'unknown');
 
         $time = date('Y-m-d H:i:s');
