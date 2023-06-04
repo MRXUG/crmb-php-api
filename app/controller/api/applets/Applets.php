@@ -14,7 +14,7 @@ namespace app\controller\api\applets;
 
 use app\common\model\applet\AppletsTx;
 use crmeb\basic\BaseController;
-use crmeb\services\ads\action\ViewContent;
+use crmeb\services\ads\Action\ViewContent;
 use think\App;
 
 class Applets extends BaseController
