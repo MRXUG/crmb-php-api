@@ -1,5 +1,5 @@
 <?php
-namespace crmeb\services\ads\action;
+namespace crmeb\services\ads\Action;
 
 use crmeb\services\ads\BaseAdsEvent;
 
