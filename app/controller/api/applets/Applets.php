@@ -32,7 +32,7 @@ class Applets extends BaseController
 
         $appid   = $this->request->header('appid');
         $gdt_vid = $this->request->has('gdt_vid') ? $this->request->param('gdt_vid') : $this->request->param('qz_gdt');
-        $uinfo   = $this->request->userInfo();
+        $uinfo   = $this->request->unionid();
         if ($appid == '' || $gdt_vid == '' || $uinfo['unionid'] == '') {
             sendMessageToWorkBot([
                 'module' => '广告落地页回传数据',

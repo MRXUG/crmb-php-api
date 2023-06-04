@@ -558,7 +558,11 @@ class UserRepository extends BaseRepository
     {
         $service = new JwtTokenService();
         $exp = intval(Config::get('admin.user_token_valid_exp', 15));
-        $token = $service->createToken($user->uid, 'user', strtotime("+ {$exp}day"));
+        $param = [];
+        if(isset($user->unionid)){
+            $param['unionid'] = $user->unionid;
+        }
+        $token = $service->createToken($user->uid, 'user', strtotime("+ {$exp}day"),$param);
         $this->cacheToken($token['token'], $token['out']);
         return $token;
     }
