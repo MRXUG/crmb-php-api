@@ -95,7 +95,7 @@ class UserTokenMiddleware extends BaseMiddleware
             return $user->uid;
         });
         $request->macro('unionid', function () use (&$payload) {
-            return $payload['unionid'];
+            return $payload->unionid;
         });
         //Log::debug(json_encode([$user,$token]));
         $request->macro('userInfo', function () use (&$user) {

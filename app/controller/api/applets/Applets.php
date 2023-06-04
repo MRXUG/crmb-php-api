@@ -32,15 +32,16 @@ class Applets extends BaseController
 
         $appid   = $this->request->header('appid');
         $gdt_vid = $this->request->has('gdt_vid') ? $this->request->param('gdt_vid') : $this->request->param('qz_gdt');
-        $uinfo   = $this->request->unionid();
-        if ($appid == '' || $gdt_vid == '' || $uinfo['unionid'] == '') {
+        $unionid   = $this->request->unionid();
+        if ($appid == '' || $gdt_vid == '' || $unionid == '') {
             sendMessageToWorkBot([
                 'module' => '广告落地页回传数据',
                 'type'   => 'error',
-                'msg'    => '参数获取异常：' . json_encode([$appid, $gdt_vid, $uinfo['unionid']]),
+                'msg'    => '参数获取异常：' . json_encode([$appid, $gdt_vid, $unionid]),
             ]);
+            return app('json')->success([]);
         }
-        $result = (new ViewContent($this->request->header('appid'), $uinfo['unionid'], $gdt_vid))->handle();
+        $result = (new ViewContent($this->request->header('appid'), $unionid, $gdt_vid))->handle();
         if ($result['code'] != 0) {
             sendMessageToWorkBot([
                 'module' => '广告落地页',
