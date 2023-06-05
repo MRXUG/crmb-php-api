@@ -163,6 +163,21 @@ class WechatUserRepository extends BaseRepository
         });
     }
 
+    public function Uinfo( $wechat_uid,array $routine)
+    {
+        $routineInfo = [];
+        $routineInfo['nickname'] = filter_emoji($routine['nickName']);//姓名
+        $routineInfo['sex'] = $routine['gender'] ?? 0;//性别
+        $routineInfo['language'] = $routine['language'] ?? '';//语言
+        $routineInfo['city'] = $routine['city'] ?? '';//城市
+        $routineInfo['province'] = $routine['province'] ?? '';//省份
+        $routineInfo['country'] = $routine['country'] ?? '';//国家
+        $routineInfo['headimgurl'] = $routine['avatarUrl'];//头像
+
+        $wechatUser = $this->dao->userInfobyUid($wechat_uid);
+        return $wechatUser->save($routineInfo);
+    }
+
     /**
      * @param string $routineOpenid
      * @param array $routine

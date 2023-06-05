@@ -615,7 +615,7 @@ Route::group('api/', function () {
     //登录
     Route::post('auth/login', 'api.Auth/login');
     //登录
-    Route::post('auth', 'api.Auth/authLogin');
+    Route::post('auth', 'api.Auth/authLogin')->middleware(UserTokenMiddleware::class, false);
     Route::post('thirdpartyCode2Session', 'api.Auth/miniLogin');
     Route::post('mini_login', 'api.Auth/miniLogin');
     //短信登录

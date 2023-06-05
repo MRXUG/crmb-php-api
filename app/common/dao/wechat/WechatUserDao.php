@@ -107,6 +107,17 @@ class WechatUserDao extends BaseDao
     }
 
     /**
+     * @param string $unionId
+     * @return mixed
+     * @author xaboy
+     * @day 2020-04-28
+     */
+    public function userInfobyUid(string $wechart_uid)
+    {
+        return WechatUser::getDB()->where('wechat_user_id', $wechart_uid)->find();
+    }
+
+    /**
      * @param $id
      * @return mixed
      * @author xaboy
@@ -174,5 +185,16 @@ class WechatUserDao extends BaseDao
 
 
         return $query;
+    }
+
+    /**
+     * @param $id
+     * @return mixed
+     * @author xaboy
+     * @day 2020/5/30
+     */
+    public function idBySessionKey(int $id)
+    {
+        return WechatUser::getDB()->where('wechat_user_id', $id)->value('session_key');
     }
 }

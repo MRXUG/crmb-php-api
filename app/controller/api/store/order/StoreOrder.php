@@ -149,12 +149,14 @@ class StoreOrder extends BaseController
         // 营销页优惠
         $marketingDiscount = (array)$this->request->param('marketing_discount', []);
         $ad_type = (int)$this->request->param('ad_type',0);
-        $ad_query = $this->request->param('ad_query','');
+        $ad_query = $this->request->param('gdt_params','');
         if ($clipCoupons == 2) {
             $couponIds = [];
         }
 
-        if ($ad_query){
+        if ($ad_query!=''){
+            $ad_query['unionid'] = $this->request->unionid();
+            $ad_query['appid']  = $this->request->header('appid');
             $ad_query = json_encode($ad_query);
         }
 
@@ -223,13 +225,15 @@ class StoreOrder extends BaseController
         $marketingDiscount = (array)$this->request->param('marketing_discount', []);
         // 卡包回流券信息
         $refluxCoil = isset($marketingDiscount['refluxCoil']) ? (array)$marketingDiscount['refluxCoil'] : [];
-        $ad_type = (int)$this->request->param('ad_type',0);
-        $ad_query = $this->request->param('ad_query','');
+        $ad_type = (int)$this->request->param('ad_type',1);
+        $ad_query = $this->request->param('gdt_params','');
         if ($clipCoupons == 2) {
             $couponIds = [];
         }
 
-        if ($ad_query){
+        if ($ad_query!=''){
+            $ad_query['unionid'] = $this->request->unionid();
+            $ad_query['appid']  = $this->request->header('appid');
             $ad_query = json_encode($ad_query);
         }
 

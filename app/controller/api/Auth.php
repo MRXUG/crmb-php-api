@@ -527,61 +527,20 @@ class Auth extends BaseController
         }
         $data = $auth['auth'];
         if ($auth['type'] === 'routine') {
-            $code = $data['code'] ?? '';
-            $userInfoCong = Cache::get('eb_api_code_' . $code);
-            if (!$code && !$userInfoCong) {
-                throw new ValidateException('授权失败,参数有误');
-            }
             $miniProgramService = MiniProgramService::create();
-            if ($code && !$userInfoCong) {
-                try {
-                    // $userInfoCong里有session_key、openid、unionid(可能无)
-//                    $userInfoCong = $miniProgramService->getUserInfo($code);
-
-                    $appid = $this->request->appid();
-
-                    //调用微信接口
-                    $openPlatformRepository = app()->make(OpenPlatformRepository::class);
-
-                    $userInfoCong =  $openPlatformRepository->thirdpartyCode2Session($appid,$code);
-                    if (!isset($userInfoCong['session_key'])) throw new ValidateException('授权失败,参数有误');
-                    if (!isset($userInfoCong['unionid'])) throw new ValidateException('授权失败,参数有误');
-
-
-                    Cache::set('eb_api_code_' . $code, $userInfoCong, 86400);
-                } catch (Exception $e) {
-                    Log::error("获取session_key失败，请检查您的配置！". json_encode([
-                            'msg' => $e->getMessage(),
-                            'file' => $e->getFile(),
-                            'line' => $e->getLine(),
-                        ]));
-                    throw new ValidateException('获取session_key失败，请检查您的配置！');
-                }
-            }
             try {
+                $session_key = app()->make(WechatUserRepository::class)->idBySessionKey($this->request->uid());
                 //解密获取用户信息
-                $userInfo = $miniProgramService->encryptor($userInfoCong['session_key'], $data['iv'],
+                $userInfo = $miniProgramService->encryptor($session_key, $data['iv'],
                     $data['encryptedData']);
             } catch (Exception $e) {
                 if ($e->getCode() == '-41003') {
-                    throw new ValidateException('获取会话密匙失败');
+                    throw new ValidateException('解密用户信息失败');
                 }
                 throw $e;
             }
-            if (!$userInfo) {
-                throw new ValidateException('openid获取失败');
-            }
-            if (!isset($userInfo['openId'])) {
-                $userInfo['openId'] = $userInfoCong['openid'] ?? '';
-            }
-            $userInfo['unionId'] = $userInfoCong['unionid'] ?? $userInfo['unionId'] ?? '';
-            if (!$userInfo['openId']) {
-                throw new ValidateException('openid获取失败');
-            }
-
-            /** @var WechatUserRepository $make */
             $make = app()->make(WechatUserRepository::class);
-            $user = $make->syncRoutineUser($userInfo['openId'], $userInfo, $createUser);
+            $user = $make->Uinfo($this->request->uid(), $userInfo);
             if (!$user) {
                 throw new ValidateException('授权失败');
             }
@@ -654,10 +613,12 @@ class Auth extends BaseController
     public function authLogin()
     {
         $auth = $this->request->param('auth');
+        //return app('json')->success([$this->request->uid()]);
         $users = $this->authInfo($auth, systemConfig('is_phone_login') !== '1');
         if (!$users) {
             return app('json')->fail('授权失败');
         }
+        return app('json')->success([$users]);
         $authInfo = $users[0];
         $userRepository = app()->make(UserRepository::class);
         $user = $users[1] ?? $userRepository->wechatUserIdBytUser($authInfo['wechat_user_id']);
@@ -908,7 +869,7 @@ class Auth extends BaseController
         $openPlatformRepository = app()->make(OpenPlatformRepository::class);
 
         $jscode2session =  $openPlatformRepository->thirdpartyCode2Session($appid,$js_code);
-        
+
         if (!isset($jscode2session['session_key']))return app('json')->status(400,'登陆失败');
         if (!isset($jscode2session['unionid']))return app('json')->status(400,'登陆失败');
         
