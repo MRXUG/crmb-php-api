@@ -7,7 +7,7 @@ use think\facade\Log;
 abstract class BaseAdsEvent 
 {
     // TODO 沙箱环境 到生产切换为 https://api.e.qq.com
-    const API_DOMAIN = 'https://datanexus-sandbox.e.qq.com/v1.1/action/add?access_token=%s&timestamp=%u&nonce=%s'; 
+    const API_DOMAIN = 'https://api.e.qq.com/v1.1/action/add?access_token=%s&timestamp=%u&nonce=%s'; 
     const ADS_TOKEN = '25cfd1caf5d23aa51da5fbc0cfeff172';
     const ACCOUNT_ID = '31974198';  
 
