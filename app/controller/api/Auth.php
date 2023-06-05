@@ -901,4 +901,30 @@ class Auth extends BaseController
         return app('json')->status(200, $userRepository->returnToken($user, $tokenInfo,$auth['auth']['code']??''));
     }
 
+    public function miniLogin(){
+        $appid = $this->request->appid();
+        $js_code = $this->request->param('js_code', '');
+        //调用微信接口
+        $openPlatformRepository = app()->make(OpenPlatformRepository::class);
+
+        $jscode2session =  $openPlatformRepository->thirdpartyCode2Session($appid,$js_code);
+        
+        if (!isset($jscode2session['session_key']))return app('json')->status(400,'登陆失败');
+        if (!isset($jscode2session['unionid']))return app('json')->status(400,'登陆失败');
+        
+        /** @var WechatUserRepository $make */
+        $make = app()->make(WechatUserRepository::class);
+        list($wechatUser,$user) = $make->syncWecahtUser($appid,$jscode2session);
+        if (!$user) {
+            throw new ValidateException('授权失败');
+        }
+        $userRepository = app()->make(UserRepository::class);
+        $user = $users[1] ?? $userRepository->wechatUserIdBytUser($wechatUser['wechat_user_id']);
+        $user->unionid = $wechatUser->unionid;
+        $tokenInfo = $userRepository->createToken($user);
+        $userRepository->loginAfter($user);
+        return app('json')->status(200, $userRepository->returnToken($user, $tokenInfo,$auth['auth']['code']??''));
+    }
+
+
 }

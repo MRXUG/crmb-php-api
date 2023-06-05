@@ -17,6 +17,7 @@ namespace app\common\repositories\wechat;
 use app\common\dao\user\UserDao;
 use app\common\dao\user\UserOpenIdRelationDao;
 use app\common\dao\wechat\WechatUserDao;
+use app\common\model\wechat\WechatUser;
 use app\common\repositories\article\ArticleRepository;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\user\UserRepository;
@@ -354,5 +355,47 @@ class WechatUserRepository extends BaseRepository
     public function getOne($where, $field = '*')
     {
         return $this->dao->getWhere($where, $field);
+    }
+
+    /**
+     * 保存用户数据到wechat_user表、user表 重构方法登陆
+     *
+     */
+    public function syncWecahtUser(string $appid,array $jscode2session)
+    {
+        $routineInfo = [];
+        $routineInfo['routine_openid'] = $jscode2session['openid'];//openid
+        $routineInfo['session_key'] = $jscode2session['session_key'] ?? '';//会话密匙
+        $routineInfo['unionid'] = $jscode2session['unionid'];//用户在开放平台的唯一标识符
+        $routineInfo['user_type'] = 'routine';//用户类型
+        // 查询用户
+        $wechatUser = $this->dao->unionIdByWechatUser($routineInfo['unionid']);
+        if(!$wechatUser){
+            $wechatUser = $this->dao->routineIdByWechatUser($routineInfo['routine_openid']);
+        }
+        return Db::transaction(function () use ($routineInfo, $wechatUser,$appid) {
+            if ($wechatUser) {
+                $wechatUser->save($routineInfo);
+            } else {
+                $wechatUser = $this->dao->create($routineInfo);
+            }
+            $userOpenidRelationData = [
+                'routine_openid' => $routineInfo['routine_openid'],
+                'unionid' => $routineInfo['unionid'] ?? "",
+                'appid' => $appid,
+                'wechat_user_id' => $wechatUser->wechat_user_id,
+            ];
+            (new UserOpenIdRelationDao())->createOrUpdate(
+                [
+                    'routine_openid' => $routineInfo['routine_openid'],
+                    'appid' => $appid,
+                ],
+                $userOpenidRelationData
+            );
+            /** @var UserRepository $userRepository */
+            $userRepository = app()->make(UserRepository::class);
+            $user = $userRepository->syncWechatUser($wechatUser, 'routine');
+            return [$wechatUser, $user];
+        });
     }
 }
