@@ -529,7 +529,10 @@ class Auth extends BaseController
         if ($auth['type'] === 'routine') {
             $miniProgramService = MiniProgramService::create();
             try {
+                Log::info("session_key>>>>>".$this->request->uid());
                 $session_key = app()->make(WechatUserRepository::class)->idBySessionKey($this->request->uid());
+                Log::info("session_key>>>>>".$session_key);
+                //return $session_key;
                 //解密获取用户信息
                 $userInfo = $miniProgramService->encryptor($session_key, $data['iv'],
                     $data['encryptedData']);
@@ -613,37 +616,13 @@ class Auth extends BaseController
     public function authLogin()
     {
         $auth = $this->request->param('auth');
-        //return app('json')->success([$this->request->uid()]);
         $users = $this->authInfo($auth, systemConfig('is_phone_login') !== '1');
         if (!$users) {
             return app('json')->fail('授权失败');
         }
-        return app('json')->success([$users]);
-        $authInfo = $users[0];
         $userRepository = app()->make(UserRepository::class);
-        $user = $users[1] ?? $userRepository->wechatUserIdBytUser($authInfo['wechat_user_id']);
-        $code = (int)($auth['auth']['spread_code']['id'] ?? $auth['auth']['spread_code'] ?? '');
-        //获取是否有扫码进小程序
-        if ($code && ($info = app()->make(RoutineQrcodeRepository::class)->getRoutineQrcodeFindType($code))) {
-            $auth['auth']['spread'] = $info['third_id'];
-        }
-        if (!$user) {
-            $uni = uniqid(true, false) . random_int(1, 100000000);
-            $key = 'U' . md5(time() . $uni);
-            Cache::set('u_try' . $key, [
-                'id' => $authInfo['wechat_user_id'],
-                'type' => $authInfo['user_type'],
-                'spread' => $auth['auth']['spread'] ?? 0
-            ], 3600);
-            return app('json')->status(201, compact('key'));
-        }
-
-        if ($auth['auth']['spread'] ?? 0) {
-            $userRepository->bindSpread($user, (int)($auth['auth']['spread']));
-        }
-        $tokenInfo = $userRepository->createToken($user);
-        $userRepository->loginAfter($user);
-        return app('json')->status(200, $userRepository->returnToken($user, $tokenInfo,$auth['auth']['code']??''));
+        $users = $userRepository->wechatUserIdBytUser($this->request->uid());
+        return app('json')->status(200, $users);
     }
 
 
