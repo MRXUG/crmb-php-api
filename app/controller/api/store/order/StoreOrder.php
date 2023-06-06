@@ -232,6 +232,7 @@ class StoreOrder extends BaseController
         }
 
         if ($ad_query!=''){
+            $ad_query = json_decode($ad_query,1);
             $ad_query['unionid'] = $this->request->unionid();
             $ad_query['appid']  = $this->request->header('appid');
             $ad_query = json_encode($ad_query);
