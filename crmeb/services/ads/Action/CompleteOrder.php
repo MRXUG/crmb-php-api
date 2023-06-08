@@ -16,7 +16,7 @@ class CompleteOrder extends BaseAdsEvent {
 
     public function requestActionParams(){
         return [
-            ['action_type'=>'COMPLETE_ORDER','action_time'=>time(),'action_param'=>['value'=>intval($this->value)]],
+            ['action_type'=>'COMPLETE_ORDER','action_time'=>time(),'action_param'=>['value'=>intval($this->value*100)]],
         ];
     }
     
