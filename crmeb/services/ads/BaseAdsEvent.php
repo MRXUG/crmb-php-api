@@ -7,8 +7,8 @@ use think\facade\Log;
 abstract class BaseAdsEvent 
 {
     // TODO 沙箱环境 到生产切换为 https://api.e.qq.com
-    const API_DOMAIN = 'https://api.e.qq.com/v1.1/action/add?access_token=%s&timestamp=%u&nonce=%s'; 
-    const ADS_TOKEN = '25cfd1caf5d23aa51da5fbc0cfeff172';
+    const API_DOMAIN = 'https://api.e.qq.com/v1.1/user_actions/add?access_token=%s&timestamp=%u&nonce=%s'; 
+    const ADS_TOKEN = 'cb11f8cf120a811e33098117b44daaa8';
     const ACCOUNT_ID = '31974198';  
 
     protected $URL = '';
@@ -29,7 +29,7 @@ abstract class BaseAdsEvent
 
     protected $reuestParams = [
         'account_id'=>self::ACCOUNT_ID,
-        'data_source_id'=>0,
+        'user_action_set_id'=>0,
         'actions'=>[],
     ];
 
@@ -41,7 +41,7 @@ abstract class BaseAdsEvent
         if(!array_key_exists($appid,$this->data_source_map)){
             throw new \Exception( 'appid => data_source_id error');
         }
-        $this->reuestParams['data_source_id'] = $this->data_source_map[$appid];
+        $this->reuestParams['user_action_set_id'] = $this->data_source_map[$appid];
         $this->unionid = $unionid;
         $this->appid = $appid;
         $this->click_id = $clickid;
