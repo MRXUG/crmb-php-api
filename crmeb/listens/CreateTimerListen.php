@@ -26,6 +26,6 @@ class CreateTimerListen implements ListenerInterface
             app()->event->trigger('create_timer');
         }, false, 0, true);
         $process->start();
-//        app()->make(Server::class)->addProcess($process);
+        app()->make(Server::class)->addProcess($process);
     }
 }
