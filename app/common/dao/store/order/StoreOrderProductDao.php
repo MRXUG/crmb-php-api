@@ -90,14 +90,14 @@ class StoreOrderProductDao extends BaseDao
     public function orderProductGroup($date, $merId = null, $limit = 7)
     {
         return StoreOrderProduct::getDB()->alias('A')->leftJoin('StoreOrder B', 'A.order_id = B.order_id')
-            ->field(Db::raw('sum(A.product_num) as total,A.product_id,cart_info'))
+            ->field(Db::raw('sum(A.product_num) as total,A.product_id,A.cart_info'))
             ->withAttr('cart_info', function ($val) {
                 return json_decode($val, true);
             })->when($date, function ($query, $date) {
                 getModelTime($query, $date, 'B.pay_time');
             })->when($merId, function ($query, $merId) {
                 $query->where('B.mer_id', $merId);
-            })->where('B.paid', 1)->group('A.product_id')->limit($limit)->order('total DESC')->select();
+            })->where('B.paid', 1)->group('A.product_id,A.cart_info')->limit($limit)->order('total DESC')->select();
     }
 
     public function dateProductNum($date)

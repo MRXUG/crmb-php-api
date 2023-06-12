@@ -1,0 +1,6 @@
+.git
+.idea
+.resources/certs
+*.sql
+runtime/cache
+runtime/log
