@@ -405,7 +405,7 @@ class StoreOrderRepository extends BaseRepository
                 $this->autoPrinter($order->order_id, $order->mer_id);
                 if(!empty($order->ad_query)){
                      //处理广告回传
-                     Queue::push(AdvertisingReportingJob::class,['gdt_params'=>$order->ad_query,'order_id'=>$order->order_id,'pay_price'=>$order->pay_price]);
+                     Queue::push(AdvertisingReportingJob::class,['gdt_params'=>$order->ad_query,'order_id'=>$order->order_id,'pay_price'=>$order->pay_price*100]);
                 }
 
             }
