@@ -27,8 +27,10 @@ class AuthTakeOrderListen extends TimerService implements ListenerInterface
 {
 
     protected string $name = "自动收货：" . __CLASS__;
+
     public function handle($event): void
     {
+
         $this->tick(1000 * 60 * 60, function () {
             $storeOrderStatusRepository = app()->make(StoreOrderStatusRepository::class);
             $storeOrderRepository = app()->make(StoreOrderRepository::class);
@@ -36,6 +38,8 @@ class AuthTakeOrderListen extends TimerService implements ListenerInterface
             $timer = ((int)systemConfig('auto_take_order_timer')) ?: 15;
             $time = date('Y-m-d H:i:s', strtotime("- $timer day"));
             $ids = $storeOrderStatusRepository->getTimeoutDeliveryOrder($time);
+            Log::info('本轮 自动收货 任务 查询到需要处理的订单ID: [' . implode(",", $ids) . "]");
+
             foreach ($ids as $id) {
                 try {
                     $storeOrderRepository->takeOrder($id);

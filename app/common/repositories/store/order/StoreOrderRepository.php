@@ -745,13 +745,15 @@ class StoreOrderRepository extends BaseRepository
     public function takeOrder($id, ?User $user = null)
     {
         $order = $this->dao->search(!$user ? [] : ['uid' => $user->uid], null)->where('order_id', $id)->where('StoreOrder.is_del', 0)->find();
+
         if (!$order)
-            throw new ValidateException('订单不存在');
+            throw new ValidateException("订单不存在(order_id: ${id} uid: $order->uid)");
         if ($order['status'] != 1 || $order['order_type'])
-            throw new ValidateException('订单状态有误');
+            throw new ValidateException("订单状态有误(order_id: ${id} uid: $order->uid)");
+
         if (!$user) $user = $order->user;
         if (!$user) {
-            throw new ValidateException('用户不存在');
+            throw new ValidateException("用户不存在(order_id: ${id} uid: $order->uid)");
         }
         $order->status = 2;
         $order->verify_time = date('Y-m-d H:i:s');
