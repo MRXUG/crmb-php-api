@@ -36,6 +36,8 @@ class AutoTakeOrder extends BaseController
      */
     public function httpTrigger()
     {
+        Log::info("正在执行 自动收货 任务");
+
         $timer = ((int)systemConfig('auto_take_order_timer')) ?: 15;
         Log::info("使用的系统配置 auto_take_order_timer ${timer}");
         $time = date('Y-m-d H:i:s', strtotime("- $timer day"));
