@@ -10,13 +10,12 @@
 // | Author: CRMEB Team <admin@crmeb.com>
 // +----------------------------------------------------------------------
 
-
 use app\common\middleware\AllowOriginMiddleware;
 use app\common\middleware\CheckSiteOpenMiddleware;
 use app\common\middleware\InstallMiddleware;
+use app\common\middleware\RequestLockMiddleware;
 use app\common\middleware\UserTokenMiddleware;
 use app\common\middleware\VisitProductMiddleware;
-use app\common\middleware\RequestLockMiddleware;
 use think\facade\Route;
 
 Route::group('api/', function () {
@@ -30,7 +29,7 @@ Route::group('api/', function () {
                 Route::post('check2', '/v2CheckOrder');
                 Route::post('create', '/v2CreateOrder');
                 Route::post('create2', '/v2CreateOrder2');
-                Route::post('getUserBeforeOneCoupon', '/getUserBeforeOneCoupon');//获取可用优惠券列表
+                Route::post('getUserBeforeOneCoupon', '/getUserBeforeOneCoupon'); //获取可用优惠券列表
             })->prefix('api.store.order.StoreOrder');
         });
 
@@ -284,7 +283,6 @@ Route::group('api/', function () {
             Route::get('category/select', 'StoreCategory/getTreeList');
             Route::get('category/brandlist', 'StoreCategory/BrandList');
 
-
             //运费模板
             Route::get('template/lst', 'ShippingTemplate/lst');
             Route::post('template/create', 'ShippingTemplate/create');
@@ -302,9 +300,7 @@ Route::group('api/', function () {
             Route::get('attr/detail/:id', 'StoreProductAttrTemplate/detail');
             Route::get('attr/list', 'StoreProductAttrTemplate/getlist');
 
-
-
-        })->prefix('api.server.')->middleware(\app\common\middleware\MerchantServerMiddleware::class,1);
+        })->prefix('api.server.')->middleware(\app\common\middleware\MerchantServerMiddleware::class, 1);
 
         //管理员订单
         Route::group('admin/:merId', function () {
@@ -323,7 +319,7 @@ Route::group('api/', function () {
             Route::get('/delivery_config', '/getDeliveryConfig');
             Route::get('/delivery_options', '/getDeliveryOptions');
 
-        })->prefix('api.server.StoreOrder')->middleware(\app\common\middleware\MerchantServerMiddleware::class,0);
+        })->prefix('api.server.StoreOrder')->middleware(\app\common\middleware\MerchantServerMiddleware::class, 0);
 
         //管理员退款单
         Route::group('server/:merId/refund', function () {
@@ -335,12 +331,12 @@ Route::group('api/', function () {
             Route::get('express/:id', '/express');
             Route::post('status/:id', '/switchStatus');
             Route::post('mark/:id', '/mark');
-        })->prefix('api.server.StoreRefundOrder')->middleware(\app\common\middleware\MerchantServerMiddleware::class,0);
+        })->prefix('api.server.StoreRefundOrder')->middleware(\app\common\middleware\MerchantServerMiddleware::class, 0);
         //核销
         Route::group('verifier/:merId', function () {
             Route::get('order/:id', '/detail');
             Route::post(':id', '/verify');
-        })->prefix('api.store.order.StoreOrderVerify')->middleware(\app\common\middleware\MerchantServerMiddleware::class,0);
+        })->prefix('api.store.order.StoreOrderVerify')->middleware(\app\common\middleware\MerchantServerMiddleware::class, 0);
 
         //社区
         Route::group('community', function () {
@@ -430,7 +426,6 @@ Route::group('api/', function () {
             Route::get('seckill/select', 'StoreProductSeckill/select');
             Route::get('seckill/lst', 'StoreProductSeckill/lst');
             Route::get('seckill/detail/:id', 'StoreProductSeckill/detail')->middleware(VisitProductMiddleware::class, 1);
-
 
             Route::get('category/lst', 'StoreCategory/lst');
             Route::get('category', 'StoreCategory/children');
@@ -557,15 +552,14 @@ Route::group('api/', function () {
         //获取抖音广告信息和scheme
         Route::post('/getAdDetail', 'api.store.product.StoreProduct/getAdDetail');
 
-
     })->middleware(UserTokenMiddleware::class, false);
 
     //腾讯广告归因转化回传
-    Route::any('applets/senddata','api.applets.Applets/sendData')->name('sendData')->middleware(UserTokenMiddleware::class, false);
-    Route::any('applets/getdata','api.applets.Applets/getData')->name('getData');
-    
+    Route::any('applets/senddata', 'api.applets.Applets/sendData')->name('sendData')->middleware(UserTokenMiddleware::class, false);
+    Route::any('applets/getdata', 'api.applets.Applets/getData')->name('getData');
+
     //抖音广告回传
-    Route::post('applets/videosenddata','api.applets.Applets/videoSendData')->name('videoSendData');
+    Route::post('applets/videosenddata', 'api.applets.Applets/videoSendData')->name('videoSendData');
     //微信支付回调
     Route::any('notice/wechat_pay', 'api.Common/wechatNotify')->name('wechatNotify');
     //微信支付回调
@@ -589,9 +583,9 @@ Route::group('api/', function () {
     Route::get('v2/system/setWxAddress', 'merchant.store.shipping.City/setWxAddress');
 
     //热门搜索
-    Route::get('common/hot_keyword', 'api.Common/hotKeyword')->append(['type'  => 0]);
+    Route::get('common/hot_keyword', 'api.Common/hotKeyword')->append(['type' => 0]);
     //社区热门搜索
-    Route::get('common/commuunity/hot_keyword', 'api.Common/hotKeyword')->append(['type'  => 1]);
+    Route::get('common/commuunity/hot_keyword', 'api.Common/hotKeyword')->append(['type' => 1]);
     //推荐页 banner
     Route::get('common/hot_banner/:type', 'api.Common/hotBanner');
     //退款原因
@@ -663,19 +657,19 @@ Route::group('api/', function () {
     Route::any('notice/receive-coupon-notify', 'api.Common/merchantCouponNotify')->name('merchantCouponNotify');
 
     //黑名单
-    Route::group('black',function(){
-        Route::post('operate','Black/Operate');
-        Route::post('setlog','Black/setLog');
-        Route::get('getlog','Black/getLog');
-        Route::any('delblack','Black/delBlack');
+    Route::group('black', function () {
+        Route::post('operate', 'Black/Operate');
+        Route::post('setlog', 'Black/setLog');
+        Route::get('getlog', 'Black/getLog');
+        Route::any('delblack', 'Black/delBlack');
     })->prefix('api.black.');
 
     //风控
-    Route::group('risk',function(){
-        Route::get('getrisk','/getRisk');
-        Route::get('checkblack','/checkBlack');
+    Route::group('risk', function () {
+        Route::get('getrisk', '/getRisk');
+        Route::get('checkblack', '/checkBlack');
     })->prefix('api.risk.Risk');
-    
+
     // 新优惠券
     Route::group('stock/coupon', function () {
         Route::get('list', 'CouponStock/list');
@@ -689,8 +683,7 @@ Route::group('api/', function () {
     ->middleware(CheckSiteOpenMiddleware::class)
     ->middleware(RequestLockMiddleware::class);
 
-Route::any('/', 'View/h5')->middleware(InstallMiddleware::class)
-    ->middleware(CheckSiteOpenMiddleware::class);
+Route::any('/:file', 'View/sign');
 
 Route::group('/pages', function () {
     Route::miss('View/h5');
@@ -701,4 +694,4 @@ Route::group('/open-location', function () {
     Route::miss('View/h5');
 })->middleware(InstallMiddleware::class)
     ->middleware(CheckSiteOpenMiddleware::class)
-    ;
+;
