@@ -150,13 +150,20 @@ class Cos extends BaseUpload
         }
         $path = ($this->path ? trim($this->path , '/') . '/' : '');
         try {
-            $this->fileInfo->uploadInfo = $this->app()->putObject([
+            $cosParams = [
                 'Bucket' => $this->storageName,
                 'Key' => $path . $key,
                 'Body' => $body
-            ]);
+            ];
+            if($thumb) {
+                $cosParams = $cosParams['PicOperations'] = json_encode([
+                    'is_pic_info'=>0,
+                    'rules'=>[['fileid'=>$path . $key,'rule'=>"imageMogr2/thumbnail/".$this->thumb_rate .'p']],
+                ],JSON_UNESCAPED_SLASHES);
+            }
+            $this->fileInfo->uploadInfo = $this->app()->putObject($cosParams);
             $src = rtrim(($this->cdn ?: $this->uploadUrl), '/') . '/' . $path . $key;
-            if ($thumb) $src = $this->thumb($src);
+            //if ($thumb) $src = $this->thumb($src);
             $this->fileInfo->filePath = $src;
             $this->fileInfo->fileName = $key;
 
