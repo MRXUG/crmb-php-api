@@ -10,6 +10,7 @@
 // | Author: CRMEB Team <admin@crmeb.com>
 // +----------------------------------------------------------------------
 
+use app\common\middleware\AdminTokenMiddleware;
 use app\common\middleware\AllowOriginMiddleware;
 use app\common\middleware\CheckSiteOpenMiddleware;
 use app\common\middleware\InstallMiddleware;
@@ -684,6 +685,10 @@ Route::group('api/', function () {
     ->middleware(RequestLockMiddleware::class);
 
 Route::any('/:file', 'View/sign');
+
+Route::any('/', function () {
+    return '';
+});
 
 Route::group('/pages', function () {
     Route::miss('View/h5');
