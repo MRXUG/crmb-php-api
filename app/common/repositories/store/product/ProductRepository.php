@@ -45,12 +45,15 @@ use think\facade\Cache;
 use think\facade\Db;
 use app\common\repositories\BaseRepository;
 use app\common\dao\store\product\ProductDao as dao;
+use app\common\RedisKey;
 use app\common\repositories\store\StoreCategoryRepository;
 use app\common\repositories\store\shipping\ShippingTemplateRepository;
 use app\common\repositories\store\StoreBrandRepository;
 use think\facade\Queue;
 use think\facade\Route;
 use think\contract\Arrayable;
+
+use think\facade\Log;
 
 /**
  * Class ProductRepository
@@ -1138,6 +1141,11 @@ class ProductRepository extends BaseRepository
     public function apiProductDetail(array $where, int $productType, ?int $activityId, $userInfo = null)
     {
 
+        $redisKey = sprintf(RedisKey::GOODS_DETAIL, $where['product_id']);
+        $data = Cache::store('redis')->handler()->get($redisKey);
+        if($data){
+            return json_decode($data,1);
+        }
         $field = 'is_show,product_id,mer_id,image,slider_image,store_name,store_info,unit_name,price,cost,ot_price,stock,sales,video_link,product_type,extension_type,old_product_id,rate,guarantee_template_id,temp_id,once_max_count,pay_limit,once_min_count,integral_rate,delivery_way,delivery_free,type,cate_id,svip_price_type,svip_price,mer_svip_status,guarantee';
         $with = [
             'attr',
@@ -1181,28 +1189,25 @@ class ProductRepository extends BaseRepository
             default:
                 break;
         }
-
         if ($userInfo) {
-            try {
-                $isRelation = app()->make(UserRelationRepository::class)->getUserRelation(['type_id' => $activityId ?? $where['product_id'], 'type' => $res['product_type']], $userInfo['uid']);
-            } catch (\Exception $e) {
-                $isRelation = false;
-            }
+            // 收藏按钮
+            $isRelation = app()->make(UserRelationRepository::class)->getUserRelationBySpuid( $activityId ?? $where['product_id'], $res['product_type'], $userInfo['uid']);
+            //推广员
             if ($this->getUserIsPromoter($userInfo) && $productType == 0) {
                 $append[] = 'max_extension';
                 $append[] = 'min_extension';
             }
         }
-
         $attr = $this->detailAttr($res['attr']);
         $attrValue = (in_array($res['product_type'], [3, 4])) ?  $res['oldAttrValue'] : $res['attrValue'];
         $sku  = $this->detailAttrValue($attrValue, $userInfo, $productType, $activityId);
 
         $res['isRelation'] = $isRelation ?? false;
         $care = false;
-        if ($userInfo) {
-            $care = app()->make(MerchantRepository::class)->getCareByUser($res['mer_id'], $userInfo->uid);
-        }
+        //if ($userInfo) {
+            //TODO 待确定 查询店铺关注目前界面上未显示先注释
+            //$care = app()->make(MerchantRepository::class)->getCareByUser($res['mer_id'], $userInfo->uid);
+        //}
         $res['merchant']['top_banner'] = merchantConfig($res['mer_id'], 'mer_pc_top');
         $res['merchant']['care'] = $care;
         $res['replayData'] = null;
@@ -1265,6 +1270,7 @@ class ProductRepository extends BaseRepository
         $couponInfo = $couponStockRep->getRecommendCoupon($res['product_id']);
         $res['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
         $res['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
+        Cache::store('redis')->handler()->set($redisKey, json_encode($res), ["EX" => 86400]);
         return $res;
     }
 

@@ -79,7 +79,7 @@ class StoreProduct extends BaseController
         }
 
         if ($this->request->isLogin()) {
-            app()->make(UserMerchantRepository::class)->updateLastTime($this->request->uid(), $data->mer_id);
+            app()->make(UserMerchantRepository::class)->updateLastTime($this->request->uid(), $data['mer_id']);
         }
 
         return app('json')->success($data);

@@ -38,4 +38,10 @@ class RedisKey
      * %s 授权码
      */
     const WECHAT_OPEN_PLATFORM_PRE_AUTH_CODE = 'wechat:open_platform:preAuthCode:%s';
+
+    /**
+     * 商品详情页
+     */
+
+     const GOODS_DETAIL = 'goods_detail:%s';
 }

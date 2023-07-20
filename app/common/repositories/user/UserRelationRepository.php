@@ -25,6 +25,7 @@ use app\common\repositories\store\StoreActivityRepository;
 use app\common\repositories\system\merchant\MerchantRepository;
 use think\exception\ValidateException;
 use think\facade\Db;
+use think\facade\Log;
 
 /**
  * Class UserRelationRepository
@@ -91,6 +92,20 @@ class UserRelationRepository extends BaseRepository
             $params['type'] = 1;
         }
         return ($this->dao->apiFieldExists('type_id', $params['type_id'], $params['type'], $uid)->count()) > 0;
+    }
+
+    /**
+     * @param array $params
+     * @param int $uid
+     * @return bool
+     * @author Qinii
+     */
+    public function getUserRelationBySpuid(int $supid,$type, int $uid)
+    {
+        if(in_array($type,[0,1,2,3,4])) {
+            $type = 1;
+        }
+        return ($this->dao->apiFieldExists('type_id', $supid, $type, $uid)->count()) > 0;
     }
 
     /**
