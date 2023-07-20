@@ -31,7 +31,7 @@ return [
         'swoole.workerStop' => [\crmeb\listens\SwooleWorkerExitListen::class],
         'create_timer' => env("app_server.run_server") == 'job' ? [
             \crmeb\listens\LiveStatusCheckListen::class, //
-            \crmeb\listens\AutoOrderProfitsharingListen::class, // 自动分账
+            \crmeb\listens\AutoOrderProfitsharingListen::class, // TODO 自动分账 查询逻辑有问题
 //            \crmeb\listens\OrderRefundListen::class, // 用户退款 分账回退
             \crmeb\listens\PlatformCouponEliminateWeChatCoupons::class, // 自动消除快过期平台券
             \crmeb\listens\RefreshPlatformCouponListen::class, // 自动刷新平台优惠券列表商品

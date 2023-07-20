@@ -26,14 +26,15 @@ class DeliveryProfitSharingStatusDao extends BaseDao
      */
     public function getDeliveryPrepareProfitSharingOrder($limit, $where)
     {
+        // TODO 分拥失败 + 解冻失败 独立处理 这样导致死循环
         return DeliveryProfitSharingStatus::getDB()
             ->whereIn('profit_sharing_status', [
-                DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_FAIL,
+               // DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_FAIL,
                 DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_DEFAULT,
             ])->where('amount','>',0)->whereOr(function ($query) use ($where) {
                 $query->whereIn('unfreeze_status', [
                     DeliveryProfitSharingStatus::PROFIT_SHARING_UNFREEZE_DEFAULT,
-                    DeliveryProfitSharingStatus::PROFIT_SHARING_UNFREEZE_FAIL,
+                   // DeliveryProfitSharingStatus::PROFIT_SHARING_UNFREEZE_FAIL,
                 ])
                     ->where($where)
                     ->where('is_del', DeliveryProfitSharingStatus::DELETE_DEFAULT)
