@@ -35,15 +35,6 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
 //        echo '分账检测已开启' . PHP_EOL;
         $this->tick(1000 * 15 * 1, function () {
               \think\facade\Log::info($this->name.'_start：'.date('Y-m-d H:i:s'));
-            //     request()->clearCache();
-            // crmeb的分佣
-            // $day = (int)systemConfig('sys_refund_timer') ?: 15;
-            // $time = strtotime('-' . $day . ' day');
-            // $ids = app()->make(StoreOrderProfitsharingRepository::class)->getAutoProfitsharing(date('Y-m-d H:i:s', $time));
-            // foreach ($ids as $id) {
-            //     Queue::push(OrderProfitsharingJob::class, $id);
-            // }
-
 
             $maxOrderId = 0;
             // 新的分佣逻辑-订单发货后+24小时发起70%分佣
@@ -66,13 +57,12 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
                     $where[] = ['order_id', '>', $maxOrderId];
                 }
                 // 查询已发货的订单
-                $data = $repository->getDeliveryPrepareProfitSharingOrder($limit, $where);
+                $data = $repository->getDeliveryPrepareProfitSharingOrderV2($limit, $where);
                 if (empty($data)) {
                     break;
                 }
 
                 $dataByKeys = array_column($data, null, 'order_id');
-                Log::info("获取到分账订单: " . json_encode($dataByKeys));
                 //查询订单
                 /** @var StoreOrderRepository $ordersRep */
                 $ordersRep = app()->make(StoreOrderRepository::class);
@@ -83,6 +73,7 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
                 }
 
                 foreach ($orders as $order) {
+                    Log::info("订单处理T+1压款: " . $order['order_id']);
                     $item = $dataByKeys[$order['order_id']];
                     if ($item['amount'] > 0) {
                         // 请求分佣
@@ -241,6 +232,7 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
             $update['profit_sharing_status'] = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_FAIL;
             $update['profit_sharing_error'] = $e->getMessage();
         }
+        $update['jobs_fail']=1;
         // 记录分佣日志
          \think\facade\Log::info($this->name.json_encode($update));
         try {
@@ -255,8 +247,8 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
                     'out_order_no' => $order['order_sn'],
                     'request' => json_encode($params, JSON_UNESCAPED_UNICODE),
                     'response' => json_encode($res, JSON_UNESCAPED_UNICODE),
-                    'order_id' => $order['order_id'],
-                    'transaction_id' => $order['transaction_id']
+                    'order_id' => $order['order_id']??'',
+                    'transaction_id' => $order['transaction_id']??'',
                 ]);
             });
         } catch (DbException $e) {
