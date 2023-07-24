@@ -155,7 +155,7 @@ class OpenPlatformRepository extends BaseRepository
                     'submit_audit_result' => json_encode($data['Reason'], JSON_UNESCAPED_UNICODE),
                 ];
             }else{
-                $desc = "unknown";
+                $desc = $data['Event'];
                 $updateData = [];
             }
             Log::info("接收微信推送accountServe:data-{$params['appid']} - $desc - ".json_encode($data, JSON_UNESCAPED_UNICODE));
