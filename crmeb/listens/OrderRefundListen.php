@@ -30,19 +30,19 @@ class OrderRefundListen extends TimerService implements ListenerInterface
     public function handle($event): void
     {
         # 每半分钟检测一次
-        $this->tick(1000 * 30, function () {
-            
+        $this->tick(1000, function () {
+
             # 查询获取任务信息·
             /** @var RefundTask[] $task */
-            $task = RefundTask::getDB()->where('status', 0)->limit(10)->select();
-            Log::info("开始运行 {$this->name} " . date("Y-m-d H:i:s"));
+            $task = RefundTask::getDB()->where('status', 0)->select();
+            Log::info("开始运行 {$this->name} " . date("Y-m-d H:i:s") . json_encode($task));
             foreach ($task as $item) {
                 try {
-                    Db::transaction(function ($item) {
-                        $this->runner($item);
-                    });
+                   
+                    $this->runner($item);
+                 
                 } catch (Exception | ValueError | Throwable $e) {
-                    Log::error("运行出错 {$this->name} " . date("Y-m-d H:i:s") . $e->getMessage() . '   [[' . serialize($e->getTrace()) . ']]');
+                    Log::error("运行出错 {$this->name} order_id" . $item->getAttr('order_id') . date("Y-m-d H:i:s") . $e->getMessage());
                 }
             }
             Log::info("运行结束 {$this->name} " . date("Y-m-d H:i:s"));
