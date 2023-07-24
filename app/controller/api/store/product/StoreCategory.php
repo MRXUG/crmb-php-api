@@ -12,9 +12,11 @@
 
 namespace app\controller\api\store\product;
 
+use app\common\RedisKey;
 use think\App;
 use crmeb\basic\BaseController;
 use app\common\repositories\store\StoreCategoryRepository as repository;
+use think\facade\Cache;
 
 class StoreCategory extends BaseController
 {
@@ -38,6 +40,10 @@ class StoreCategory extends BaseController
      */
     public function lst()
     {
+        $data = Cache::store('redis')->handler()->get(RedisKey::CATEGORY_LIST);
+        if($data){
+            return app('json')->success(json_decode($data,1));
+        }
         $data = $this->repository->getHot(0);
         $list = $this->repository->getApiFormatList(0,1);
         $ret =[];
@@ -112,8 +118,8 @@ class StoreCategory extends BaseController
             }
         }
 
-
         $data['list'] = array_merge($ret, []);
+        Cache::store('redis')->handler()->set(RedisKey::CATEGORY_LIST,json_encode($data));
         return app('json')->success($data);
     }
 

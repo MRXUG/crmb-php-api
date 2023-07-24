@@ -44,4 +44,10 @@ class RedisKey
      */
 
      const GOODS_DETAIL = 'goods_detail:%s';
+
+    /**
+     * 分类列表
+     */
+
+     const CATEGORY_LIST = 'category:list';
 }
