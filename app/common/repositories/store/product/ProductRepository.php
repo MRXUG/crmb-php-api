@@ -1114,14 +1114,136 @@ class ProductRepository extends BaseRepository
      */
     public function detail(int $id, $userInfo)
     {
-        $where = [
-            'is_show' => 1,
-            'status' => 1,
-            'is_used' => 1,
-            'mer_status' => 1,
-            'product_id' => $id
+        $res = $this->productDetail($id);
+        if ($userInfo) {
+            // 收藏按钮
+            $isRelation = app()->make(UserRelationRepository::class)->getUserRelationBySpuid( $id, $res['product_type'], $userInfo['uid']);
+            $res['isRelation'] = $isRelation ?? false;
+            //推广员
+            if ($this->getUserIsPromoter($userInfo) && $res['product_type'] == 0) {
+                $append = [];
+                $append[] = 'max_extension';
+                $append[] = 'min_extension';
+                $res->append($append);
+            }
+        }
+        return $res;
+    }
+
+    public function productDetail($product_id){
+        $redisKey = sprintf(RedisKey::GOODS_DETAIL, $product_id);
+        $data = Cache::store('redis')->handler()->get($redisKey);
+        if($data){
+            return json_decode($data,1);
+        }
+        $field = 'is_show,product_id,mer_id,image,slider_image,store_name,store_info,unit_name,price,cost,ot_price,stock,sales,video_link,product_type,extension_type,old_product_id,rate,guarantee_template_id,temp_id,once_max_count,pay_limit,once_min_count,integral_rate,delivery_way,delivery_free,type,cate_id,svip_price_type,svip_price,mer_svip_status,guarantee';
+        $with = [
+            'attr',
+            'content' => function($query) {
+                $query->order('type ASC');
+            },
+            'attrValue',
+            'oldAttrValue',
+            'merchant' => function ($query) {
+                $query->with(['type_name'])->append(['isset_certificate','services_type']);
+            },
+            'seckillActive' => function ($query) {
+                $query->field('start_day,end_day,start_time,end_time,product_id');
+            },
+            'temp'
         ];
-        return $this->apiProductDetail($where, 0, null, $userInfo);
+        $append = ['guaranteeTemplate','params'];
+        $res = $this->dao->getWhere(['is_show' => 1,'status' => 1,'is_used' => 1,'mer_status' => 1,'product_id' => $product_id], $field, $with);
+        if (!$res)  return [];
+        switch ($res['product_type']) {
+            case 0:
+                $append[] = 'max_integral';
+                $append[] = 'show_svip_info';
+                break;
+            case 1:
+                $_where = $this->dao->productShow();
+                $_where['product_id'] = $res['old_product_id'];
+                $oldProduct = $this->dao->getWhere($_where);
+                $result = $this->getSeckillAttrValue($res['attrValue'], $res['old_product_id']);
+                $res['attrValue'] = $result['item'];
+
+                $res['stock'] = $result['stock'];
+                $res['stop'] = strtotime(date('Y-m-d', time()) . $res['seckillActive']['end_time'] . ':00:00');
+                $res['sales'] = app()->make(StoreOrderRepository::class)->seckillOrderCounut($product_id);
+                $res['quota'] = $this->seckillStock($product_id);
+                $res['old_status'] = $oldProduct ? 1 : 0;
+                $append[] = 'seckill_status';
+                break;
+            default:
+                break;
+        }
+        $attr = $this->detailAttr($res['attr']);
+        $attrValue = (in_array($res['product_type'], [3, 4])) ?  $res['oldAttrValue'] : $res['attrValue'];
+        $sku  = $this->detailAttrValuev1($attrValue, $res['product_type']);
+        $res['merchant']['top_banner'] = merchantConfig($res['mer_id'], 'mer_pc_top');
+       // $res['merchant']['care'] = $care;
+        $res['replayData'] = null;
+        if (systemConfig('sys_reply_status')){
+            $res['replayData'] = app()->make(ProductReplyRepository::class)->getReplyRate($res['product_id']);
+            $append[] = 'topReply';
+        }
+        unset($res['attr'], $res['attrValue'], $res['oldAttrValue'], $res['seckillActive']);
+        if (count($attr) > 0) {
+            $firstSku = [];
+            foreach ($attr as $item) {
+                $firstSku[] = $item['attr_values'][0];
+            }
+            $firstSkuKey = implode(',', $firstSku);
+            if (isset($sku[$firstSkuKey])) {
+                $sku = array_merge([$firstSkuKey => $sku[$firstSkuKey]], $sku);
+            }
+        }
+        $res['attr'] = $attr;
+        $res['sku'] = $sku;
+        $res->append($append);
+
+        if ($res['content'] && $res['content']['type'] == 1) {
+            $res['content']['content'] = json_decode($res['content']['content']);
+        }
+
+        /** @var CouponStocksRepository $couponStockRep */
+        $couponStockRep = app()->make(CouponStocksRepository::class);
+
+        $recommend = $this->getRecommend($res['product_id'], $res['mer_id']);
+        foreach ($recommend as &$item) {
+            $couponInfo = $couponStockRep->getRecommendCoupon($item['product_id']);
+            $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+            $item['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
+        }
+        $res['merchant']['recommend'] = $recommend;
+        $spu = app()->make(SpuRepository::class)->getSpuData(
+            $res['product_id'],
+            $res['product_type'],
+            0
+        );
+        $res['spu_id'] = $spu->spu_id;
+        if (systemConfig('community_status')) {
+            $res['community'] = app()->make(CommunityRepository::class)->getDataBySpu($spu->spu_id);
+        }
+        //热卖排行
+        if (systemConfig('hot_ranking_switch') && $res['spu_id']) {
+            $hot = $this->getHotRanking($res['spu_id'], $res['cate_id']);
+            $res['top_name'] = $hot['top_name'] ?? '';
+            $res['top_num'] = $hot['top_num'] ?? 0;
+            $res['top_pid'] = $hot['top_pid'] ?? 0;
+        }
+        //活动氛围图
+        if (in_array($res['product_type'],[0,2,4])){
+            $active =  app()->make(StoreActivityRepository::class)->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_ATMOSPHERE,$res['spu_id'],$res['cate_id'],$res['mer_id']);
+            if ($active) $res['atmosphere_pic'] = $active['pic'];
+        }
+        /** @var CouponStocksRepository $couponStockRep */
+        $couponStockRep = app()->make(CouponStocksRepository::class);
+        $couponInfo = $couponStockRep->getRecommendCoupon($res['product_id']);
+        $res['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+        $res['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
+        Cache::store('redis')->handler()->set($redisKey, json_encode($res), ["EX" => 86400]);
+        return $res;
     }
 
 
@@ -1484,6 +1606,38 @@ class ProductRepository extends BaseRepository
             if ($this->getUserIsPromoter($userInfo)) {
                 $_value['extension_one'] = $value->bc_extension_one;
                 $_value['extension_two'] = $value->bc_extension_two;
+            }
+            $sku[$value['sku']] = $_value;
+        }
+        return $sku;
+    }
+
+        /**
+     * TODO 单商品sku
+     * @param $data
+     * @param $userInfo
+     * @return array
+     * @author Qinii
+     * @day 2020-08-05
+     */
+    public function detailAttrValueV1($data,$productType)
+    {
+        $sku = [];
+        foreach ($data as $value) {
+            $_value = [
+                'sku'    => $value['sku'],
+                'price'  => $value['price'],
+                'stock'  => $value['stock'],
+                'image'  => $value['image'],
+                'weight' => $value['weight'],
+                'volume' => $value['volume'],
+                'sales'  => $value['sales'],
+                'unique' => $value['unique'],
+                'bar_code' => $value['bar_code'],
+            ];
+            if($productType == 0 ){
+                $_value['ot_price'] = $value['ot_price'];
+                $_value['svip_price'] = $value['svip_price'];
             }
             $sku[$value['sku']] = $_value;
         }
