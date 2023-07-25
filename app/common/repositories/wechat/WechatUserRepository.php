@@ -22,6 +22,7 @@ use app\common\repositories\article\ArticleRepository;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\user\UserRepository;
 use crmeb\jobs\SendNewsJob;
+use crmeb\jobs\WechatUserRelationJob;
 use crmeb\services\WechatUserGroupService;
 use crmeb\services\WechatUserTagService;
 use FormBuilder\Exception\FormBuilderException;
