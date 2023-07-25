@@ -6,5 +6,5 @@ ADD . /app
 ENV TZ Asia/Shanghai
 
 
-CMD ["/usr/local/bin/php", "/app/think", "queue:work"," --tries=2"]
+CMD ["/usr/local/bin/php", "/app/think", "queue:work","--tries=2"]
 
