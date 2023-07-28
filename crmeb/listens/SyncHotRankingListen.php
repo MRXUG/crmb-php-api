@@ -20,7 +20,7 @@ use think\facade\Queue;
 
 class SyncHotRankingListen extends TimerService implements ListenerInterface
 {
-
+    
     public function handle($event): void
     {
         $hot = systemConfig('hot_ranking_switch');

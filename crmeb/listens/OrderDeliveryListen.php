@@ -22,6 +22,7 @@ class OrderDeliveryListen implements ListenerInterface
         list($depositRate, $profitSharingRate) = app()
             ->make(StoreOrderRepository::class)
             ->switchOrderPlatformSource($order);
+        //创建分账任务
         DeliveryProfitSharingStatus::getDB()->insert([
             'order_id' => $order['order_id'],
             'profit_sharing_status' => DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_DEFAULT,
@@ -34,7 +35,9 @@ class OrderDeliveryListen implements ListenerInterface
             'deposit_rate' => $depositRate,
             'amount' => bcmul(bcmul($order['pay_price'], 100), $depositRate > 0 ? $depositRate : $profitSharingRate),
             'order_sn' => $order['order_sn'],
-            'platform_source' => $order['platform_source']
+            'platform_source' => $order['platform_source'],
+            'profit_sharing_result'=>'',
+            'transaction_id'=>$order['transaction_id']??'',
         ]);
     }
 }

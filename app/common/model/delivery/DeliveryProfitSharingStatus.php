@@ -8,7 +8,7 @@ use app\common\model\BaseModel;
 
 class DeliveryProfitSharingStatus  extends BaseModel
 {
-    // 未请求分佣
+    // 待请求分账
     const PROFIT_SHARING_STATUS_DEFAULT  = 0;
     // 进行中
     const PROFIT_SHARING_STATUS_ING = 1;
@@ -22,7 +22,8 @@ class DeliveryProfitSharingStatus  extends BaseModel
     const PROFIT_SHARING_STATUS_RETURN_FAIL = 5;
     // 分账回退成功
     const PROFIT_SHARING_STATUS_RETURN_SUCCESS = 6;
-    
+    // 用户退款中断处理分账
+    const PROFIT_SHARING_STATUS_RETURN_FNIAL = 6;
     
     
     // 0-资金未解冻 1-解冻中 2-解冻失败 3-解冻成功

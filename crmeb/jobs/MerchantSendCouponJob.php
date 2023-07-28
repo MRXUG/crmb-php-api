@@ -54,7 +54,6 @@ class MerchantSendCouponJob implements JobInterface
                 $storeCouponUserRepository->insertAll($install);
             } catch (\Exception $e) {
             }
-            usleep(100);
         } while (count($uids));
         $send->status = 1;
         $send->save();

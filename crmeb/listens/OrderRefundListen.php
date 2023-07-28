@@ -4,9 +4,11 @@ namespace crmeb\listens;
 
 use app\common\dao\store\order\StoreRefundOrderDao;
 use app\common\dao\store\RefundTaskDao;
+use app\common\model\delivery\DeliveryProfitSharingLogs;
 use app\common\model\delivery\DeliveryProfitSharingStatus;
 use app\common\model\store\RefundTask;
 use app\common\repositories\delivery\DeliveryProfitSharingStatusRepository;
+use app\common\repositories\delivery\DeliveryProfitSharingLogsRepository;
 use crmeb\interfaces\ListenerInterface;
 use crmeb\jobs\RefundCheckJob;
 use crmeb\services\MiniProgramService;
@@ -14,6 +16,7 @@ use crmeb\services\TimerService;
 use crmeb\services\WechatService;
 use crmeb\utils\wechat\ProfitSharing;
 use Exception;
+use think\exception\ValidateException;
 use think\facade\Db;
 use think\facade\Log;
 use think\facade\Queue;
@@ -25,27 +28,63 @@ class OrderRefundListen extends TimerService implements ListenerInterface
 
     protected string $name = '订单退款处理-' . __CLASS__;
 
-    private int $reNumber = 0;
-
     public function handle($event): void
     {
         # 每半分钟检测一次
-        $this->tick(1000 * 60, function () {
-
+        $this->tick(1000*60*1, function () {
+            request()->clearCache();
             # 查询获取任务信息·
             /** @var RefundTask[] $task */
-            $task = RefundTask::getDB()->where('status', 0)->select();
-            Log::info("开始运行 {$this->name} " . date("Y-m-d H:i:s") . json_encode($task));
+            //$task                = RefundTask::getDB()->where('order_sn', "wx1690439779414212841")->select();
+            $task                = RefundTask::getDB()->where('status', 0)->select();
+            $profitSharingStatus = app()->make(DeliveryProfitSharingStatusRepository::class);
             foreach ($task as $item) {
                 try {
-                   
-                    $this->runner($item);
-                 
+                    Log::info("开始处理 {$this->name} " . date("Y-m-d H:i:s") . $item->getAttr('order_sn'));
+                    //获取是否进行过分账
+                    $info = $profitSharingStatus->getProfitSharingStatus($item->getAttr('order_id'));
+                    if($info['profit_sharing_status']==DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_DEFAULT){
+                        app()->make(DeliveryProfitSharingStatusRepository::class)->updateByWhere([
+                            'order_id' => $item['order_id'],
+                        ], ['profit_sharing_status' => DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_FNIAL]);
+                    }
+                    if (!empty($info)&&$info['profit_sharing_status']!=DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_DEFAULT) {
+                        //查询分账处理状态
+                        $res = WechatService::getMerPayObj($item->getAttr('mer_id'), $item->getAttr('app_id'))
+                            ->profitSharing()
+                            ->profitSharingReturnResult($item->getAttr('order_sn'), $item->getAttr('order_sn')); //TODO 确认是否都是用的订单号
+                        # 回退结果
+                        $return_status = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_ING;
+                        switch ($res['result']) {
+                            case 'SUCCESS':
+                                $return_status = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS;
+                                break;
+                            case 'FAILED':
+                                $return_status = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_FAIL;
+                                # 处理错误信息
+                                $item->profitSharingErrHandler([$this->errorCode($res['fail_reason'], $item['returnMchId'])]);
+                                break;
+                            default:
+                                $return_status = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_ING;
+                                break;
+                        }
+                        //分账回退成功 进行退款操作
+                        if ($return_status == DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS) {
+                            $this->refundToUser($item);
+                            $item->setAttr('status', 1);
+                            $item->save();
+                        }
+                    } else {
+                        $this->refundToUser($item);
+                        $item->setAttr('status', 1);
+                        $item->save();
+                    }
                 } catch (Exception | ValueError | Throwable $e) {
-                    Log::error("运行出错 {$this->name} order_id" . $item->getAttr('order_id') . date("Y-m-d H:i:s") . $e->getMessage());
+                    Log::error("运行出错 {$this->name} order_id" . $item->getAttr('order_id') . date("Y-m-d H:i:s") . $e->getMessage()."line:".$e->getLine());
+                    $item->setAttr('err_msg', "运行出错 {$this->name} order_id" . $item->getAttr('order_id') . date("Y-m-d H:i:s") . $e->getMessage());
+                    $item->save();
                 }
             }
-            Log::info("运行结束 {$this->name} " . date("Y-m-d H:i:s"));
         });
     }
 
@@ -54,105 +93,10 @@ class OrderRefundListen extends TimerService implements ListenerInterface
      * @return void
      * @throws null
      */
-    private function runner(RefundTask $task): void
-    {
-        /** @var DeliveryProfitSharingStatusRepository $make */
-        $make = app()->make(DeliveryProfitSharingStatusRepository::class);
-        $info = $make->getProfitSharingStatus($task->getAttr('order_id'));
-
-        if (!empty($info)) {
-            # 将参数解析出来
-            $param = json_decode($task->getAttr('param'), true);
-            # 收集失败原因
-            $errArr = [];
-            # 收集还需要检测的
-            $newParam = [];
-
-            # 循环进行查询
-            foreach (is_array($param) ? $param : [] as $item) {
-                # 调用查询分账回退结果
-                $res = WechatService::getMerPayObj($item['merId'], $item['appId'])
-                    ->profitSharing()
-                    ->profitSharingReturnResult($item['outReturnNo'], $item['outOrderNo']);
-                # 回退结果
-                $profitSharingStatus = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_ING;
-                switch ($res['result']) {
-                    case 'SUCCESS':
-                        $profitSharingStatus = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS;
-                        break;
-                    case 'FAILED':
-                        $profitSharingStatus = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_FAIL;
-                        $errArr[]            = $this->errorCode($res['fail_reason'], $item['returnMchId']);
-                        break;
-                    default:
-                        $newParam[] = $item;
-                        break;
-                }
-                # 将状态更新到数据库
-                DeliveryProfitSharingStatus::getDB()->where([
-                    ['order_sn', '=', $item['outOrderNo']],
-                    ['mch_id', '=', $item['returnMchId']],
-                ])->update([
-                    'profit_sharing_status' => $profitSharingStatus,
-                ]);
-            }
-            # 处理错误信息
-            if ($task->profitSharingErrHandler($errArr)) {
-                return;
-            }
-
-            # 将处理后的param存储
-            $this->saveTaskParam($task, $newParam);
-        }
-        # 判断数据库中数据是否还存在未退回的
-        if (
-            DeliveryProfitSharingStatus::getDB()
-            ->where('order_id', $task->getAttr('order_id'))
-            ->where('profit_sharing_status', DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_ING)
-            ->count() > 0
-        ) {
-            return;
-        }
-
-        # 走到此处说明已经没有等待退回分账的状态了 判断该订单是否还存在出现错误未巡回 如果存在的话不调用退回到用户
-        if (
-            DeliveryProfitSharingStatus::getDB()
-            ->where('order_id', $task->getAttr('order_id'))
-            ->where('profit_sharing_status', DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_FAIL)
-            ->count() == 0
-        ) {
-            $this->refundToUser($task, !empty($info));
-        }
-        # 更新此任务为完成状态
-        $task->setAttr('status', 1);
-        $task->save();
-    }
-
-    /**
-     * @param RefundTask $task
-     * @return void
-     * @throws null
-     */
-    public function refundToUser(RefundTask $task, bool $isUnfreeze): void
+    public function refundToUser(RefundTask $task): void
     {
         # 清空错误信息
         $task->setAttr('err_msg', '');
-        # 判断是否需要解冻
-        if ($isUnfreeze) {
-            # 获取微信操作对象
-            $weChat = WechatService::getMerPayObj($task->getAttr('mer_id'), $task->getAttr('app_id'));
-            # 解冻资金
-            try {
-                $weChat->profitSharing()->profitSharingUnfreeze([
-                    'transaction_id' => $task->getAttr('transaction_id'),
-                    'out_order_no'   => $task->getAttr('order_sn'),
-                    'description'    => '用户退款解冻全部剩余资金',
-                ]);
-            } catch (Exception $e) {
-                $task->profitSharingErrHandler(['解冻分账失败' . $e->getMessage()]);
-                return;
-            }
-        }
         /** @var StoreRefundOrderDao $refundOrderResp */
         $refundOrderResp = app()->make(StoreRefundOrderDao::class);
         $refundOrder     = $refundOrderResp->getWhere(['refund_order_id' => $task->getAttr('refund_order_id')], "*", ['order']);
@@ -179,16 +123,8 @@ class OrderRefundListen extends TimerService implements ListenerInterface
             return;
         }
         if (isset($res->err_code)) {
-            $this->reNumber += 1;
             $task->profitSharingErrHandler(['发起退款失败 错误码:' . ($res->err_code_des ?? '')]);
             Log::error("退款失败 正在进行重新尝试" . ($res->err_code_des ?? ''));
-            if ($this->reNumber >= 2) {
-                sleep(60);
-                ProfitSharing::refund($task->getAttr('refund_order_id'));
-                return;
-            }
-            sleep(5);
-            $this->runner($task);
             return;
         }
         /** @var RefundTaskDao $refundTaskDao */
@@ -198,20 +134,6 @@ class OrderRefundListen extends TimerService implements ListenerInterface
         Queue::later(60, RefundCheckJob::class, [
             'refund_task_id' => $task->getAttr('refund_task_id'),
         ]);
-    }
-
-    /**
-     * 存储任务的新参数
-     *
-     * @param RefundTask $task
-     * @param array $param
-     * @return void
-     */
-    private function saveTaskParam(RefundTask $task, array $param)
-    {
-        $newTask = clone $task;
-        $newTask->setAttr('param', json_encode($param, JSON_UNESCAPED_UNICODE));
-        $newTask->save();
     }
 
     /**
@@ -229,5 +151,32 @@ class OrderRefundListen extends TimerService implements ListenerInterface
         ][$code] ?? $code;
 
         return "错误原因: {$err} 微信商户号: {$mchId}";
+    }
+
+        /**
+     * 处理返回结果
+     *
+     * @param $res
+     * @param $update
+     *
+     * @return bool
+     * @author  zouxiuhui <zouxiuhui@vchangyi.com>
+     * @date    2023/3/13 20:35
+     */
+    protected function handleStatus($res, &$update)
+    {
+        if (empty($res)) {
+            return true;
+        }
+
+        $status = DeliveryProfitSharingStatus::PROFIT_SHARING_UNFREEZE_ING;
+        foreach ($res['receivers'] as $receiver) {
+            if ($receiver['result'] == 'CLOSED') {
+                $status = DeliveryProfitSharingStatus::PROFIT_SHARING_UNFREEZE_FAIL;
+                break;
+            }
+        }
+
+        $update['unfreeze_status'] = $status;
     }
 }

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace crmeb\listens;
-
 
 use app\common\model\delivery\DeliveryProfitSharingLogs;
 use app\common\model\delivery\DeliveryProfitSharingStatus;
@@ -26,63 +24,47 @@ class FinishOrderListen extends TimerService implements ListenerInterface
     public function handle($event): void
     {
         $this->tick(1000 * 60 * 5, function () {
-            \think\facade\Log::info($this->name.'_start：'.date('Y-m-d H:i:s'));
+            request()->clearCache();
+            \think\facade\Log::info($this->name . '_start：' . date('Y-m-d H:i:s'));
             $maxOrderId = 0;
             /**
              * @var StoreOrderRepository $app
              */
-            $app = app()->make(StoreOrderRepository::class);
+            $app   = app()->make(StoreOrderRepository::class);
             $where = [
                 [
                     'verify_time',
                     '<',
-                    date('Y-m-d H:i:s', time() - 86400 * 15)
+                    date('Y-m-d H:i:s', time() - 86400 * 15),
 //                    date('Y-m-d H:i:s', time() - 60 * 5)
-                ]
+                ],
             ];
 
             $field = 'order_id,system_commission,platform_source,mer_id,appid,order_sn';
             $limit = 50;
-            while (true) {
-                if ($maxOrderId) {
-                    array_push($where, ['order_id', '>', $maxOrderId]);
-                }
 
-                $orders = $app->getNeedFinishOrders($where, $limit, $field);
-                if (empty($orders)) {
-                    break;
-                }
-
-                /**
-                 * 获取发货分账记录
-                 * @var DeliveryProfitSharingStatusRepository $app
-                 */
-
-                $orderByKeys = array_column($orders, null, 'order_id');
-                $data = app()
-                    ->make(DeliveryProfitSharingStatusRepository::class)
-                    ->whereIn('order_id', array_keys($orderByKeys))
-                    ->where('profit_sharing_status', DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_SUCCESS)
-                    ->select()
-                    ->toArray();
-
-                if (empty($data)) {
-                    break;
-                }
-
-                // 查询请求分账的记录
-                $logs = app()
-                    ->make(DeliveryProfitSharingLogsRepository::class)
-                    ->getProfitSharingOrder('order_id', array_column($data, 'order_id'));
-                $logByKeys = array_column($logs, null, 'order_id');
-                foreach ($data as $value) {
-                    // 押金回退
-                    $this->profitSharingReturn($value, $logByKeys[$value['order_id']], $orderByKeys[$value['order_id']]);
-                    // sleep(1);
-                    $maxOrderId = $value['order_id'];
-                }
+            $orders = $app->getNeedFinishOrders($where, $limit, $field);
+            if (empty($orders)) {
+                return;
             }
-             \think\facade\Log::info($this->name.'_end：'.date('Y-m-d H:i:s'));
+            $orderByKeys = array_column($orders, null, 'order_id');
+            $data        = app()
+                ->make(DeliveryProfitSharingStatusRepository::class)
+                ->whereIn('order_id', array_keys($orderByKeys))
+                ->where('profit_sharing_status', DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_SUCCESS)
+                ->select()
+                ->toArray();
+            // 查询请求分账的记录
+            $logs = app()
+                ->make(DeliveryProfitSharingLogsRepository::class)
+                ->getProfitSharingOrder('order_id', array_column($data, 'order_id'));
+            $logByKeys = array_column($logs, null, 'order_id');
+            foreach ($data as $value) {
+                // 押金回退
+                $this->profitSharingReturn($value, $logByKeys[$value['order_id']], $orderByKeys[$value['order_id']]);
+                //$maxOrderId = $value['order_id'];
+            }
+            \think\facade\Log::info($this->name . '_end：' . date('Y-m-d H:i:s'));
         });
     }
 
@@ -105,27 +87,27 @@ class FinishOrderListen extends TimerService implements ListenerInterface
             ->calcProfitSharingAmountByPlatformSource($data, $order);
         $update = [
             'profit_sharing_status' => DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_ING,
-            'return_amount' => $returnAmount,
-            'profit_sharing_error' => ''
+            'return_amount'         => $returnAmount,
+            'profit_sharing_error'  => '',
         ];
 
         $params = $res = [];
         try {
             // 获取商户配置
-            $make = WechatService::getMerPayObj($order['mer_id'], $order['appid']);
+            $make   = WechatService::getMerPayObj($order['mer_id'], $order['appid']);
             $params = [
-                'out_order_no' => $log['out_order_no'],
+                'out_order_no'  => $log['out_order_no'],
                 'out_return_no' => $log['out_return_no'] ?? $log['out_order_no'] . substr(0, 4, time()),
-                'return_mchid' => (string)$data['mch_id'],
-                'amount' => (int)$returnAmount,
-                'description' => '分账回退',
+                'return_mchid'  => (string) $data['mch_id'],
+                'amount'        => (int) $returnAmount,
+                'description'   => '分账回退',
             ];
             $res = $make->profitSharing()->profitSharingReturn($params);
             $this->handleRes($res, $update);
         } catch (ValidateException $exception) {
             \think\facade\Log::error($log['order_id'] . '收货15天后押金回退失败' . $exception->getMessage());
             $update['profit_sharing_status'] = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_FAIL;
-            $update['profit_sharing_error'] = $exception->getMessage();
+            $update['profit_sharing_error']  = $exception->getMessage();
         }
 
         Db::transaction(function () use ($log, $update, $params, $res, $data, $order) {
@@ -135,31 +117,31 @@ class FinishOrderListen extends TimerService implements ListenerInterface
                 ->updateByWhere(['order_id' => $log['order_id']], $update);
 
             app()->make(DeliveryProfitSharingLogsRepository::class)->create([
-                'type' => DeliveryProfitSharingLogs::RETURN_ORDERS_TYPE,
-                'out_order_no' => $log['out_order_no'],
-                'request' => json_encode($params, JSON_UNESCAPED_UNICODE),
-                'response' => json_encode($res, JSON_UNESCAPED_UNICODE),
-                'order_id' => $log['order_id'],
-                'transaction_id' => $log['transaction_id']
+                'type'           => DeliveryProfitSharingLogs::RETURN_ORDERS_TYPE,
+                'out_order_no'   => $log['out_order_no'],
+                'request'        => json_encode($params, JSON_UNESCAPED_UNICODE),
+                'response'       => json_encode($res, JSON_UNESCAPED_UNICODE),
+                'order_id'       => $log['order_id'],
+                'transaction_id' => $log['transaction_id'],
             ]);
 
             if ($update['profit_sharing_status'] == DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS) {
                 // 记录流水
                 if ($order['platform_source'] != StoreOrder::PLATFORM_SOURCE_NATURE) {
                     app()->make(OrderFlowRepository::class)->create([
-                        'order_sn' => $order['order_sn'],
+                        'order_sn'    => $order['order_sn'],
                         'create_time' => date('Y-m-d H:i:s'),
-                        'type' => OrderFlow::FLOW_TYPE_IN,
-                        'amount' => '+'.$update['return_amount'],
-                        'remark' => $this->getTitleByPlatformSource($order),
-                        'mer_id' => $data['mer_id'],
-                        'mch_id' => $data['mch_id'],
-                        'is_del' => OrderFlow::DELETE_FALSE
+                        'type'        => OrderFlow::FLOW_TYPE_IN,
+                        'amount'      => '+' . $update['return_amount'],
+                        'remark'      => $this->getTitleByPlatformSource($order),
+                        'mer_id'      => $data['mer_id'],
+                        'mch_id'      => $data['mch_id'],
+                        'is_del'      => OrderFlow::DELETE_FALSE,
                     ]);
                 }
 
                 app()->make(MerchantGoodsPaymentRepository::class)->updateWhenReceivePlus15Days($order['order_id'], [
-                    'deposit_money' => 0
+                    'deposit_money' => 0,
                 ]);
             }
         });

@@ -372,7 +372,6 @@ class DeliveryOrderRepository extends BaseRepository
                 $error['origin_id'] = $orderSn;
                 $error['reason'] = $type == 1 ? 36 : '信息错误';
                 $error['order_code'] = $type == 2 ? $res['ordercode'] : $priceData['deliveryNo'];
-                sleep(1);
                 $service->cancelOrder($error);
             }
             Db::rollback();

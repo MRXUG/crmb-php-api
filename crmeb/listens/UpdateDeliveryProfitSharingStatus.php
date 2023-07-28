@@ -77,7 +77,6 @@ class UpdateDeliveryProfitSharingStatus extends TimerService implements Listener
                 foreach ($orders as $order) {
                     // 查询分佣结果
                     $this->profitSharingResult($order, $logByKeys[$order['order_id']], $dataByKeys[$order['order_id']]);
-                    // sleep(1);
                     $maxOrderId = $order['order_id'];
                 }
             }

@@ -473,7 +473,6 @@ class MiniProgramService
             // 如果订单没有解冻需要先解冻订单
             $this->unFreezeOrder($info, $order);
             // 避免完结分账还没走完就发起退款导致失败
-            sleep(900);
         } catch (\Exception $e) {
             throw $e;
         }

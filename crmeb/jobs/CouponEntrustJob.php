@@ -21,7 +21,6 @@ class CouponEntrustJob implements JobInterface
     public function fire($job, $data)
     {
         Log::info('委托营销-异步实现批次委托,' . json_encode(compact('data')));
-        sleep(30);
 
         $stockId = $data['stock_id'] ?? '';
         if ($stockId) {

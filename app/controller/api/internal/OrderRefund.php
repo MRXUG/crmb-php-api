@@ -189,11 +189,9 @@ class OrderRefund extends BaseController
             $task->profitSharingErrHandler(['发起退款失败 错误码:' . ($res->err_code_des ?? '')]);
             Log::error("退款失败 正在进行重新尝试" . ($res->err_code_des ?? ''));
             if ($this->reNumber >= 2) {
-                sleep(60);
                 ProfitSharing::refund($task->getAttr('refund_order_id'));
                 return;
             }
-            sleep(5);
             $this->runner($task);
             return;
         }

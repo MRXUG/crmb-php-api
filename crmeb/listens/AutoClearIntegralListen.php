@@ -49,7 +49,6 @@ class AutoClearIntegralListen extends TimerService implements ListenerInterface
                             $uid = $user['uid'];
                             Queue::later(1800, ClearUserIntegralJob::class, compact('uid', 'startTime', 'endTime'));
                         }
-                        usleep(100);
                     });
                 }
             } else if ($end < strtotime('+15 day')) {
@@ -87,7 +86,6 @@ class AutoClearIntegralListen extends TimerService implements ListenerInterface
                         }
                         $cache->set($cacheKey, 1, 3600 * 24 * 2);
                     }
-                    usleep(200);
                 });
                 $cache->set($checkKey, 1, 3600 * 24 * 1);
             }

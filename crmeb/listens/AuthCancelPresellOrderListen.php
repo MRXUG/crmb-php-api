@@ -22,7 +22,7 @@ use think\facade\Log;
 
 class AuthCancelPresellOrderListen extends TimerService implements ListenerInterface
 {
-
+    protected string $name = '预售订单';
     public function handle($event): void
     {
         $this->tick(1000 * 60 * 1.5, function () {
