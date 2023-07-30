@@ -31,14 +31,13 @@ return [
         'swoole.workerStop'         => [\crmeb\listens\SwooleWorkerExitListen::class],
         'create_timer'              => env("app_server.run_server") == 'job' ? [
             \crmeb\listens\LiveStatusCheckListen::class, // 心跳检测
-            /** 分账相关 **/
+            /** 「订单」「分账」 **/
             \crmeb\listens\AutoOrderProfitsharingListen::class, //发货后进行分账
-            //\crmeb\listens\ProfitSharingUnfreezeListen::class,// 解冻商户资金
-            //\crmeb\listens\UpdateDeliveryOrderUnfreezeStatus::class,// 更新解冻状态
-            // \crmeb\listens\FinishOrderListen::class,// 15天后分账回退,
-             \crmeb\listens\UpdateDeliverProfitSharingReturnListen::class, // 同步分账回退/分账结果 状态同步
+            \crmeb\listens\FinishOrderListen::class,// 收货15天后分账回退,
+            \crmeb\listens\UpdateDeliverProfitSharingReturnListen::class, // 同步分账回退/分账结果 状态同步
             \crmeb\listens\OrderRefundListen::class, // 用户退款 分账回退
             \crmeb\listens\RefundOrderAgreeListen::class, // 自动退款
+            \crmeb\listens\AuthTakeOrderListen::class, // 自动收货
 
             \crmeb\listens\PlatformCouponEliminateWeChatCoupons::class, // 自动消除快过期平台券
             \crmeb\listens\RefreshPlatformCouponListen::class, // 自动刷新平台优惠券列表商品
@@ -62,9 +61,11 @@ return [
             \crmeb\listens\AuthAcquirePenaltyListen::class,// 自动更新小程序获取交易体验分违规记录
             \crmeb\listens\UpdateAppletSubmitAuditListen::class, // 异步处理小程序提审流程
             \crmeb\listens\AuthProductStockSetListen::class, // 每天自动恢复商品库存
-            \crmeb\listens\AuthTakeOrderListen::class, // 自动收货
+            
 
             // TODO 待确定是否需要
+            //\crmeb\listens\ProfitSharingUnfreezeListen::class,// 解冻商户资金
+            //\crmeb\listens\UpdateDeliveryOrderUnfreezeStatus::class,// 更新解冻状态
             //\crmeb\listens\UpdateDeliveryProfitSharingStatus::class,// 定时更新发货分佣结果
             // \crmeb\listens\UpdateMerchantProfitListen::class,// 处理商户收益(放在job中每日凌晨执行一次)
             // \crmeb\listens\AuthCancelActivityListen::class, // 自动同步活动状态

@@ -20,6 +20,7 @@ use app\common\model\system\merchant\MerchantAd;
 use app\common\model\system\merchant\MerchantGoodsPayment;
 use app\common\model\system\merchant\MerchantProfitRecord;
 use app\common\model\user\User;
+use app\common\model\store\OrderFinishTask;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\coupon\CouponStocksUserRepository;
 use app\common\repositories\delivery\DeliveryOrderRepository;
@@ -724,8 +725,14 @@ class StoreOrderRepository extends BaseRepository
             $this->computed($order, $user);
             //TODO 确认收货
             $statusRepository = app()->make(StoreOrderStatusRepository::class);
-
+            
             $statusRepository->status($order->order_id, $statusRepository::ORDER_STATUS_TAKE, $order->order_type  == 1 ? '已核销' :'已收货');
+
+            OrderFinishTask::getDB()->save([
+                'order_id'=>$order->order_id,
+                'finish_at'=>time(),
+            ]);
+
             Queue::push(SendSmsJob::class, ['tempId' => 'ORDER_TAKE_SUCCESS', 'id' => $order->order_id]);
             Queue::push(SendSmsJob::class, ['tempId' => 'ADMIN_TAKE_DELIVERY_CODE', 'id' => $order->order_id]);
             app()->make(MerchantRepository::class)->computedLockMoney($order);
@@ -2546,5 +2553,9 @@ class StoreOrderRepository extends BaseRepository
     public function getNeedFinishOrders($where, $limit, $field = '*')
     {
         return $this->dao->query($where)->field($field)->limit($limit)->select()->toArray();
+    }
+    public function getNeedFinishOrdersByIds($ids, $field = '*')
+    {
+        return $this->dao->whereIn('order_id',$ids)->field($field)->select()->toArray();
     }
 }

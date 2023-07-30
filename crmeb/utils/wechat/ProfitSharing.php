@@ -134,7 +134,7 @@ class ProfitSharing
         $deliveryProfit = DeliveryProfitSharingStatus::getDB()
             ->where('order_id', $refundOrder['order_id'])
             ->find();
-        if (in_array($deliveryProfit['profit_sharing_status'], [DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_ING, DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_SUCCESS])) {
+        if (!empty($deliveryProfit)&&in_array($deliveryProfit['profit_sharing_status'], [DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_ING, DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_SUCCESS])) {
             # 商户支付对象 调用分账退回 保证所有的 分账都是在申请回退状态
             WechatService::getMerPayObj($deliveryProfit['mer_id'], $deliveryProfit['app_id'])
                 ->profitSharing()

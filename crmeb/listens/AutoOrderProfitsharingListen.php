@@ -31,7 +31,7 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
     public function handle($params): void
     {
 //        echo '分账检测已开启' . PHP_EOL;1000 * 15 * 1
-        $this->tick(1000 * 60 * 10, function () {
+        $this->tick(1000 * 60 * 1, function () {
             // 新的分佣逻辑-订单发货后+24小时发起70%分佣
             $limit = 50;
             /**

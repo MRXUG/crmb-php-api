@@ -30,8 +30,8 @@ class AuthTakeOrderListen extends TimerService implements ListenerInterface
 
     public function handle($event): void
     {
-
-        $this->tick(1000 * 60 * 60, function () {
+        // 1000 * 60 * 60
+        $this->tick(1000 * 60 * 5, function () {
             $storeOrderStatusRepository = app()->make(StoreOrderStatusRepository::class);
             $storeOrderRepository = app()->make(StoreOrderRepository::class);
             request()->clearCache();

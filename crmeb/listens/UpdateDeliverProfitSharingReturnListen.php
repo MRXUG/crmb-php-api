@@ -10,6 +10,7 @@ use app\common\repositories\delivery\DeliveryProfitSharingLogsRepository;
 use app\common\repositories\delivery\DeliveryProfitSharingStatusRepository;
 use app\common\repositories\store\order\OrderFlowRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
+use app\common\repositories\system\merchant\MerchantGoodsPaymentRepository;
 use crmeb\interfaces\ListenerInterface;
 use crmeb\services\TimerService;
 use crmeb\services\WechatService;

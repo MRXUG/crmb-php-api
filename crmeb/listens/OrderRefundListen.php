@@ -31,19 +31,20 @@ class OrderRefundListen extends TimerService implements ListenerInterface
     public function handle($event): void
     {
         # 每半分钟检测一次
-        $this->tick(1000*60*1, function () {
+        $this->tick(1000*60*5, function () {
             request()->clearCache();
             # 查询获取任务信息·
-            /** @var RefundTask[] $task */
-            //$task                = RefundTask::getDB()->where('order_sn', "wx1690439779414212841")->select();
-            $task                = RefundTask::getDB()->where('status', 0)->select();
+            //** @var RefundTask[] $task */
+            $task                = RefundTask::getDB()->where('order_id', 1118)->select();
+            //$task                = RefundTask::getDB()->where('status', 0)->select();
             $profitSharingStatus = app()->make(DeliveryProfitSharingStatusRepository::class);
             foreach ($task as $item) {
                 try {
                     Log::info("开始处理 {$this->name} " . date("Y-m-d H:i:s") . $item->getAttr('order_sn'));
                     //获取是否进行过分账
                     $info = $profitSharingStatus->getProfitSharingStatus($item->getAttr('order_id'));
-                    if($info['profit_sharing_status']==DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_DEFAULT){
+
+                    if(isset($info['profit_sharing_status'])&&$info['profit_sharing_status']==DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_DEFAULT){
                         app()->make(DeliveryProfitSharingStatusRepository::class)->updateByWhere([
                             'order_id' => $item['order_id'],
                         ], ['profit_sharing_status' => DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_FNIAL]);
