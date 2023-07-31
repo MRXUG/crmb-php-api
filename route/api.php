@@ -677,7 +677,7 @@ Route::group('api/', function () {
         Route::get('receiveList', 'CouponStock/receiveList');
         Route::get('receiveList2', 'CouponStock/receiveList2');
         Route::get('bestOffer/:id', 'BestOfferCoupon/productBestOffer');
-    })->prefix('api.coupon.');
+    })->prefix('api.coupon.')->middleware(UserTokenMiddleware::class, false);;
 
 })->middleware(AllowOriginMiddleware::class)
     ->middleware(InstallMiddleware::class)

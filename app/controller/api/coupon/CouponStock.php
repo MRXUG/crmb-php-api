@@ -72,7 +72,7 @@ class CouponStock extends BaseController
         [$page, $limit] = $this->getPage();
         $params = $this->request->params(['stock_name', 'nickname','written_off', 'coupon_user_id', 'stock_id', 'uid']);
         $params['time'] = date('Y-m-d H:i:s');
-        return app('json')->success($this->userRepository->list2($page, $limit, $params, 0));
+        return app('json')->success($this->userRepository->list2($page, $limit, $params, $this->request->uid()));
     }
 
     //获取用户弹窗（平台券）

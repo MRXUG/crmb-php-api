@@ -38,9 +38,9 @@ class CouponStocksUserRepository extends BaseRepository
         return compact('count', 'list');
     }
 
-    public function list2($page, $limit, $where, $merId): array
+    public function list2($page, $limit, $where, $uid): array
     {
-        $query = $this->dao->search2($merId, $where);
+        $query = $this->dao->search2($uid, $where);
         $count = $query->count();
         $list = $query->page($page, 10000)->select();
         foreach ($list as $k=>$v){

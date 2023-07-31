@@ -9,6 +9,7 @@ use app\common\model\coupon\CouponStocks;
 use app\common\model\coupon\CouponStocksUser;
 use app\common\model\user\User;
 use think\db\Query;
+use think\facade\Log;
 
 class CouponStocksUserDao extends BaseDao
 {
@@ -79,7 +80,7 @@ class CouponStocksUserDao extends BaseDao
         return $query->order('sss DESC');
     }
 
-    public function search2(?int $merId, array $where)
+    public function search2(?int $uid, array $where)
     {
         $query = ($this->getModel()::getDB())->alias("CouponStocksUser");
         $query->with(['stockDetail',"userDetail"]);
@@ -112,11 +113,11 @@ class CouponStocksUserDao extends BaseDao
             ->when(isset($where['coupon_user_id']) && $where['coupon_user_id'] !== '', function ($query) use ($where) {
                 $query->where('coupon_user_id', (int)$where['coupon_user_id']);
             })
-            ->when($merId > 0, function ($query) use ($merId) {
-                $query->where('CouponStocksUser.mer_id', $merId); //建券商户id
-            })
-            ->when(isset($where['uid']) && $where['uid'] > 0, function ($query) use ($where) {
-                $query->where('uid', $where['uid']);
+            // ->when($merId > 0, function ($query) use ($merId) {
+            //     $query->where('CouponStocksUser.mer_id', $merId); //建券商户id
+            // })
+            ->when($uid > 0, function ($query) use ($uid) {
+                $query->where('uid', $uid);
             })
             ->when(isset($where['mch_id']) && $where['mch_id'] > 0, function ($query) use ($where) {
                 $query->where('CouponStocksUser.mch_id', (int)$where['mch_id']); //发券商户号
