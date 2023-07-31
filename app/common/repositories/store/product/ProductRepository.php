@@ -1115,6 +1115,12 @@ class ProductRepository extends BaseRepository
     public function detail(int $id, $userInfo)
     {
         $res = $this->productDetail($id);
+        $watch = Cache::store('redis')->get(RedisKey::GOODS_DETAIL_WATCH);
+        if($watch !=''){
+            $res['watch'] = json_decode($watch,1);
+        }else{
+            $res['watch'] = [];
+        }
         if ($userInfo) {
             // 收藏按钮
             $isRelation = app()->make(UserRelationRepository::class)->getUserRelationBySpuid( $id, $res['product_type'], $userInfo['uid']);

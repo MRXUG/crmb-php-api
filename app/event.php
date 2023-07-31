@@ -31,36 +31,37 @@ return [
         'swoole.workerStop'         => [\crmeb\listens\SwooleWorkerExitListen::class],
         'create_timer'              => env("app_server.run_server") == 'job' ? [
             \crmeb\listens\LiveStatusCheckListen::class, // 心跳检测
+            \crmeb\listens\GoodsWatchListen::class,//商品围观数据缓存
             /** 「订单」「分账」 **/
-            \crmeb\listens\AutoOrderProfitsharingListen::class, //发货后进行分账
-            \crmeb\listens\FinishOrderListen::class,// 收货15天后分账回退,
-            \crmeb\listens\UpdateDeliverProfitSharingReturnListen::class, // 同步分账回退/分账结果 状态同步
-            \crmeb\listens\OrderRefundListen::class, // 用户退款 分账回退
-            \crmeb\listens\RefundOrderAgreeListen::class, // 自动退款
-            \crmeb\listens\AuthTakeOrderListen::class, // 自动收货
+            // \crmeb\listens\AutoOrderProfitsharingListen::class, //发货后进行分账
+            // \crmeb\listens\FinishOrderListen::class,// 收货15天后分账回退,
+            // \crmeb\listens\UpdateDeliverProfitSharingReturnListen::class, // 同步分账回退/分账结果 状态同步
+            // \crmeb\listens\OrderRefundListen::class, // 用户退款 分账回退
+            // \crmeb\listens\RefundOrderAgreeListen::class, // 自动退款
+            // \crmeb\listens\AuthTakeOrderListen::class, // 自动收货
 
-            \crmeb\listens\PlatformCouponEliminateWeChatCoupons::class, // 自动消除快过期平台券
-            \crmeb\listens\RefreshPlatformCouponListen::class, // 自动刷新平台优惠券列表商品
-            \crmeb\listens\AutoCancelGroupOrderListen::class, // 自动关闭订单
-            \crmeb\listens\AuthCancelPresellOrderListen::class, //预售订单
-            \crmeb\listens\AutoUnLockBrokerageListen::class, // 解冻佣金
-            \crmeb\listens\AutoSendPayOrderSmsListen::class, // 待支付订单短信通知
-            \crmeb\listens\SyncSmsResultCodeListen::class, // 更新短信记录
-            \crmeb\listens\ExcelFileDelListen::class, // 自动删除导出文件
+            // \crmeb\listens\PlatformCouponEliminateWeChatCoupons::class, // 自动消除快过期平台券
+            // \crmeb\listens\RefreshPlatformCouponListen::class, // 自动刷新平台优惠券列表商品
+            // \crmeb\listens\AutoCancelGroupOrderListen::class, // 自动关闭订单
+            // \crmeb\listens\AuthCancelPresellOrderListen::class, //预售订单
+            // \crmeb\listens\AutoUnLockBrokerageListen::class, // 解冻佣金
+            // \crmeb\listens\AutoSendPayOrderSmsListen::class, // 待支付订单短信通知
+            // \crmeb\listens\SyncSmsResultCodeListen::class, // 更新短信记录
+            // \crmeb\listens\ExcelFileDelListen::class, // 自动删除导出文件
            
-            \crmeb\listens\AutoOrderReplyListen::class, // 系统默认好评
-            \crmeb\listens\SyncSpreadStatusListen::class, // 分销员绑定关系到期状态
-            \crmeb\listens\GuaranteeCountListen::class, // 自动更新服务保障统计数据
-            \crmeb\listens\AutoUnLockIntegralListen::class, // 冻结积分
-            \crmeb\listens\AutoClearIntegralListen::class, // 清除到期积分
-            \crmeb\listens\MerchantApplyMentsCheckListen::class, // 申请分账子商户结果查询
-            \crmeb\listens\AutoUnlockMerchantMoneyListen::class, // 冻结商户余额
-            \crmeb\listens\SumCountListen::class,
-            \crmeb\listens\SyncHotRankingListen::class,
-            \crmeb\listens\UnbindMerAndUserRelationListen::class,// 解绑失效的商户-用户关系
-            \crmeb\listens\AuthAcquirePenaltyListen::class,// 自动更新小程序获取交易体验分违规记录
-            \crmeb\listens\UpdateAppletSubmitAuditListen::class, // 异步处理小程序提审流程
-            \crmeb\listens\AuthProductStockSetListen::class, // 每天自动恢复商品库存
+            // \crmeb\listens\AutoOrderReplyListen::class, // 系统默认好评
+            // \crmeb\listens\SyncSpreadStatusListen::class, // 分销员绑定关系到期状态
+            // \crmeb\listens\GuaranteeCountListen::class, // 自动更新服务保障统计数据
+            // \crmeb\listens\AutoUnLockIntegralListen::class, // 冻结积分
+            // \crmeb\listens\AutoClearIntegralListen::class, // 清除到期积分
+            // \crmeb\listens\MerchantApplyMentsCheckListen::class, // 申请分账子商户结果查询
+            // \crmeb\listens\AutoUnlockMerchantMoneyListen::class, // 冻结商户余额
+            // \crmeb\listens\SumCountListen::class,
+            // \crmeb\listens\SyncHotRankingListen::class,
+            // \crmeb\listens\UnbindMerAndUserRelationListen::class,// 解绑失效的商户-用户关系
+            // \crmeb\listens\AuthAcquirePenaltyListen::class,// 自动更新小程序获取交易体验分违规记录
+            // \crmeb\listens\UpdateAppletSubmitAuditListen::class, // 异步处理小程序提审流程
+            // \crmeb\listens\AuthProductStockSetListen::class, // 每天自动恢复商品库存
             
 
             // TODO 待确定是否需要

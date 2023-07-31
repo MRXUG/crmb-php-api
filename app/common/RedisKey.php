@@ -50,4 +50,9 @@ class RedisKey
      */
 
      const CATEGORY_LIST = 'category:list';
+      /**
+     * 围观数据
+     */
+
+     const GOODS_DETAIL_WATCH = 'goods_detail_watch';
 }
