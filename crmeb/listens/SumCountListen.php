@@ -19,7 +19,8 @@ use crmeb\services\TimerService;
 
 class SumCountListen extends TimerService implements ListenerInterface
 {
-
+    //社区图文
+    protected string $name = "社区图文:" . __CLASS__;
     public function handle($event): void
     {
         $this->tick(1000 * 10 * 5, function () {

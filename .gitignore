@@ -4,3 +4,4 @@ src/.env
 /.idea
 applets.txt
 .DS_Store
+vendor

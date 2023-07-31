@@ -19,12 +19,7 @@ class UnbindMerAndUserRelationListen extends TimerService implements ListenerInt
      */
     public function handle($event): void
     {
-        if (env('app_name') == 'wandui_prod'){
-            $interval = 1000 * 60 * 1;//todo-fw 2023/3/16 10:50: 测试时1分钟，生产改为10分钟
-        }else{
-            $interval = 1000 * 60 * 1;
-        }
-        $this->tick($interval, function () {
+        $this->tick(1000 * 60 * 10, function () {
             Log::info("执行开始：解绑过期的商户客户关系");
             try {
                 /**

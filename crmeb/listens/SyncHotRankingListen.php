@@ -20,7 +20,7 @@ use think\facade\Queue;
 
 class SyncHotRankingListen extends TimerService implements ListenerInterface
 {
-    
+    protected string $name = '热销榜商品同步:'.__CLASS__;
     public function handle($event): void
     {
         $hot = systemConfig('hot_ranking_switch');

@@ -24,7 +24,7 @@ class SyncSpreadStatusListen extends TimerService implements ListenerInterface
     protected string $name = '分销员绑定关系到期状态:' . __CLASS__;
     public function handle($event): void
     {
-        $this->tick(1000 * 10, function () {
+        $this->tick(1000 * 60 * 30, function () {
             request()->clearCache();
             app()->make(UserRepository::class)->syncSpreadStatus();
         });
