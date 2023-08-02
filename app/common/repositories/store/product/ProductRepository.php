@@ -69,12 +69,16 @@ class ProductRepository extends BaseRepository
         "slider_image", //商品轮播图
         "goods_desc", //商品详情
         //设置比例待定-暂时不处理
+        ["delivery_free",0], //全国包邮金额 统一邮费的话就填写邮费金额
         "temp_id", //邮费模版ID
+
+        ["is_show",0],//立即上架传入1
+
         "guarantee_template_id", //服务保障模版ID
-        "delivery_way", //1.仅到店自提2快递计价配送3全国包邮
-        "delivery_free", //全国包邮金额
+        "guarantee",//购物保障：0-不展示，1-展示
         ["attrValue", []], //attrValue.[0].['image','price','bar_code','detail'],
         ["attr", []], //attr.[0].['value','detail']
+
         ['once_max_count', 0], //订单单次购买数量最大限制
         ['once_min_count', 0], //单次购买最低限购
         ['pay_limit', 0], //购买总数限制 0:不限购，1单次限购 2 长期限购
@@ -245,10 +249,6 @@ class ProductRepository extends BaseRepository
             foreach ($attrval as $item) {
                 app()->make(ProductAttrValueRepository::class)->insertAll($item);
             }
-            $price = $attrValue['attrValue'][0]['price'];
-            foreach ($attrValue['attrValue'] as $pp) {
-               
-            }
             app()->make(SpuRepository::class)->create($product, $result->product_id, 0, $productType);
             $product = $result;
             //event('product.create',compact('product'));
@@ -264,40 +264,32 @@ class ProductRepository extends BaseRepository
      */
     public function edit(int $id, array $data, int $merId, int $productType, $conType = 0)
     {
-        if (!$data['spec_type']) {
-            $data['attr'] = [];
-            if (count($data['attrValue']) > 1) {
-                throw new ValidateException('单规格商品属性错误');
-            }
+       // event('product.update.before', compact('id', 'data', 'merId', 'productType', 'conType'));
+       $price = $data['attrValue'][0]['price'];
+       // 计算最低到手价格
+       foreach ($data['attrValue'] as $item) {
+           if ($item['price'] < $price) {
+               $price = $item['price'];
+           }
+       }
+       $data['price'] = $price;
+       $this->setProduct($data);
+       
+        Db::transaction(function () use ($id, $data, $productType) {
 
-        }
-        event('product.update.before', compact('id', 'data', 'merId', 'productType', 'conType'));
-        $spuData              = $product              = $this->setProduct($data);
-        $settleParams         = $this->setAttrValue($data, $id, $productType, 1);
-        $settleParams['cate'] = $this->setMerCate($data['mer_cate_id'], $id, $merId);
-        $settleParams['attr'] = $this->setAttr($data['attr'], $id);
-        $content              = [
-            'content' => $conType ? json_encode($data['content']) : $data['content'],
-            'type'    => $conType,
-        ];
-        $spuData['price']      = $settleParams['data']['price'];
-        $spuData['mer_id']     = $merId;
-        $spuData['mer_labels'] = $data['mer_labels'];
+            (app()->make(ProductAttrRepository::class))->clearAttr($id);
+            (app()->make(ProductAttrValueRepository::class))->clearAttr($id);
 
-        Db::transaction(function () use ($id, $data, $productType, $settleParams, $content, $product, $spuData, $merId) {
-            $this->save($id, $settleParams, $content, $product, $productType);
-            if ($productType == 1) { //秒杀商品
-                $dat = $this->setSeckillProduct($data);
-                app()->make(StoreSeckillActiveRepository::class)->updateByProduct($id, $dat);
+            $attrValue = $this->setAttrValue($data, $id, $productType, 0);
+            $attr      = $this->setAttr($data['attr'], $id);
+            if (!empty($attr)) {
+                (app()->make(ProductAttrRepository::class))->insert($attr);
             }
-            if ($productType == 0) {
-                $make = app()->make(ParameterValueRepository::class);
-                $make->clear($id, 'product_id');
-                $make->create($id, $data['params'] ?? [], $merId);
+            $attrval = array_chunk($attrValue['attrValue'], 30);
+            foreach ($attrval as $item) {
+                app()->make(ProductAttrValueRepository::class)->insertAll($item);
             }
-            app()->make(SpuRepository::class)->baseUpdate($spuData, $id, 0, $productType);
-            event('product.update', compact('id'));
-            app()->make(SpuRepository::class)->changeStatus($id, $productType);
+            return $this->dao->update($id, $data);
         });
     }
 
@@ -466,8 +458,6 @@ class ProductRepository extends BaseRepository
             'status'                => $data['status'] ?? 0,
             'mer_status'            => $data['mer_status'],
             'guarantee_template_id' => $data['guarantee_template_id'] ?? 0,
-            'is_gift_bag'           => $data['is_gift_bag'] ?? 0,
-            'delivery_way'          => implode(',', $data['delivery_way']),
             'delivery_free'         => $data['delivery_free'] ?? 0,
             'once_min_count'        => $data['once_min_count'] ?? 0,
             'once_max_count'        => $data['once_max_count'] ?? 0,
@@ -2450,40 +2440,15 @@ class ProductRepository extends BaseRepository
         if (!$data['pay_limit']) {
             $data['once_max_count'] = 0;
         }
-
         if ($data['delivery_way'] == 2 && !$this->merShippingExists($merId, $data['temp_id'])) {
             throw new ValidateException('运费模板不存在');
         }
 
-        // if (isset($data['type']) && $data['type'] && $data['extend']) {
-        //     $key = ['email','text','number','date','time','idCard','mobile','image'];
-        //     if (count($data['extend']) > 10) throw new ValidateException('附加表单不能超过10条');
-        //     $title = [];
-        //     foreach ($data['extend'] as $item) {
-        //         if (empty($item['title']) )
-        //             throw new ValidateException('表单名称不能为空：'.$item['key']);
-        //         if (in_array($item['title'],$title))
-        //             throw new ValidateException('表单名称不能重复：'.$item['title']);
-        //         $title[] = $item['title'];
-        //         if (!in_array($item['key'], $key))
-        //             throw new ValidateException('表单类型错误：'.$item['key']);
-        //         $extend[] = [
-        //             'title' => $item['title'],
-        //             'key' => $item['key'] ,
-        //             'require' => $item['require'],
-        //         ];
-        //     }
-        // }
-        //app()->make(ProductLabelRepository::class)->checkHas($merId,$data['mer_labels']);
-        //$count = app()->make(StoreCategoryRepository::class)->getWhereCount(['store_category_id' => $data['cate_id'],'is_show' => 1]);
-        //if (!$count) throw new ValidateException('平台分类不存在或不可用');
         app()->make(StoreProductValidate::class)->check($data);
         if ($id) {
             unset($data['type']);
         }
 
-        //$data['extend'] = $extend ?? [];
-        //单次限购
         return $data;
     }
 
