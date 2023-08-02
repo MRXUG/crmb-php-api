@@ -22,16 +22,13 @@ class StoreProductValidate extends Validate
 
     protected $rule = [
         "image|主图" => 'require|max:128',
+        "slider_image|轮播图" => 'require|array',
+        "goods_desc|商品详情" => 'require|array',
         "store_name|商品名称" => 'require|max:128',
-        "cate_id|平台分类" => 'require',
-        "mer_cate_id|商户分类" => 'array',
-        "unit_name|单位名" => 'require|max:4',
         "spec_type" => "in:0,1",
         "is_show｜是否上架" => "in:0,1",
-        "extension_type|分销类型" => "in:0,1",
         "attr|商品规格" => "requireIf:spec_type,1|Array|checkUnique",
         "attrValue|商品属性" => "require|array|productAttrValue",
-        'type|商品类型' => 'require|in:0,1',
         'delivery_way|发货方式' => 'requireIf:is_ficti,0|require',
         'once_min_count|最小限购' => 'min:0',
         'pay_limit|是否限购' => 'require|in:0,1,2|payLimit',
@@ -56,13 +53,6 @@ class StoreProductValidate extends Validate
                 }
                 if(in_array($sku,$arr)) return '商品SKU重复';
                 $arr[] = $sku;
-                if(isset($data['extension_type']) && $data['extension_type'] && systemConfig('extension_status')){
-                    if(!isset($v['extension_one']) || !isset($v['extension_two'])) return '佣金金额必须填写';
-                    if(($v['extension_one'] < 0) || ($v['extension_two'] < 0))
-                        return '佣金金额不可存在负数';
-                    if($v['price'] < bcadd($v['extension_one'],$v['extension_two'],2))
-                        return '自定义佣金总金额不能大于商品售价';
-                }
             }
         } catch (\Exception $exception) {
             return '商品属性格式错误';

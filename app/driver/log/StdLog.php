@@ -43,9 +43,9 @@ class StdLog implements LogHandlerInterface
         $request = \think\facade\Request::instance();
         //新增
         foreach ($log as $type => $val) {
-            if ($type == "sql") {
-                continue;
-            }
+            // if ($type == "sql") {
+            //     continue;
+            // }
             foreach ($val as $msg) {
                 if (!is_string($msg)) {
                     $msg = var_export($msg, true);

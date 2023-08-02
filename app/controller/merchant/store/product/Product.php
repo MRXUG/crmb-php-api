@@ -87,16 +87,16 @@ class Product extends BaseController
         $params = $this->request->params($this->repository::CREATE_PARAMS);
         $data = $this->repository->checkParams($params,$this->request->merId());
         $data['mer_id'] = $this->request->merId();
-        if ($data['is_gift_bag'] && !$this->repository->checkMerchantBagNumber($data['mer_id']))
-            return app('json')->fail('礼包数量超过数量限制');
+        // if ($data['is_gift_bag'] && !$this->repository->checkMerchantBagNumber($data['mer_id']))
+        //     return app('json')->fail('礼包数量超过数量限制');
         $data['status'] = $this->request->merchant()->is_audit ? 0 : 1;
         $data['mer_status'] = ($this->request->merchant()->is_del || !$this->request->merchant()->mer_state || !$this->request->merchant()->status) ? 0 : 1;
         $data['rate'] = 3;
         $this->repository->create($data,0);
 
         // 设置商品库存
-        $this->stockSetRepository->stockSet($data['mer_id']);
-        $this->stockSetRepository->attrValueStockSet($data['mer_id']);
+        //$this->stockSetRepository->stockSet($data['mer_id']);
+        //$this->stockSetRepository->attrValueStockSet($data['mer_id']);
 
         return app('json')->success('添加成功');
     }
