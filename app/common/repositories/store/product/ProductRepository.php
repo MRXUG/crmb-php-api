@@ -225,12 +225,19 @@ class ProductRepository extends BaseRepository
     {
         # 刷新平台优惠券
         RefreshPlatformCouponProduct::runQueue();
-
+        $price = $data['attrValue'][0]['price'];
+        // 计算最低到手价格
+        foreach ($data['attrValue'] as $item) {
+            if ($item['price'] < $price) {
+                $price = $item['price'];
+            }
+        }
+        $data['price'] = $price;
         $product = $this->setProduct($data);
         return Db::transaction(function () use ($data, $productType, $conType, $product) {
-            $result      = $this->dao->create($product);
-            $attrValue   = $this->setAttrValue($data, $result->product_id, $productType, 0);
-            $attr = $this->setAttr($data['attr'], $result->product_id);
+            $result    = $this->dao->create($product);
+            $attrValue = $this->setAttrValue($data, $result->product_id, $productType, 0);
+            $attr      = $this->setAttr($data['attr'], $result->product_id);
             if (!empty($attr)) {
                 (app()->make(ProductAttrRepository::class))->insert($attr);
             }
@@ -239,12 +246,9 @@ class ProductRepository extends BaseRepository
                 app()->make(ProductAttrValueRepository::class)->insertAll($item);
             }
             $price = $attrValue['attrValue'][0]['price'];
-            foreach($attrValue['attrValue'] as $pp){
-                if($pp['price']<$price){
-                    $price = $pp['price'];
-                }
+            foreach ($attrValue['attrValue'] as $pp) {
+               
             }
-            $product['price'] = $price;
             app()->make(SpuRepository::class)->create($product, $result->product_id, 0, $productType);
             $product = $result;
             //event('product.create',compact('product'));
@@ -469,6 +473,7 @@ class ProductRepository extends BaseRepository
             'once_max_count'        => $data['once_max_count'] ?? 0,
             'pay_limit'             => $data['pay_limit'] ?? 0,
             'guarantee'             => $data['guarantee_type'] ?? 0,
+            'price'                 => $data['price'] ?? 0,
             'type'                  => 0,
             'ficti'                 => mt_rand(300, 1000),
         ];
@@ -827,7 +832,7 @@ class ProductRepository extends BaseRepository
      */
     public function getList(?int $merId, array $where, int $page, int $limit)
     {
-        $query = $this->dao->search($merId, $where);//->with(['merCateId.category', 'storeCategory', 'brand']);
+        $query = $this->dao->search($merId, $where); //->with(['merCateId.category', 'storeCategory', 'brand']);
         $count = $query->count();
         $data  = $query->page($page, $limit)->setOption('field', [])->field($this->filed)->select();
 
@@ -1115,7 +1120,7 @@ class ProductRepository extends BaseRepository
             'attr',
             'attrValue',
             'oldAttrValue',
-            'merchant'      => function ($query) {
+            'merchant' => function ($query) {
                 $query->with(['type_name'])->append(['isset_certificate', 'services_type']);
             },
             // 'seckillActive' => function ($query) {
