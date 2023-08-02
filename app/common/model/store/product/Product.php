@@ -66,6 +66,10 @@ class Product extends BaseModel
     {
         return $value ? explode(',',$value) : [];
     }
+    public function getGoodsDescAttr($value)
+    {
+        return $value ? explode(',',$value) : [];
+    }
     public function getGiveCouponIdsAttr($value)
     {
         return $value ? explode(',',$value) : [];

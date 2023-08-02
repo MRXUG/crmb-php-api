@@ -548,7 +548,6 @@ class ProductRepository extends BaseRepository
                     "product_id" => $productId,
                     "type"       => 0,
                     "sku"        => $sku,
-                    'sales'      => mt_rand(300, 800),
                 ];
             }
         } catch (\Exception $exception) {
@@ -1111,20 +1110,17 @@ class ProductRepository extends BaseRepository
         if ($data) {
             return json_decode($data, 1);
         }
-        $field = 'is_show,product_id,mer_id,image,slider_image,store_name,store_info,unit_name,price,cost,ot_price,stock,sales,video_link,product_type,extension_type,old_product_id,rate,guarantee_template_id,temp_id,once_max_count,pay_limit,once_min_count,integral_rate,delivery_way,delivery_free,type,cate_id,svip_price_type,svip_price,mer_svip_status,guarantee';
+        $field = 'is_show,product_id,short_title,sell_point,goods_desc,mer_id,image,slider_image,store_name,store_info,unit_name,price,cost,ot_price,stock,sales,video_link,product_type,extension_type,old_product_id,rate,guarantee_template_id,temp_id,once_max_count,pay_limit,once_min_count,integral_rate,delivery_way,delivery_free,type,cate_id,svip_price_type,svip_price,mer_svip_status,guarantee';
         $with  = [
             'attr',
-            'content'       => function ($query) {
-                $query->order('type ASC');
-            },
             'attrValue',
             'oldAttrValue',
             'merchant'      => function ($query) {
                 $query->with(['type_name'])->append(['isset_certificate', 'services_type']);
             },
-            'seckillActive' => function ($query) {
-                $query->field('start_day,end_day,start_time,end_time,product_id');
-            },
+            // 'seckillActive' => function ($query) {
+            //     $query->field('start_day,end_day,start_time,end_time,product_id');
+            // },
             'temp',
         ];
         $append = ['guaranteeTemplate', 'params'];
@@ -1179,10 +1175,6 @@ class ProductRepository extends BaseRepository
         $res['attr'] = $attr;
         $res['sku']  = $sku;
         $res->append($append);
-
-        if ($res['content'] && $res['content']['type'] == 1) {
-            $res['content']['content'] = json_decode($res['content']['content']);
-        }
 
         /** @var CouponStocksRepository $couponStockRep */
         $couponStockRep = app()->make(CouponStocksRepository::class);
@@ -1482,7 +1474,7 @@ class ProductRepository extends BaseRepository
             }
             $arr = [];
             if ($preview) {
-                $item['attr_values']       = explode('-!-', $item['attr_values']);
+                $item['attr_values']       = explode(',', $item['attr_values']);
                 $attr[$key]['attr_values'] = $item['attr_values'];
             }
             $values = $item['attr_values'];
