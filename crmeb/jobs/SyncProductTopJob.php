@@ -2,6 +2,7 @@
 
 namespace crmeb\jobs;
 
+use app\common\RedisKey;
 use app\common\repositories\store\product\SpuRepository;
 use app\common\repositories\store\StoreCategoryRepository;
 use app\common\repositories\system\merchant\MerchantRepository;
@@ -19,7 +20,7 @@ class SyncProductTopJob implements JobInterface
         try{
             $SpuRepository = app()->make(SpuRepository::class);
             $RedisCacheService = app()->make(RedisCacheService::class);
-            $prefix = env('queue_name','merchant').'_hot_ranking_';
+            $prefix = RedisKey::HOT_RANKING;
             $oldKeys1 = $RedisCacheService->keys($prefix.'top_*') ?: [];
             $oldKeys1 = array_combine($oldKeys1, $oldKeys1);
             $mset = [];

@@ -29,6 +29,7 @@ use think\exception\ValidateException;
 use think\facade\Log;
 use app\common\repositories\BaseRepository;
 use app\common\dao\store\product\SpuDao;
+use app\common\RedisKey;
 use app\common\repositories\store\StoreCategoryRepository;
 use app\common\repositories\store\StoreSeckillActiveRepository;
 use app\common\repositories\user\UserVisitRepository;
@@ -563,7 +564,7 @@ class SpuRepository extends BaseRepository
     public function getHotRanking(int $cateId)
     {
         $RedisCacheService = app()->make(RedisCacheService::class);
-        $prefix = env('queue_name','merchant').'_hot_ranking_';
+        $prefix = RedisKey::HOT_RANKING;
         $ids = $RedisCacheService->handler()->get($prefix.'top_' . intval($cateId));
         $ids = $ids ? explode(',', $ids) : [];
         if (!count($ids)) {
