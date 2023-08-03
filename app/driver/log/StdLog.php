@@ -35,12 +35,16 @@ class StdLog implements LogHandlerInterface
     {
         $stdErr = fopen("php://stdout", "w");
         $info = [];
-
         // 日志信息封装
         $time = DateTime::createFromFormat('0.u00 U',
             microtime())->setTimezone(new \DateTimeZone(date_default_timezone_get()))->format($this->config['time_format']);
 
         $request = \think\facade\Request::instance();
+        $requestParams = [
+            'url'=>$request->url(),
+            'params'=>$request->param(),
+            'mvc'=>$request->controller() . '.' . $request->action() . '@' . $request->method()
+        ];
         //新增
         foreach ($log as $type => $val) {
             // if ($type == "sql") {
@@ -50,13 +54,17 @@ class StdLog implements LogHandlerInterface
                 if (!is_string($msg)) {
                     $msg = var_export($msg, true);
                 }
-                $message = $this->config['json'] ?
-                    ['time' => $time, 'type' => $type, 'request_id' => $_SERVER['x_request_id'] ?? mini_unique_id(), 'msg' => $msg] :
-                    sprintf($this->config['format'], $time, $type, $msg);
-                $info[$type] = $message;
-
+                $outData = [
+                    'time'=>$time,
+                    'type'=>$type,
+                    'request_id'=>$_SERVER['x_request_id'] ?? mini_unique_id(),
+                    'request'=>$requestParams,
+                    'msg'=>$msg
+                ];
+                $message = $this->config['json'] ? $outData  : sprintf($this->config['format'], $time, $type, $msg);
+                fwrite($stdErr, json_encode($message, $this->config['json_options']) . PHP_EOL);
             }
-            fwrite($stdErr, json_encode($info, $this->config['json_options']) . PHP_EOL);
+            
         }
         fclose($stdErr);
         return true;
