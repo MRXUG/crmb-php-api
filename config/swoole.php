@@ -81,12 +81,12 @@ return [
     'pool'       => [
         'db'    => [
             'enable'        => true,
-            'max_active'    => 30,
+            'max_active'    => 300,
             'max_wait_time' => 5,
         ],
         'cache' => [
             'enable'        => true,
-            'max_active'    => 30,
+            'max_active'    => 1000,
             'max_wait_time' => 5,
         ],
     ],
