@@ -157,7 +157,7 @@ class Cos extends BaseUpload
                
                 $cosParams['PicOperations'] = json_encode([
                     'is_pic_info' => 1,
-                    'rules'       => [['fileid' => '/'.$path . $key, 'rule' => "imageMogr2/thumbnail/" . $this->thumb_rate . 'p' . '/format/webp']],
+                    'rules'       => [['fileid' => '/'.$path . $key, 'rule' => "imageMogr2/thumbnail/!" . $this->thumb_rate . 'p' . '/format/webp']],
                 ], JSON_UNESCAPED_SLASHES);
             }
             $this->fileInfo->uploadInfo = $this->app()->putObject($cosParams);
