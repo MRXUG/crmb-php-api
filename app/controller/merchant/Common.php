@@ -249,13 +249,18 @@ class Common extends BaseController
             'file.fileSize' => '请上传png、jpg格式，大小在8M以内的图片'
         ])->check(['file' => $file]);
         $path = \think\facade\Filesystem::disk('license')->putFile("water", $file, 'md5');
-        /*$upload = UploadService::create(1);
-        $data = $upload->to('attach')->move('file');*/
-        if (!$path) {
+        $filePath = app()->getRootPath() . 'public/license/' . $path;
+        //TODO 暂时用php添加水印 腾讯云图片处理存在问题
+        app()->make(ImageWaterMarkService::class)->run($filePath);
+        $upload = UploadService::create();
+        //$info = $upload->to('license')->moveText();
+        $info = $upload->to('license')->stream(file_get_contents($filePath));
+        if ($info===false){
             return app('json')->fail("文件上传失败");
         }
-        app()->make(ImageWaterMarkService::class)->run(app()->getRootPath() . 'public/license/' . $path);
-        return app('json')->success(['src' => tidy_url('license/' . $path)]);
+        $res = $upload->getUploadInfo();
+        
+        return app('json')->success(['src' => tidy_url($res['dir'])]);
     }
 
     public function uploadVideo()

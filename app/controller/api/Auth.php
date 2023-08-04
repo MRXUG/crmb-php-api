@@ -49,6 +49,7 @@ use think\facade\Db;
 use think\facade\Log;
 use think\facade\Queue;
 use crmeb\jobs\SendSmsJob;
+use crmeb\services\UploadService;
 
 /**
  * Class Auth
@@ -60,6 +61,29 @@ class Auth extends BaseController
 {
     public function test()
     {
+
+        $file = $this->request->file('file');
+        if (!$file) {
+            return app('json')->fail('请上传证书');
+        }
+        validate([
+            "file|文件" => ['fileExt' => 'png,jpg', "fileSize" => 8*1024*1024],
+        ],[
+            'file.fileExt' => '请上传png、jpg格式，大小在8M以内的图片',
+            'file.fileSize' => '请上传png、jpg格式，大小在8M以内的图片'
+        ])->check(['file' => $file]);
+        $obj = UploadService::create();
+        $res = $obj->moveText();
+        $res = $obj->getUploadInfo();
+        return app('json')->success(['stc'=>tidy_url($res['dir'])]);
+        //$path = \think\facade\Filesystem::disk('license')->putFile("water", $file, 'md5');
+        /*$upload = UploadService::create(1);
+        $data = $upload->to('attach')->move('file');*/
+        // if (!$path) {
+        //     return app('json')->fail("文件上传失败");
+        // }
+        // app()->make(ImageWaterMarkService::class)->run(app()->getRootPath() . 'public/license/' . $path);
+        // return app('json')->success(['src' => tidy_url('license/' . $path)]);
         
     }
 

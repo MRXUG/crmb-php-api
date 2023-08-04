@@ -421,7 +421,7 @@ class MerchantApplymentsRepository extends BaseRepository
      */
     public function uploadImage($field,$water)
     {
-        $upload = UploadService::create(1);
+        $upload = UploadService::create();
         $info = $upload->to('def')->move($field);
         if ($info === false) throw new ValidateException($upload->getError());
         $res = $upload->getUploadInfo();

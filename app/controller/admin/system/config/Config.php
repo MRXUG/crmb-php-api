@@ -225,7 +225,7 @@ class Config extends BaseController
             return app('json')->success(['src' => $res]);
         }
 
-        $upload = UploadService::create(1);
+        $upload = UploadService::create();
         $data = $upload->to('attach')->validate()->move($field);
         if ($data === false) {
             return app('json')->fail($upload->getError());
@@ -272,12 +272,14 @@ class Config extends BaseController
         ])->check(['file' => $file]);
 
         if (!$file) return app('json')->fail('请上传附件');
-        $saveName = Filesystem::disk('license')->putFile("license", $file);
-
-        if (!$saveName) {
+        $upload = UploadService::create();
+        $info = $upload->to('license')->move();
+        if ($info===false){
             return app('json')->fail("文件上传失败");
         }
-        return app('json')->success(['src' => tidy_url('license/' . $saveName)]);
+        $res = $upload->getUploadInfo();
+        
+        return app('json')->success(['src' => tidy_url($res['dir'])]);
     }
 
     public function uploadWechatForm()

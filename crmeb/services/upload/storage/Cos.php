@@ -9,16 +9,14 @@
 // | Author: CRMEB Team <admin@crmeb.com>
 // +----------------------------------------------------------------------
 
-
 namespace crmeb\services\upload\storage;
 
 use crmeb\basic\BaseUpload;
 use crmeb\exceptions\UploadException;
-use Guzzle\Http\EntityBody;
 use Qcloud\Cos\Client;
 use think\Exception;
 use think\exception\ValidateException;
-use think\Image;
+use think\facade\Log;
 
 /**
  * 腾讯云COS文件上传
@@ -95,15 +93,15 @@ class Cos extends BaseUpload
     public function initialize(array $config)
     {
         parent::initialize($config);
-        $this->accessKey = $config['accessKey'] ?? null;
-        $this->secretKey = $config['secretKey'] ?? null;
-        $this->uploadUrl = tidy_url($this->checkUploadUrl($config['uploadUrl'] ?? ''));
-        $this->storageName = $config['storageName'] ?? null;
+        $this->accessKey     = $config['accessKey'] ?? null;
+        $this->secretKey     = $config['secretKey'] ?? null;
+        $this->uploadUrl     = tidy_url($this->checkUploadUrl($config['uploadUrl'] ?? ''));
+        $this->storageName   = $config['storageName'] ?? null;
         $this->storageRegion = $config['storageRegion'] ?? null;
-        $this->cdn = $config['cdn'] ?? null;
-        $this->thumb_status = $config['thumb_status'];
-        $this->thumb_rate = $config['thumb_rate'];
-        $this->path =  env('APP_NAME') . "/" . date("Ymd");
+        $this->cdn           = $config['cdn'] ?? null;
+        $this->thumb_status  = $config['thumb_status'];
+        $this->thumb_rate    = $config['thumb_rate'];
+        $this->path          = env('APP_NAME') . "/" . date("Ymd");
     }
 
     /**
@@ -116,7 +114,7 @@ class Cos extends BaseUpload
             throw new UploadException('Please configure accessKey and secretKey');
         }
         $this->handle = new Client(['region' => $this->storageRegion, 'credentials' => [
-            'secretId' => $this->accessKey, 'secretKey' => $this->secretKey
+            'secretId' => $this->accessKey, 'secretKey' => $this->secretKey,
         ]]);
         return $this->handle;
     }
@@ -128,7 +126,7 @@ class Cos extends BaseUpload
      * @param string|null $fileContent 流内容
      * @return array|bool|\StdClass
      */
-    protected function upload(string $file = null, bool $isStream = false, string $fileContent = null,$thumb = true)
+    protected function upload(string $file = null, bool $isStream = false, string $fileContent = null, $thumb = true)
     {
         if (!$isStream) {
             $fileHandle = app()->request->file($file);
@@ -142,27 +140,28 @@ class Cos extends BaseUpload
                     return $this->setError($e->getMessage());
                 }
             }
-            $key = $this->saveFileName($fileHandle->getRealPath(), $fileHandle->getOriginalExtension());
+            $key  = $this->saveFileName($fileHandle->getRealPath(), $fileHandle->getOriginalExtension());
             $body = fopen($fileHandle->getRealPath(), 'rb');
         } else {
-            $key = $file;
+            $key  = $file;
             $body = $fileContent;
         }
-        $path = ($this->path ? trim($this->path , '/') . '/' : '');
+        $path = ($this->path ? trim($this->path, '/') . '/' : '');
         try {
             $cosParams = [
                 'Bucket' => $this->storageName,
-                'Key' => $path . $key,
-                'Body' => $body
+                'Key'    => '/'.$path . $key,
+                'Body'   => $body,
             ];
-            if($thumb) {
+            if ($thumb) {
+               
                 $cosParams['PicOperations'] = json_encode([
-                    'is_pic_info'=>0,
-                    'rules'=>[['fileid'=>$path . $key,'rule'=>"imageMogr2/thumbnail/".$this->thumb_rate .'p'.'/format/webp']],
-                ],JSON_UNESCAPED_SLASHES);
+                    'is_pic_info' => 1,
+                    'rules'       => [['fileid' => '/'.$path . $key, 'rule' => "imageMogr2/thumbnail/" . $this->thumb_rate . 'p' . '/format/webp']],
+                ], JSON_UNESCAPED_SLASHES);
             }
             $this->fileInfo->uploadInfo = $this->app()->putObject($cosParams);
-            $src = rtrim(($this->cdn ?: $this->uploadUrl), '/') . '/' . $path . $key;
+            $src                        = rtrim(($this->cdn ?: $this->uploadUrl), '/') . '/' . $path . $key;
             //if ($thumb) $src = $this->thumb($src);
             $this->fileInfo->filePath = $src;
             $this->fileInfo->fileName = $key;
@@ -182,7 +181,7 @@ class Cos extends BaseUpload
     public function thumb(string $key = '')
     {
         if ($this->thumb_status && $key) {
-            $key = $key.'?imageMogr2/thumbnail/!' . $this->thumb_rate .'p';
+            $key = $key . '?imageMogr2/thumbnail/!' . $this->thumb_rate . 'p';
         }
         return $key;
     }
@@ -198,7 +197,7 @@ class Cos extends BaseUpload
         if (!$key) {
             $key = $this->saveFileName();
         }
-        return $this->upload($key, true, $fileContent,false);
+        return $this->upload($key, true, $fileContent, false);
     }
 
     /**
@@ -206,9 +205,19 @@ class Cos extends BaseUpload
      * @param string $file
      * @return array|bool|mixed|\StdClass
      */
-    public function move(string $file = 'file' ,$thumb = true)
+    public function move(string $file = 'file', $thumb = true)
     {
-        return $this->upload($file,false,null,$thumb);
+        return $this->upload($file, false, null, $thumb);
+    }
+
+    /**
+     * 文件上传
+     * @param string $file
+     * @return array|bool|mixed|\StdClass
+     */
+    public function moveText(string $file = 'file', $text = "商城入驻专用其它无效")
+    {
+        return $this->uploadText($file, false, null, $text);
     }
 
     /**
@@ -233,17 +242,17 @@ class Cos extends BaseUpload
     {
         // TODO: Implement getTempKeys() method.
         $config = array(
-            'url' => 'https://sts.tencentcloudapi.com/',
-            'domain' => 'sts.tencentcloudapi.com',
-            'proxy' => '',
-            'secretId' => $this->accessKey, // 固定密钥
-            'secretKey' => $this->secretKey, // 固定密钥
-            'bucket' => $this->storageName, // 换成你的 bucket
-            'region' => $this->storageRegion, // 换成 bucket 所在园区
+            'url'             => 'https://sts.tencentcloudapi.com/',
+            'domain'          => 'sts.tencentcloudapi.com',
+            'proxy'           => '',
+            'secretId'        => $this->accessKey, // 固定密钥
+            'secretKey'       => $this->secretKey, // 固定密钥
+            'bucket'          => $this->storageName, // 换成你的 bucket
+            'region'          => $this->storageRegion, // 换成 bucket 所在园区
             'durationSeconds' => 1800, // 密钥有效期
-            'allowPrefix' => '*', // 这里改成允许的路径前缀，可以根据自己网站的用户登录态判断允许上传的具体路径，例子： a.jpg 或者 a/* 或者 * (使用通配符*存在重大安全风险, 请谨慎评估使用)
+            'allowPrefix'     => '*', // 这里改成允许的路径前缀，可以根据自己网站的用户登录态判断允许上传的具体路径，例子： a.jpg 或者 a/* 或者 * (使用通配符*存在重大安全风险, 请谨慎评估使用)
             // 密钥的权限列表。简单上传和分片需要以下的权限，其他权限列表请看 https://cloud.tencent.com/document/product/436/31923
-            'allowActions' => array (
+            'allowActions'    => array(
                 // 简单上传
                 'name/cos:PutObject',
                 'name/cos:PostObject',
@@ -252,96 +261,99 @@ class Cos extends BaseUpload
                 'name/cos:ListMultipartUploads',
                 'name/cos:ListParts',
                 'name/cos:UploadPart',
-                'name/cos:CompleteMultipartUpload'
-            )
+                'name/cos:CompleteMultipartUpload',
+            ),
         );
         $result = null;
-        try{
-            if(array_key_exists('policy', $config)){
+        try {
+            if (array_key_exists('policy', $config)) {
                 $policy = $config['policy'];
-            }else{
-                if(array_key_exists('bucket', $config)){
-                    $ShortBucketName = substr($config['bucket'],0, strripos($config['bucket'], '-'));
-                    $AppId = substr($config['bucket'], 1 + strripos($config['bucket'], '-'));
-                }else{
+            } else {
+                if (array_key_exists('bucket', $config)) {
+                    $ShortBucketName = substr($config['bucket'], 0, strripos($config['bucket'], '-'));
+                    $AppId           = substr($config['bucket'], 1 + strripos($config['bucket'], '-'));
+                } else {
                     throw new Exception("bucket== null");
                 }
-                if(array_key_exists('allowPrefix', $config)){
-                    if(!(strpos($config['allowPrefix'], '/') === 0)){
+                if (array_key_exists('allowPrefix', $config)) {
+                    if (!(strpos($config['allowPrefix'], '/') === 0)) {
                         $config['allowPrefix'] = '/' . $config['allowPrefix'];
                     }
-                }else{
+                } else {
                     throw new Exception("allowPrefix == null");
                 }
                 $policy = array(
-                    'version'=> '2.0',
-                    'statement'=> array(
+                    'version'   => '2.0',
+                    'statement' => array(
                         array(
-                            'action'=> $config['allowActions'],
-                            'effect'=> 'allow',
-                            'principal'=> array('qcs'=> array('*')),
-                            'resource'=> array(
-                                'qcs::cos:' . $config['region'] . ':uid/' . $AppId . ':' . $config['bucket'] . $config['allowPrefix']
-                            )
-                        )
-                    )
+                            'action'    => $config['allowActions'],
+                            'effect'    => 'allow',
+                            'principal' => array('qcs' => array('*')),
+                            'resource'  => array(
+                                'qcs::cos:' . $config['region'] . ':uid/' . $AppId . ':' . $config['bucket'] . $config['allowPrefix'],
+                            ),
+                        ),
+                    ),
                 );
             }
             $policyStr = str_replace('\\/', '/', json_encode($policy));
-            $Action = 'GetFederationToken';
-            $Nonce = rand(10000, 20000);
+            $Action    = 'GetFederationToken';
+            $Nonce     = rand(10000, 20000);
             $Timestamp = time();
-            $Method = 'POST';
-            if(array_key_exists('durationSeconds', $config)){
-                if(!(is_integer($config['durationSeconds']))){
+            $Method    = 'POST';
+            if (array_key_exists('durationSeconds', $config)) {
+                if (!(is_integer($config['durationSeconds']))) {
                     throw new exception("durationSeconds must be a int type");
                 }
             }
             $params = array(
-                'SecretId'=> $config['secretId'],
-                'Timestamp'=> $Timestamp,
-                'Nonce'=> $Nonce,
-                'Action'=> $Action,
-                'DurationSeconds'=> $config['durationSeconds'],
-                'Version'=>'2018-08-13',
-                'Name'=> 'cos',
-                'Region'=> $config['region'],
-                'Policy'=> urlencode($policyStr)
+                'SecretId'        => $config['secretId'],
+                'Timestamp'       => $Timestamp,
+                'Nonce'           => $Nonce,
+                'Action'          => $Action,
+                'DurationSeconds' => $config['durationSeconds'],
+                'Version'         => '2018-08-13',
+                'Name'            => 'cos',
+                'Region'          => $config['region'],
+                'Policy'          => urlencode($policyStr),
             );
             $params['Signature'] = $this->getSignature($params, $config['secretKey'], $Method, $config);
-            $url = $config['url'];
-            $ch = curl_init($url);
-            if(array_key_exists('proxy', $config)){
+            $url                 = $config['url'];
+            $ch                  = curl_init($url);
+            if (array_key_exists('proxy', $config)) {
                 $config['proxy'] && curl_setopt($ch, CURLOPT_PROXY, $config['proxy']);
             }
             curl_setopt($ch, CURLOPT_HEADER, 0);
-            curl_setopt($ch,CURLOPT_SSL_VERIFYPEER,0);
-            curl_setopt($ch,CURLOPT_SSL_VERIFYHOST,0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($ch, CURLOPT_POST, 1);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $this->json2str($params));
             $result = curl_exec($ch);
-            if(curl_errno($ch)) $result = curl_error($ch);
+            if (curl_errno($ch)) {
+                $result = curl_error($ch);
+            }
+
             curl_close($ch);
             $result = json_decode($result, 1);
             if (isset($result['Response'])) {
                 $result = $result['Response'];
-                if(isset($result['Error'])){
+                if (isset($result['Error'])) {
                     throw new Exception("get cam failed");
                 }
                 $result['startTime'] = $result['ExpiredTime'] - $config['durationSeconds'];
             }
-            $result = $this->backwardCompat($result);
-            $result['url'] = $this->uploadUrl . '/';
-            $result['type'] = 'COS';
-            $result['cdn'] = $this->cdn;
+            $result           = $this->backwardCompat($result);
+            $result['url']    = $this->uploadUrl . '/';
+            $result['type']   = 'COS';
+            $result['cdn']    = $this->cdn;
             $result['bucket'] = $this->storageName;
             $result['region'] = $this->storageRegion;
             return $result;
-        }catch(Exception $e){
-            if($result == null){
-                $result = "error: " . + $e->getMessage();
-            }else{
+        } catch (Exception $e) {
+            if ($result == null) {
+                $result = "error: " . +$e->getMessage();
+            } else {
                 $result = json_encode($result);
             }
             throw new Exception($result);
@@ -356,21 +368,24 @@ class Cos extends BaseUpload
      * @param $config
      * @return string
      */
-    public function getSignature($opt, $key, $method, $config) {
+    public function getSignature($opt, $key, $method, $config)
+    {
         $formatString = $method . $config['domain'] . '/?' . $this->json2str($opt, 1);
-        $sign = hash_hmac('sha1', $formatString, $key);
-        $sign = base64_encode($this->_hex2bin($sign));
+        $sign         = hash_hmac('sha1', $formatString, $key);
+        $sign         = base64_encode($this->_hex2bin($sign));
         return $sign;
     }
-    public function _hex2bin($data) {
+    public function _hex2bin($data)
+    {
         $len = strlen($data);
         return pack("H" . $len, $data);
     }
     // obj 转 query string
-    public function json2str($obj, $notEncode = false) {
+    public function json2str($obj, $notEncode = false)
+    {
         ksort($obj);
         $arr = array();
-        if(!is_array($obj)){
+        if (!is_array($obj)) {
             return $this->setError($obj . " must be a array");
         }
         foreach ($obj as $key => $val) {
@@ -379,13 +394,14 @@ class Cos extends BaseUpload
         return join('&', $arr);
     }
     // v2接口的key首字母小写，v3改成大写，此处做了向下兼容
-    public function backwardCompat($result) {
-        if(!is_array($result)){
+    public function backwardCompat($result)
+    {
+        if (!is_array($result)) {
             return $this->setError($result . " must be a array");
         }
         $compat = array();
         foreach ($result as $key => $value) {
-            if(is_array($value)) {
+            if (is_array($value)) {
                 $compat[lcfirst($key)] = $this->backwardCompat($value);
             } elseif ($key == 'Token') {
                 $compat['sessionToken'] = $value;
@@ -394,5 +410,63 @@ class Cos extends BaseUpload
             }
         }
         return $compat;
+    }
+    /**
+     * 上传文件并添加水印
+     * @param string|null $file
+     * @param bool $isStream 是否为流上传
+     * @param string|null $fileContent 流内容
+     * @return array|bool|\StdClass
+     */
+    protected function uploadText(string $file = null, bool $isStream = false, string $fileContent = null, $text = "")
+    {
+        Log::debug("aaaa" . $text);
+        if (!$isStream) {
+            $fileHandle = app()->request->file($file);
+            if (!$fileHandle) {
+                return $this->setError('Upload file does not exist');
+            }
+            if ($this->validate) {
+                try {
+                    validate([$file => $this->validate])->check([$file => $fileHandle]);
+                } catch (ValidateException $e) {
+                    return $this->setError($e->getMessage());
+                }
+            }
+            $key  = $this->saveFileName($fileHandle->getRealPath(), $fileHandle->getOriginalExtension());
+            $body = fopen($fileHandle->getRealPath(), 'rb');
+        } else {
+            $key  = $file;
+            $body = $fileContent;
+        }
+        $path = ($this->path ? trim($this->path, '/') . '/' : '');
+        try {
+            $text                       = $this->urlsafe_b64encode($text);
+            $cosParams = array(
+                'PicOperations'=>json_encode([
+                    'is_pic_info' => 0,
+                    'rules'       => [['fileid' => '/'.$path . $key, 'rule' => "watermark/2/text/".$text."/font/dGFob21hLnR0Zg/fontsize/16/fill/Izk5OTk5OQ/dissolve/100/shadow/0/batch/1/degree/60"]],
+                ], JSON_UNESCAPED_SLASHES),
+                'Bucket' => $this->storageName,
+                'Key'    => '/'.$path . $key,
+                'Body'   => $body,
+            );
+            
+            $this->fileInfo->uploadInfo = $this->app()->putObject($cosParams);
+            Log::debug($path . $key);
+            $src                        = rtrim(($this->cdn ?: $this->uploadUrl), '/') . '/' . $path . $key;
+            $this->fileInfo->filePath   = $src;
+            $this->fileInfo->fileName   = $key;
+
+            return $this->fileInfo;
+        } catch (UploadException $e) {
+            return $this->setError($e->getMessage());
+        }
+    }
+    protected function urlsafe_b64encode($string)
+    {
+        $data = base64_encode($string);
+        $data = str_replace(array('+', '/', '='), array('-', '_', ''), $data);
+        return $data;
     }
 }
