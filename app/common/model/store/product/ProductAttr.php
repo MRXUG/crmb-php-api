@@ -46,7 +46,7 @@ class ProductAttr extends BaseModel
      */
     public function getAttrValuesAttr($value)
     {
-        return explode('-!-',$value);
+        return explode(',',$value);
     }
 
     /**
@@ -57,7 +57,7 @@ class ProductAttr extends BaseModel
      */
     public function setAttrValuesAttr($value)
     {
-        return implode('-!-',$value);
+        return implode(',',$value);
     }
 
 }
