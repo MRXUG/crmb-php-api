@@ -3348,13 +3348,15 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     }
                     $discountTotal = $marketingDiscountAmount;
                     if ($adInfo['discount_fission_switch'] == 1) {
-                        $discountTotal = bcadd($adMarketingDiscountAmount, $adFissionAmount, 2);
+                        //$discountTotal = bcadd($adMarketingDiscountAmount, $adFissionAmount, 2);
+                        $discountTotal = $adFissionAmount;
                     }
                     break;
                 case 6:
                     $maxCurrentDiscount = $adMarketingDiscountAmount;
                     if ($adInfo['discount_fission_switch'] == 1) {
-                        $maxCurrentDiscount = bcadd($adFissionAmount, $adMarketingDiscountAmount, 2);
+                        //$maxCurrentDiscount = bcadd($adFissionAmount, $adMarketingDiscountAmount, 2);
+                       $maxCurrentDiscount = $adFissionAmount;
                     }
                     // var_dump([$failureDiscount, $adFailureDiscountAmount, $failureDiscount, $maxCurrentDiscount]);die;
                     if ((($failureDiscount != $adFailureDiscountAmount) || ($failureDiscount < $maxCurrentDiscount)) && $productId == $adProductId) {
