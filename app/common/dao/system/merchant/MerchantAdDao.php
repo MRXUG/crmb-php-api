@@ -12,7 +12,6 @@ use app\common\model\system\merchant\MerchantAd;
 
 class MerchantAdDao extends BaseDao
 {
-
     /**
      * @return BaseModel
      * @day 2020-03-30

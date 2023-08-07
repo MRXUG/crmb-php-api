@@ -103,6 +103,10 @@ class MerchantAdRepository extends BaseRepository
             $data['deliveryMethod'] = json_encode($data['deliveryMethod'],true);
         }
 
+        if(isset($data['multistep_discount']) && $data['multistep_discount']){
+            $data['multistep_discount'] = json_encode($data['multistep_discount'],true);
+        }
+
         Db::transaction(function () use ($id, $data, $coupon) {
             if ($id) {
                 $this->dao->update($id, $data);

@@ -29,4 +29,9 @@ class MerchantAd extends BaseModel
     {
         return $this->hasMany(MerchantAdCoupon::class, 'ad_id', 'ad_id');
     }
+
+    public function getMultistepDiscountAttr($value)
+    {
+        return $value ? json_decode($value) : [];
+    }
 }

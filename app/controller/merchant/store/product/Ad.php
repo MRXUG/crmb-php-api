@@ -1,9 +1,9 @@
 <?php
 namespace app\controller\merchant\store\product;
 
-use think\App;
-use crmeb\basic\BaseController;
 use app\common\repositories\system\merchant\MerchantAdRepository;
+use crmeb\basic\BaseController;
+use think\App;
 
 /**
  *
@@ -38,8 +38,10 @@ class Ad extends BaseController
      */
     public function detail($id)
     {
-        if (!$this->repository->adExists($id))
+        if (!$this->repository->adExists($id)) {
             return app('json')->fail('数据不存在');
+        }
+
         return app('json')->success($this->repository->getInfo($id));
     }
 
@@ -57,9 +59,9 @@ class Ad extends BaseController
      */
     public function lst($goodsId)
     {
-        [$page, $limit] = $this->getPage();
+        [$page, $limit]    = $this->getPage();
         $where['goods_id'] = $goodsId;
-        $where = [
+        $where             = [
             'goods_id' => $goodsId,
         ];
         $data = $this->repository->getList($where, $page, $limit);
@@ -82,8 +84,9 @@ class Ad extends BaseController
         $coupon = $data['coupons'];
         unset($data['coupons']);
 
-        if (!$this->repository->adExists($id))
+        if (!$this->repository->adExists($id)) {
             return app('json')->fail('数据不存在');
+        }
 
         $this->repository->updateData($id, $data, $coupon);
 
@@ -103,7 +106,7 @@ class Ad extends BaseController
     {
         return $this->validate($data, [
             'mer_id|商户id'                          => 'require',
-            'goods_id|商品id'                          => 'require',
+            'goods_id|商品id'                        => 'require',
             'ad_link_name|广告连接名称'                  => 'require',
             'ad_channel_id|广告渠道'                   => 'require',
 //            'ad_account_id|广告商id'                  => 'require',
@@ -115,14 +118,16 @@ class Ad extends BaseController
             'fission_amount|涨红包金额'                 => 'requireIf:discount_fission_switch,1',
 //            'discount_image|优惠后商品图'                => 'require',
             'page_popover_switch|商详页弹窗开关'          => 'require|in:1,0',
+            'multistep_switch|多级回流开关'              => 'require|in:1,0',
+            'multistep_discount|多级回流优惠设置'          => 'requireIf:multistep_switch,1|array',
 //            'marketing_page_main_chart|营销页头图'      => 'require',
-//            'marketing_page_goods_chart|营销页商品图'    => 'require',
-//            'marketing_page_bottom_chart|营销页底图'    => 'require',
-//            'marketing_page_popup_chart|营销页弹窗'     => 'require',
-//            'marketing_page_backcolor|营销页背景色'      => 'require',
+            //            'marketing_page_goods_chart|营销页商品图'    => 'require',
+            //            'marketing_page_bottom_chart|营销页底图'    => 'require',
+            //            'marketing_page_popup_chart|营销页弹窗'     => 'require',
+            //            'marketing_page_backcolor|营销页背景色'      => 'require',
             'reflow_coupons_switch|回流优惠券开关'        => 'require|in:1,0',
 //            'coupon_popup_chart|领券弹窗'              => 'requireIf:reflow_coupons_switch,1',
-            'coupons'                                   => 'requireIf:reflow_coupons_switch,1|array',
+            'coupons'                              => 'requireIf:reflow_coupons_switch,1|array',
             'consume_coupon_switch|券核销方式'          => 'in:1',
             'pay_failure_discount_switch|支付失败优惠开关' => 'in:1,0',
             'pay_failure_discount_amount|支付失败优惠金额' => 'requireIf:pay_failure_discount_switch,1',
@@ -143,7 +148,9 @@ class Ad extends BaseController
         $coupon = $data['coupons'];
         unset($data['coupons']);
 
-        if (isset($data['ad_id']))  unset($data['ad_id']);
+        if (isset($data['ad_id'])) {
+            unset($data['ad_id']);
+        }
 
         $this->repository->updateData(null, $data, $coupon);
         return app('json')->success('保存成功');
@@ -162,8 +169,10 @@ class Ad extends BaseController
     public function proportion($id)
     {
         $proportion = input('proportion');
-        if (!$this->repository->adExists($id))
+        if (!$this->repository->adExists($id)) {
             return app('json')->fail('数据不存在');
+        }
+
         $this->repository->update($id, ['postback_proportion' => $proportion]);
         return app('json')->success('保存成功');
     }
@@ -178,10 +187,10 @@ class Ad extends BaseController
     public function qrcode()
     {
         $appid = input('appid');
-        $path = input('path');
-        $data = input('data');
-        $id = uniqid();
-        $url = get_preview_code($id, $appid, $path, $data);
+        $path  = input('path');
+        $data  = input('data');
+        $id    = uniqid();
+        $url   = get_preview_code($id, $appid, $path, $data);
 
         return app('json')->success(['url' => $url]);
     }
