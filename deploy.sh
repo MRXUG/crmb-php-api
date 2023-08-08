@@ -3,7 +3,7 @@
 set -e
 
 now=$(date +%s)
-#//获取当前路径（因为放在build文件夹下所以加上/../）
+#
 base=$( cd "$(dirname "$0" )" ; pwd -P )
 echo "$base"
 echo "开始远程部署"
