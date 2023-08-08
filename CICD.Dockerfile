@@ -4,7 +4,8 @@ COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
 ADD . /app
 
-RUN apt-get update && apt-get install -y git
+RUN apk update && \
+    apk add --no-cache git 
 
 RUN cd /app && composer install
 
