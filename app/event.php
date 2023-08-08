@@ -62,7 +62,8 @@ return [
             \crmeb\listens\AuthAcquirePenaltyListen::class,// 自动更新小程序获取交易体验分违规记录
             \crmeb\listens\UpdateAppletSubmitAuditListen::class, // 异步处理小程序提审流程
             \crmeb\listens\AuthProductStockSetListen::class, // 每天自动恢复商品库存
-            
+
+            \crmeb\listens\DbOrderBatchToESListen::class, //每天批量更新数据库store_order表 到 ElasticSearch
 
             // TODO 待确定是否需要
             //\crmeb\listens\ProfitSharingUnfreezeListen::class,// 解冻商户资金
@@ -84,6 +85,7 @@ return [
         'pay_success_presell'       => [\crmeb\listens\pay\PresellPaySuccessListen::class],
         'pay_success_meal'          => [\crmeb\listens\pay\MealSuccessListen::class],
         'order.delivery'            => [\crmeb\listens\OrderDeliveryListen::class],
+        'es.order_after_update'     => [\crmeb\listens\OrderAfterUpdateListen::class],
     ],
 
     'subscribe' => [],

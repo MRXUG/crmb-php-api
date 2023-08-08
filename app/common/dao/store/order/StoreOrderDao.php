@@ -284,7 +284,9 @@ class StoreOrderDao extends BaseDao
         foreach ($orderIds as $id){
             $make->status($id,$make::ORDER_STATUS_GROUP_SUCCESS,'拼团成功');
         }
-        return StoreOrder::getDB()->whereIn('order_id', $orderIds)->update(compact('status'));
+        $return = $this->getModelObj()->whereIn('order_id', $orderIds)->update(compact('status'));
+        event('es.order_after_update', ['orderIds' => $orderIds]);
+        return $return;
     }
 
     /**
@@ -370,7 +372,10 @@ class StoreOrderDao extends BaseDao
      */
     public function reconciliationUpdate($reconciliation_id)
     {
-        return ($this->getModel()::getDB())->whereIn('reconciliation_id', $reconciliation_id)->update(['reconciliation_id' => 0]);
+        $orderIds = $this->getModelObj()->whereIn('reconciliation_id', $reconciliation_id)->column('order_id');
+        $return = $this->getModelObj()->whereIn('reconciliation_id', $reconciliation_id)->update(['reconciliation_id' => 0]);
+        event('es.order_after_update', ['orderIds' => $orderIds]);
+        return $return;
     }
 
     public function dayOrderNum($day, $merId = null)
@@ -808,6 +813,7 @@ class StoreOrderDao extends BaseDao
         $this->getModelObj()->where('order_id', $orderId)->update([
             'status' => $status
         ]);
+        event('es.order_after_update', ['orderIds' => [$orderId]]);
         /** @var StoreOrderProductDao $orderProductDao */
         $orderProductDao = app()->make(StoreOrderProductDao::class);
         if ($status == 4) {

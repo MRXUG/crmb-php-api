@@ -6,3 +6,5 @@ applets.txt
 .DS_Store
 vendor
 /.vscode
+/test
+

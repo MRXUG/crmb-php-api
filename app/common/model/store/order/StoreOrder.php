@@ -25,6 +25,9 @@ use app\common\model\system\merchant\MerchantGoodsPayment;
 use app\common\model\system\merchant\MerchantAd;
 use app\common\model\user\User;
 use app\common\repositories\store\MerchantTakeRepository;
+use crmeb\jobs\ElasticSearch\OrderInsertJob;
+use crmeb\jobs\ElasticSearch\OrderUpdateJob;
+use think\facade\Queue;
 
 class StoreOrder extends BaseModel
 {
@@ -286,4 +289,14 @@ class StoreOrder extends BaseModel
     {
         return $this->hasMany(MerchantGoodsPayment::class,'order_id','order_id');
     }
+
+    public static function onAfterUpdate($order){
+        Queue::push(OrderUpdateJob::class, ['orderIds' => $order->order_id, 'updateColumn' => $order->toArray()]);
+    }
+
+    public static function onAfterInsert($order){
+        Queue::push(OrderInsertJob::class, $order);
+    }
+
+
 }

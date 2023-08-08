@@ -14,6 +14,7 @@
 namespace app\common\repositories;
 
 use app\common\dao\BaseDao;
+use crmeb\services\ElasticSearch\ElasticSearchService;
 
 /**
  * Class BaseRepository
@@ -25,6 +26,11 @@ class BaseRepository
      * @var BaseDao $dao
      */
     protected $dao;
+
+    /**
+     * @var ElasticSearchService $es
+     */
+    protected $es;
 
     public function setDao($dao){
         $this->dao = $dao;

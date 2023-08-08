@@ -555,6 +555,10 @@ Route::group('api/', function () {
 
     })->middleware(UserTokenMiddleware::class, false);
 
+
+    //记录用户访问日志
+    Route::post('user/visit_log', 'api.server.UserLogController/visit')->name('UserVisitLog')->middleware(UserTokenMiddleware::class, false);
+
     //腾讯广告归因转化回传
     Route::any('applets/senddata', 'api.applets.Applets/sendData')->name('sendData')->middleware(UserTokenMiddleware::class, false);
     Route::any('applets/getdata', 'api.applets.Applets/getData')->name('getData');
