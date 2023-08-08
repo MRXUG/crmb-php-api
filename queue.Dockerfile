@@ -1,4 +1,4 @@
-FROM registry.baidubce.com/wd-shop/wd-backend:1.1
+FROM registry.cn-shanghai.aliyuncs.com/wandui/wd-backend:v1.0
 
 ADD . /app
 
