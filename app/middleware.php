@@ -19,5 +19,5 @@ return [
     // \think\middleware\SessionInit::class
     // access
     app\common\middleware\AccessMiddleware::class,
-    //app\common\middleware\ThrottleMiddleware::class,
+    app\common\middleware\ThrottleMiddleware::class,
 ];

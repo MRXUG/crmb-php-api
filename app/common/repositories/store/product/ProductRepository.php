@@ -2440,7 +2440,8 @@ class ProductRepository extends BaseRepository
         if (!$data['pay_limit']) {
             $data['once_max_count'] = 0;
         }
-        if ($data['delivery_way'] == 2 && !$this->merShippingExists($merId, $data['temp_id'])) {
+        // delivery_way 不包邮选择模版
+        if (isset($data['delivery_way']) && $data['delivery_way'] == 2 && !$this->merShippingExists($merId, $data['temp_id'])) {
             throw new ValidateException('运费模板不存在');
         }
 
