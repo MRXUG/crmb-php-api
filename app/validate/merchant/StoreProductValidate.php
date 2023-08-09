@@ -29,7 +29,6 @@ class StoreProductValidate extends Validate
         "is_show｜是否上架" => "in:0,1",
         "attr|商品规格" => "requireIf:spec_type,1|Array|checkUnique",
         "attrValue|商品属性" => "require|array|productAttrValue",
-        'delivery_way|发货方式' => 'requireIf:is_ficti,0|require',
         'once_min_count|最小限购' => 'min:0',
         'pay_limit|是否限购' => 'require|in:0,1,2|payLimit',
     ];
