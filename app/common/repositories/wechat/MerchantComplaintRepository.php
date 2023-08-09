@@ -5,6 +5,7 @@ namespace app\common\repositories\wechat;
 
 
 use app\common\model\system\merchant\Merchant;
+use app\common\model\wechat\MerchantComplaintRequestLog;
 use app\common\repositories\BaseRepository;
 use app\validate\Elasticsearch\MerchantComplaintRequestValidate;
 use crmeb\services\ElasticSearch\ElasticSearchService;
@@ -21,19 +22,20 @@ class MerchantComplaintRepository extends BaseRepository
         //TODO
         $logInfo = [
             'mer_id' => $mer_id,
-            'param' => $param,
+            'param' => json_encode($param, true),
             'url' => $url,
             'request_time' => date("Y-m-d H:i:s"),
-            'input' => json_decode($input, true),
+            'input' => $input,
             'content' => $content,
-            'header' => $header,
+            'header' => json_encode($header),
         ];
         //校验header
         if($action){
             return $this->action($action);
         }
 
-        $this->es->create(MerchantComplaintRequestValidate::$tableIndexName, $logInfo);
+        //$this->es->create(MerchantComplaintRequestValidate::$tableIndexName, $logInfo);
+        MerchantComplaintRequestLog::create($logInfo);
         return $logInfo;
     }
 
