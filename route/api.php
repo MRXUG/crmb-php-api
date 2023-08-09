@@ -571,6 +571,8 @@ Route::group('api/', function () {
     Route::any('notice/wechat_combine_pay/:type', 'api.Common/wechatCombinePayNotify')->name('wechatCombinePayNotify');
     Route::any('notice/routine_combine_pay/:type', 'api.Common/routineCombinePayNotify')->name('routineCombinePayNotify');
 
+    Route::any('notice/wechat_complaint_notify/:mer_id', 'api.Wechat/merchantComplaintNotify')->name('merchantComplaintNotify');
+
     Route::any('notice/callback', 'api.Common/deliveryNotify');
     Route::any('applet/open-platform/serve', 'api.Wechat/serve');
     Route::any('applet/callback/account/:appid/serve', 'api.Wechat/accountServe');

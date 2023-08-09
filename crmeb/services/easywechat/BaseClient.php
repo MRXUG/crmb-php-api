@@ -91,7 +91,8 @@ class BaseClient extends AbstractAPI
      * @param string $endpoint
      * @param string $method
      * @param array $options
-     * @param bool $returnResponse
+     * @param bool $serial
+     * @return mixed
      */
     public function request(string $endpoint, string $method = 'POST', array $options = [], $serial = true)
     {
@@ -128,6 +129,8 @@ class BaseClient extends AbstractAPI
             }
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         }
+        // 设置请求方式
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
         curl_setopt($curl, CURLOPT_URL, $location);
         curl_setopt($curl, CURLOPT_HEADER, true);
         curl_setopt($curl, CURLOPT_TIMEOUT, 60);

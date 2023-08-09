@@ -78,6 +78,7 @@ class WechatService
         $this->application->register(new \crmeb\services\easywechat\storePay\ServiceProvider);
         $this->application->register(new \crmeb\services\easywechat\profitSharing\ServiceProvider);
         $this->application->register(new \crmeb\services\easywechat\coupon\ServiceProvider);
+        $this->application->register(new \crmeb\services\easywechat\merchantComplaint\ServiceProvider);
     }
     
      /**
@@ -1053,6 +1054,17 @@ class WechatService
     public function profitSharing()
     {
         return $this->application->profitSharing;
+    }
+
+
+
+
+    /**
+     * @return easywechat\merchantComplaint\merchantComplaintClient
+     */
+    public function MerchantComplaint()
+    {
+        return $this->application->merchantComplaint;
     }
 
 }

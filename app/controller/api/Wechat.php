@@ -1,6 +1,7 @@
 <?php
 namespace app\controller\api;
 
+use app\common\repositories\wechat\MerchantComplaintRepository;
 use app\common\repositories\wechat\OpenPlatformRepository;
 use crmeb\basic\BaseController;
 use crmeb\services\WechatService;
@@ -41,5 +42,26 @@ class Wechat extends BaseController
 
 //        return app('json')->success([]);
         return  "success";
+    }
+
+
+    /**
+     * 接收商户创建投诉通知回调
+     * @return mixed
+     * @author  lucky
+     * @date    2023/8/9 20:38
+     */
+    public function merchantComplaintNotify($mer_id){
+
+        /** @var MerchantComplaintRepository $make */
+        $make = app()->make(MerchantComplaintRepository::class);
+        $action = $this->request->param('action');
+        return $make->notify($action, $mer_id,
+            $this->request->header(),
+            $this->request->server('REQUEST_METHOD').':'.$this->request->host(). $this->request->url(),
+            $this->request->param(),
+            $this->request->getInput(),
+            $this->request->getContent());
+
     }
 }

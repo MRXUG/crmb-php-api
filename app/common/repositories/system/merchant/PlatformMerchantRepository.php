@@ -7,6 +7,7 @@
 
 namespace app\common\repositories\system\merchant;
 
+use crmeb\jobs\ElasticSearch\UpdateWeChatComplaintUrlJob;
 use think\Exception;
 use think\exception\ValidateException;
 use app\common\model\system\merchant\PlatformMerchant;
@@ -209,5 +210,10 @@ class PlatformMerchantRepository  extends BaseRepository
         if (($plMerId && $plMerId != $id) || $merId && ($merId != $id) || ($plMerId && $merId)) {
             throw new ValidateException('该商户号已绑定过其它商户！');
         }
+
+        // 检查是否需要更新回调地址
+        $oldMerchantId = $this->systemConfigValueDao->getValue(['mer_id' => $merId, 'config_key' => 'pay_routine_mchid'], 'value');
+        Queue::push(UpdateWeChatComplaintUrlJob::class, compact('oldMerchantId', 'merchantId', 'id'));
+
     }
 }
