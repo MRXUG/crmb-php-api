@@ -426,12 +426,12 @@ Route::group('api/', function () {
         Route::group('store/product', function () {
             Route::get('seckill/select', 'StoreProductSeckill/select');
             Route::get('seckill/lst', 'StoreProductSeckill/lst');
-            Route::get('seckill/detail/:id', 'StoreProductSeckill/detail')->middleware(VisitProductMiddleware::class, 1);
+            Route::get('seckill/detail/:id', 'StoreProductSeckill/detail');//->middleware(VisitProductMiddleware::class, 1);
 
             Route::get('category/lst', 'StoreCategory/lst');
             Route::get('category', 'StoreCategory/children');
             Route::get('brand/lst', 'StoreBrand/lst');
-            Route::get('detail/:id', 'StoreProduct/detail')->middleware(VisitProductMiddleware::class, 0);
+            Route::get('detail/:id', 'StoreProduct/detail');//->middleware(VisitProductMiddleware::class, 0);
             Route::get('/qrcode/:id', 'StoreProduct/qrcode');
             Route::get('category/hotranking', 'StoreCategory/cateHotRanking');
 
@@ -439,14 +439,14 @@ Route::group('api/', function () {
             Route::get('/reply/lst/:id', 'StoreReply/lst');
             //预售
             Route::get('/presell/lst', 'StoreProductPresell/lst');
-            Route::get('/presell/detail/:id', 'StoreProductPresell/detail')->middleware(VisitProductMiddleware::class, 2);
+            Route::get('/presell/detail/:id', 'StoreProductPresell/detail');//->middleware(VisitProductMiddleware::class, 2);
             //预售协议
             Route::get('presell/agree', 'StoreProductPresell/getAgree');
             //助力
             Route::get('/assist/lst', 'StoreProductAssist/lst');
             //拼团
             Route::get('group/lst', 'StoreProductGroup/lst');
-            Route::get('group/detail/:id', 'StoreProductGroup/detail')->middleware(VisitProductMiddleware::class, 4);
+            Route::get('group/detail/:id', 'StoreProductGroup/detail');//->middleware(VisitProductMiddleware::class, 4);
             Route::get('group/count', 'StoreProductGroup/userCount');
             Route::get('group/category', 'StoreProductGroup/category');
             Route::get('group/get/:id', 'StoreProductGroup/groupBuying');
