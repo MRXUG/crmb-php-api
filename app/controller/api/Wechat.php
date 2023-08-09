@@ -56,12 +56,14 @@ class Wechat extends BaseController
         /** @var MerchantComplaintRepository $make */
         $make = app()->make(MerchantComplaintRepository::class);
         $action = $this->request->param('action');
-        return $make->notify($action, $mer_id,
+        $res = $make->notify($action, $mer_id,
             $this->request->header(),
             $this->request->server('REQUEST_METHOD').':'.$this->request->host(). $this->request->url(),
             $this->request->param(),
             $this->request->getInput(),
             $this->request->getContent());
+
+        return app('json')->success($res);
 
     }
 }
