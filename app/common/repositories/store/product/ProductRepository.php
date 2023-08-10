@@ -277,7 +277,7 @@ class ProductRepository extends BaseRepository
        $attr      = $this->setAttr($data['attr'], $id);
        $data = $this->setProduct($data);
        
-        Db::transaction(function () use ($id, $data, $attrValue) {
+        Db::transaction(function () use ($id, $data, $attrValue,$attr) {
 
             (app()->make(ProductAttrRepository::class))->clearAttr($id);
             (app()->make(ProductAttrValueRepository::class))->clearAttr($id);
@@ -291,6 +291,8 @@ class ProductRepository extends BaseRepository
             }
             return $this->dao->update($id, $data);
         });
+        $redisKey = sprintf(RedisKey::GOODS_DETAIL, $id);
+        Cache::store('redis')->handler()->del($redisKey);
     }
 
     public function freeTrial(int $id, array $data, int $merId)
@@ -535,6 +537,7 @@ class ProductRepository extends BaseRepository
                 if (isset($value['detail']) && !empty($value['detail']) && is_array($value['detail'])) {
                     $sku = implode(',', $value['detail']);
                 }
+                $unique = $this->setUnique($productId, $sku, $productType);
                 $result['attrValue'][] = [
                     'detail'     => json_encode($value['detail'] ?? ''),
                     "bar_code"   => $value["bar_code"] ?? '',
@@ -543,6 +546,7 @@ class ProductRepository extends BaseRepository
                     "product_id" => $productId,
                     "type"       => 0,
                     "sku"        => $sku,
+                    'unique'=>$unique
                 ];
             }
         } catch (\Exception $exception) {
