@@ -273,7 +273,7 @@ class ProductRepository extends BaseRepository
            }
        }
        $data['price'] = $price;
-       $this->setProduct($data);
+       $data = $this->setProduct($data);
        
         Db::transaction(function () use ($id, $data, $productType) {
 
