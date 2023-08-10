@@ -577,9 +577,9 @@ class ProductRepository extends BaseRepository
     public function getAdminOneProduct(int $id, ?int $activeId, $conType = 0)
     {
         $with = ['attr', 'attrValue', 'oldAttrValue', 'merCateId.category', 'storeCategory', 'brand', 'temp', 'seckillActive',
-            'content'  => function ($query) use ($conType) {
-                $query->where('type', $conType);
-            },
+            // 'content'  => function ($query) use ($conType) {
+            //     $query->where('type', $conType);
+            // },
             'merchant' => function ($query) {
                 $query->field('mer_id,mer_avatar,mer_name,is_trader');
             },

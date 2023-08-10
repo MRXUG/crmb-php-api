@@ -167,11 +167,11 @@ class ProductDao extends BaseDao
 
             })
 
-            ->when(isset($where['pid']) && $where['pid'] !== '', function ($query) use ($where) {
-                $storeCategoryRepository = app()->make(StoreCategoryRepository::class);
-                $ids = array_merge($storeCategoryRepository->findChildrenId((int)$where['pid']), [(int)$where['pid']]);
-                if (count($ids)) $query->whereIn('Product.cate_id', $ids);
-            })
+            // ->when(isset($where['pid']) && $where['pid'] !== '', function ($query) use ($where) {
+            //     $storeCategoryRepository = app()->make(StoreCategoryRepository::class);
+            //     $ids = array_merge($storeCategoryRepository->findChildrenId((int)$where['pid']), [(int)$where['pid']]);
+            //     if (count($ids)) $query->whereIn('Product.cate_id', $ids);
+            // })
             ->when(isset($where['us_status']) && $where['us_status'] !== '', function ($query) use ($where) {
                 if ($where['us_status'] == 0) {
                     $query->where('Product.is_show', 0)->where('Product.is_used', 1)->where('Product.status', 1);
