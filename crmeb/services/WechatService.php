@@ -142,7 +142,7 @@ class WechatService
     /**
      * 获取平台证书
      *
-     * @return mixed
+     * @return easywechat\certficates\Client
      * @author  zouxiuhui <zouxiuhui@vchangyi.com>
      * @date    2023/3/3 19:22
      */
