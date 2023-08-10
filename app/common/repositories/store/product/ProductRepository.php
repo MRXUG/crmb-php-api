@@ -535,6 +535,7 @@ class ProductRepository extends BaseRepository
                 if (isset($value['detail']) && !empty($value['detail']) && is_array($value['detail'])) {
                     $sku = implode(',', $value['detail']);
                 }
+                $unique = $this->setUnique($productId, $sku, $productType);
                 $result['attrValue'][] = [
                     'detail'     => json_encode($value['detail'] ?? ''),
                     "bar_code"   => $value["bar_code"] ?? '',
@@ -543,6 +544,7 @@ class ProductRepository extends BaseRepository
                     "product_id" => $productId,
                     "type"       => 0,
                     "sku"        => $sku,
+                    'unique'=>$unique
                 ];
             }
         } catch (\Exception $exception) {
