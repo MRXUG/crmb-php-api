@@ -273,15 +273,15 @@ class ProductRepository extends BaseRepository
            }
        }
        $data['price'] = $price;
+       $attrValue = $this->setAttrValue($data, $id, $productType, 0);
+       $attr      = $this->setAttr($data['attr'], $id);
        $data = $this->setProduct($data);
        
-        Db::transaction(function () use ($id, $data, $productType) {
+        Db::transaction(function () use ($id, $data, $attrValue) {
 
             (app()->make(ProductAttrRepository::class))->clearAttr($id);
             (app()->make(ProductAttrValueRepository::class))->clearAttr($id);
 
-            $attrValue = $this->setAttrValue($data, $id, $productType, 0);
-            $attr      = $this->setAttr($data['attr'], $id);
             if (!empty($attr)) {
                 (app()->make(ProductAttrRepository::class))->insert($attr);
             }
