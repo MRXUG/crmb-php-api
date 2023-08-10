@@ -277,7 +277,7 @@ class ProductRepository extends BaseRepository
        $attr      = $this->setAttr($data['attr'], $id);
        $data = $this->setProduct($data);
        
-        Db::transaction(function () use ($id, $data, $attrValue) {
+        Db::transaction(function () use ($id, $data, $attrValue,$attr) {
 
             (app()->make(ProductAttrRepository::class))->clearAttr($id);
             (app()->make(ProductAttrValueRepository::class))->clearAttr($id);
