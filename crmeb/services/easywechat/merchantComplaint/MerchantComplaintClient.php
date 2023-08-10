@@ -5,7 +5,6 @@ namespace crmeb\services\easywechat\merchantComplaint;
 
 
 use crmeb\services\easywechat\BaseClient;
-use crmeb\services\easywechat\certficates\Client;
 use think\exception\ValidateException;
 
 class MerchantComplaintClient extends BaseClient
@@ -72,16 +71,13 @@ class MerchantComplaintClient extends BaseClient
     /**
      * 回复用户
      * @param string $complaint_id 投诉id
+     * @param string $complainted_mchid 被诉商户号
      * @param string $response_content 回复内容
      * @param array $response_images
-     * @param string $complainted_mchid 被诉商户号
      * @param array $jumpInfo 跳转链接
      * @return mixed
      */
-    public function responseUser(string $complaint_id, string $response_content, $response_images = [], string $complainted_mchid = '', $jumpInfo = []){
-       if(!$complainted_mchid){
-           $complainted_mchid = $this->app['config']['service_payment']['merchant_id'];
-       }
+    public function responseUser(string $complaint_id, string $complainted_mchid,string $response_content, $response_images = [], $jumpInfo = []){
         $body = [
             'complainted_mchid' => $complainted_mchid,
             'response_content' => $response_content,
@@ -99,8 +95,7 @@ class MerchantComplaintClient extends BaseClient
         $options['sign_body'] = json_encode($body);
         $res = $this->request($uri, 'POST', $options);
         if(isset($res['code'])) throw new ValidateException('[微信接口返回]:' . $res['message']);
-        //无应答
-        return true;
+        return $res;
     }
 
     /**
@@ -109,16 +104,12 @@ class MerchantComplaintClient extends BaseClient
      * @param string $complainted_mchid
      * @return mixed
      */
-    public function complete(string $complaint_id, string $complainted_mchid = ''){
-        if(!$complainted_mchid){
-            $complainted_mchid = $this->app['config']['service_payment']['merchant_id'];
-        }
+    public function complete(string $complaint_id, string $complainted_mchid){
         $uri = str_replace('{complaint_id}', $complaint_id, self::COMPLETE_URI);
         $options['sign_body'] = json_encode(['complainted_mchid' => $complainted_mchid]);
         $res = $this->request($uri, 'POST', $options);
         if(isset($res['code'])) throw new ValidateException('[微信接口返回]:' . $res['message']);
-        //无应答
-        return true;
+        return $res;
     }
 
     /**
@@ -248,67 +239,6 @@ class MerchantComplaintClient extends BaseClient
         if(isset($res['code'])) throw new ValidateException('[微信接口返回]:' . $res['message']);
 
         return $res['media_id'];
-    }
-
-    /**
-     * wechatpay Signature verify
-     * @param array $header
-     * @param string $body
-     * @return bool|int
-     */
-    public function verifySignature(array $header, string $body)
-    {
-        // lower base name.
-        $serialNo  = $header[strtolower('Wechatpay-Serial')] ?? '';
-        $sign      = $header[strtolower('Wechatpay-Signature')] ?? '';
-        $timestamp = $header[strtolower('Wechatpay-TimeStamp')] ?? '';
-        $nonce     = $header[strtolower('Wechatpay-Nonce')] ?? '';
-
-        if (!isset($serialNo, $sign, $timestamp, $nonce)) {
-            return false;
-        }
-
-        if (!$this->checkTimestamp($timestamp)) {
-            // log here
-            return false;
-        }
-
-        $message = "$timestamp\n$nonce\n$body\n";
-
-        return $this->verify($serialNo, $message, $sign);
-    }
-
-    /**
-     * @param string $serialNumber
-     * @param string $message
-     * @param string $signature
-     * @return bool|int
-     */
-    public function verify($serialNumber, $message, $signature){
-        /** @var Client $certficatesService */
-        $certficatesService = $this->app->certficates;
-        $plain  = $certficatesService->get();
-
-        $certificate = \openssl_x509_read($plain['certificates']);
-        $serialNo = $certficatesService->parseCertificateSerialNo($certificate);
-        $certPubKeys = \openssl_get_publickey($certificate);
-
-        $serialNumber = \strtoupper(\ltrim($serialNumber, '0')); // trim leading 0 and uppercase
-        if($serialNumber != $serialNo){
-            return false;
-        }
-
-        if (!in_array('sha256WithRSAEncryption', \openssl_get_md_methods(true))) {
-            throw new \RuntimeException('当前PHP环境不支持SHA256withRSA');
-        }
-        $signature = \base64_decode($signature);
-        return \openssl_verify($message, $signature, $certPubKeys, 'sha256WithRSAEncryption');
-    }
-
-    protected function checkTimestamp($timestamp)
-    {
-        // reject responses beyond 5 minutes
-        return \abs((int)$timestamp - \time()) <= 300;
     }
 
 }

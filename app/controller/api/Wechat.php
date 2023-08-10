@@ -60,6 +60,7 @@ class Wechat extends BaseController
             $this->request->header(),
             $this->request->server('REQUEST_METHOD').':'.$this->request->host(). $this->request->url(),
             $this->request->param(),
+            $this->request->getInput(),
             $this->request->getContent());
 
         return app('json')->success($res);
