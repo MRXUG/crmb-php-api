@@ -291,6 +291,8 @@ class ProductRepository extends BaseRepository
             }
             return $this->dao->update($id, $data);
         });
+        $redisKey = sprintf(RedisKey::GOODS_DETAIL, $id);
+        Cache::store('redis')->handler()->del($redisKey);
     }
 
     public function freeTrial(int $id, array $data, int $merId)
