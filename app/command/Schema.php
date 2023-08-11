@@ -33,34 +33,21 @@ class Schema extends Command
                  //获取字段名称和备注
                  $COLUMNS = Db::query("select COLUMN_NAME,DATA_TYPE,COLUMN_COMMENT from information_schema.COLUMNS where table_name = :item and table_schema = :dataBase", ["item" => $item, "dataBase" => Schema::$schema]);
  
- 
-                 $file = fopen("/Users/xinyang/work/wandui/wd-backend/modelTmp/" . Schema::snakeToCamel($item) . ".php", "w");
-                 var_dump($file);
- 
-                 fwrite($file, "<?php" . PHP_EOL . "namespace app\model;" . PHP_EOL
-                     . PHP_EOL . "use think\model;" . PHP_EOL
-                     . PHP_EOL . "class " . Schema::snakeToCamel($item) . " extends Model"
-                     . PHP_EOL . "{" . PHP_EOL);
- 
                  $content = "//设置字段信息" . PHP_EOL .
                      "protected $" . "schema = [" . PHP_EOL;
-                 fwrite($file, $content);
                  //写入字段
                  foreach ($COLUMNS as $COLUMN) {
-                     $content = "'" . $COLUMN["COLUMN_NAME"] . "'" . "       =>"  .
+                     $content .= "'" . $COLUMN["COLUMN_NAME"] . "'" . "       =>"  .
                          "'" . $COLUMN["DATA_TYPE"] . "'" . "," . "//" . $COLUMN["COLUMN_COMMENT"] . PHP_EOL;
-                     fwrite($file, $content);
+
                  }
  
-                 $content = PHP_EOL . "];";
-                 fwrite($file, $content);
- 
-                 fwrite($file, PHP_EOL . "}");
-                 fclose($file);
+                 $content .= PHP_EOL . "];";
+                 $output->writeln($content.PHP_EOL);
              }
          }
         // 指令输出
-        $output->writeln('app\command\schema');
+        
     }
 
     public static function snakeToCamel($str, $capitalized = true)
