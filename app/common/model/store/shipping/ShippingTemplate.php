@@ -17,6 +17,21 @@ use app\common\model\BaseModel;
 
 class ShippingTemplate extends BaseModel
 {
+
+    protected $schema = [
+        'appoint'              => 'tinyint', //开启指定包邮
+        'create_time'          => 'timestamp', //添加时间
+        'info'                 => 'varchar', //运费说明
+        'is_default'           => 'tinyint', //默认模板
+        'mer_id'               => 'int', //商户 id
+        'name'                 => 'varchar', //模板名称
+        'shipping_template_id' => 'int', //编号
+        'sort'                 => 'int', //排序
+        'type'                 => 'tinyint', //计费方式 0=数量 1=重量 2=体积
+        'undelivery'           => 'tinyint', //开启指定区域不配送
+
+    ];
+    
     /**
      * Author:Qinii
      * Date: 2020/5/6

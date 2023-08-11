@@ -18,7 +18,25 @@ use app\common\model\BaseModel;
 class ProductAttrValue extends BaseModel
 {
 
-
+    protected $schema = [
+        'bar_code'      => 'varchar', //产品条码
+        'cost'          => 'decimal', //成本价
+        'detail'        => 'varchar', //
+        'extension_one' => 'decimal', //一级佣金
+        'extension_two' => 'decimal', //二级佣金
+        'image'         => 'varchar', //图片
+        'ot_price'      => 'decimal', //原价
+        'price'         => 'decimal', //价格
+        'product_id'    => 'int', //商品ID
+        'sales'         => 'int', //销量
+        'sku'           => 'varchar', //商品属性索引值 (attr_value|attr_value[|....])
+        'stock'         => 'int', //属性对应的库存
+        'svip_price'    => 'decimal', //会员价
+        'type'          => 'tinyint', //活动类型 0=商品
+        'unique'        => 'char', //唯一值
+        'volume'        => 'decimal', //体积
+        'weight'        => 'decimal', //重量
+    ];
     /**
      * @Author:Qinii
      * @Date: 2020/5/8

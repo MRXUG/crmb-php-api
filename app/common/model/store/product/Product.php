@@ -37,6 +37,75 @@ class Product extends BaseModel
 
     protected $deleteTime = 'is_del';
     protected $defaultSoftDelete = 0;
+
+    protected $schema = [
+        'bar_code'              => 'varchar', //产品条码（一维码）/废弃
+        'brand_id'              => 'int', //品牌 id/废弃
+        'browse'                => 'int', //浏览量
+        'care_count'            => 'int', //收藏数
+        'cate_id'               => 'int', //分类id/废弃
+        'code_path'             => 'varchar', //产品二维码地址(用户小程序海报)
+        'cost'                  => 'decimal', //成本价
+        'create_time'           => 'timestamp', //添加时间
+        'delivery_free'         => 'int', //全国包邮
+        'delivery_way'          => 'varchar', //1.仅到店自提2快递计价配送3全国包邮
+        'extend'                => 'varchar', //扩展信息
+        'extension_type'        => 'tinyint', //佣金比例 0.系统，1.自定义
+        'ficti'                 => 'mediumint', //虚拟销量
+        'give_coupon_ids'       => 'varchar', //赠送优惠券
+        'goods_desc'            => 'text', //商品详情
+        'guarantee'             => 'tinyint', //购物保障：0-不展示，1-展示
+        'guarantee_template_id' => 'int', //保障服务模板
+        'image'                 => 'varchar', //商品图片
+        'integral_price_total'  => 'decimal', //使用积分抵扣金额总数
+        'integral_rate'         => 'int', //积分抵扣比例
+        'integral_total'        => 'int', //使用积分抵扣总数
+        'is_benefit'            => 'tinyint', //促销单品
+        'is_best'               => 'tinyint', //是否精品
+        'is_del'                => 'tinyint', //是否删除
+        'is_gift_bag'           => 'tinyint', //是否为礼包
+        'is_good'               => 'tinyint', //是否优品推荐
+        'is_hot'                => 'tinyint', //是否热卖
+        'is_new'                => 'tinyint', //是否新品
+        'is_show'               => 'tinyint', //商户 状态（0：未上架，1：上架）
+        'is_used'               => 'int', //显示/隐藏
+        'keyword'               => 'varchar', //关键字/废弃
+        'labels'                => 'varchar', //标签id
+        'mer_id'                => 'int', //商户Id
+        'mer_status'            => 'tinyint', //商铺状态是否 1.正常 0. 非正常
+        'mer_svip_status'       => 'tinyint', //商户会员状态
+        'old_product_id'        => 'int', //原商品ID
+        'once_max_count'        => 'int', //订单单次购买数量最大限制
+        'once_min_count'        => 'int', //单次购买最低限购
+        'ot_price'              => 'decimal', //原价
+        'param_temp_id'         => 'varchar', //参数模板ID
+        'pay_limit'             => 'tinyint', //购买总数限制 0:不限购，1单次限购 2 长期限购
+        'price'                 => 'decimal', //最低价格
+        'product_id'            => 'int', //商品id
+        'product_type'          => 'tinyint', //0.普通商品 1.秒杀商品,2.预售商品，3.助力商品，4.拼团商品
+        'rank'                  => 'smallint', //总后台排序
+        'rate'                  => 'decimal', //评价分数
+        'refusal'               => 'varchar', //审核拒绝理由
+        'reply_count'           => 'int', //评论数
+        'sales'                 => 'mediumint', //销量
+        'sell_point'            => 'varchar', //商品卖点
+        'short_title'           => 'varchar', //商品短标题
+        'slider_image'          => 'varchar', //轮播图
+        'sort'                  => 'smallint', //排序
+        'spec_type'             => 'tinyint', //规格 0单 1多 /单规格移除
+        'status'                => 'tinyint', //管理员 状态（0：审核中，1：审核通过 -1: 未通过 -2: 下架）
+        'stock'                 => 'int', //总库存/废弃
+        'store_info'            => 'varchar', //商品简介 / 修改为内部备注作用
+        'store_name'            => 'varchar', //商品名称
+        'svip_price'            => 'decimal', //会员价
+        'svip_price_type'       => 'tinyint', //0不参加，1默认比例，2自定义
+        'temp_id'               => 'int', //运费模板ID
+        'type'                  => 'tinyint', //0.实体商品，1.虚拟商品
+        'unit_name'             => 'varchar', //单位名/废弃
+        'video_link'            => 'varchar', //主图视频链接/废弃
+
+    ];
+    
     /**
      * @Author:Qinii
      * @Date: 2020/5/8

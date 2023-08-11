@@ -25,6 +25,14 @@ use app\common\model\BaseModel;
 class MerchantCategory extends BaseModel
 {
 
+    protected $schema = [
+        'category_name'        => 'varchar', //商户分类名称
+        'commission_rate'      => 'decimal', //手续费
+        'create_time'          => 'timestamp', //添加时间
+        'merchant_category_id' => 'int', //商户分类 id
+
+    ];
+
     /**
      * @return string
      * @author xaboy

@@ -39,6 +39,27 @@ use function Symfony\Component\String\b;
 class StoreCart extends BaseModel
 {
 
+    //设置字段信息
+    protected $schema = [
+        'cart_id'             => 'bigint', //购物车表ID
+        'cart_num'            => 'smallint', //商品数量
+        'create_time'         => 'timestamp', //添加时间
+        'is_del'              => 'tinyint', //是否删除
+        'is_fail'             => 'tinyint', //是否失效
+        'is_new'              => 'tinyint', //是否为立即购买
+        'is_pay'              => 'tinyint', //0 = 未购买 1 = 已购买
+        'mer_id'              => 'int', //商户 id
+        'product_attr_unique' => 'varchar', //商品属性
+        'product_id'          => 'int', //商品ID
+        'product_type'        => 'tinyint', //类型 0=普通产品，2.预售商品
+        'source'              => 'tinyint', //来源 1.直播间,2.预售商品,3.助力商品
+        'source_id'           => 'int', //来源关联 id
+        'spread_id'           => 'int', //推广人
+        'uid'                 => 'int', //用户ID
+
+    ];
+    
+
     public static function tablePk(): ?string
     {
         return 'cart_id';

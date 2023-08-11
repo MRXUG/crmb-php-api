@@ -35,6 +35,56 @@ use app\common\repositories\user\UserRepository;
 class User extends BaseModel
 {
 
+    protected $schema = [
+        'account'          => 'varchar', //用户账号
+        'addres'           => 'varchar', //地址
+        'avatar'           => 'varchar', //用户头像
+        'birthday'         => 'date', //生日
+        'black'            => 'tinyint', //黑名单状态1黑名单0非黑名单
+        'brokerage_level'  => 'int', //推广员等级
+        'brokerage_price'  => 'decimal', //佣金金额
+        'cancel_time'      => 'timestamp', //注销时间
+        'card_id'          => 'varchar', //身份证号码
+        'count_fans'       => 'int', //用户粉丝数
+        'count_start'      => 'int', //用户获赞数
+        'create_time'      => 'timestamp', //添加时间
+        'group_id'         => 'int', //用户分组id
+        'integral'         => 'int', //积分
+        'is_promoter'      => 'tinyint', //是否为推广员
+        'is_svip'          => 'tinyint', //是否为付费会员 -1未开通过 0到期 1体验卡 2 有效期 3 永久
+        'label_id'         => 'varchar', //用户标签 id
+        'last_ip'          => 'varchar', //最后一次登录ip
+        'last_time'        => 'timestamp', //最后一次登录时间
+        'main_uid'         => 'int', //主账号
+        'mark'             => 'varchar', //用户备注
+        'member_level'     => 'int', //免费会员等级
+        'member_value'     => 'int', //免费会员成长值
+        'nickname'         => 'varchar', //用户昵称
+        'now_money'        => 'decimal', //用户余额
+        'pay_count'        => 'int', //用户购买次数
+        'pay_price'        => 'decimal', //用户消费金额
+        'phone'            => 'char', //手机号码
+        'promoter_time'    => 'timestamp', //成功推广时间
+        'pwd'              => 'varchar', //用户密码
+        'real_name'        => 'varchar', //真实姓名
+        'sex'              => 'tinyint', //性别
+        'spread_count'     => 'int', //下级人数
+        'spread_limit'     => 'timestamp', //推广员到期时间
+        'spread_pay_count' => 'int', //下级订单数
+        'spread_pay_price' => 'decimal', //下级订单金额
+        'spread_time'      => 'timestamp', //推广员关联时间
+        'spread_uid'       => 'int', //推广员id
+        'status'           => 'tinyint', //1为正常，0为禁止
+        'svip_endtime'     => 'timestamp', //会员结束时间
+        'svip_save_money'  => 'decimal', //会员节省金额
+        'uid'              => 'int', //用户id
+        'user_type'        => 'varchar', //用户类型
+        'wb_time'          => 'int', //加入白名单时间
+        'wechat_user_id'   => 'int', //微信用户 id
+        'white'            => 'tinyint', //白名单状态1白名单0非白名单
+    ];
+
+
     /**
      * @return string
      * @author xaboy

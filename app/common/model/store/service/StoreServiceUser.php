@@ -23,6 +23,21 @@ use app\common\repositories\system\ExtendRepository;
 class StoreServiceUser extends BaseModel
 {
 
+    protected $schema = [
+        'create_time'     => 'datetime', //创建时间
+        'is_online'       => 'tinyint', //是否在线
+        'last_log_id'     => 'int', //最后一条记录 id
+        'last_time'       => 'datetime', //最后发送时间
+        'mer_id'          => 'int', //商户 id
+        'service_id'      => 'int', //客服 id
+        'service_unread'  => 'smallint', //客服未读数
+        'service_user_id' => 'int', //聊天用户 id
+        'uid'             => 'int', //用户 id
+        'user_unread'     => 'smallint', //用户未读数
+
+    ];
+    
+
     public static function tablePk(): ?string
     {
         return 'service_user_id';

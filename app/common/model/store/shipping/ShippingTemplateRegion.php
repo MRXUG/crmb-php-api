@@ -17,6 +17,19 @@ use app\common\repositories\store\CityAreaRepository;
 
 class ShippingTemplateRegion extends BaseModel
 {
+
+    protected $schema = [
+        'city_id'                     => 'text', //城市ID /id/id/id/
+        'continue'                    => 'decimal', //续件
+        'continue_price'              => 'decimal', //续件运费
+        'first'                       => 'decimal', //首件
+        'first_price'                 => 'decimal', //首件运费
+        'shipping_template_region_id' => 'int', //编号
+        'temp_id'                     => 'int', //模板ID
+
+    ];
+
+    
     /**
      * Author:Qinii
      * Date: 2020/5/6

@@ -17,6 +17,14 @@ use app\common\repositories\store\CityAreaRepository;
 
 class ShippingTemplateUndelivery extends BaseModel
 {
+
+    protected $schema = [
+        'city_id'                         => 'text', //城市ID /id/id/id/
+        'shipping_template_undelivery_id' => 'int', //编号
+        'temp_id'                         => 'int', //模板ID
+
+    ];
+    
     /**
      * Author:Qinii
      * Date: 2020/5/6

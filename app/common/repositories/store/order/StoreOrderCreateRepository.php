@@ -31,6 +31,7 @@ use crmeb\services\SwooleTaskService;
 use think\exception\ValidateException;
 use think\facade\Db;
 use think\facade\Queue;
+use think\facade\Log;
 
 class StoreOrderCreateRepository extends StoreOrderRepository
 {
@@ -82,6 +83,8 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         /** @var StoreCartRepository $storeCartRepository */
         $storeCartRepository = app()->make(StoreCartRepository::class);
         $res = $storeCartRepository->checkCartList($storeCartRepository->cartIbByData($cartId, $uid, $address), 0, $user);
+        
+        Log::debug("catData:".json_encode($res));
         $merchantCartList = $res['list'];
         // dd($merchantCartList);
         // [$storeCouponDiscountByCode, $productCouponDiscountByCode] = $this->merchantCoupon($marketing_data, $merchantCartList);

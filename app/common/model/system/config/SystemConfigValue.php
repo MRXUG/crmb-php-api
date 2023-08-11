@@ -10,9 +10,7 @@
 // | Author: CRMEB Team <admin@crmeb.com>
 // +----------------------------------------------------------------------
 
-
 namespace app\common\model\system\config;
-
 
 use app\common\model\BaseModel;
 
@@ -24,6 +22,15 @@ use app\common\model\BaseModel;
  */
 class SystemConfigValue extends BaseModel
 {
+
+    protected $schema = [
+        'config_value_id' => 'int',
+        'config_key'      => 'string',
+        'value'           => 'string',
+        'mer_id'          => 'int',
+        'create_time'     => 'datetime',
+    ];
+
     /**
      * @return string
      * @author xaboy

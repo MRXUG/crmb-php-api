@@ -11,6 +11,16 @@ use think\model\relation\HasOne;
 
 class StockProduct extends BaseModel
 {
+    protected $schema = [
+        'coupon_stocks_id' => 'int', //批次表主键
+        'create_time'      => 'timestamp', //
+        'id'               => 'bigint', //
+        'is_del'           => 'tinyint', //
+        'product_id'       => 'int', //可用商品ID
+        'stock_id'         => 'varchar', //商家券批次号
+
+    ];
+    
 
     public static function tablePk(): ?string
     {

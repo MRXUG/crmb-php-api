@@ -39,6 +39,7 @@ $initCommands = [
 $commands = [
     //测试微信
     'test:wechat' => 'app\command\testWechat',
+    'schema' => 'app\command\Schema',
 ];
 if(in_array(env('app_name', ''), ['wandui_local', 'wandui_dev', 'wandui_test'])){
     $commands = array_merge($initCommands, $commands);

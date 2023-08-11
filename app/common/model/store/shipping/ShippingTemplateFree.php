@@ -17,6 +17,16 @@ use app\common\repositories\store\CityAreaRepository;
 
 class ShippingTemplateFree extends BaseModel
 {
+
+    protected $schema = [
+        'city_id'                   => 'text', //城市ID /id/id/id/id/
+        'number'                    => 'int', //包邮件数
+        'price'                     => 'decimal', //包邮金额
+        'shipping_template_free_id' => 'int', //编号
+        'temp_id'                   => 'int', //模板ID
+
+    ];
+    
     /**
      * Author:Qinii
      * Date: 2020/5/6
