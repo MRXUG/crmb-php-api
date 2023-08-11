@@ -19,6 +19,8 @@ class MerchantComplaintClient extends BaseClient
     const COMPLAINTS_DETAIL_URI = '/v3/merchant-service/complaints-v2/{complaint_id}';
     const NEGOTIATION_HISTORY_URI = '/v3/merchant-service/complaints-v2/{complaint_id}/negotiation-historys';
 
+    const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+
     /**
      * 投诉通知回调接口
      * @param string $method GET POST PUT DELETE ...
@@ -144,7 +146,8 @@ class MerchantComplaintClient extends BaseClient
         $options['sign_body'] = json_encode($body);
         $res = $this->request($uri, 'POST', $options);
         if(isset($res['code'])) throw new ValidateException('[微信接口返回]:' . $res['message']);
-        return $res;
+        //无应答
+        return true;
     }
 
     /**
@@ -202,15 +205,16 @@ class MerchantComplaintClient extends BaseClient
      */
     public function uploadImage(string $filepath, string $filename){
         $fileSize = filesize($filepath);
-        $maxSize = 2 * 1024 * 1024;
-        if($fileSize > $maxSize){
-            throw new ValidateException('图片太大:'.$maxSize );
-        }
-        $fi = new \finfo(FILEINFO_MIME_TYPE);
-        $mime_type = $fi->file($filepath);
-        if(!in_array($mime_type, ['image/jpeg', 'image/bmp', 'image/png', 'image/x-ms-bmp'])){
-            throw new ValidateException('图片格式不正确，仅支持bmp, png, jpg.当前格式:'.$mime_type );
-        }
+        //上层逻辑校验
+//        $maxSize = self::MAX_IMAGE_SIZE;
+//        if($fileSize > $maxSize){
+//            throw new ValidateException('图片太大:'.$maxSize );
+//        }
+//        $fi = new \finfo(FILEINFO_MIME_TYPE);
+//        $mime_type = $fi->file($filepath);
+//        if(!in_array($mime_type, ['image/jpeg', 'image/bmp', 'image/png', 'image/x-ms-bmp'])){
+//            throw new ValidateException('图片格式不正确，仅支持bmp, png, jpg.当前格式:'.$mime_type );
+//        }
 
         $boundary = uniqid();
         try{

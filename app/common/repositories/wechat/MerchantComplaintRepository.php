@@ -5,15 +5,21 @@ namespace app\common\repositories\wechat;
 
 
 use app\common\model\system\merchant\Merchant;
+use app\common\model\user\User;
 use app\common\model\wechat\MerchantComplaintOrder;
 use app\common\model\wechat\MerchantComplaintOrderLog;
 use app\common\model\wechat\MerchantComplaintRequestLog;
+use app\common\model\wechat\MerchantComplaintMedia;
 use app\common\repositories\BaseRepository;
 use crmeb\jobs\Merchant\ComplaintNotifyIntoDBJob;
+use crmeb\services\easywechat\merchantComplaint\MerchantComplaintClient;
 use crmeb\services\ElasticSearch\ElasticSearchService;
 use crmeb\services\WechatService;
+use think\db\BaseQuery;
+use think\db\Query;
 use think\Exception;
 use think\facade\Queue;
+use think\file\UploadedFile;
 
 class MerchantComplaintRepository extends BaseRepository
 {
@@ -102,6 +108,9 @@ class MerchantComplaintRepository extends BaseRepository
             ->value('id')){
             return ['error' => 'exists'];
         }
+        if(!isset($resource['payer_phone']) && isset($detail['payer_phone']) && $detail['payer_phone'] != ''){
+            $resource['payer_phone'] = $complaintService->decryptSensitiveInformation($detail['payer_phone']);
+        }
         $logInfo = $this->formatOrderLogData($mer_id, $content, $resource, $detail);
         $logModel->create($logInfo);
 
@@ -136,9 +145,9 @@ class MerchantComplaintRepository extends BaseRepository
             'complaint_id' => $resource['complaint_id'],
             'action_type' => $resource['action_type'] ?? '',
             'out_trade_no' => $resource['out_trade_no'] ?? $detail['complaint_order_info']['out_trade_no'] ?? '',
-            'complaint_time' => date("Y-m-d H:i:s", strtotime($resource['complaint_time'])),
+            'complaint_time' => date("Y-m-d H:i:s", strtotime($detail['complaint_time'])),
             'amount' => $resource['amount'] ?? 0,
-            'pay_phone' => $resource['pay_phone'] ?? '',
+            'payer_phone' => $resource['payer_phone'] ?? '',
             'complaint_detail' => $resource['complaint_detail'] ?? $detail['complaint_detail'] ?? '',
             'complaint_state' => $detail['complaint_state'] ?? '', //log表存初始值
             'transaction_id' => $resource['transaction_id'] ?? '',
@@ -165,29 +174,163 @@ class MerchantComplaintRepository extends BaseRepository
         //order表存转换int 便于查询
         $data['complaint_state'] = MerchantComplaintOrder::COMPLAINT_STATE[$data['complaint_state']] ?? '';
         $data['problem_type'] = MerchantComplaintOrder::PROBLEM_TYPE[$data['problem_type']] ?? '';
+        $data['uid'] = $data['payer_openid'] ? User::alias('u')
+            ->join('wechat_user wu', 'wu.wechat_user_id = u.wechat_user_id')
+            ->join('user_openid_relation uo', 'wu.unionid = uo.unionid')
+            ->where("uo.routine_openid", '=', $data['payer_openid'])
+            ->value('uid') : null;
         return $data;
     }
 
-    public function list(){
-        return [];
+    public function list(array $param){
+        /** @var MerchantComplaintOrder $orderModel */
+        $orderModel = app()->make(MerchantComplaintOrder::class);
+        $orderModel = $orderModel
+            ->alias('co')
+            ->when(isset($param['mer_id']) && $param['mer_id'] !== '', function ($query) use ($param) {
+                $query->where('co.mer_id', '=', $param['mer_id']);
+            })
+            ->when(isset($param['complaint_id']) && $param['complaint_id'] !== '', function ($query) use ($param) {
+                $query->where('complaint_id', '=', $param['complaint_id']);
+            })
+            ->when(isset($param['transaction_id']) && $param['transaction_id'] !== '', function ($query) use ($param) {
+                $query->where('transaction_id', '=', $param['transaction_id']);
+            })
+            ->when(isset($param['out_trade_no']) && $param['out_trade_no'] !== '', function ($query) use ($param) {
+                $query->where('out_trade_no', '=', $param['out_trade_no']);
+            })
+            ->when(isset($param['problem_type']) && $param['problem_type'] !== 0, function ($query) use ($param) {
+                $query->where('problem_type', '=', $param['problem_type']);
+            })
+            ->when(isset($param['complaint_state']) && $param['complaint_state'] !== 0, function ($query) use ($param) {
+                $query->where('complaint_state', '=', $param['complaint_state']);
+            })
+            ->when(isset($param['begin_time']) && $param['begin_time'] !== '', function ($query) use ($param) {
+                $query->where('complaint_time', '>=', $param['begin_time']);
+            })
+            ->when(isset($param['end_time']) && $param['end_time'] !== '', function ($query) use ($param) {
+                $query->where('complaint_time', '<=', $param['end_time']);
+            })
+            ->when(isset($param['timeout_type']) && in_array($param['timeout_type'], [MerchantComplaintOrder::TIMEOUT_NO, MerchantComplaintOrder::TIMEOUT_YES]),
+                function (BaseQuery $query) use ($param) {
+                //超时类型 0 全部，1 未超时: 待处理距投诉时间小于24小时，处理中距投诉时间小于72小时,2 已超时 所有待处理距投诉时间大于24小时，处理中距投诉时间大于72小时
+                $before24 = date("Y-m-d H:i:s", strtotime('-24 hour'));
+                $before72 = date("Y-m-d H:i:s", strtotime('-72 hour'));
+                if($param['timeout_type'] == MerchantComplaintOrder::TIMEOUT_NO){
+                    $option = ">";
+                }else{
+                    $option = "<";
+                }
+                $query->where("
+                        CASE
+                         WHEN complaint_state = 1 THEN complaint_time {$option} '{$before24}'
+                         WHEN complaint_state = 2 THEN complaint_time {$option} '{$before72}'
+                         ELSE 1=1
+                         END");
+            });
+        $count = $orderModel->count();
+        $list = $orderModel
+            ->join('user u', 'u.uid = co.uid')
+            ->join('merchant m', 'm.mer_id = co.mer_id')
+            ->join('store_order o', "o.pay_order_sn = co.out_trade_no and o.pay_order_sn != ''")
+            ->field('complaint_id, co.mer_id, complaint_time, out_trade_no, co.transaction_id, problem_type, complaint_state,
+             u.uid, u.account, u.nickname, u.avatar, 
+             o.order_id,
+             m.mer_name, m.real_name')
+            ->page($param['page'], $param['limit'])->select();
+        return ['count' => $count, 'list' => $list];
     }
 
-    public function statistics(){
-        return [];
+    public function statistics($mer_id = 0){
+        /** @var MerchantComplaintOrder $orderModel */
+        $orderModel = app()->make(MerchantComplaintOrder::class);
+        $before24 = date("Y-m-d H:i:s", strtotime('-24 hour'));
+        $before72 = date("Y-m-d H:i:s", strtotime('-72 hour'));
+        $data = $orderModel
+            ->when($mer_id != 0, function ($query) use ($mer_id) {
+                $query->where('mer_id', '=', $mer_id);
+            })
+            ->field("CASE
+                         WHEN complaint_state = 1 AND complaint_time < '{$before24}' THEN 1
+                         WHEN complaint_state = 2 AND complaint_time < '{$before72}' THEN 1
+                         ELSE 0
+                         END  as is_timeout, complaint_state, count(complaint_id) as count_id")
+            ->group('complaint_state, is_timeout')
+            ->select();
+        $result = [
+            'pending' => 0,
+            'pending_timeout' => 0,
+            'processing' => 0,
+            'processing_timeout' => 0,
+            'processed' => 0,
+        ];
+        foreach ($data as $one){
+            if($one['complaint_state'] == MerchantComplaintOrder::COMPLAINT_STATUS_PENDING){
+                $result['pending'] += $one['count_id'];
+                if($one['is_timeout']){
+                    $result['pending_timeout'] = $one['count_id'];
+                }
+            }elseif($one['complaint_state'] == MerchantComplaintOrder::COMPLAINT_STATUS_PROCESSING){
+                $result['processing'] += $one['count_id'];
+                if($one['is_timeout']){
+                    $result['processing_timeout'] = $one['count_id'];
+                }
+            }else{
+                $result['processed'] = $one['count_id'];
+            }
+        }
+        return $result;
     }
 
     /**
-     * @param int $id
+     * @param string $id
+     * @param int $mer_id
      * @return array
      */
-    public function detail($id){
-        return [];
+    public function detail($id, $mer_id){
+        /** @var MerchantComplaintOrder $orderModel */
+        $orderModel = app()->make(MerchantComplaintOrder::class);
+        $detail = $orderModel->alias('co')
+            ->where('co.mer_id', '=', $mer_id)
+            ->field('complaint_id, complaint_time, complaint_state, complaint_detail, problem_type, problem_description,
+            apply_refund_amount / 100 as apply_refund_amount,
+            amount / 100 as amount, u.uid, u.account, u.nickname, u.avatar, payer_phone,user_complaint_times,
+            m.mer_name, m.real_name,
+            transaction_id,out_trade_no,complaint_full_refunded
+            ')
+            ->join('user u', 'u.uid = co.uid')
+            ->join('merchant m', 'm.mer_id = co.mer_id')
+            ->where('complaint_id', '=', $id)
+            ->find();
+        if($detail){
+            switch ($detail->complaint_state){
+                case MerchantComplaintOrder::COMPLAINT_STATUS_PENDING:
+                    $detail->timeout = date('Y-m-d H:i:s', strtotime('+24 hour', $detail->complaint_time));
+                    break;
+                case MerchantComplaintOrder::COMPLAINT_STATUS_PROCESSING:
+                    $detail->timeout = date('Y-m-d H:i:s', strtotime('+72 hour', $detail->complaint_time));
+                    break;
+                default:
+                    $detail->timeout = '';
+            }
+            $service = WechatService::getMerPayObj($mer_id)->MerchantComplaint();
+            $weHistory = $service->negotiationHistory($id);
+            $weHistory = $weHistory['data'] ?? $weHistory;
+            foreach ($weHistory as $k => $history){
+                $weHistory[$k]['operate_time'] = date('Y-m-d H:i:s', strtotime($history['operate_time'] ?? ''));
+                $weHistory[$k]['operate_type'] = MerchantComplaintOrder::operationType($history['operate_type'] ?? '');
+            }
+            $detail->wxHistory = $weHistory;
+
+
+        }
+        return $detail ?? [];
     }
 
     public function response($complaint_id, $mer_id, $params){
         $service = WechatService::getMerPayObj($mer_id)->MerchantComplaint();
 
-        $service->responseUser($complaint_id, $params['response_content'], []);
+        $service->responseUser($complaint_id, $params['response_content'], $params['response_images'] ?? []);
         return 'ok';
     }
 
@@ -199,8 +342,25 @@ class MerchantComplaintRepository extends BaseRepository
             ->find();
     }
 
-    public function refund($id){
-        return [];
+    public function refund($id, $param){
+        $reject_media_list = $param['reject_media_list'] ?? [];
+
+        $service = WechatService::getMerPayObj($param['mer_id'])->MerchantComplaint();
+        $service->updateRefundProgress($id, $param['action'],
+            $param['launch_refund_day'] ?? 0,
+            $param['reject_reason'] ?? '',
+             $reject_media_list,
+            $param['remark'] ?? ''
+            );
+        return 'ok';
+    }
+
+    public function checkMedia(array $mediaIds){
+        if(empty($mediaIds)){
+            return true;
+        }
+        return MerchantComplaintMedia::whereIn('media_id', $mediaIds)
+            ->count('media_id') == count($mediaIds);
     }
 
     public function complete($complaint_id, $mer_id){
@@ -210,8 +370,29 @@ class MerchantComplaintRepository extends BaseRepository
         return 'ok';
     }
 
-    public function uploadImage($id){
-        return [];
+    /**
+     * @param int $mer_id
+     * @param UploadedFile $file
+     * @return array
+     */
+    public function uploadImage($mer_id, $adminId, $userType, $file){
+        $service = WechatService::getMerPayObj($mer_id)->MerchantComplaint();
+
+        $mediaId = $service->uploadImage($file->getRealPath(), $file->getOriginalName());
+        MerchantComplaintMedia::create([
+            'media_id' => $mediaId,
+            'mime_type' => $file->getMime(),
+            'filesize' => $file->getSize(),
+            'mer_id' => $mer_id,
+            'admin_id' => $adminId,
+            'user_type' => $userType,
+            'create_time' => date('Y-m-d H:i:s'),
+        ]);
+        return ['media_id' => $mediaId];
+    }
+
+    public function getMaxImageSize(){
+        return MerchantComplaintClient::MAX_IMAGE_SIZE;
     }
 
 

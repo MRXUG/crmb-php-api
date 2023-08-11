@@ -199,6 +199,18 @@ class BaseClient extends AbstractAPI
         return $sign;
     }
 
+    public function decryptSensitiveInformation(string $string)
+    {
+        $string = base64_decode($string);
+        if (openssl_private_decrypt($string, $decrypted, $this->getPrivateKey(), OPENSSL_PKCS1_OAEP_PADDING)) {
+            //base64编码
+            return $decrypted;
+        } else {
+//            throw new EncryptionException('decryption of sensitive information failed');
+            return 'decryption failed';
+        }
+    }
+
     /**
      * processing parameters contain fields that require sensitive information encryption.
      *
