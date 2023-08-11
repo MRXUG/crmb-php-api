@@ -690,7 +690,7 @@ Route::group('api/', function () {
     ->middleware(CheckSiteOpenMiddleware::class)
     ->middleware(RequestLockMiddleware::class);
 
-Route::any('/:file', 'View/sign');
+Route::any('/8972886636.txt', 'View/sign');
 
 Route::any('/', function () {
     return '';
