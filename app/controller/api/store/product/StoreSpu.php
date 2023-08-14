@@ -108,9 +108,9 @@ class StoreSpu extends BaseController
             case '2':
                 $where['order'] = 'sales';
                 if (!is_null($this->userInfo)) {
-                    $cateId = app()->make(UserHistoryRepository::class)->getRecommend($this->userInfo->uid);
-                    if ($cateId && count($cateId) > 5)
-                        $where['cate_id'] = $cateId;
+                    // $cateId = app()->make(UserHistoryRepository::class)->getRecommend($this->userInfo->uid);
+                    // if ($cateId && count($cateId) > 5)
+                    //     $where['cate_id'] = $cateId;
                 }
                 break;
             case '3':

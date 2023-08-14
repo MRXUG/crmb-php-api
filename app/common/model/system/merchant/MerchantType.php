@@ -21,6 +21,20 @@ use app\common\repositories\system\RelevanceRepository;
 class MerchantType extends BaseModel
 {
 
+    protected $schema = [
+        'mer_type_id' => 'int',//商户类型 id
+        'type_name' => 'varchar',//类型名称
+        'type_info' => 'varchar',//类型要求
+        'description' => 'varchar',//类型说明
+        'create_time' => 'datetime',//添加时间
+        'margin' => 'decimal',//保证金
+        'is_margin' => 'tinyint',//是否有保证金（0无，1有）
+        'mark' => 'varchar',//备注
+        'update_time' => 'datetime',//更新时间
+  
+      ];
+
+
     public static function tablePk(): ?string
     {
         return 'mer_type_id';

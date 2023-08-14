@@ -20,6 +20,13 @@ use app\common\model\store\product\Product;
 class StoreCouponProduct extends BaseModel
 {
 
+    protected $schema = [
+        'product_id' => 'int',//产品id
+        'coupon_id' => 'int',//优惠卷id
+        'create_time' => 'timestamp',//添加时间
+  
+    ];
+
     /**
      * @return string
      * @author xaboy

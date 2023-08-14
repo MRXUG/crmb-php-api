@@ -22,6 +22,28 @@ use think\db\BaseQuery;
 class Spu extends BaseModel
 {
 
+    protected $schema = [
+        'spu_id' => 'int',//
+        'mer_id' => 'int',//商户ID
+        'product_id' => 'int',//商品ID
+        'product_type' => 'int',//活动类型0普通，1秒杀，2预售，3助力
+        'activity_id' => 'int',//活动ID
+        'status' => 'int',//0.下架，1.上架
+        'store_name' => 'varchar',//商品名称
+        'keyword' => 'varchar',//关键词
+        'price' => 'decimal',//最低价格
+        'rank' => 'int',//排序
+        'create_time' => 'datetime',//
+        'temp_id' => 'int',//运费模板
+        'sort' => 'int',//商户排序
+        'star' => 'int',//星级
+        'image' => 'varchar',//主图
+        'is_del' => 'int',//
+        'mer_labels' => 'varchar',//标签id
+        'sys_labels' => 'varchar',//标签id
+  
+      ];
+
     /**
      * TODO
      * @return string

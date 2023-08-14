@@ -146,6 +146,7 @@ class SpuRepository extends BaseRepository
         }
         $where['spu_status'] = 1;
         $where['mer_status'] = 1;
+        Log::debug(json_encode($where));
         $query = $this->dao->search($where);
 
         $query->with([
