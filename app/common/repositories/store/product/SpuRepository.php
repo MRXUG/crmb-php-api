@@ -565,7 +565,7 @@ class SpuRepository extends BaseRepository
     {
         $RedisCacheService = app()->make(RedisCacheService::class);
         $prefix = RedisKey::HOT_RANKING;
-        $list = $RedisCacheService->handler()->mget($prefix);
+        $list = $RedisCacheService->handler()->hgetall($prefix);
         if(!empty($list)){
            return $this->getBorderList($list,0);
         }
