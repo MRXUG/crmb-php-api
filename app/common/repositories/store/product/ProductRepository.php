@@ -1083,7 +1083,9 @@ class ProductRepository extends BaseRepository
         $res   = $this->productDetail($id);
         $watch = Cache::store('redis')->get(RedisKey::GOODS_DETAIL_WATCH);
         if ($watch != '') {
-            $res['watch'] = json_decode($watch, 1);
+            $watch =json_decode($watch, 1);
+            shuffle($watch);
+            $res['watch'] = $watch;
         } else {
             $res['watch'] = [];
         }
