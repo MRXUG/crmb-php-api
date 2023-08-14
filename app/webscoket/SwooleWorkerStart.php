@@ -58,6 +58,7 @@ class SwooleWorkerStart implements ListenerInterface
      */
     public function handle($event): void
     {
+        return;
         if (!env('INSTALLED', false)) return;
         if ($this->server->worker_id == ($this->config->get('swoole.server.options.worker_num')) && $this->config->get('swoole.websocket.enable', false)) {
             $keys = array_merge(Cache::keys('m_chat*'), Cache::keys('u_chat*'));

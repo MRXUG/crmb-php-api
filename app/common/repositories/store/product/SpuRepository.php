@@ -565,18 +565,15 @@ class SpuRepository extends BaseRepository
     {
         $RedisCacheService = app()->make(RedisCacheService::class);
         $prefix = RedisKey::HOT_RANKING;
-        $ids = $RedisCacheService->handler()->get($prefix.'top_' . intval($cateId));
-        $ids = $ids ? explode(',', $ids) : [];
-        if (!count($ids)) {
-            return [];
+        $list = $RedisCacheService->handler()->mget($prefix);
+        if(!empty($list)){
+           return $this->getBorderList($list,0);
         }
-        $ids = array_map('intval', $ids);
         $where['mer_status'] = 1;
         $where['status'] = 1;
         $where['is_del'] = 0;
         $where['product_type'] = 0;
         $where['order'] = 'sales';
-        $where['spu_ids'] = $ids;
         $list = $this->dao->search($where)->setOption('field',[])->field('spu_id,cate_id,S.mer_id,S.image,S.price,S.product_type,P.product_id,P.sales,S.status,S.store_name,P.ot_price,P.cost')->select();
         if ($list) $list = $list->toArray();
        $list = $this->getBorderList($list,0);

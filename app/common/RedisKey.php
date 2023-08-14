@@ -60,5 +60,5 @@ class RedisKey
      * 围观数据
      */
 
-     const HOT_RANKING = 'goods_hot:hot_ranking_';
+     const HOT_RANKING = 'goods_hot:hot_ranking';
 }
