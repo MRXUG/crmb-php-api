@@ -663,6 +663,11 @@ Route::group('api/', function () {
     // 商家券回调
     Route::any('notice/receive-coupon-notify', 'api.Common/merchantCouponNotify')->name('merchantCouponNotify');
 
+
+    Route::get('image/show', 'admin.Complaint.WechatComplaintController/show')->name('WechatPayComplaintShowImage')->option([
+        '_alias' => '查看微信支付的商家图片',
+    ]);
+
     //黑名单
     Route::group('black', function () {
         Route::post('operate', 'Black/Operate');

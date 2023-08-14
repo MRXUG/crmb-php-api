@@ -9,6 +9,7 @@ use app\validate\merchant\WechatComplaint\WechatComplaintOrderListValidate;
 use app\validate\merchant\WechatComplaint\WechatComplaintResponseValidate;
 use crmeb\basic\BaseController;
 use think\App;
+use think\response\File;
 
 class WechatComplaintController extends BaseController
 {
@@ -43,6 +44,23 @@ class WechatComplaintController extends BaseController
 
     public function statistics(){
         return app('json')->success($this->repository->statistics());
+    }
+
+    public function show(){
+        $param = $this->request->param(['url', 'mer_id']);
+        $mer_id = $param['mer_id'] ?? '';
+        $url = $param['url'] ?? '';
+        validate([
+            "url|链接" => "require",
+            "mer_id|商户id" => "require",
+        ])->check($param);
+        $content = $this->repository->imageShow($mer_id, $url);
+        if($content){
+            return app(File::class, [$content])
+                ->isContent()
+                ->mimeType('application/octet-stream');
+        }
+        return '';
     }
 
 }

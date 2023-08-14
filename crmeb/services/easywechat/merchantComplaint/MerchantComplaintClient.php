@@ -254,6 +254,27 @@ class MerchantComplaintClient extends BaseClient
         return $res['media_id'];
     }
 
+    public function imageShow($url){
+        $uri = str_replace('https://api.mch.weixin.qq.com', '', $url);
+        $curl = curl_init();
+        $headers = [
+            "Authorization: ".$this->getAuthorization($uri, 'GET', ''),
+            "Wechatpay-Serial: ".$this->app->certficates->get()['serial_no'],
+        ];
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_HEADER, true);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 60);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        $content = curl_exec($curl);
+        $headerSize = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+        curl_close($curl);
+        return substr($content, $headerSize);
+    }
+
     /**
      * wechatpay Signature verify
      * @param array $header

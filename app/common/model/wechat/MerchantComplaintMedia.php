@@ -26,15 +26,16 @@ class MerchantComplaintMedia extends BaseModel
     }
 
     protected $schema = [
-        'id' => 'int',
-        'media_id' => 'varchar',
-        'mime_type' => 'varchar',
-        'filesize' => 'int',
-        'mer_id' => 'int',
-        'admin_id' => 'int',
-        'user_type' => 'tinyint',
-        'complaint_id' => 'varchar',
-        'create_time' => 'datetime',
-        'update_time' => 'datetime',
+        'id' => 'int',//
+        'media_id' => 'varchar',//
+        'mime_type' => 'varchar',//
+        'filesize' => 'int',//byte
+        'mer_id' => 'int',//
+        'admin_id' => 'int',//管理员id
+        'user_type' => 'tinyint',//管理员类型
+        'complaint_id' => 'varchar',//
+        'create_time' => 'datetime',//
+        'update_time' => 'datetime',//
+
     ];
 }

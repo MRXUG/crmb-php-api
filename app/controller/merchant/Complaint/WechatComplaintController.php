@@ -10,6 +10,7 @@ use app\validate\merchant\WechatComplaint\WechatComplaintRefundValidate;
 use app\validate\merchant\WechatComplaint\WechatComplaintResponseValidate;
 use crmeb\basic\BaseController;
 use think\App;
+use think\response\File;
 
 class WechatComplaintController extends BaseController
 {
@@ -98,6 +99,20 @@ class WechatComplaintController extends BaseController
             'fileMime' => 'image/jpeg,image/bmp,image/png,image/x-ms-bmp',
         ]])->check(['file' => $file]);
         return app('json')->success($this->repository->uploadImage($mer_id, $admin_id, $userType, $file));
+    }
+
+    public function show(){
+        $mer_id = $this->request->merId();
+        $url = $this->request->param('url');
+        validate(["url|链接" => "require"])->check(['url' => $url]);
+
+        $content = $this->repository->imageShow($mer_id, $url);
+        if($content){
+            return app(File::class, [$content])
+                ->isContent()
+                ->mimeType('application/octet-stream');
+        }
+        return '';
     }
 
 }

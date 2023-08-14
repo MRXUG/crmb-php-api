@@ -18,31 +18,35 @@ class Schema extends Command
     {
         // 指令配置
         $this->setName('schema')
+            ->addArgument('tableName', 1, 'this is tableName')
             ->setDescription('the app\command\schema command');
     }
 
     protected function execute(Input $input, Output $output)
     {
          //获取表名
-         $tables = Db::query("SELECT TABLE_NAME  as 'name' from information_schema.tables WHERE TABLE_SCHEMA = :dataBase and TABLE_NAME='eb_merchant'", ["dataBase" => Schema::$schema]);
+         $tables = Db::query("SELECT TABLE_NAME  as 'name' from information_schema.tables WHERE TABLE_SCHEMA = :dataBase and TABLE_NAME=:tableName",
+             ["dataBase" => Schema::$schema, "tableName" => $input->getArgument("tableName")]);
  
          foreach ($tables as $key => $value) {
  
              foreach ($value as $item) {
  
                  //获取字段名称和备注
-                 $COLUMNS = Db::query("select COLUMN_NAME,DATA_TYPE,COLUMN_COMMENT from information_schema.COLUMNS where table_name = :item and table_schema = :dataBase", ["item" => $item, "dataBase" => Schema::$schema]);
+                 $COLUMNS = Db::query("select COLUMN_NAME,DATA_TYPE,COLUMN_COMMENT from information_schema.COLUMNS 
+                        where table_name = :item and table_schema = :dataBase order by ORDINAL_POSITION",
+                     ["item" => $item, "dataBase" => Schema::$schema]);
  
                  $content = "//设置字段信息" . PHP_EOL .
-                     "protected $" . "schema = [" . PHP_EOL;
+                     "  protected $" . "schema = [" . PHP_EOL;
                  //写入字段
                  foreach ($COLUMNS as $COLUMN) {
-                     $content .= "'" . $COLUMN["COLUMN_NAME"] . "'" . "       =>"  .
+                     $content .= "      '" . $COLUMN["COLUMN_NAME"] . "'" . " => "  .
                          "'" . $COLUMN["DATA_TYPE"] . "'" . "," . "//" . $COLUMN["COLUMN_COMMENT"] . PHP_EOL;
 
                  }
  
-                 $content .= PHP_EOL . "];";
+                 $content .= PHP_EOL . "    ];";
                  $output->writeln($content.PHP_EOL);
              }
          }

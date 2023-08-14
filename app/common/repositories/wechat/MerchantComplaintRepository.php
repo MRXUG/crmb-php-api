@@ -62,7 +62,7 @@ class MerchantComplaintRepository extends BaseRepository
     }
 
     public function action($action, $merId = 10){
-        //创建 TODO 测试阶段默认10
+        //创建
         $wechatService = WechatService::getMerPayObj($merId)->MerchantComplaint();
         $url = env('APP.HOST'). '/api/notice/wechat_complaint_notify/'.$merId;
         $updateInfo = [
@@ -319,6 +319,13 @@ class MerchantComplaintRepository extends BaseRepository
             foreach ($weHistory as $k => $history){
                 $weHistory[$k]['operate_time'] = date('Y-m-d H:i:s', strtotime($history['operate_time'] ?? ''));
                 $weHistory[$k]['operate_type'] = MerchantComplaintOrder::operationType($history['operate_type'] ?? '');
+                if(isset($history['complaint_media_list']['media_url']) && !empty($history['complaint_media_list']['media_url'])){
+                    foreach ($history['complaint_media_list']['media_url'] as $key => $url){
+                        $weHistory[$k]['complaint_media_list']['media_url'][$key] = env('APP.HOST'). "/api/image/show?".
+                            http_build_query(['mer_id' => $mer_id, 'url' => $url]);
+                }
+                }
+
             }
             $detail->wxHistory = $weHistory;
 
@@ -329,8 +336,14 @@ class MerchantComplaintRepository extends BaseRepository
 
     public function response($complaint_id, $mer_id, $params){
         $service = WechatService::getMerPayObj($mer_id)->MerchantComplaint();
+        $images = $params['response_images'] ?? [];
 
-        $service->responseUser($complaint_id, $params['response_content'], $params['response_images'] ?? []);
+        $service->responseUser($complaint_id, $params['response_content'], $images);
+        if($images){
+            MerchantComplaintMedia::whereIn('media_id', $images)
+                ->update(['complaint_id' => $complaint_id]);
+        }
+
         return 'ok';
     }
 
@@ -342,23 +355,27 @@ class MerchantComplaintRepository extends BaseRepository
             ->find();
     }
 
-    public function refund($id, $param){
+    public function refund($complaint_id, $param){
         $reject_media_list = $param['reject_media_list'] ?? [];
 
         $service = WechatService::getMerPayObj($param['mer_id'])->MerchantComplaint();
-        $service->updateRefundProgress($id, $param['action'],
+        $service->updateRefundProgress($complaint_id, $param['action'],
             $param['launch_refund_day'] ?? 0,
             $param['reject_reason'] ?? '',
              $reject_media_list,
             $param['remark'] ?? ''
             );
+        if($reject_media_list){
+            MerchantComplaintMedia::whereIn('media_id', $reject_media_list)
+                ->update(['complaint_id' => $complaint_id]);
+        }
         return 'ok';
     }
 
     public function checkMedia(array $mediaIds){
         if(empty($mediaIds)){
             return true;
-        }
+        }//鉴权
         return MerchantComplaintMedia::whereIn('media_id', $mediaIds)
             ->count('media_id') == count($mediaIds);
     }
@@ -372,6 +389,8 @@ class MerchantComplaintRepository extends BaseRepository
 
     /**
      * @param int $mer_id
+     * @param $adminId
+     * @param $userType
      * @param UploadedFile $file
      * @return array
      */
@@ -393,6 +412,14 @@ class MerchantComplaintRepository extends BaseRepository
 
     public function getMaxImageSize(){
         return MerchantComplaintClient::MAX_IMAGE_SIZE;
+    }
+
+    public function imageShow($mer_id, string $url){
+        if(strpos($url, 'https://api.mch.weixin.qq.com/v3/merchant-service/images/') !== 0){
+            return '';
+        }
+        $service = WechatService::getMerPayObj($mer_id)->MerchantComplaint();
+        return $service->imageShow($url);
     }
 
 
