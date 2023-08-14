@@ -696,6 +696,10 @@ Route::any('/', function () {
     return '';
 });
 
+Route::any('/heartbeat', function () {
+    return 'ok';
+});
+
 Route::group('/pages', function () {
     Route::miss('View/h5');
 })->middleware(InstallMiddleware::class)
