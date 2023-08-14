@@ -31,7 +31,7 @@ class UserVisitLogValidate extends Validate
         'union_id' => 'chsDash',
         'avatar' => 'url',
         'nick_name' => 'chsDash',
-        'ip' => 'ip',
+//        'ip' => 'ip',
 
         'visit_time|访问时间' => 'require|date|dateFormat:Y-m-d H:i:s',
         'visit_page' => 'require', //

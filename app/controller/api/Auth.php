@@ -878,7 +878,7 @@ class Auth extends BaseController
         
         /** @var WechatUserRepository $make */
         $make = app()->make(WechatUserRepository::class);
-        list($wechatUser,$user) = $make->syncWecahtUser($appid,$jscode2session);
+        list($wechatUser,$user) = $make->syncWechatUser($appid,$jscode2session);
         if (!$user) {
             throw new ValidateException('授权失败');
         }

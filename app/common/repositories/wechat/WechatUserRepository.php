@@ -377,7 +377,7 @@ class WechatUserRepository extends BaseRepository
      * 保存用户数据到wechat_user表、user表 重构方法登陆
      *
      */
-    public function syncWecahtUser(string $appid,array $jscode2session)
+    public function syncWechatUser(string $appid,array $jscode2session)
     {
         $routineInfo = [];
         $routineInfo['routine_openid'] = $jscode2session['openid'];//openid

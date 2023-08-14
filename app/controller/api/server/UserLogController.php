@@ -24,6 +24,7 @@ class UserLogController extends BaseController
     public function visit()
     {
         $params = $this->request->param();
+        $params['ip'] = $this->request->ip();
         if(!method_exists($this->request, 'userInfo')){
             $params['uid'] = 0;
         }else{
