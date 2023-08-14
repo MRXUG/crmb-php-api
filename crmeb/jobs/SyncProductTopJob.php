@@ -26,7 +26,7 @@ class SyncProductTopJob implements JobInterface
             $where['product_type'] = 0;
             $where['order'] = 'sales';
             $list = $SpuRepository->search($where)->setOption('field',[])->field('spu_id,cate_id,S.mer_id,S.image,S.price,S.product_type,P.product_id,P.sales,S.status,S.store_name,P.ot_price,P.cost')->select();
-            Cache::store("redis")->handler()->hmset($prefix,$list);
+            Cache::store("redis")->handler()->set($prefix,json_encode($list,true));
         }catch (\Exception $e){
             Log::info('热卖排行统计:' . $e->getMessage());
         }
