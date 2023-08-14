@@ -317,19 +317,7 @@ class StoreSpu extends BaseController
 
     public function getHotRanking()
     {
-        $cateId = $this->request->param('cate_pid',0);
-        $cateId = is_array($cateId) ?:explode(',',$cateId);
-        $data = [];
-        foreach ($cateId as $cate_id) {
-            $cate = app()->make(StoreCategoryRepository::class)->get($cate_id);
-            $list = $this->repository->getHotRanking($cate_id);
-            $data[] = [
-                'cate_id' => $cate['store_category_id'] ?? 0,
-                'cate_name' => $cate['cate_name'] ?? '总榜',
-                'list' => $list,
-            ];
-        }
-        return app('json')->success($data);
+        return app('json')->success($this->repository->getHotRanking(0));
     }
 
 
