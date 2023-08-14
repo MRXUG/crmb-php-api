@@ -1109,7 +1109,7 @@ class ProductRepository extends BaseRepository
         if ($data) {
             return json_decode($data, 1);
         }
-        $field = 'is_show,product_id,short_title,sell_point,goods_desc,mer_id,image,slider_image,store_name,store_info,unit_name,price,cost,ot_price,stock,sales,video_link,product_type,extension_type,old_product_id,rate,guarantee_template_id,temp_id,once_max_count,pay_limit,once_min_count,integral_rate,delivery_way,delivery_free,type,cate_id,svip_price_type,svip_price,mer_svip_status,guarantee';
+        $field = 'is_show,product_id,short_title,sell_point,goods_desc,mer_id,image,slider_image,store_name,store_info,unit_name,price,cost,ot_price,stock,sales,ficti,video_link,product_type,extension_type,old_product_id,rate,guarantee_template_id,temp_id,once_max_count,pay_limit,once_min_count,integral_rate,delivery_way,delivery_free,type,cate_id,svip_price_type,svip_price,mer_svip_status,guarantee';
         $with  = [
             'attr',
             'attrValue',
@@ -1127,6 +1127,8 @@ class ProductRepository extends BaseRepository
         if (!$res) {
             return [];
         }
+
+        $res['sales'] = $res['sales']+$res['ficti'];
 
         switch ($res['product_type']) {
             case 0:
