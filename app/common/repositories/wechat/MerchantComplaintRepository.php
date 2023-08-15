@@ -18,6 +18,7 @@ use crmeb\services\WechatService;
 use think\db\BaseQuery;
 use think\db\Query;
 use think\Exception;
+use think\facade\Cache;
 use think\facade\Queue;
 use think\file\UploadedFile;
 
@@ -30,6 +31,8 @@ class MerchantComplaintRepository extends BaseRepository
         $this->es = $es;
         $this->dao = $dao;
     }
+    const WeChatMediaImageCachePrefix = "WechatMediaImage:";
+    const WeChatComplaintDetailHistoryCachePrefix = "WechatComplaintDetailHistory:";
 
     public function notify(string $action, int $mer_id, array $header, string $url, $param, $content){
         $logInfo = [
@@ -291,7 +294,6 @@ class MerchantComplaintRepository extends BaseRepository
         /** @var MerchantComplaintOrder $orderModel */
         $orderModel = app()->make(MerchantComplaintOrder::class);
         $detail = $orderModel->alias('co')
-            ->where('co.mer_id', '=', $mer_id)
             ->field('complaint_id, complaint_time, complaint_state, complaint_detail, problem_type, problem_description,
             apply_refund_amount / 100 as apply_refund_amount,
             amount / 100 as amount, u.uid, u.account, u.nickname, u.avatar, payer_phone,user_complaint_times,
@@ -300,7 +302,8 @@ class MerchantComplaintRepository extends BaseRepository
             ')
             ->join('user u', 'u.uid = co.uid')
             ->join('merchant m', 'm.mer_id = co.mer_id')
-            ->where('complaint_id', '=', $id)
+            ->where('co.mer_id', '=', $mer_id)
+            ->where('co.complaint_id', '=', $id)
             ->find();
         if($detail){
             switch ($detail->complaint_state){
@@ -313,9 +316,18 @@ class MerchantComplaintRepository extends BaseRepository
                 default:
                     $detail->timeout = '';
             }
-            $service = WechatService::getMerPayObj($mer_id)->MerchantComplaint();
-            $weHistory = $service->negotiationHistory($id);
-            $weHistory = $weHistory['data'] ?? $weHistory;
+
+            /** @var \Redis $cacheService */
+            $cacheService = Cache::store()->handler();
+            $cacheHistory = $cacheService->get(self::WeChatComplaintDetailHistoryCachePrefix.$mer_id.':'.$id);
+            if($cacheHistory !== false){
+                $weHistory = json_decode($cacheHistory, true);
+
+            }else{
+                $service = WechatService::getMerPayObj($mer_id)->MerchantComplaint();
+                $weHistory = $service->negotiationHistory($id);
+                $weHistory = $weHistory['data'] ?? $weHistory;
+            }
             foreach ($weHistory as $k => $history){
                 $weHistory[$k]['operate_time'] = date('Y-m-d H:i:s', strtotime($history['operate_time'] ?? ''));
                 $weHistory[$k]['operate_type'] = MerchantComplaintOrder::operationType($history['operate_type'] ?? '');
@@ -327,6 +339,7 @@ class MerchantComplaintRepository extends BaseRepository
                 }
 
             }
+            $cacheService->set(self::WeChatComplaintDetailHistoryCachePrefix.$mer_id.':'.$id, json_encode($weHistory), 10 * 3600);
             $detail->wxHistory = $weHistory;
 
 
@@ -418,8 +431,16 @@ class MerchantComplaintRepository extends BaseRepository
         if(strpos($url, 'https://api.mch.weixin.qq.com/v3/merchant-service/images/') !== 0){
             return '';
         }
+        /** @var \Redis $cacheService */
+        $cacheService = Cache::store()->handler();
+        $content = $cacheService->get(self::WeChatMediaImageCachePrefix.$url);
+        if($content !== false){
+            return $content;
+        }
         $service = WechatService::getMerPayObj($mer_id)->MerchantComplaint();
-        return $service->imageShow($url);
+        $content = $service->imageShow($url);
+        $cacheService->set(self::WeChatMediaImageCachePrefix.$url, $content, 7 * 24 * 3600);
+        return $content;
     }
 
 
