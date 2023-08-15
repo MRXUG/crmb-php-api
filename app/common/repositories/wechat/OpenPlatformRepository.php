@@ -69,7 +69,7 @@ class OpenPlatformRepository extends BaseRepository
             $xmlData = $this->fromXml($xml);
             $res = $this->decryptMsg($xmlData['Encrypt']);
             $data = $this->fromXml($res);
-            Log::info('接收微信推送ticket:data-'.json_encode($data, JSON_UNESCAPED_UNICODE));
+            Log::info('接收微信推送ticket-data-'.json_encode($data, JSON_UNESCAPED_UNICODE));
             if($data['InfoType'] == 'component_verify_ticket'){// 推送ticket
                 $ticketKey = sprintf(RedisKey::WECHAT_OPEN_PLATFORM_TICKET, $xmlData['AppId']);
                 Cache::store('redis')->handler()->set($ticketKey, $data['ComponentVerifyTicket']);
