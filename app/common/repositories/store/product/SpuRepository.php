@@ -561,7 +561,7 @@ class SpuRepository extends BaseRepository
     }
 
 
-
+    //TODO
     public function getHotRanking(int $cateId)
     {
         $RedisCacheService = app()->make(RedisCacheService::class);
