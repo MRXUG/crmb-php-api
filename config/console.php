@@ -40,6 +40,8 @@ $commands = [
     //测试微信
     'test:wechat' => 'app\command\testWechat',
     'schema' => 'app\command\Schema',
+    //批量添加微信投诉回调
+    'notify_url:create' => 'app\command\batchCreateNotifyUrl',
 ];
 if(in_array(env('app_name', ''), ['wandui_local', 'wandui_dev', 'wandui_test'])){
     $commands = array_merge($initCommands, $commands);
