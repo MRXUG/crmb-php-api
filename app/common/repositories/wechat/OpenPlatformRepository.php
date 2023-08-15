@@ -425,6 +425,7 @@ class OpenPlatformRepository extends BaseRepository
         $token = $this->getAuthorizerToken($authorizerAppid);
         $url = Constant::API_WXA_MODIFY_DOMAIN . '?access_token='.$token;
         $params = config('wechat.modify_domain_setting');
+        Log::info("配置服务器域名:data-$authorizerAppid".json_encode($params, JSON_UNESCAPED_UNICODE));
         $data = sendRequest('post', $url, $params);
         Log::info("配置服务器域名:data-$authorizerAppid".json_encode($data, JSON_UNESCAPED_UNICODE));
         if($data['errcode'] == 0){
