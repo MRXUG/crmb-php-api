@@ -445,12 +445,6 @@ return [
         "text": "首页"
       },
       {
-        "pagePath": "pages/goods_cate/goods_cate",
-        "iconPath": "static/images/2-001.png",
-        "selectedIconPath": "static/images/2-002.png",
-        "text": "分类"
-      },
-      {
         "pagePath": "pages/user/index",
         "iconPath": "static/images/4-001.png",
         "selectedIconPath": "static/images/4-002.png",
