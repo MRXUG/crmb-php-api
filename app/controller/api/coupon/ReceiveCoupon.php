@@ -76,21 +76,7 @@ class ReceiveCoupon extends BaseController
             }
 
             // 计算券的开始和结束时间
-            // 券开始核销时间
-            $availableTime = date("Y-m-d",strtotime($stockInfo['start_at'])).' 00:00:00';
-            // 券停止核销时间
-            $unAvailableTime = date("Y-m-d",strtotime($stockInfo['end_at'])).' 23:59:59';
-            // 领取后N天内有效
-            $availableDayAfterReceive = (int)$stockInfo['available_day_after_receive'] ?: 0;
-            // 领取第N天后生效
-            $waitDaysAfterReceive = (int)$stockInfo['wait_days_after_receive'] ?: 0;
-            // 开始
-            $startTime = date('Y-m-d', strtotime("+$waitDaysAfterReceive day")).' 00:00:00';
-            // 结束
-            $delay = $waitDaysAfterReceive + $availableDayAfterReceive;
-            $endTime = date('Y-m-d', strtotime("+$delay day")).' 23:59:59';
-            $start = $waitDaysAfterReceive == 0 ? $availableTime : ($startTime > $availableTime ? $startTime : $availableTime);
-            $end = $availableDayAfterReceive == 0 ? $unAvailableTime : ($endTime < $unAvailableTime ? $endTime : $unAvailableTime);
+            list($start, $end) = $couponStocksUserRepository->calculateCouponAvailableTime($stockInfo);
 
             $where = [
                 'coupon_code' => $item['coupon_code'],

@@ -130,23 +130,7 @@ class CouponStocksUserRepository extends BaseRepository
             throw new ValidateException('批次不存在,stock_id:' . $stockId);
         }
 
-        // 计算券的开始和结束时间
-        // 券开始核销时间
-        $availableTime = $stockInfo['start_at'];
-        // 券停止核销时间
-        $unAvailableTime = $stockInfo['end_at'];
-        // 领取后N天内有效
-        $availableDayAfterReceive = (int)$stockInfo['available_day_after_receive'] ?: 0;
-        // 领取第N天后生效
-        $waitDaysAfterReceive = (int)$stockInfo['wait_days_after_receive'] ?: 0;
-        // 开始
-        $startTime = date('Y-m-d H:i:s', strtotime("+$waitDaysAfterReceive day"));
-        // 结束
-        $delay = $waitDaysAfterReceive + $availableDayAfterReceive;
-        $endTime = date('Y-m-d H:i:s', strtotime("+$delay day"));
-        $start = $waitDaysAfterReceive == 0 ? $availableTime : ($startTime > $availableTime ? $startTime : $availableTime);
-        $end = $availableDayAfterReceive == 0 ? $unAvailableTime : ($endTime < $unAvailableTime ? $endTime : $unAvailableTime);
-
+        list($start, $end) = $this->calculateCouponAvailableTime($stockInfo);
         // 入库
         $insertData = [
             'uid'         => $user->uid,
@@ -230,6 +214,34 @@ class CouponStocksUserRepository extends BaseRepository
     public function createUpdate($where, $data)
     {
         return $this->dao->createOrUpdate($where, $data);
+    }
+
+    /**
+     * 计算券开始和结束时间
+     * 参考 https://pay.weixin.qq.com/wiki/doc/apiv3/apis/chapter9_2_1.shtml
+     * @param array $stockInfo
+     * @return array [$start,$end] datetime.
+     */
+    public function calculateCouponAvailableTime(array $stockInfo){
+        // 券开始核销时间
+        $availableTime = $stockInfo['start_at'];
+        // 券停止核销时间
+        $unAvailableTime = $stockInfo['end_at'];
+        // 领取并且生效后N天内有效 1表示当天内有效 终点
+        $availableDayAfterReceive = (int)$stockInfo['available_day_after_receive'] ?: 0;
+        // 领取第N天后生效 0表示当天开始有效，1表示第二天开始，以此类推。与available_day_after_receive 构成区间,起点
+        $waitDaysAfterReceive = (int)$stockInfo['wait_days_after_receive'] ?: 0;
+
+        // 开始
+        $startTime = date('Y-m-d', strtotime("+$waitDaysAfterReceive day")).' 00:00:00';
+        $start = max($startTime, $availableTime);
+
+        // 结束 区间计算终点临界值减1，例如 1(第二天开始生效==第一天后生效) + 2 （两天内有效） - 1  = 2 （+1天到达第二天）
+        $delay = $waitDaysAfterReceive + $availableDayAfterReceive - 1;
+        $endTime = date('Y-m-d', strtotime("+$delay day")).' 23:59:59';
+        $end = $availableDayAfterReceive == 0 ? $unAvailableTime : min($endTime, $unAvailableTime);
+
+        return [$start, $end];
     }
 
     /**

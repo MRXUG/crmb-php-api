@@ -233,13 +233,14 @@ class MerchantComplaintRepository extends BaseRepository
             });
         $count = $orderModel->count();
         $list = $orderModel
-            ->join('user u', 'u.uid = co.uid')
-            ->join('merchant m', 'm.mer_id = co.mer_id')
-            ->join('store_order o', "o.pay_order_sn = co.out_trade_no and o.pay_order_sn != ''")
+            ->leftJoin('user u', 'u.uid = co.uid')
+            ->leftJoin('merchant m', 'm.mer_id = co.mer_id')
+            ->leftJoin('store_order o', "o.pay_order_sn = co.out_trade_no and o.pay_order_sn != ''")
             ->field('complaint_id, co.mer_id, complaint_time, out_trade_no, co.transaction_id, problem_type, complaint_state,
              u.uid, u.account, u.nickname, u.avatar, 
              o.order_id,
              m.mer_name, m.real_name')
+            ->order(['co.id' => 'desc'])
             ->page($param['page'], $param['limit'])->select();
         return ['count' => $count, 'list' => $list];
     }
@@ -300,8 +301,8 @@ class MerchantComplaintRepository extends BaseRepository
             m.mer_name, m.real_name,
             transaction_id,out_trade_no,complaint_full_refunded
             ')
-            ->join('user u', 'u.uid = co.uid')
-            ->join('merchant m', 'm.mer_id = co.mer_id')
+            ->leftJoin('user u', 'u.uid = co.uid')
+            ->leftJoin('merchant m', 'm.mer_id = co.mer_id')
             ->where('co.mer_id', '=', $mer_id)
             ->where('co.complaint_id', '=', $id)
             ->find();
