@@ -202,10 +202,10 @@ class MerchantComplaintRepository extends BaseRepository
             ->when(isset($param['out_trade_no']) && $param['out_trade_no'] !== '', function ($query) use ($param) {
                 $query->where('out_trade_no', '=', $param['out_trade_no']);
             })
-            ->when(isset($param['problem_type']) && $param['problem_type'] !== 0, function ($query) use ($param) {
+            ->when(isset($param['problem_type']) && (int)$param['problem_type'] !== 0, function ($query) use ($param) {
                 $query->where('problem_type', '=', $param['problem_type']);
             })
-            ->when(isset($param['complaint_state']) && $param['complaint_state'] !== 0, function ($query) use ($param) {
+            ->when(isset($param['complaint_state']) && (int)$param['complaint_state'] !== 0, function ($query) use ($param) {
                 $query->where('complaint_state', '=', $param['complaint_state']);
             })
             ->when(isset($param['begin_time']) && $param['begin_time'] !== '', function ($query) use ($param) {
