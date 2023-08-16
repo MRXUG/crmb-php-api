@@ -2451,7 +2451,9 @@ class StoreOrderCreateRepository extends StoreOrderRepository
      * @param  array  $marketingDiscount
      * @return mixed
      */
-    public function v2CreateOrder2(int $pay_type, $user, array $cartId, array $extend, array $mark, array $receipt_data, array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null, array $post, array $marketingDiscount = [], array $refluxCoil = [],$clipCoupons = 1,$ad_type = 0,$ad_query = '')
+    public function v2CreateOrder2(int $pay_type, $user, array $cartId, array $extend, array $mark, array $receipt_data,
+                                   array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null,
+                                   array $post, array $marketingDiscount = [], array $refluxCoil = [],$clipCoupons = 1,$ad_type = 0,$ad_query = '')
     {
         $uid = $user->uid;
         $orderInfo = $this->v2CartIdByOrderInfo2($user, $cartId, $takes, $useCoupon, $useIntegral, $addressId, true, $marketingDiscount, $refluxCoil ,$clipCoupons);
@@ -3116,13 +3118,15 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     }
                     $discountTotal = $marketingDiscountAmount;
                     if ($adInfo['discount_fission_switch'] == 1) {
-                        $discountTotal = bcadd($adMarketingDiscountAmount, $adFissionAmount, 2);
+//                        $discountTotal = bcadd($adMarketingDiscountAmount, $adFissionAmount, 2);
+                        $discountTotal = $adFissionAmount;//现在不再需要累加marketing_discount_amount 独立计算
                     }
                     break;
                 case 6:
                     $maxCurrentDiscount = $adMarketingDiscountAmount;
                     if ($adInfo['discount_fission_switch'] == 1) {
-                        $maxCurrentDiscount = bcadd($adFissionAmount, $adMarketingDiscountAmount, 2);
+//                        $maxCurrentDiscount = bcadd($adFissionAmount, $adMarketingDiscountAmount, 2);
+                        $maxCurrentDiscount = $adFissionAmount;//现在不再需要累加marketing_discount_amount 独立计算
                     }
                     // var_dump([$failureDiscount, $adFailureDiscountAmount, $failureDiscount, $maxCurrentDiscount]);die;
                     if ((($failureDiscount != $adFailureDiscountAmount) || ($failureDiscount < $maxCurrentDiscount)) && $productId == $adProductId) {

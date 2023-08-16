@@ -232,7 +232,7 @@ class StoreOrder extends BaseController
         }
 
         if ($ad_query!=''){
-            $ad_query = json_decode($ad_query,1);
+            $ad_query = json_decode($ad_query,true);
             $ad_query['unionid'] = $this->request->unionid();
             $ad_query['appid']  = $this->request->header('appid');
             $ad_query = json_encode($ad_query);
@@ -258,12 +258,18 @@ class StoreOrder extends BaseController
         // if (!$addressId)
         //     return app('json')->fail('请选择地址');
 
-        $groupOrder = app()->make(LockService::class)->exec('order.create', function () use ($orderCreateRepository, $receipt_data, $mark, $extend, $cartId, $payType, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query) {
+        $groupOrder = app()->make(LockService::class)->exec('order.create', function () use ($orderCreateRepository,
+            $receipt_data, $mark, $extend, $cartId, $payType, $takes, $couponIds, $useIntegral, $addressId,
+            $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query) {
             if (count($refluxCoil) === 0) {
                 // $marketing_discount['refluxCoil'] 为空对象
-                return $orderCreateRepository->v2CreateOrder(array_search($payType, StoreOrderRepository::PAY_TYPE), $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query);
+                return $orderCreateRepository->v2CreateOrder(array_search($payType, StoreOrderRepository::PAY_TYPE),
+                    $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds,
+                    $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query);
             } else {
-                return $orderCreateRepository->v2CreateOrder2(array_search($payType, StoreOrderRepository::PAY_TYPE), $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query);
+                return $orderCreateRepository->v2CreateOrder2(array_search($payType, StoreOrderRepository::PAY_TYPE),
+                    $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds,
+                    $useIntegral, $addressId, $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query);
             }
         });
 
@@ -280,9 +286,6 @@ class StoreOrder extends BaseController
 
         if ($groupOrder['pay_price'] == 0) {
             return app('json')->status('error', "支付金额不能为0", ['order_id' => $groupOrder->group_order_id]);
-
-            // $this->repository->paySuccess($groupOrder);
-            //     return app('json')->status('success', '支付成功', ['order_id' => $groupOrder['group_order_id']]);
         }
         if ($isPc) {
             return app('json')->success(['order_id' => $groupOrder->group_order_id]);
