@@ -309,10 +309,10 @@ class MerchantComplaintRepository extends BaseRepository
         if($detail){
             switch ($detail->complaint_state){
                 case MerchantComplaintOrder::COMPLAINT_STATUS_PENDING:
-                    $detail->timeout = date('Y-m-d H:i:s', strtotime('+24 hour', $detail->complaint_time));
+                    $detail->timeout = date('Y-m-d H:i:s', strtotime('+24 hour', strtotime($detail->complaint_time)));
                     break;
                 case MerchantComplaintOrder::COMPLAINT_STATUS_PROCESSING:
-                    $detail->timeout = date('Y-m-d H:i:s', strtotime('+72 hour', $detail->complaint_time));
+                    $detail->timeout = date('Y-m-d H:i:s', strtotime('+72 hour', strtotime($detail->complaint_time)));
                     break;
                 default:
                     $detail->timeout = '';
