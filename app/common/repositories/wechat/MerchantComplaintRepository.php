@@ -328,19 +328,19 @@ class MerchantComplaintRepository extends BaseRepository
                 $service = WechatService::getMerPayObj($mer_id)->MerchantComplaint();
                 $weHistory = $service->negotiationHistory($id);
                 $weHistory = $weHistory['data'] ?? $weHistory;
-            }
-            foreach ($weHistory as $k => $history){
-                $weHistory[$k]['operate_time'] = date('Y-m-d H:i:s', strtotime($history['operate_time'] ?? ''));
-                $weHistory[$k]['operate_type'] = MerchantComplaintOrder::operationType($history['operate_type'] ?? '');
-                if(isset($history['complaint_media_list']['media_url']) && !empty($history['complaint_media_list']['media_url'])){
-                    foreach ($history['complaint_media_list']['media_url'] as $key => $url){
-                        $weHistory[$k]['complaint_media_list']['media_url'][$key] = env('APP.HOST'). "/api/image/show?".
-                            http_build_query(['mer_id' => $mer_id, 'url' => $url]);
-                }
-                }
+                foreach ($weHistory as $k => $history){
+                    $weHistory[$k]['operate_time'] = date('Y-m-d H:i:s', strtotime($history['operate_time'] ?? ''));
+                    $weHistory[$k]['operate_type'] = MerchantComplaintOrder::operationType($history['operate_type'] ?? '');
+                    if(isset($history['complaint_media_list']['media_url']) && !empty($history['complaint_media_list']['media_url'])){
+                        foreach ($history['complaint_media_list']['media_url'] as $key => $url){
+                            $weHistory[$k]['complaint_media_list']['media_url'][$key] = env('APP.HOST'). "/api/image/show?".
+                                http_build_query(['mer_id' => $mer_id, 'url' => $url]);
+                        }
+                    }
 
+                }
+                $cacheService->set(self::WeChatComplaintDetailHistoryCachePrefix.$mer_id.':'.$id, json_encode($weHistory), 10 * 3600);
             }
-            $cacheService->set(self::WeChatComplaintDetailHistoryCachePrefix.$mer_id.':'.$id, json_encode($weHistory), 10 * 3600);
             $detail->wxHistory = $weHistory;
 
 
