@@ -77,7 +77,7 @@ class UpdateDeliverProfitSharingReturnListen extends TimerService implements Lis
                             'mer_id'            => $item['mer_id'],
                             'mch_id'            => $item['mch_id'],
                             'order_sn'          => $item['order_sn'],
-                            'remark'            => $this->getTitleByPlatformSource($item['platform_source']),
+                            'remark'            => $this->getTitleByPlatformSource($item),
                             'is_del'            => OrderFlow::DELETE_FALSE,
                             'profit_sharing_id' => $res['order_id'],
                         ];
