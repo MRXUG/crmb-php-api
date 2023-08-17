@@ -4,6 +4,7 @@ namespace app\common\repositories\store\order;
 
 use app\common\dao\system\merchant\MerchantAdDao;
 use app\common\model\coupon\CouponStocks;
+use app\common\model\store\order\StoreCart;
 use app\common\model\store\order\StoreOrder;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\coupon\CouponStocksUserRepository;
@@ -1053,7 +1054,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 }
 
                 if ($cart['product_type'] > 0) $order_type = $cart['product_type'];
-                if ($cart['product_type'] > 0 && (($cart['product_type'] != 10 && count($merchantCart['list']) != 1) || count($merchantCartList) != 1)) {
+                if ($cart['product_type'] > 0 && (($cart['product_type'] != StoreCart::PRODUCT_TYPE_PACKAGE && count($merchantCart['list']) != 1) || count($merchantCartList) != 1)) {
                     throw new ValidateException('活动商品必须单独购买');
                 }
                 if ($cart['product']['type'] && (count($merchantCart['list']) != 1 || count($merchantCartList) != 1)) {
@@ -1079,7 +1080,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
 
 
         //套餐订单
-        if ($order_type == 10) {
+        if ($order_type == StoreCart::PRODUCT_TYPE_PACKAGE) {
             app()->make(StoreDiscountRepository::class)
                 ->check($merchantCartList[0]['list'][0]['source_id'], $merchantCartList[0]['list'], $user);
         }
@@ -1145,16 +1146,16 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             //加载商品数据
             foreach ($merchantCart['list'] as $cart) {
                 //预售订单
-                if ($cart['product_type'] == 2) {
+                if ($cart['product_type'] == StoreCart::PRODUCT_TYPE_PreSALE) {
                     $cart->append(['productPresell', 'productPresellAttr']);
                     //助力订单
-                } else if ($cart['product_type'] == 3) {
+                } else if ($cart['product_type'] == StoreCart::PRODUCT_TYPE_ASSISTANCE) {
                     $cart->append(['productAssistAttr']);
                     //拼团订单
-                } else if ($cart['product_type'] == 4) {
+                } else if ($cart['product_type'] == StoreCart::PRODUCT_TYPE_GROUP) {
                     $cart->append(['activeSku']);
                     //套餐订单
-                } else if ($cart['product_type'] == 10) {
+                } else if ($cart['product_type'] == StoreCart::PRODUCT_TYPE_PACKAGE) {
                     $cart->append(['productDiscount', 'productDiscountAttr']);
                 }
 

@@ -58,6 +58,14 @@ class StoreCart extends BaseModel
         'uid'                 => 'int', //用户ID
 
     ];
+
+    const PRODUCT_TYPE_NORMAL = 0;//普通
+    const PRODUCT_TYPE_SecKILL = 1;//秒杀
+    const PRODUCT_TYPE_PreSALE = 2;//预售
+    const PRODUCT_TYPE_ASSISTANCE = 3;//助力
+    const PRODUCT_TYPE_GROUP = 4;//拼团订单
+    const PRODUCT_TYPE_PACKAGE = 10;//套餐订单
+
     
 
     public static function tablePk(): ?string
