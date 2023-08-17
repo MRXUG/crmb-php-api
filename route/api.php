@@ -30,7 +30,7 @@ Route::group('api/', function () {
                 Route::post('check2', '/v2CheckOrder');
                 Route::post('create', '/v2CreateOrder');
                 Route::post('create2', '/v2CreateOrder2');
-                Route::post('getUserBeforeOneCoupon', '/getUserBeforeOneCoupon'); //获取可用优惠券列表
+                Route::post('getUserBeforeOneCoupon', '/getUserBeforeOneCoupon'); //获取可用优惠券列表.TODO 0817 已废弃，移动到product/detail 接口
             })->prefix('api.store.order.StoreOrder');
         });
 
@@ -453,7 +453,7 @@ Route::group('api/', function () {
 
             Route::get('/guarantee/:id', 'StoreProduct/guaranteeTemplate');
             Route::get('/preview', 'StoreProduct/preview');
-            Route::get('/price_rule/:id', 'StoreProduct/priceRule');
+            Route::get('/price_rule/:id', 'StoreProduct/priceRule'); // TODO 0817 已废弃，controller等代码未删除，未来可以酌量删
             Route::get('/ad/:id', 'StoreProduct/adDetail');
         })->prefix('api.store.product.');
 
@@ -543,7 +543,7 @@ Route::group('api/', function () {
 
         //复制口令
         Route::get('command/copy', 'api.Common/getCommand');
-        Route::group('discounts', function () {
+        Route::group('discounts', function () { // TODO 0817  套餐需要，已废弃，controller等代码未删除，未来可以酌量删
             Route::get('lst', '/lst');
         })->prefix('api.store.product.Discounts');
         //test

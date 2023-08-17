@@ -20,6 +20,7 @@ use app\common\RedisKey;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\community\CommunityRepository;
 use app\common\repositories\coupon\CouponStocksRepository;
+use app\common\repositories\coupon\CouponStocksUserRepository;
 use app\common\repositories\store\GuaranteeRepository;
 use app\common\repositories\store\GuaranteeTemplateRepository;
 use app\common\repositories\store\GuaranteeValueRepository;
@@ -1081,6 +1082,10 @@ class ProductRepository extends BaseRepository
     public function detail(int $id, $userInfo)
     {
         $res   = $this->productDetail($id);
+        if(!$res){
+            return $res;
+        }
+
         $watch = Cache::store('redis')->get(RedisKey::GOODS_DETAIL_WATCH);
         if ($watch != '') {
             $watch =json_decode($watch, 1);
@@ -1089,6 +1094,7 @@ class ProductRepository extends BaseRepository
         } else {
             $res['watch'] = [];
         }
+        $res['getUserBeforeOneCoupon'] = [];
         if ($userInfo) {
             // 收藏按钮
             $isRelation        = app()->make(UserRelationRepository::class)->getUserRelationBySpuid($id, $res['product_type'], $userInfo['uid']);
@@ -1100,6 +1106,11 @@ class ProductRepository extends BaseRepository
                 $append[] = 'min_extension';
                 $res->append($append);
             }
+
+            /** @var CouponStocksUserRepository $couponUser */
+            $couponUser = app()->make(CouponStocksUserRepository::class);
+            $res['getUserBeforeOneCoupon'] = $couponUser->best($userInfo['uid'], $res['mer_id'],
+                ['price' => $res['price'], 'goods_id' => $id], $res['price']);
         }
         return $res;
     }
@@ -1109,7 +1120,7 @@ class ProductRepository extends BaseRepository
         $redisKey = sprintf(RedisKey::GOODS_DETAIL, $product_id);
         $data     = Cache::store('redis')->handler()->get($redisKey);
         if ($data) {
-            return json_decode($data, 1);
+            return json_decode($data, true);
         }
         $field = 'is_show,product_id,short_title,sell_point,goods_desc,mer_id,image,slider_image,store_name,store_info,unit_name,price,cost,ot_price,stock,sales,ficti,video_link,product_type,extension_type,old_product_id,rate,guarantee_template_id,temp_id,once_max_count,pay_limit,once_min_count,integral_rate,delivery_way,delivery_free,type,cate_id,svip_price_type,svip_price,mer_svip_status,guarantee';
         $with  = [
@@ -1127,6 +1138,7 @@ class ProductRepository extends BaseRepository
         $append = ['guaranteeTemplate', 'params'];
         $res    = $this->dao->getWhere(['is_show' => 1, 'status' => 1, 'is_used' => 1, 'mer_status' => 1, 'product_id' => $product_id], $field, $with);
         if (!$res) {
+            Cache::store('redis')->handler()->set($redisKey, '[]', RedisKey::GOODS_DETAIL_TIMEOUT);
             return [];
         }
 
@@ -1218,7 +1230,7 @@ class ProductRepository extends BaseRepository
         $couponInfo            = $couponStockRep->getRecommendCoupon($res['product_id']);
         $res['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
         $res['coupon']         = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
-        Cache::store('redis')->handler()->set($redisKey, json_encode($res), ["EX" => 86400]);
+        Cache::store('redis')->handler()->set($redisKey, json_encode($res), ["EX" => RedisKey::GOODS_DETAIL_TIMEOUT]);
         return $res;
     }
 
@@ -1239,9 +1251,12 @@ class ProductRepository extends BaseRepository
     {
 
         $redisKey = sprintf(RedisKey::GOODS_DETAIL, $where['product_id']);
+        if($userInfo){//此方法用于预售等活动 可能会废弃或需要移出userInfo
+            $redisKey.= ':uid:'.$userInfo['uid'];
+        }
         $data     = Cache::store('redis')->handler()->get($redisKey);
         if ($data) {
-            return json_decode($data, 1);
+            return json_decode($data, true);
         }
         $field = 'is_show,product_id,mer_id,image,slider_image,store_name,store_info,unit_name,price,cost,ot_price,stock,sales,video_link,product_type,extension_type,old_product_id,rate,guarantee_template_id,temp_id,once_max_count,pay_limit,once_min_count,integral_rate,delivery_way,delivery_free,type,cate_id,svip_price_type,svip_price,mer_svip_status,guarantee';
         $with  = [
@@ -1373,7 +1388,7 @@ class ProductRepository extends BaseRepository
         $couponInfo            = $couponStockRep->getRecommendCoupon($res['product_id']);
         $res['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
         $res['coupon']         = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
-        Cache::store('redis')->handler()->set($redisKey, json_encode($res), ["EX" => 86400]);
+        Cache::store('redis')->handler()->set($redisKey, json_encode($res), ["EX" => RedisKey::GOODS_DETAIL_WithUid_TIMEOUT]);
         return $res;
     }
 
