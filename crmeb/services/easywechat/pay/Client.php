@@ -71,6 +71,7 @@ class Client extends BaseClient
                 'openid' => $order['openid']
             ];
         }
+        $params['settle_info'] = ['profit_sharing'=>true];
 
         $content = json_encode($params, JSON_UNESCAPED_UNICODE);
 

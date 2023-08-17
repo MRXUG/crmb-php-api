@@ -36,6 +36,9 @@ class Client extends BaseClient
             'total_amount' => $order['total_amount'],
             'total_num' => $order['total_num'],
             'transfer_detail_list' => $order['transfer_detail_list'],
+            'settle_info'=>[
+                'profit_sharing'=>true
+            ],
         ];
 
         $content = json_encode($params, JSON_UNESCAPED_UNICODE);
