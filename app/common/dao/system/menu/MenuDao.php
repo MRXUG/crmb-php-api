@@ -16,11 +16,13 @@ namespace app\common\dao\system\menu;
 use app\common\dao\BaseDao;
 use app\common\model\BaseModel;
 use app\common\model\system\auth\Menu;
+use app\common\RedisKey;
 use app\common\repositories\system\RelevanceRepository;
 use think\db\BaseQuery;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
+use think\facade\Cache;
 use think\Model;
 
 /**
@@ -307,14 +309,28 @@ class MenuDao extends BaseDao
 
     public function typesByRoutes($typeId, array $ids)
     {
-        return Menu::getDB()->alias('A')->leftJoin('Relevance B', 'A.menu_id = B.right_id')->where('is_menu', 0)
-            ->where('B.left_id', $typeId)->whereIn('B.right_id', $ids)->where('B.type', RelevanceRepository::TYPE_MERCHANT_AUTH)->column('params,route');
+        $allData = array_column($this->merchantTypeByRoutes($typeId), null, 'right_id');
+        $data = [];
+        foreach ($ids as $right_id){
+            if(isset($allData[$right_id])){
+                $data[] = $allData[$right_id];
+            }
+        }
+        return $data;
     }
 
     public function merchantTypeByRoutes($typeId)
     {
-        return Menu::getDB()->alias('A')->leftJoin('Relevance B', 'A.menu_id = B.right_id')->where('is_menu', 0)
-            ->where('B.left_id', $typeId)->where('B.type', RelevanceRepository::TYPE_MERCHANT_AUTH)->column('params,route');
+        $cacheService = Cache::store()->handler();
+        $cacheKey = RedisKey::MERCHANT_MENU_ROUTES.$typeId;
+        $data = $cacheService->get($cacheKey);
+        if($data !== false){
+            return json_decode($data, true);
+        }
+        $data = Menu::getDB()->alias('A')->leftJoin('Relevance B', 'A.menu_id = B.right_id')->where('is_menu', 0)
+            ->where('B.left_id', $typeId)->where('B.type', RelevanceRepository::TYPE_MERCHANT_AUTH)->column('right_id,params,route');
+        $cacheService->set($cacheKey, json_encode($data), RedisKey::MERCHANT_MENU_ROUTES_TIMEOUT);
+        return $data;
     }
 
     /**

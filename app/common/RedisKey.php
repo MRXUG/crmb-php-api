@@ -63,4 +63,10 @@ class RedisKey
      */
 
      const HOT_RANKING = 'goods_hot:hot_ranking';
+
+    /**
+     * 商家菜单权限数据 区分商家类型
+     */
+     const MERCHANT_MENU_ROUTES = 'all_menu_relevance_routes:';
+     const MERCHANT_MENU_ROUTES_TIMEOUT = 24*3600;
 }
