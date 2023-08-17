@@ -35,7 +35,7 @@
         "topthink/think-orm": "^2.0",
         "topthink/think-swoole": "3.1.2",
         "firebase/php-jwt": "^5.0",
-        "w7corp/easywechat": "^3.0",
+        "overtrue/wechat": "3.3.33",
         "xaboy/form-builder": "2.0.15",
         "topthink/think-queue": "^3.0",
         "topthink/think-image": "^1.0",
