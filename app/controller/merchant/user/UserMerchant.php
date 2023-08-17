@@ -18,6 +18,7 @@ use app\common\repositories\store\coupon\StoreCouponUserRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
 use app\common\repositories\user\UserLabelRepository;
 use app\common\repositories\user\UserMerchantRepository;
+use app\common\repositories\user\UserRepository;
 use crmeb\basic\BaseController;
 use FormBuilder\Exception\FormBuilderException;
 use think\App;
@@ -100,6 +101,13 @@ class UserMerchant extends BaseController
         $label_id = implode(',', $label_id);
         $this->repository->update($id, compact('label_id'));
         return app('json')->success('修改成功');
+    }
+
+    public function detail($uid)
+    {
+        /** @var UserRepository $repos */
+        $repos = app()->make(UserRepository::class);
+        return app('json')->success($repos->merchantUserOrderDetail($uid, $this->request->merId()));
     }
 
     public function order($uid)

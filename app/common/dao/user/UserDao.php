@@ -294,21 +294,24 @@ class UserDao extends BaseDao
     public function userOrderDetail($uid)
     {
         $info =  User::getDB()->alias('A')
-            ->join('StoreOrder B', 'A.uid = B.uid and B.paid = 1 and B.pay_time between \'' . date('Y/m/d', strtotime('first day of')) . ' 00:00:00\' and \'' . date('Y/m/d H:i:s') . '\'')
-            ->join('PresellOrder C', 'C.order_id = B.order_id and C.paid = 1', 'LEFT')
+            ->leftJoin('StoreOrder B', 'A.uid = B.uid and B.paid = 1 and B.pay_time between \'' . date('Y/m/d', strtotime('first day of')) . ' 00:00:00\' and \'' . date('Y/m/d H:i:s') . '\'')
+            ->leftJoin('PresellOrder C', 'C.order_id = B.order_id and C.paid = 1')
             ->field('A.uid,A.avatar,A.nickname,A.now_money,A.pay_price,A.pay_count, sum(B.pay_price + IFNULL(C.pay_price,0)) as total_pay_price, count(B.order_id) as total_pay_count,is_svip,svip_endtime,svip_save_money')
             ->where('A.uid', $uid)
             ->find();
-        $userInfo = User::getDB()->field('uid,avatar,nickname,now_money,pay_price,pay_count')->where('uid', $uid)->find();
-
-        $info['uid'] = $userInfo['uid'];
-        $info['avatar'] = $userInfo['avatar'];
-        $info['nickname'] = $userInfo['nickname'];
-        $info['now_money'] = $userInfo['now_money'];
-        $info['pay_price'] = $userInfo['pay_price'];
-        $info['pay_count'] = $userInfo['pay_count'];
 
         return  $info;
+    }
+
+    public function merchantUserOrderDetail($uid, $mer_id){
+        $monthFirstDay = date('Y/m/d', strtotime('first day of'));
+        $now = date('Y/m/d H:i:s');
+        return  User::getDB()->alias('A')
+            ->leftJoin('StoreOrder B', "A.uid = B.uid and B.paid = 1 AND B.mer_id ={$mer_id} and B.pay_time between '{$monthFirstDay} 00:00:00' and '{$now}'")
+            ->leftJoin('StoreOrder total_B', "A.uid = total_B.uid and total_B.paid = 1 AND total_B.mer_id ={$mer_id}")
+            ->field('A.uid,A.avatar,A.nickname,sum(total_B.pay_price) as pay_price,count(total_B.order_id) as pay_count, sum(B.pay_price) as total_pay_price, count(B.order_id) as total_pay_count,is_svip,svip_endtime,svip_save_money')
+            ->where('A.uid', $uid)
+            ->find();
     }
 
     public function userNumGroup($date)

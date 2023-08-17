@@ -37,6 +37,9 @@ Route::group(function () {
         Route::post('change_label/:id', '/changeLabel')->name('merchantUserChangeLabel')->option([
             '_alias' => '修改标签',
         ]);
+        Route::get('detail/:id', '/detail')->name('merchantUserDetail')->option([
+            '_alias' => '用户详情',
+        ]);
         Route::get('order/:uid', '/order')->name('merchantUserOrder')->option([
             '_alias' => '订单列表',
         ]);
