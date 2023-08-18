@@ -31,7 +31,7 @@ class MerchantAd extends BaseModel
         'marketing_page_popup_chart'  => 'varchar', //营销页弹窗
         'marketing_page_switch'       => 'tinyint', //营销页开关：1-开启，2-关闭
         'mer_id'                      => 'int', //商户id
-        'multistep_discount'          => 'varchar', //多级别回流优惠信息
+        'multistep_discount'          => 'text', //多级别回流优惠信息
         'multistep_switch'            => 'tinyint', //多级别回流0关闭 1开启
         'page_popover_switch'         => 'tinyint', //商详页弹窗开关：1-开启，2-关闭
         'page_type'                   => 'tinyint', //页面配置：1-集合页，2-单品页

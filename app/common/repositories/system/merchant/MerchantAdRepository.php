@@ -112,7 +112,7 @@ class MerchantAdRepository extends BaseRepository
                 $this->dao->update($id, $data);
                 app()->make(MerchantAdCouponRepository::class)->dels(['ad_id' => $id]);
             } else {
-                $id = $this->dao->create($data)->getLastInsID();
+                $id = $this->dao->getModelObj()->insertGetId($data);
             }
             if ($data['reflow_coupons_switch']) {
                 $this->createAdCouponRelation($id, $coupon);
