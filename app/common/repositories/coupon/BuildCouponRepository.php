@@ -110,6 +110,7 @@ class BuildCouponRepository extends BaseRepository
             'is_user_limit' => (int)$params['is_user_limit'],
             'type_date' => (int)$params['type_date'],
             'date_range' => json_encode($params['date_range'] ?? []),
+            'goods_range' => json_encode($goodsList),
         ];
 
 
