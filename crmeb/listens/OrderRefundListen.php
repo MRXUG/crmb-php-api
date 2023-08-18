@@ -82,6 +82,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
                 } catch (Exception | ValueError | Throwable $e) {
                     Log::error("运行出错 {$this->name} order_id" . $item->getAttr('order_id') . date("Y-m-d H:i:s") . $e->getMessage()."line:".$e->getLine());
                     $item->setAttr('err_msg', "运行出错 {$this->name} order_id" . $item->getAttr('order_id') . date("Y-m-d H:i:s") . $e->getMessage());
+                    $item->setAttr('status', -1);
                     $item->save();
                 }
             }
