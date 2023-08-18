@@ -280,4 +280,17 @@ class Client extends BaseClient
         $options = array_filter($options);
         return json_encode($options, JSON_UNESCAPED_UNICODE);
     }
+
+    /**
+     * 查询退款单详情 v3
+     * @param string $out_refund_no
+     * @return mixed
+     */
+    public function getRefundOrder(string $out_refund_no){
+        $res = $this->request('/v3/refund/domestic/refunds/'.$out_refund_no, 'GET', [], true);
+        if (isset($res['code'])) {
+            throw new ValidateException('微信接口报错:' . $res['message']);
+        }
+        return $res;
+    }
 }

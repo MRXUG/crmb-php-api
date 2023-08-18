@@ -156,6 +156,28 @@ class Client extends BaseClient
         return $res;
     }
 
+    /**
+     * 查询分账结果
+     * https://pay.weixin.qq.com/wiki/doc/apiv3_partner/apis/chapter7_4_2.shtml
+     * @param $sub_mechid
+     * @param $transaction_id
+     * @param $out_order_no
+     * @return mixed
+     */
+    public function getResult($sub_mechid, $transaction_id, $out_order_no){
+        $params = [
+            'sub_mchid' => $sub_mechid,
+            'transaction_id' => $transaction_id,
+            'out_order_no' => $out_order_no,
+        ];
+        $content = json_encode($params);
+        $res = $this->request('/v3/ecommerce/profitsharing/orders', 'GET', ['sign_body' => $content]);
+        if (isset($res['code'])) {
+            throw new ValidateException('微信接口报错:' . $res['message']);
+        }
+        return $res;
+    }
+
     public function profitsharingFinishOrder(array $params)
     {
         $content = json_encode($params);

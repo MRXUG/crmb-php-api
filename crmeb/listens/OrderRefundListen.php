@@ -35,8 +35,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
             request()->clearCache();
             # 查询获取任务信息·
             //** @var RefundTask[] $task */
-            $task                = RefundTask::getDB()->where('order_id', 1118)->select();
-            //$task                = RefundTask::getDB()->where('status', 0)->select();
+            $task                = RefundTask::getDB()->where('status', 0)->select();
             $profitSharingStatus = app()->make(DeliveryProfitSharingStatusRepository::class);
             foreach ($task as $item) {
                 try {

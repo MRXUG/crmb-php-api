@@ -109,6 +109,12 @@ class Client extends BaseClient
         return $this->pay('native', $options);
     }
 
+    /**
+     * 订单退款
+     * @param string $order_sn
+     * @param array $options
+     * @return mixed
+     */
     public function payOrderRefund(string $order_sn, array $options)
     {
         $params = [
