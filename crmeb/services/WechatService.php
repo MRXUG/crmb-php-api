@@ -118,7 +118,8 @@ class WechatService
                 // 'pay_weixin_client_key' => $payment['pay_routine_client_cert'],
                 'serial_no' => trim($payment['pay_routine_serial_no']),
                 'apiv3_key' => trim($payment['pay_routine_v3_key']),
-            ]
+                'notify_url' => systemConfig('site_url') . Route::buildUrl('wechatNotify')->build(),
+            ],
         ];
     }
     

@@ -49,9 +49,9 @@ class Client extends BaseClient
             'description' => $order['body'],
             'out_trade_no' => $order['out_trade_no'],
             'attach' => $order['attach'],
-            'notify_url' => $this->app['payment']['notify_url'],
+            'notify_url' => $this->app['config']['service_payment']['notify_url'],
             'amount' => [
-                'total' => $order['total_fee'],
+                'total' => $order['total_fee'] * 100, //单位 分
                 'currency' => 'CNY'
             ],
             'scene_info' => [
