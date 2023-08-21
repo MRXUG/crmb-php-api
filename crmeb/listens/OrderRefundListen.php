@@ -6,15 +6,18 @@ use app\common\dao\store\order\StoreRefundOrderDao;
 use app\common\dao\store\RefundTaskDao;
 use app\common\model\delivery\DeliveryProfitSharingLogs;
 use app\common\model\delivery\DeliveryProfitSharingStatus;
+use app\common\model\delivery\DeliveryProfitSharingStatusPart;
+use app\common\model\store\order\StoreOrder;
 use app\common\model\store\RefundTask;
+use app\common\repositories\delivery\DeliveryProfitSharingStatusPartRepository;
 use app\common\repositories\delivery\DeliveryProfitSharingStatusRepository;
 use app\common\repositories\delivery\DeliveryProfitSharingLogsRepository;
+use app\common\repositories\store\order\StoreOrderRepository;
 use crmeb\interfaces\ListenerInterface;
 use crmeb\jobs\RefundCheckJob;
 use crmeb\services\MiniProgramService;
 use crmeb\services\TimerService;
 use crmeb\services\WechatService;
-use crmeb\utils\wechat\ProfitSharing;
 use Exception;
 use think\exception\ValidateException;
 use think\facade\Db;
@@ -50,9 +53,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
                     }
                     if (!empty($info)&&$info['profit_sharing_status']!=DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_DEFAULT) {
                         //查询分账处理状态
-                        $res = WechatService::getMerPayObj($item->getAttr('mer_id'), $item->getAttr('app_id'))
-                            ->profitSharing()
-                            ->profitSharingReturnResult($item->getAttr('order_sn'), $item->getAttr('order_sn')); //TODO 确认是否都是用的订单号
+                        $res = $this->checkRefundResult($item, $info);
                         # 回退结果
                         $return_status = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_ING;
                         switch ($res['result']) {
@@ -62,7 +63,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
                             case 'FAILED':
                                 $return_status = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_FAIL;
                                 # 处理错误信息
-                                $item->profitSharingErrHandler([$this->errorCode($res['fail_reason'], $item['returnMchId'])]);
+                                $item->profitSharingErrHandler([$this->errorCode($res['fail_reason'], $item['app_id'])]);
                                 break;
                             default:
                                 $return_status = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_ING;
@@ -135,6 +136,104 @@ class OrderRefundListen extends TimerService implements ListenerInterface
         Queue::later(60, RefundCheckJob::class, [
             'refund_task_id' => $task->getAttr('refund_task_id'),
         ]);
+    }
+
+    public function checkRefundResult(RefundTask $item, $info){
+        $orderId = $item['order_id'];
+        $orderSn = $item->getAttr('order_sn');
+        $merId = $item->getAttr('mer_id');
+        // 获取商户配置
+        $make   = WechatService::getMerPayObj($merId, $item->getAttr('app_id'));
+        /** @var DeliveryProfitSharingStatusPart $profitSharingPartRepos */
+        $profitSharingPartRepos = app()->make(DeliveryProfitSharingStatusPartRepository::class);
+        switch ($info['platform_source']){
+            case StoreOrder::PLATFORM_SOURCE_NATURE:
+                // 自然流量分账未回退，此处需要回退
+                // 使用 DeliveryProfitSharingStatusPart 记录分账信息，避免重复提交分账
+                if($part = $profitSharingPartRepos->where('delivery_profit_sharing_status_id', $info['id'])->find()){
+                    //查询回退结果
+                    return $make->profitSharing()
+                        ->profitSharingReturnResult($part['out_return_no'], $orderSn);
+                }else{
+                    //分账回退
+                    // 自定义32位
+                    $out_return_no = $orderSn.'r'.time();
+                    $params = [
+                        'out_order_no'  => $orderSn,
+                        'out_return_no' => $out_return_no,
+                        'return_mchid'  => (string) $merId,
+                        'amount'        => (int) $info['amount'],
+                        'description'   => '退款分账回退',
+                    ];
+                    $res = $make->profitSharing()->profitSharingReturn($params);
+                    if(isset($res['result']) && $res['result']=='FAILED'){
+                        throw new \Exception('自然流量分账回退失败：' . json_encode($res, JSON_UNESCAPED_UNICODE));
+                    }
+                    //成功回退 记录数据
+                    app()->make(DeliveryProfitSharingStatusPartRepository::class)->create([
+                        'order_id'                          => $orderId,
+                        'delivery_profit_sharing_status_id' => $info['id'],
+                        'out_return_no'                     => $out_return_no,
+                        'part_return_amount'                => $info['amount'],
+                        'result'                            => $res['result'] ?? 'ERROR_404',
+                    ]);
+                    return $res;
+                }
+                break;
+            case StoreOrder::PLATFORM_SOURCE_BACK_FLOW:
+                // 回流 部分分账回退， 需要退回剩下部分
+                $leftAmount = $info['amount'] - $info['return_amount'];
+                if($leftAmount > 0){
+                    $leftOrderOurReturnNo = $orderSn.'r1final'; //最后部分
+                    if($part = $profitSharingPartRepos->where([
+                        'delivery_profit_sharing_status_id' => $info['id'],
+                        'out_return_no' => $leftOrderOurReturnNo
+                    ])->find()){
+                        //查询回退结果
+                        return $make->profitSharing()
+                            ->profitSharingReturnResult($part['out_return_no'], $orderSn);
+                    }else{
+                        //分账回退
+                        // 自定义32位
+                        $out_return_no = $orderSn.'r'.time();
+                        $params = [
+                            'out_order_no'  => $orderSn,
+                            'out_return_no' => $out_return_no,
+                            'return_mchid'  => (string) $merId,
+                            'amount'        => (int) $info['amount'],
+                            'description'   => '退款分账回退',
+                        ];
+                        $res = $make->profitSharing()->profitSharingReturn($params);
+                        if(isset($res['result']) && $res['result']=='FAILED'){
+                            throw new \Exception('自然流量分账回退失败：' . json_encode($res, JSON_UNESCAPED_UNICODE));
+                        }
+                        //成功回退 记录数据
+                        app()->make(DeliveryProfitSharingStatusPartRepository::class)->create([
+                            'order_id'                          => $orderId,
+                            'delivery_profit_sharing_status_id' => $info['id'],
+                            'out_return_no'                     => $out_return_no,
+                            'part_return_amount'                => $info['amount'],
+                            'result'                            => $res['result'] ?? 'ERROR_404',
+                        ]);
+                        return $res;
+                    }
+                }else{
+                    $returnOrderNo = $profitSharingPartRepos->where([
+                        'delivery_profit_sharing_status_id' => $info['id'],
+                    ])->find();
+
+                    //查询回退结果
+                    return $returnOrderNo ? $make->profitSharing()
+                        ->profitSharingReturnResult($returnOrderNo['out_return_no'], $orderSn) :
+                        ['result' => 'FAILED', 'fail_reason' => '回流分账记录DeliveryProfitSharingStatusPart不存在'];
+                }
+                break;
+            default:
+                //查询回退结果 原始逻辑
+                return $make->profitSharing()
+                    ->profitSharingReturnResult($orderSn, $orderSn);
+
+        }
     }
 
     /**

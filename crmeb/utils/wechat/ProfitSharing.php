@@ -18,12 +18,12 @@ use crmeb\services\WechatService;
 class ProfitSharing
 {
     /**
-     * 分账退回调用
+     * 分账退回调用 TODO 没有调用 可以删除
      * @param int $refundOrderId 退款订单 id
      * @return void
      * @throws null
      */
-    public static function refund(int $refundOrderId): void
+    public static function refundBak(int $refundOrderId): void
     {
         # 获取退款订单信息
         $refundOrder = StoreRefundOrder::getDB()

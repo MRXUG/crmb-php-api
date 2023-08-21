@@ -8,6 +8,7 @@ use app\common\model\store\order\OrderFlow;
 use app\common\model\store\order\StoreOrder;
 use app\common\model\store\OrderFinishTask;
 use app\common\repositories\delivery\DeliveryProfitSharingLogsRepository;
+use app\common\repositories\delivery\DeliveryProfitSharingStatusPartRepository;
 use app\common\repositories\delivery\DeliveryProfitSharingStatusRepository;
 use app\common\repositories\store\order\OrderFlowRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
@@ -79,27 +80,95 @@ class FinishOrderListen extends TimerService implements ListenerInterface
         ];
 
         $params = $res = [];
-        try {
-            // 获取商户配置
-            $make   = WechatService::getMerPayObj($order['mer_id'], $order['appid']);
-            $params = [
-                'out_order_no'  => $data['order_sn'],
-                'out_return_no' => $data['order_sn'] ?? $data['order_sn'] . substr(0, 4, time()),
-                'return_mchid'  => (string) $data['mch_id'],
-                'amount'        => (int) $returnAmount,
-                'description'   => '分账回退',
-            ];
-            $res = $make->profitSharing()->profitSharingReturn($params);
-            if(isset($res['result']) && $res['result']=='SUCCESS'){
-                $update['profit_sharing_status'] = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS;
-            }
-            if(isset($res['result']) && $res['result']=='FAILED'){
-                throw new \Exception('分账回退失败：' . json_encode($res, JSON_UNESCAPED_UNICODE));
-            }
-        } catch (ValidateException $exception) {
-            \think\facade\Log::error('order_id:'.$data['order_id'] . ',收货15天后押金回退失败' . $exception->getMessage());
-            $update['profit_sharing_status'] = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_FAIL;
-            $update['profit_sharing_error']  = $exception->getMessage();
+        switch ($order['platform_source']){
+            case StoreOrder::PLATFORM_SOURCE_NATURE:
+                //自然流量分账不回退
+                $update = [
+                    'profit_sharing_status' => DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS_PART,
+                    'return_amount'         => 0,
+                    'profit_sharing_error'  => '自然流量分账不回退',
+                ];
+                break;
+            case StoreOrder::PLATFORM_SOURCE_BACK_FLOW:
+                //部分分账 -- 回流流量
+                $update = [
+                    'profit_sharing_status' => DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS_PART,
+                    'return_amount'         => $returnAmount + $data['return_amount'], //已经退款的总额
+                    'profit_sharing_error'  => '',
+                ];
+                try {
+                    if($returnAmount <= 0){
+                        throw new \Exception('回流流量分账回退失败：回退金额小于0:'.$returnAmount);
+                    }
+                    if($returnAmount + $data['return_amount'] > $data['amount']){
+                        throw new \Exception('回流流量分账回退失败：回退总金额大于分账金额:'.$returnAmount);
+                    }
+                    // 获取商户配置
+                    $make   = WechatService::getMerPayObj($order['mer_id'], $order['appid']);
+                    // 自定义32位
+                    $out_return_no = $data['order_sn'].'r'.time();
+                    $params = [
+                        'out_order_no'  => $data['order_sn'],
+                        'out_return_no' => $out_return_no,
+                        'return_mchid'  => (string) $data['mch_id'],
+                        'amount'        => (int) $returnAmount,
+                        'description'   => '分账部分回退',
+                    ];
+                    $res = $make->profitSharing()->profitSharingReturn($params);
+                    if(isset($res['result']) && $res['result']=='SUCCESS'){
+                        $update['profit_sharing_status'] = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS_PART;
+//                        if($returnAmount + $data['return_amount'] == $data['amount']){
+//                            //已经全部回退 目前应该不会触达
+//                            $update['profit_sharing_status'] = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS;
+//                        }
+                    }
+                    if(isset($res['result']) && $res['result']=='FAILED'){
+                        throw new \Exception('分账回退失败：' . json_encode($res, JSON_UNESCAPED_UNICODE));
+                    }
+                    //成功回退 记录数据
+                    app()->make(DeliveryProfitSharingStatusPartRepository::class)->create([
+                        'order_id'                          => $data['order_id'],
+                        'delivery_profit_sharing_status_id' => $data['id'],
+                        'out_return_no'                     => $out_return_no,
+                        'part_return_amount'                => $returnAmount,
+                        'result'                            => $res['result'] ?? 'ERROR_404',
+                    ]);
+                } catch (ValidateException $exception) {
+                    \think\facade\Log::error('order_id:'.$data['order_id'] . ',收货15天后押金回退失败' . $exception->getMessage());
+                    $update['profit_sharing_status'] = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_FAIL;
+                    $update['profit_sharing_error']  = $exception->getMessage();
+                }
+                break;
+            default:
+                try {
+                    if($returnAmount <= 0){
+                        throw new \Exception('分账回退失败：回退金额小于0:'.$returnAmount);
+                    }
+                    if($returnAmount + $data['return_amount'] > $data['amount']){
+                        throw new \Exception('分账回退失败：回退总金额大于分账金额:'.$returnAmount);
+                    }
+                    // 获取商户配置
+                    $make   = WechatService::getMerPayObj($order['mer_id'], $order['appid']);
+                    $params = [
+                        'out_order_no'  => $data['order_sn'],
+                        'out_return_no' => $data['order_sn'] ?? $data['order_sn'] . substr(0, 4, time()),
+                        'return_mchid'  => (string) $data['mch_id'],
+                        'amount'        => (int) $returnAmount,
+                        'description'   => '分账回退',
+                    ];
+                    $res = $make->profitSharing()->profitSharingReturn($params);
+                    if(isset($res['result']) && $res['result']=='SUCCESS'){
+                        $update['profit_sharing_status'] = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS;
+                    }
+                    if(isset($res['result']) && $res['result']=='FAILED'){
+                        throw new \Exception('分账回退失败：' . json_encode($res, JSON_UNESCAPED_UNICODE));
+                    }
+                } catch (ValidateException $exception) {
+                    \think\facade\Log::error('order_id:'.$data['order_id'] . ',收货15天后押金回退失败' . $exception->getMessage());
+                    $update['profit_sharing_status'] = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_FAIL;
+                    $update['profit_sharing_error']  = $exception->getMessage();
+                }
+                break;
         }
         //更新分账操作状态
         app()->make(DeliveryProfitSharingStatusRepository::class)->updateByWhere(['order_id' => $data['order_id']], $update);
