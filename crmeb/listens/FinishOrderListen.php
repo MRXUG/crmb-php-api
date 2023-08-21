@@ -205,6 +205,25 @@ class FinishOrderListen extends TimerService implements ListenerInterface
     }
 
     /**
+     * 测试方法
+     * @param int $order_id
+     * @throws \Exception
+     */
+    public function test($order_id = 1116){
+        $app   = app()->make(StoreOrderRepository::class);
+        $orders = $app->getNeedFinishOrdersByIds([$order_id],'order_id,system_commission,platform_source,mer_id,appid,order_sn');
+        $data = app()
+            ->make(DeliveryProfitSharingStatusRepository::class)
+            ->whereIn('order_id', $order_id)
+            ->find()
+            ->toArray();
+        $order = $orders[0];
+        $res = $this->profitSharingReturn($data, $order);
+        echo json_encode($res);
+        return $res;
+    }
+
+    /**
      * 获取流水标题
      *
      * @param $order

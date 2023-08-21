@@ -152,6 +152,9 @@ class OrderRefundListen extends TimerService implements ListenerInterface
                 // 使用 DeliveryProfitSharingStatusPart 记录分账信息，避免重复提交分账
                 if($part = $profitSharingPartRepos->where('delivery_profit_sharing_status_id', $info['id'])->find()){
                     //查询回退结果
+                    if($part['result'] == 'SUCCESS'){
+                        return ['result' => 'SUCCESS'];
+                    }
                     return $make->profitSharing()
                         ->profitSharingReturnResult($part['out_return_no'], $orderSn);
                 }else{
@@ -161,7 +164,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
                     $params = [
                         'out_order_no'  => $orderSn,
                         'out_return_no' => $out_return_no,
-                        'return_mchid'  => (string) $merId,
+                        'return_mchid'  => (string) $info['mch_id'],
                         'amount'        => (int) $info['amount'],
                         'description'   => '退款分账回退',
                     ];
@@ -189,18 +192,20 @@ class OrderRefundListen extends TimerService implements ListenerInterface
                         'delivery_profit_sharing_status_id' => $info['id'],
                         'out_return_no' => $leftOrderOurReturnNo
                     ])->find()){
+                        if($part['result'] == 'SUCCESS'){
+                            return ['result' => 'SUCCESS'];
+                        }
                         //查询回退结果
                         return $make->profitSharing()
                             ->profitSharingReturnResult($part['out_return_no'], $orderSn);
                     }else{
                         //分账回退
                         // 自定义32位
-                        $out_return_no = $orderSn.'r'.time();
                         $params = [
                             'out_order_no'  => $orderSn,
-                            'out_return_no' => $out_return_no,
-                            'return_mchid'  => (string) $merId,
-                            'amount'        => (int) $info['amount'],
+                            'out_return_no' => $leftOrderOurReturnNo,
+                            'return_mchid'  => (string) $info['mch_id'],
+                            'amount'        => (int) $leftAmount,
                             'description'   => '退款分账回退',
                         ];
                         $res = $make->profitSharing()->profitSharingReturn($params);
@@ -211,7 +216,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
                         app()->make(DeliveryProfitSharingStatusPartRepository::class)->create([
                             'order_id'                          => $orderId,
                             'delivery_profit_sharing_status_id' => $info['id'],
-                            'out_return_no'                     => $out_return_no,
+                            'out_return_no'                     => $leftOrderOurReturnNo,
                             'part_return_amount'                => $info['amount'],
                             'result'                            => $res['result'] ?? 'ERROR_404',
                         ]);
@@ -234,6 +239,23 @@ class OrderRefundListen extends TimerService implements ListenerInterface
                     ->profitSharingReturnResult($orderSn, $orderSn);
 
         }
+    }
+
+    /**
+     * 测试方法
+     * @param int $refundTaskId
+     * @return array|mixed
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function test($refundTaskId = 7395){
+        $item = RefundTask::getDB()->where("refund_task_id", $refundTaskId)->find();
+        $profitSharingStatus = app()->make(DeliveryProfitSharingStatusRepository::class);
+        $info = $profitSharingStatus->getProfitSharingStatus($item->getAttr('order_id'));
+//        var_dump($info['platform_source']);exit;
+        $info['platform_source'] = 1;
+        return $this->checkRefundResult($item, $info);
     }
 
     /**
