@@ -76,7 +76,7 @@ class DeliveryProfitSharingStatusDao extends BaseDao
     {
         $info = DeliveryProfitSharingStatus::getDB()
             ->where('order_id', $orderId)
-            ->field('profit_sharing_status,mch_id,amount,unfreeze_status')
+            //->field('profit_sharing_status,mch_id,amount,unfreeze_status,platform_source,id')
             ->find();
         return $info ? $info->toArray() : [];
     }

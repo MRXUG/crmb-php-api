@@ -22,6 +22,8 @@ class DeliveryProfitSharingStatus  extends BaseModel
     const PROFIT_SHARING_STATUS_RETURN_FAIL = 5;
     // 分账回退成功
     const PROFIT_SHARING_STATUS_RETURN_SUCCESS = 6;
+    // 分账回退部分 成功，用于记录部分回退状态，计算退款等。例如自然流量不回退，回流流量部分回退
+    const PROFIT_SHARING_STATUS_RETURN_SUCCESS_PART = 7;
     // 用户退款中断处理分账
     const PROFIT_SHARING_STATUS_RETURN_FNIAL = 6;
     

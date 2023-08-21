@@ -2303,6 +2303,7 @@ class StoreOrderRepository extends BaseRepository
                     // 查绑定的非本商户
                     /* @var MerchantBindUserRepository $bindRepo */
                     $bindMer = $bindRepo->getBindMerchantId($params['wechatUserId']);
+                    // 非绑定用户不算收益 此处不需要修改
                     if ($bindMer && $bindMer != $order['mer_id']) {
                         $profitRecordRepo->create([
                             'order_mer_id'        => $order['mer_id'],
@@ -2434,8 +2435,10 @@ class StoreOrderRepository extends BaseRepository
     public function calcProfitSharingAmountByPlatformSource($data, $order)
     {
         [, $profitSharingRate] = $this->switchOrderPlatformSource($order);
-        $money = bcsub($data['amount'], bcmul($data['total'], $profitSharingRate));
-        return $money > 0 ? $money : $data['amount'];
+//        $money = bcsub($data['amount'], bcmul($data['total'], $profitSharingRate));
+//        return $money > 0 ? $money : $data['amount'];
+        // 如果金额为0 表示自然流量，小于0 抛出异常 不能直接用amount 返回
+        return bcsub($data['amount'], bcmul($data['total'], $profitSharingRate));
     }
 
     /**
