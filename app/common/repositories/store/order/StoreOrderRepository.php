@@ -794,7 +794,6 @@ class StoreOrderRepository extends BaseRepository
             $deliveryTimeout = $deliveryUnTimeout = $afterSaleIng = 0;
         // 聚合查询
         $timeOut = date('Y-m-d H:i:s', strtotime('-1 day'));
-        var_dump($moreWhere);
         $agg = $this->dao->getModelObj()->where($where)
             ->when(($sysDel !== null), function (BaseQuery $query) use ($sysDel) {
                 $query->where('is_system_del', $sysDel);
