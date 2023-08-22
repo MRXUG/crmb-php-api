@@ -3107,7 +3107,6 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     $discountTotal = $adMarketingDiscountAmount;
                     break;
                 case 4:
-                case 5:
                     // 营销 + 红包
                     // 优惠裂变开关：1-开启，2-关闭
                     if ($fissionAmount && (($adInfo['discount_fission_switch'] == 2) || ($fissionAmount != $adFissionAmount)) && $productId == $adProductId) {
@@ -3122,6 +3121,30 @@ class StoreOrderCreateRepository extends StoreOrderRepository
 //                        $discountTotal = bcadd($adMarketingDiscountAmount, $adFissionAmount, 2);
                         $discountTotal = $adFissionAmount;//现在不再需要累加marketing_discount_amount 独立计算
                     }
+                    break;
+                //50-5* 多级回流
+                case 50:
+                case 51:
+                case 52:
+                    //1
+                    $index = $step - 50;
+                    $multistep_discount = json_decode($adInfo['multistep_discount'], true);
+                    $i = 0;
+                    $settingDiscount = 0;
+                    foreach ($multistep_discount as $v){
+                        if($v['switch'] ?? false == true){
+                            if($i == $index){
+                                $settingDiscount = $v['backflow_amount'] ?? 0;
+                                break;
+                            }else{
+                                $i++;
+                            }
+                        }
+                    }
+                    if($marketingDiscountAmount && $settingDiscount != $marketingDiscountAmount){
+                        $hasError = true;
+                    }
+                    $discountTotal = $adMarketingDiscountAmount;
                     break;
                 case 6:
                     $maxCurrentDiscount = $adMarketingDiscountAmount;
@@ -3344,7 +3367,6 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     $discountTotal = $adMarketingDiscountAmount;
                     break;
                 case 4:
-                case 5:
                     // 营销 + 红包
                     // 优惠裂变开关：1-开启，2-关闭
                     if ($fissionAmount && (($adInfo['discount_fission_switch'] == 2) || ($fissionAmount != $adFissionAmount)) && $productId == $adProductId) {
@@ -3359,6 +3381,30 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                         //$discountTotal = bcadd($adMarketingDiscountAmount, $adFissionAmount, 2);
                         $discountTotal = $adFissionAmount;
                     }
+                    break;
+                    //50-5* 多级回流
+                case 50:
+                case 51:
+                case 52:
+                    //1
+                    $index = $step - 50;
+                    $multistep_discount = json_decode($adInfo['multistep_discount'], true);
+                    $i = 0;
+                    $settingDiscount = 0;
+                    foreach ($multistep_discount as $v){
+                        if($v['switch'] ?? false == true){
+                            if($i == $index){
+                                $settingDiscount = $v['backflow_amount'] ?? 0;
+                                break;
+                            }else{
+                                $i++;
+                            }
+                        }
+                    }
+                    if($marketingDiscountAmount && $settingDiscount != $marketingDiscountAmount){
+                        $hasError = true;
+                    }
+                    $discountTotal = $adMarketingDiscountAmount;
                     break;
                 case 6:
                     $maxCurrentDiscount = $adMarketingDiscountAmount;

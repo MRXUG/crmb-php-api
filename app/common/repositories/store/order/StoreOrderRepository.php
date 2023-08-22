@@ -613,6 +613,7 @@ class StoreOrderRepository extends BaseRepository
 
         if ($refundOrder){
             $order->refund_order_id = $refundOrder["refund_order_id"];
+            $order->refund_order_status = $refundOrder["status"];
         }
 
         return $order;
@@ -860,7 +861,29 @@ class StoreOrderRepository extends BaseRepository
                 $param['StoreOrder.is_del'] = 1;
                 break;  // 待核销
                 break;  // 已删除
-            default:
+            // append
+            case 8:// 发货超时
+                $param = function (BaseQuery $query) {
+                    $timeOut = date('Y-m-d H:i:s', strtotime('-1 day'));
+                    $query->where('StoreOrder.paid', 1)
+                        ->where('StoreOrder.status', StoreOrder::ORDER_STATUS_BE_SHIPPED)
+                        ->where('StoreOrder.create_time', '<', $timeOut);
+                };
+                break;
+            case 9:// 24小时待发货
+                $param = function (BaseQuery $query) {
+                    $timeOut = date('Y-m-d H:i:s', strtotime('-1 day'));
+                    $query->where('StoreOrder.paid', 1)
+                        ->where('StoreOrder.status', StoreOrder::ORDER_STATUS_BE_SHIPPED)
+                        ->where('StoreOrder.create_time', '>=', $timeOut);
+                };
+                break;
+            case 10: // 售后中
+                $param = [
+                    'StoreOrder.status' => StoreOrder::ORDER_STATUS_REFUNDING
+                ];
+                break;
+            default:// 0
                 unset($param['StoreOrder.is_del']);
                 break;  //全部
         }
@@ -1459,8 +1482,10 @@ class StoreOrderRepository extends BaseRepository
                     $query->field('uid,nickname,avatar');
                 },
             ]);
+        //追加查询
+        $query = $this->dao->merchantGetListAppendQuery($query, $where);
         $count = $query->count();
-        $list = $query->page($page, $limit)->select()->append(['refund_extension_one', 'refund_extension_two'])
+        $list = $query->page($page, $limit)->field('MA.ad_account_id')->select()->append(['refund_extension_one', 'refund_extension_two'])
             ->each(function($item){
                 // 1:退款中 2:部分退款 3 = 全退
                 $refunding = 0;
@@ -1671,6 +1696,7 @@ class StoreOrderRepository extends BaseRepository
                 }
             }
             $order->takeOrderCount = count($order['takeOrderList']);
+            $order->refund_order_status = $order['refundOrder']["status"] ?? null;
             unset($order['takeOrderList']);
         }
 
