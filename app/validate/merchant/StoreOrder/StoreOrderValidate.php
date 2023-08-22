@@ -21,6 +21,9 @@ class StoreOrderValidate extends Validate
         'logistics_anomaly|物流状态' => 'chsDash', // 暂未使用
         'order_scenario|下单场景' => 'in:-1,0,1,2,3,4,5,6,7',
         'saleStatus|售后状态' => 'in:1,2,3,4',
+        'delivery_id|快递单号' => 'chsDash',
+        'pay_type|支付类型' => 'in:0,1,2,3,4,5,6',
+        'sku_code|规格编码'=> 'chsDash',
     ];
 
 }

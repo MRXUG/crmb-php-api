@@ -84,6 +84,9 @@ class Order extends BaseController
                     'logistics_anomaly',
                     'order_scenario',
                     'saleStatus',
+                    'delivery_id',
+                    'pay_type',
+                    'sku_code',
                 ]
             );
         app()->make(StoreOrderValidate::class)->check($where);

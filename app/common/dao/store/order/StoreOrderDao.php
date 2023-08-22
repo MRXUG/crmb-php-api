@@ -317,15 +317,30 @@ class StoreOrderDao extends BaseDao
             ->when(isset($where['order_scenario']) && $where['order_scenario'] != '' && $where['order_scenario'] != -1, function ($query) use ($where) {
                 $query->where('StoreOrder.order_scenario',  $where['order_scenario']);
             })
+            //物流单号
+            ->when(isset($where['delivery_id']) && $where['delivery_id'] != '', function ($query) use ($where) {
+                $query->where('StoreOrder.delivery_id',  $where['delivery_id']);
+            })
+            //规格编码
+            ->when(isset($where['sku_code']) && $where['sku_code'] != '', function ($query) use ($where) {
+                $orderId = StoreOrderProduct::alias('op')
+                    ->join('storeProduct sp','op.product_id = sp.product_id')
+                    ->join('store_product_attr_value sku','sku.product_id = sp.product_id')
+                    ->where(function ($query) use ($where){
+                        $query->where('sku.bar_code|sku.unique|sku.sku', $where['sku_code']);
+                    })
+                    ->column('order_id');
+                $query->whereIn('order_id',$orderId ?: '' );
+            })
             //售后场景
             ->when(isset($where['saleStatus']) && $where['saleStatus'] != '', function ($query) use ($where) {
                 switch ($where['saleStatus']){
                     case 1://无售后
-                        $query->leftJoin('StoreRefundOrder', 'StoreOrder.order_id',  'StoreRefundOrder.order_id')
+                        $query->leftJoin('StoreRefundOrder', 'StoreOrder.order_id = StoreRefundOrder.order_id')
                         ->where("StoreRefundOrder.order_id is null");
                         break;
                     case 2://售后中
-                        $query->leftJoin('StoreRefundOrder', 'StoreOrder.order_id',  'StoreRefundOrder.order_id')
+                        $query->leftJoin('StoreRefundOrder', 'StoreOrder.order_id = StoreRefundOrder.order_id')
                             ->whereIn("StoreRefundOrder.status", [
                                 StoreRefundOrder::CHECK_PENDING, StoreRefundOrder::PENDING_RETURN,
                                 StoreRefundOrder::UNAPPROVE, StoreRefundOrder::TO_BE_RECEIVED,
@@ -334,7 +349,7 @@ class StoreOrderDao extends BaseDao
                         break;
                     case 3://售后完成
                     case 4://售后关闭 TODO 关闭售后单 现在没有这个功能
-                        $query->leftJoin('StoreRefundOrder', 'StoreOrder.order_id',  'StoreRefundOrder.order_id')
+                        $query->leftJoin('StoreRefundOrder', 'StoreOrder.order_id = StoreRefundOrder.order_id')
                             ->where("StoreRefundOrder.status", StoreRefundOrder::REFUNDED);
                         break;
                     default:
