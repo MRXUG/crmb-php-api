@@ -780,9 +780,10 @@ class StoreOrderRepository extends BaseRepository
      * @Date: 2020/9/12
      * @param int|null $merId
      * @param int|null $orderType
+     * @param array $moreWhere
      * @return array
      */
-    public function OrderTitleNumber(?int $merId, ?int $orderType)
+    public function OrderTitleNumber(?int $merId, ?int $orderType, $moreWhere = [])
     {
         $where = [];
         $sysDel = $merId ? 0 : null;                    //商户删除
@@ -796,6 +797,9 @@ class StoreOrderRepository extends BaseRepository
         $agg = $this->dao->getModelObj()->where($where)
             ->when(($sysDel !== null), function (BaseQuery $query) use ($sysDel) {
                 $query->where('is_system_del', $sysDel);
+            })
+            ->when(isset($moreWhere['date']) && $moreWhere['date'] !== '', function ($query) use ($moreWhere) {
+                getModelTime($query, $moreWhere['date'], 'StoreOrder.create_time');
             })
             ->field("count(order_id) as order_count, status, paid, is_del, IF(create_time > '$timeOut', 1, 0) as is_time_out")
             ->group("status, is_time_out, paid, is_del")->select();

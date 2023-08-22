@@ -130,7 +130,8 @@ class Order extends BaseController
      */
     public function chart()
     {
-        return app('json')->success($this->repository->OrderTitleNumber($this->request->merId(), null));
+        $where = $this->request->params(['date']);
+        return app('json')->success($this->repository->OrderTitleNumber($this->request->merId(), null, $where));
     }
 
     /**
