@@ -100,7 +100,7 @@ class StoreGroupOrder extends BaseModel
         $params = [
             'order_sn' => $tmpOrderSn,
             'pay_price' => $this->pay_price,
-            'attach' => 'order',
+            'attach' => 'order',//用于回调event 事件名pay_success_{attach}
             'body' => '订单支付',
             'mer_id' => $this->orderList[0]['mer_id']
         ];

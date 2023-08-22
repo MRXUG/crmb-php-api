@@ -214,6 +214,7 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
             // 处理分账状态 请求未报错情况下就是分账中
         } catch (\Throwable $e) {
             $update['profit_sharing_error'] = $e->getMessage();
+            $update['profit_sharing_status'] = DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_FAIL;
         }
         // 记录分佣日志
         \think\facade\Log::info($this->name . json_encode($update));

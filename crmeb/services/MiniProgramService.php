@@ -69,6 +69,7 @@ class MiniProgramService
         $this->service->register(new \crmeb\services\easywechat\certficates\ServiceProvider);
         $this->service->register(new \crmeb\services\easywechat\combinePay\ServiceProvider);
         $this->service->register(new \crmeb\services\easywechat\msgseccheck\ServiceProvider);
+        $this->service->register(new \crmeb\services\easywechat\pay\ServiceProvider);
         $this->service->register(new ProgramAppletProvider());
     }
 
@@ -185,6 +186,22 @@ class MiniProgramService
     }
 
     /**
+     * V3支付
+     * @param $merId
+     * @param string $appId
+     * @return MiniProgramService
+     */
+    public static function createV3($merId, $appId = '')
+    {
+        return new self(self::getV3PayConfig($merId, $appId));
+    }
+
+    public static function getV3PayConfig($merId, $appId){
+        // 获取使用商户配置
+        return WechatService::getV3PayConfig($merId, $appId);
+    }
+
+    /**
      * @param $merId
      * @param string $appid
      * @return MiniProgramService
@@ -202,6 +219,15 @@ class MiniProgramService
     public function paymentService()
     {
         return $this->service->payment;
+    }
+
+    /**
+     * 支付
+     * @return \crmeb\services\easywechat\Pay\client
+     */
+    public function v3PayService()
+    {
+        return $this->service->v3Pay;
     }
 
     /**
@@ -308,7 +334,7 @@ class MiniProgramService
      * @return mixed
      */
     public function paymentPrepare($openid, $out_trade_no, $total_fee, $attach, $body, $detail = '', $trade_type = 'JSAPI', $options = [])
-    {
+    {//老版本 已废弃
         $order = $this->paymentOrder($openid, $out_trade_no, $total_fee, $attach, $body, $detail, $trade_type, $options);
         $result = $this->paymentService()->prepare($order);
         if ($result->return_code == 'SUCCESS' && $result->result_code == 'SUCCESS') {
@@ -337,8 +363,18 @@ class MiniProgramService
      * @return array|string
      */
     public function jsPay($openid, $out_trade_no, $total_fee, $attach, $body, $detail = '', $trade_type = 'JSAPI', $options = [])
-    {
+    {//老版本 已废弃
         return $this->paymentService()->configForJSSDKPayment($this->paymentPrepare($openid, $out_trade_no, $total_fee, $attach, $body, $detail, $trade_type, $options));
+    }
+
+    public function jsPayV3($openid, $options){
+        $payOrder = [
+            'body' => $options['body'],
+            'out_trade_no' => $options['order_sn'],
+            'attach' => $options['attach'],
+            'total_fee' => $options['pay_price'],
+        ];
+        return $this->v3PayService()->payJs($openid, $payOrder);
     }
 
     /**
