@@ -79,6 +79,7 @@ class WechatService
         $this->application->register(new \crmeb\services\easywechat\profitSharing\ServiceProvider);
         $this->application->register(new \crmeb\services\easywechat\coupon\ServiceProvider);
         $this->application->register(new \crmeb\services\easywechat\merchantComplaint\ServiceProvider);
+        $this->application->register(new \crmeb\services\easywechat\pay\ServiceProvider);
     }
     
      /**
@@ -118,7 +119,7 @@ class WechatService
                 // 'pay_weixin_client_key' => $payment['pay_routine_client_cert'],
                 'serial_no' => trim($payment['pay_routine_serial_no']),
                 'apiv3_key' => trim($payment['pay_routine_v3_key']),
-                'notify_url' => systemConfig('site_url') . Route::buildUrl('wechatNotify')->build(),
+                'notify_url' => systemConfig('site_url') . Route::buildUrl('wechatNotifyV3')->vars(['mer_id' => $merId])->build(),
             ],
         ];
     }
@@ -1066,6 +1067,15 @@ class WechatService
     public function MerchantComplaint()
     {
         return $this->application->merchantComplaint;
+    }
+
+    /**
+     * 支付
+     * @return easywechat\Pay\client
+     */
+    public function v3PayService()
+    {
+        return $this->application->v3Pay;
     }
 
 }

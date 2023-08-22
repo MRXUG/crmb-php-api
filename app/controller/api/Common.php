@@ -45,6 +45,7 @@ use Joypack\Tencent\Map\Bundle\LocationOption;
 use think\exception\ValidateException;
 use think\facade\Cache;
 use think\facade\Log;
+use think\facade\Route;
 use think\Response;
 
 /**
@@ -209,6 +210,30 @@ class Common extends BaseController
         } catch (Exception $e) {
             Log::info('支付回调失败:' . var_export([$e->getMessage(), $e->getFile() . ':' . $e->getLine()], true));
         }
+    }
+
+    public function wechatNotifyV3(){
+        $mer_id = $this->request->param('mer_id');
+        $service = WechatService::getMerPayObj($mer_id)->v3PayService();
+        try {
+            return app('json')->success($service->handleNotify(
+                function ($notify, $successful) {
+                    Log::info('微信支付成功回调V3' . json_encode($notify, true));
+                    if (!$successful) return false;
+                    try {
+                        event('pay_success_' . $notify['attach'], ['order_sn' => $notify['out_trade_no'], 'data' => $notify, 'is_combine' => 0]);
+                    } catch (\Exception $e) {
+                        Log::info('微信支付回调失败V3:' . $e->getMessage());
+                        return false;
+                    }
+                    return true;
+                }
+
+            ));
+        } catch (Exception $e) {
+            Log::info('支付回调失败V3:' . var_export([$e->getMessage(), $e->getFile() . ':' . $e->getLine()], true));
+        }
+        return app('json')->fail('error');
     }
 
     /**

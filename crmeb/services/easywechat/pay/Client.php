@@ -23,7 +23,7 @@ class Client extends BaseClient
     {
         $request = request();
         $success = $request->post('event_type') === 'TRANSACTION.SUCCESS';
-        $data = $this->decrypt($request->post('resource', []));
+        $data = $this->decrypt($request->post('resource', []), 1);
 
         $handleResult = call_user_func_array($callback, [json_decode($data, true), $success]);
         if (is_bool($handleResult) && $handleResult) {
@@ -38,7 +38,7 @@ class Client extends BaseClient
             ];
         }
 
-        return response($response, 200, [], 'json');
+        return $response;
     }
 
     public function pay($type, array $order)
