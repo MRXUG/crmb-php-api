@@ -12,6 +12,7 @@ class StoreOrderValidate extends Validate
     protected $failException = true;
 
     protected $rule = [
+        //追加字段搜索 不包含全部
         'received_name|收货人姓名' => 'chsDash',
         'received_phone|收货人手机号' => 'mobile',
         'buyer_name|订单编号' => 'chsDash',

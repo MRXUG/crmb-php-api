@@ -16,6 +16,7 @@ use app\common\repositories\store\ExcelRepository;
 use app\common\repositories\store\order\MerchantReconciliationRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
 use app\common\repositories\system\merchant\MerchantGoodsPaymentRepository;
+use app\validate\merchant\StoreOrder\StoreOrderValidate;
 use crmeb\exceptions\UploadException;
 use crmeb\jobs\BatchDeliveryJob;
 use crmeb\services\ExcelService;
@@ -85,6 +86,7 @@ class Order extends BaseController
                     'saleStatus',
                 ]
             );
+        app()->make(StoreOrderValidate::class)->check($where);
         $where['mer_id'] = $this->request->merId();
         return app('json')->success($this->repository->merchantGetList($where, $page, $limit));
     }
