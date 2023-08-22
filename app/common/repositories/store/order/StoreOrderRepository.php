@@ -794,12 +794,13 @@ class StoreOrderRepository extends BaseRepository
             $deliveryTimeout = $deliveryUnTimeout = $afterSaleIng = 0;
         // 聚合查询
         $timeOut = date('Y-m-d H:i:s', strtotime('-1 day'));
+        var_dump($moreWhere);
         $agg = $this->dao->getModelObj()->where($where)
             ->when(($sysDel !== null), function (BaseQuery $query) use ($sysDel) {
                 $query->where('is_system_del', $sysDel);
             })
             ->when(isset($moreWhere['date']) && $moreWhere['date'] !== '', function ($query) use ($moreWhere) {
-                getModelTime($query, $moreWhere['date'], 'StoreOrder.create_time');
+                getModelTime($query, $moreWhere['date'], 'create_time');
             })
             ->field("count(order_id) as order_count, status, paid, is_del, IF(create_time > '$timeOut', 1, 0) as is_time_out")
             ->group("status, is_time_out, paid, is_del")->select();
