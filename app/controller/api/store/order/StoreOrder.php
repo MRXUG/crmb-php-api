@@ -150,6 +150,7 @@ class StoreOrder extends BaseController
         $marketingDiscount = (array)$this->request->param('marketing_discount', []);
         $ad_type = (int)$this->request->param('ad_type',0);
         $ad_query = $this->request->param('gdt_params','');
+        $order_scenario = $this->request->param('order_scenario', 0); //下单场景 具体见model:StoreOrder
         if ($clipCoupons == 2) {
             $couponIds = [];
         }
@@ -180,8 +181,10 @@ class StoreOrder extends BaseController
         // if (!$addressId)
         //     return app('json')->fail('请选择地址');
 
-        $groupOrder = app()->make(LockService::class)->exec('order.create', function () use ($orderCreateRepository, $receipt_data, $mark, $extend, $cartId, $payType, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query) {
-            return $orderCreateRepository->v2CreateOrder(array_search($payType, StoreOrderRepository::PAY_TYPE), $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query);
+        $groupOrder = app()->make(LockService::class)->exec('order.create', function () use ($orderCreateRepository, $receipt_data, $mark, $extend, $cartId, $payType, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query, $order_scenario) {
+            return $orderCreateRepository->v2CreateOrder(array_search($payType, StoreOrderRepository::PAY_TYPE),
+                $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds, $useIntegral,
+                $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query, $order_scenario);
         });
 
         if ($groupOrder['pay_price'] == 0) {
@@ -227,6 +230,7 @@ class StoreOrder extends BaseController
         $refluxCoil = isset($marketingDiscount['refluxCoil']) ? (array)$marketingDiscount['refluxCoil'] : [];
         $ad_type = (int)$this->request->param('ad_type',1);
         $ad_query = $this->request->param('gdt_params','');
+        $order_scenario = $this->request->param('order_scenario',0);
         if ($clipCoupons == 2) {
             $couponIds = [];
         }
@@ -260,16 +264,17 @@ class StoreOrder extends BaseController
 
         $groupOrder = app()->make(LockService::class)->exec('order.create', function () use ($orderCreateRepository,
             $receipt_data, $mark, $extend, $cartId, $payType, $takes, $couponIds, $useIntegral, $addressId,
-            $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query) {
+            $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query, $order_scenario) {
             if (count($refluxCoil) === 0) {
                 // $marketing_discount['refluxCoil'] 为空对象
                 return $orderCreateRepository->v2CreateOrder(array_search($payType, StoreOrderRepository::PAY_TYPE),
                     $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds,
-                    $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query);
+                    $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query, $order_scenario);
             } else {
                 return $orderCreateRepository->v2CreateOrder2(array_search($payType, StoreOrderRepository::PAY_TYPE),
                     $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds,
-                    $useIntegral, $addressId, $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query);
+                    $useIntegral, $addressId, $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query,
+                    $order_scenario);
             }
         });
 

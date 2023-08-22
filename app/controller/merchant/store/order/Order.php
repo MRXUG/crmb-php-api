@@ -80,8 +80,9 @@ class Order extends BaseController
                     'buyer_name',
                     'buyer_phone',
                     'search_Pid',
-                    'all_ad_channel',
                     'logistics_anomaly',
+                    'order_scenario',
+                    'saleStatus',
                 ]
             );
         $where['mer_id'] = $this->request->merId();

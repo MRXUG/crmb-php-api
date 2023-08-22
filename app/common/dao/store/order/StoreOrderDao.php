@@ -314,7 +314,7 @@ class StoreOrderDao extends BaseDao
                 // TODO 根据物流状态 ，最好是将异常状态加到 status 中
             })
             //下单场景
-            ->when(isset($where['order_scenario']) && $where['order_scenario'] != 0, function ($query) use ($where) {
+            ->when(isset($where['order_scenario']) && $where['order_scenario'] != -1, function ($query) use ($where) {
                 $query->where('StoreOrder.order_scenario',  $where['order_scenario']);
             })
             //售后场景

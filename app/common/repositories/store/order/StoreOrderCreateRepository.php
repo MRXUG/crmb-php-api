@@ -1938,7 +1938,10 @@ class StoreOrderCreateRepository extends StoreOrderRepository
      * @param  array  $marketingDiscount
      * @return mixed
      */
-    public function v2CreateOrder(int $pay_type, $user, array $cartId, array $extend, array $mark, array $receipt_data, array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null, array $post, array $marketingDiscount = [],$clipCoupons = 1,$ad_type = 0,$ad_query = '')
+    public function v2CreateOrder(int $pay_type, $user, array $cartId, array $extend, array $mark, array $receipt_data,
+                                  array $takes = null, array $useCoupon = null, bool $useIntegral = false,
+                                  int $addressId = null, array $post = [], array $marketingDiscount = [],$clipCoupons = 1,
+                                  $ad_type = 0,$ad_query = '', $order_scenario = 0)
     {
         $uid = $user->uid;
         $orderInfo = $this->v2CartIdByOrderInfo($user, $cartId, $takes, $useCoupon, $useIntegral, $addressId, true, $marketingDiscount,$clipCoupons);
@@ -2161,6 +2164,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 'stock_id' => $orderMerchantCoupon['stock_id'] ?? '', // 商家券批次
                 // 'discount_num' => $orderMerchantCoupon['discount_num'] ?? 0, // 商家券面额
                 'marketing_discount' => $orderTotalMarketingDiscount, // 营销优惠|商家券优惠金额
+                'order_scenario' => $order_scenario ?? 0, // 下单场景
             ];
             $allUseCoupon = array_merge($allUseCoupon, $merchantCart['order']['useCouponIds']);
             $orderList[] = $_order;
@@ -2454,7 +2458,8 @@ class StoreOrderCreateRepository extends StoreOrderRepository
      */
     public function v2CreateOrder2(int $pay_type, $user, array $cartId, array $extend, array $mark, array $receipt_data,
                                    array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null,
-                                   array $post, array $marketingDiscount = [], array $refluxCoil = [],$clipCoupons = 1,$ad_type = 0,$ad_query = '')
+                                   array $post = [], array $marketingDiscount = [], array $refluxCoil = [],$clipCoupons = 1,
+                                   $ad_type = 0,$ad_query = '', $order_scenario = 0)
     {
         $uid = $user->uid;
         $orderInfo = $this->v2CartIdByOrderInfo2($user, $cartId, $takes, $useCoupon, $useIntegral, $addressId, true, $marketingDiscount, $refluxCoil ,$clipCoupons);
@@ -2677,6 +2682,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 'stock_id' => $orderMerchantCoupon['stock_id'] ?? '', // 商家券批次
                 // 'discount_num' => $orderMerchantCoupon['discount_num'] ?? 0, // 商家券面额
                 'marketing_discount' => $orderTotalMarketingDiscount, // 营销优惠|商家券优惠金额
+                'order_scenario' => $order_scenario ?? 0, // 下单场景
             ];
             $allUseCoupon = array_merge($allUseCoupon, $merchantCart['order']['useCouponIds']);
             $orderList[] = $_order;

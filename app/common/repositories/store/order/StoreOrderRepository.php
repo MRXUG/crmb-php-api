@@ -789,18 +789,59 @@ class StoreOrderRepository extends BaseRepository
         if ($merId) $where['mer_id'] = $merId;          //商户订单
         if ($orderType === 0) $where['order_type'] = 0; //普通订单
         if ($orderType === 1) $where['take_order'] = 1; //已核销订单
-        //1: 未支付 2: 未发货 3: 待收货 4: 待评价 5: 交易完成 6: 已退款 7: 已删除
-        $all = $this->dao->search($where, $sysDel)->where($this->getOrderType(0))->count();
-        $statusAll = $all;
-        $unpaid = $this->dao->search($where, $sysDel)->where($this->getOrderType(1))->count();
-        $unshipped = $this->dao->search($where, $sysDel)->where($this->getOrderType(2))->count();
-        $untake = $this->dao->search($where, $sysDel)->where($this->getOrderType(3))->count();
-        $unevaluate = $this->dao->search($where, $sysDel)->where($this->getOrderType(4))->count();
-        $complete = $this->dao->search($where, $sysDel)->where($this->getOrderType(5))->count();
-        $refund = $this->dao->search($where, $sysDel)->where($this->getOrderType(6))->count();
-        $del = $this->dao->search($where, $sysDel)->where($this->getOrderType(7))->count();
+        $statusAll = $unpaid = $unshipped = $untake = $unevaluate = $complete = $refund = $del =
+            $deliveryTimeout = $deliveryUnTimeout = $afterSaleIng = 0;
+        // 聚合查询
+        $timeOut = date('Y-m-d H:i:s', strtotime('-1 day'));
+        $agg = $this->dao->getModelObj()->where($where)
+            ->when(($sysDel !== null), function (BaseQuery $query) use ($sysDel) {
+                $query->where('is_system_del', $sysDel);
+            })
+            ->field("count(order_id) as order_count, status, paid, is_del, IF(create_time > '$timeOut', 1, 0) as is_time_out")
+            ->group("status, is_time_out, paid, is_del")->select();
 
-        return compact('all', 'statusAll', 'unpaid', 'unshipped', 'untake', 'unevaluate', 'complete', 'refund', 'del');
+        foreach($agg as $v){
+            // 与$this->getOrderType 保持一致
+            $orderCount = $v['order_count'];
+            $statusAll += $orderCount;//全部
+            if($v['is_del'] == 1){// 已删除
+                $del += $orderCount;
+                continue;
+            }
+            if($v['paid'] == 0){//待付款
+                $unpaid += $orderCount;
+                continue;
+            }
+            switch ($v['status']){
+                case StoreOrder::ORDER_STATUS_REFUND: // 已退款
+                    $refund += $orderCount;
+                    break;
+                case StoreOrder::ORDER_STATUS_BE_SHIPPED: // 待发货
+                    $unshipped += $orderCount;
+                    if($v['is_timeout'] == 1){
+                        $deliveryTimeout += $orderCount; //发货超时
+                    }else{
+                        $deliveryUnTimeout += $orderCount; // 24小时内未发货
+                    }
+                    break;
+                case StoreOrder::ORDER_STATUS_BE_RECEIVE: // 待收货
+                    $untake += $orderCount;
+                    break;
+                case StoreOrder::ORDER_STATUS_REPLY: // 待回复
+                    $unevaluate += $orderCount;
+                    break;
+                case StoreOrder::ORDER_STATUS_SUCCESS: // 已完成
+                    $complete += $orderCount;
+                    break;
+                case StoreOrder::ORDER_STATUS_REFUNDING:
+                case StoreOrder::ORDER_STATUS_REFUND_ERROR: // 售后中
+                     $afterSaleIng += $orderCount;
+                    break;
+            }
+        }
+        $all = $statusAll;
+        return compact('all', 'statusAll', 'unpaid', 'unshipped', 'untake', 'unevaluate', 'complete', 'refund', 'del',
+            'deliveryTimeout', 'deliveryUnTimeout', 'afterSaleIng');
     }
 
     public function orderType(array $where)

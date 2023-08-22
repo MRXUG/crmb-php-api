@@ -59,6 +59,21 @@ class StoreOrder extends BaseModel
         self::ORDER_STATUS_REFUND => '已退款',
     ];
 
+    /**
+     *
+     * 下单场景 order_scenario
+     * 0. 默认 其他
+     * 1. 营销流量-回流优惠券
+     * 2. 营销流量-扩展链接(视频号)
+     * 3. 二次动画挽留
+     * 4. 首次支付失败优惠
+     * 5. 二次支付失败优惠
+     * 6. 顺手买一件
+     *
+     *
+     *
+     */
+
     // 更具前端订单状态判断逻辑
     const STATUS_MAP = [
         self::ORDER_STATUS_BE_SHIPPED => "待提货",
