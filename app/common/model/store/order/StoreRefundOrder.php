@@ -23,7 +23,7 @@ use think\model\relation\HasOne;
 class StoreRefundOrder extends BaseModel
 {
     /**
-     *  状态 0:待审核 -1:审核未通过 1:待退货 2:待收货 3:已退款
+     *  状态 0:待审核 -1:审核未通过 1:待退货 2:待收货 3:已退款 4: 退款中 5: 退款失败
      */
     const CHECK_PENDING = 0;
     const UNAPPROVE = -1;

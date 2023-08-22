@@ -74,6 +74,14 @@ class Order extends BaseController
                     'ad_account_id',
                     'ad_id',
                     'mer_name',
+                    // append
+                    'received_name',
+                    'received_phone',
+                    'buyer_name',
+                    'buyer_phone',
+                    'search_Pid',
+                    'all_ad_channel',
+                    'logistics_anomaly',
                 ]
             );
         $where['mer_id'] = $this->request->merId();

@@ -18,6 +18,7 @@ use app\common\dao\BaseDao;
 use app\common\model\store\order\StoreOrder;
 use app\common\model\store\order\StoreOrderProduct;
 use app\common\model\store\order\StoreOrderStatus;
+use app\common\model\store\order\StoreRefundOrder;
 use app\common\repositories\store\order\StoreOrderStatusRepository;
 use app\common\repositories\store\product\ProductAssistSetRepository;
 use app\common\repositories\store\product\ProductGroupBuyingRepository;
@@ -255,9 +256,9 @@ class StoreOrderDao extends BaseDao
                 $query->where('StoreOrder.ad_channel_id' ,$where['ad_channel_id']);
             })
             // 广告账户id
+            ->leftJoin('MerchantAd MA','StoreOrder.ad_id = MA.ad_id')
             ->when(isset($where['ad_account_id']) && $where['ad_account_id'] !== '', function ($query) use ($where) {
-                    $query->join('MerchantAd MA','StoreOrder.ad_id = MA.ad_id')
-                    ->where(function($query) use($where) {
+                    $query->where(function($query) use($where) {
                         $query->whereLike('MA.ad_account_id', "%{$where['ad_account_id']}%");
                     });
             })
@@ -275,6 +276,71 @@ class StoreOrderDao extends BaseDao
             ->order('StoreOrder.create_time DESC');
 
         return $query;
+    }
+
+    /**
+     * 追加查询
+     * @param BaseQuery $query
+     * @param array $where
+     * @return BaseQuery
+     */
+    public function merchantGetListAppendQuery(BaseQuery $query, array $where){
+        $buyerName = $where['buyer_name'] ?? '';
+        $buyerPhone = $where['buyer_phone'] ?? '';
+        return $query
+            ->when(isset($where['received_name']) && $where['received_name'] != '', function (BaseQuery $query) use ($where) {
+                $query->whereLike('StoreOrder.real_name', "%" . $where['received_name'] . "%");
+            })
+            ->when(isset($where['received_phone']) && $where['received_phone'] != '', function (BaseQuery $query) use ($where) {
+                $query->where('StoreOrder.user_phone',  $where['received_phone']);
+            })
+            ->when($buyerName || $buyerPhone,  function (BaseQuery $query) use  ($buyerName, $buyerPhone){
+                $query->leftJoin('user u', 'u.uid = StoreOrder.uid')
+                    ->when($buyerName, function ($query) use($buyerName){
+                        $query->whereLike('u.nickname', "%" . $buyerName . "%");
+                    })
+                    ->when($buyerPhone, function ($query) use($buyerPhone){
+                        $query->where('u.phone', $buyerPhone);
+                    });
+            })
+            ->when(isset($where['search_Pid']) && $where['search_Pid'] !== '', function ($query) use ($where) {
+                $orderId = StoreOrderProduct::alias('op')
+                    ->join('storeProduct sp','op.product_id = sp.product_id')
+                    ->where('sp.product_id',$where['search_Pid'])->column('order_id');
+                $query->whereIn('order_id',$orderId ?: '' );
+            })
+            //物流异常
+            ->when(isset($where['logistics_anomaly']) && $where['logistics_anomaly'] !== '', function ($query) use ($where) {
+                // TODO 根据物流状态 ，最好是将异常状态加到 status 中
+            })
+            //下单场景
+            ->when(isset($where['order_scenario']) && $where['order_scenario'] != 0, function ($query) use ($where) {
+                $query->where('StoreOrder.order_scenario',  $where['order_scenario']);
+            })
+            //售后场景
+            ->when(isset($where['saleStatus']) && $where['saleStatus'] != 0, function ($query) use ($where) {
+                switch ($where['saleStatus']){
+                    case 1://无售后
+                        $query->leftJoin('StoreRefundOrder', 'StoreOrder.order_id',  'StoreRefundOrder.order_id')
+                        ->where("StoreRefundOrder.order_id is null");
+                        break;
+                    case 2://售后中
+                        $query->leftJoin('StoreRefundOrder', 'StoreOrder.order_id',  'StoreRefundOrder.order_id')
+                            ->whereIn("StoreRefundOrder.status", [
+                                StoreRefundOrder::CHECK_PENDING, StoreRefundOrder::PENDING_RETURN,
+                                StoreRefundOrder::UNAPPROVE, StoreRefundOrder::TO_BE_RECEIVED,
+                                StoreRefundOrder::REFUNDING, StoreRefundOrder::REFUND_FAILED,
+                                ]);
+                        break;
+                    case 3://售后完成
+                    case 4://售后关闭 TODO 关闭售后单 现在没有这个功能
+                        $query->leftJoin('StoreRefundOrder', 'StoreOrder.order_id',  'StoreRefundOrder.order_id')
+                            ->where("StoreRefundOrder.status", StoreRefundOrder::REFUNDED);
+                        break;
+                    default:
+                        break;
+                }
+            });
     }
 
     public function groupBuyingStatus(array $orderIds, $status)
