@@ -568,7 +568,7 @@ Route::group('api/', function () {
     //微信支付回调
     Route::any('notice/wechat_pay', 'api.Common/wechatNotify')->name('wechatNotify');
     //微信支付回调V3
-    Route::any('notice/wechat_pay_v3', 'api.Common/wechatNotifyV3')->name('wechatNotifyV3');
+    Route::any('notice/wechat_pay_v3/:mer_id', 'api.Common/wechatNotifyV3')->name('wechatNotifyV3');
     //微信支付回调
     Route::any('notice/wechat_combine_pay/:type', 'api.Common/wechatCombinePayNotify')->name('wechatCombinePayNotify');
     Route::any('notice/routine_combine_pay/:type', 'api.Common/routineCombinePayNotify')->name('routineCombinePayNotify');

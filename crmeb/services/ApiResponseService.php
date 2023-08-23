@@ -54,11 +54,13 @@ class ApiResponseService
      * @param int $status
      * @param string $message
      * @param array|Arrayable|null $data
+     * @param int|string $timestamp
      * @return Json
      */
-    public function make(int $status, string $message, $data = null): Json
+    public function make(int $status, string $message, $data = null, $timestamp = null): Json
     {
-        $content = compact('status', 'message');
+        $timestamp = $timestamp ?? time();
+        $content = compact('status', 'message', 'timestamp');
         if (!is_null($data))
             $content['data'] = $this->parseData($data);
         $this->response->data($content);

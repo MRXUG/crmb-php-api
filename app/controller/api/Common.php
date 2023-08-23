@@ -33,6 +33,7 @@ use app\common\repositories\user\UserVisitRepository;
 use app\common\repositories\wechat\TemplateMessageRepository;
 use app\common\repositories\wechat\WechatUserRepository;
 use crmeb\basic\BaseController;
+use crmeb\listens\OrderRefundListen;
 use crmeb\services\AlipayService;
 use crmeb\services\CopyCommand;
 use crmeb\services\MerchantCouponService;
@@ -212,8 +213,7 @@ class Common extends BaseController
         }
     }
 
-    public function wechatNotifyV3(){
-        $mer_id = $this->request->param('mer_id');
+    public function wechatNotifyV3($mer_id){
         $service = WechatService::getMerPayObj($mer_id)->v3PayService();
         try {
             return app('json')->success($service->handleNotify(
