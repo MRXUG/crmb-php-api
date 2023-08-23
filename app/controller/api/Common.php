@@ -215,10 +215,17 @@ class Common extends BaseController
 
     public function wechatNotifyV3($mer_id){
         $service = WechatService::getMerPayObj($mer_id)->v3PayService();
+        $header =  $this->request->header();
+        $content =  $this->request->getContent();
+
+        if(!$service->verifySignature($header,$content)){
+            Log::info('微信支付回调V3验签失败:' . json_encode($header).":content:".$content);
+            return app('json')->fail('request header verified false');
+        }
         try {
             return app('json')->success($service->handleNotify(
                 function ($notify, $successful) {
-                    Log::info('微信支付成功回调V3' . json_encode($notify, true));
+                    Log::info('微信支付成功回调V3' . json_encode($notify));
                     if (!$successful) return false;
                     try {
                         event('pay_success_' . $notify['attach'], ['order_sn' => $notify['out_trade_no'], 'data' => $notify, 'is_combine' => 0]);

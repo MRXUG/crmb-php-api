@@ -13,6 +13,7 @@
 namespace crmeb\services\easywechat;
 
 
+use crmeb\services\easywechat\certficates\Client;
 use EasyWeChat\Core\AbstractAPI;
 use EasyWeChat\Core\AccessToken;
 use EasyWeChat\Core\Exceptions\HttpException;
@@ -314,5 +315,66 @@ class BaseClient extends AbstractAPI
             throw new InvalidArgumentException($exception->getMessage(), $exception->getCode());
         }
         throw new InvalidArgumentException('AEAD_AES_256_GCM 需要 PHP 7.1 以上或者安装 libsodium-php');
+    }
+
+    /**
+     * wechatpay Signature verify
+     * @param array $header
+     * @param string $body
+     * @return bool|int
+     */
+    public function verifySignature(array $header, string $body)
+    {
+        // lower base name.
+        $serialNo  = $header[strtolower('Wechatpay-Serial')] ?? '';
+        $sign      = $header[strtolower('Wechatpay-Signature')] ?? '';
+        $timestamp = $header[strtolower('Wechatpay-TimeStamp')] ?? '';
+        $nonce     = $header[strtolower('Wechatpay-Nonce')] ?? '';
+
+        if (!isset($serialNo, $sign, $timestamp, $nonce)) {
+            return false;
+        }
+
+        if (!$this->checkTimestamp($timestamp)) {
+            // log here
+            return false;
+        }
+
+        $message = "$timestamp\n$nonce\n$body\n";
+
+        return $this->verify($serialNo, $message, $sign);
+    }
+
+    protected function checkTimestamp($timestamp)
+    {
+        // reject responses beyond 5 minutes
+        return \abs((int)$timestamp - \time()) <= 300;
+    }
+
+    /**
+     * @param string $serialNumber
+     * @param string $message
+     * @param string $signature
+     * @return bool|int
+     */
+    public function verify($serialNumber, $message, $signature){
+        /** @var Client $certficatesService */
+        $certficatesService = $this->app->certficates;
+        $plain  = $certficatesService->get();
+
+        $certificate = \openssl_x509_read($plain['certificates']);
+        $serialNo = $certficatesService->parseCertificateSerialNo($certificate);
+        $certPubKeys = \openssl_get_publickey($certificate);
+
+        $serialNumber = \strtoupper(\ltrim($serialNumber, '0')); // trim leading 0 and uppercase
+        if($serialNumber != $serialNo){
+            return false;
+        }
+
+        if (!in_array('sha256WithRSAEncryption', \openssl_get_md_methods(true))) {
+            throw new \RuntimeException('当前PHP环境不支持SHA256withRSA');
+        }
+        $signature = \base64_decode($signature);
+        return \openssl_verify($message, $signature, $certPubKeys, 'sha256WithRSAEncryption');
     }
 }
