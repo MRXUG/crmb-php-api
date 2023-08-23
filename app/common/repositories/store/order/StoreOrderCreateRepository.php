@@ -3009,7 +3009,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         $couponCode              = $marketingDiscount['coupon_code'] ?? ''; // 商家券
         $couponChecked           = $marketingDiscount['checked'] ?? false; // 是否选中，如果已选中则，不再推优
         $discountNum             = 0; // 券面额：元
-        $fissionAmount           = $marketingDiscount['fission_amount'] ?? 0; // 涨红包金额
+//        $fissionAmount           = $marketingDiscount['fission_amount'] ?? 0; // 涨红包金额 已废弃
         $marketingDiscountAmount = $marketingDiscount['marketing_discount_amount'] ?? 0; // 优惠金额
         $failureDiscount         = $marketingDiscount['pay_failure_discount_amount'] ?? 0; // 支付失败优惠金额
         /**
@@ -3115,11 +3115,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 case 4:
                     // 营销 + 红包
                     // 优惠裂变开关：1-开启，2-关闭
-                    if ($fissionAmount && (($adInfo['discount_fission_switch'] == 2) || ($fissionAmount != $adFissionAmount)) && $productId == $adProductId) {
-                        $hasError = true;
-                    }
-
-                    if ($marketingDiscountAmount && $marketingDiscountAmount != $adMarketingDiscountAmount && $productId == $adProductId) {
+                    if ($marketingDiscountAmount && (($adInfo['discount_fission_switch'] == 2) || ($marketingDiscountAmount != $adFissionAmount)) && $productId == $adProductId) {
                         $hasError = true;
                     }
                     $discountTotal = $marketingDiscountAmount;
@@ -3263,7 +3259,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         $couponCode              = $marketingDiscount['coupon_code'] ?? ''; // 商家券
         $couponChecked           = $marketingDiscount['checked'] ?? false; // 是否选中，如果已选中则，不再推优
         $discountNum             = 0; // 券面额：元
-        $fissionAmount           = $marketingDiscount['fission_amount'] ?? 0; // 涨红包金额
+//        $fissionAmount           = $marketingDiscount['fission_amount'] ?? 0; // 涨红包金额 已废弃
         $marketingDiscountAmount = $marketingDiscount['marketing_discount_amount'] ?? 0; // 优惠金额
         $failureDiscount         = $marketingDiscount['pay_failure_discount_amount'] ?? 0; // 支付失败优惠金额
 
@@ -3375,11 +3371,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 case 4:
                     // 营销 + 红包
                     // 优惠裂变开关：1-开启，2-关闭
-                    if ($fissionAmount && (($adInfo['discount_fission_switch'] == 2) || ($fissionAmount != $adFissionAmount)) && $productId == $adProductId) {
-                        $hasError = true;
-                    }
-
-                    if ($marketingDiscountAmount && $marketingDiscountAmount != $adMarketingDiscountAmount && $productId == $adProductId) {
+                    if ($marketingDiscountAmount && (($adInfo['discount_fission_switch'] == 2) || ($marketingDiscountAmount != $adFissionAmount)) && $productId == $adProductId) {
                         $hasError = true;
                     }
                     $discountTotal = $marketingDiscountAmount;
