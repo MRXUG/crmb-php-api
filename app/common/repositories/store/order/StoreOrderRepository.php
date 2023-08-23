@@ -801,8 +801,8 @@ class StoreOrderRepository extends BaseRepository
             ->when(isset($moreWhere['date']) && $moreWhere['date'] !== '', function ($query) use ($moreWhere) {
                 getModelTime($query, $moreWhere['date'], 'create_time');
             })
-            ->field("count(order_id) as order_count, status, paid, is_del, IF(create_time > '$timeOut', 1, 0) as is_time_out")
-            ->group("status, is_time_out, paid, is_del")->select();
+            ->field("count(order_id) as order_count, status, paid, is_del, IF(create_time < '$timeOut', 1, 0) as is_timeout")
+            ->group("status, is_timeout, paid, is_del")->select();
 
         foreach($agg as $v){
             // 与$this->getOrderType 保持一致
