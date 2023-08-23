@@ -16,8 +16,10 @@ namespace app\common\repositories\system\merchant;
 
 use app\common\dao\BaseDao;
 use app\common\dao\system\merchant\MerchantAdminDao;
+use app\common\dao\system\merchant\MerchantAdminRelationDao;
 use app\common\model\system\merchant\Merchant;
 use app\common\model\system\merchant\MerchantAdmin;
+use app\common\model\system\merchant\MerchantAdminRelationModel;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\system\auth\RoleRepository;
 use crmeb\exceptions\AuthException;
@@ -73,11 +75,8 @@ class MerchantAdminRepository extends BaseRepository
     {
         $query = $this->dao->search($merId, $where, 1);
         $count = $query->count();
-        $list = $query->page($page, $limit)->hidden(['pwd', 'is_del'])->select();
-        $topAccount = $this->dao->merIdByAccount($merId);
+        $list = $query->page($page, $limit)->field($this->dao::ALL_ADMIN_INFO_FIELD)->select();
         foreach ($list as $k => $role) {
-            if ($topAccount)
-                $list[$k]['account'] = $topAccount . '@' . $role['account'];
             $list[$k]['rule_name'] = $role->roleNames();
         }
         return compact('list', 'count');
@@ -181,19 +180,7 @@ class MerchantAdminRepository extends BaseRepository
     {
         event('admin.merLogin.before',compact('account', 'password'));
         $accountInfo = explode('@', $account, 2);
-        if (count($accountInfo) === 1) {
-            $adminInfo = $this->dao->accountByTopAdmin($accountInfo[0]);
-        } else {
-            $merId = $this->dao->accountByMerchantId($accountInfo[0]);
-            if (!$merId){
-                $key = 'mer_login_failuree_'.$account;
-                $numb = Cache::get($key) ?? 0;
-                $numb++;
-                Cache::set($key,$numb,15*60);
-                throw new ValidateException('账号或密码错误');
-            }
-            $adminInfo = $this->dao->accountByAdmin($accountInfo[1], $merId);
-        }
+        $adminInfo = $this->dao->accountByTopAdmin($accountInfo[0]);
 
         if (!$adminInfo || !password_verify($password, $adminInfo->pwd)){
             $key = 'mer_login_failuree_'.$account;
@@ -203,19 +190,15 @@ class MerchantAdminRepository extends BaseRepository
             throw new ValidateException('账号或密码错误');
         }
 
-        if ($adminInfo['status'] != 1)
-            throw new ValidateException('账号已关闭');
-
-
         /**
-         * @var MerchantRepository $merchantRepository
+         * @var MerchantRepository $merchantRepository 此处不再校验商户状态 返回商户列表
          */
-        $merchantRepository = app()->make(MerchantRepository::class);
-        $merchant = $merchantRepository->get($adminInfo->mer_id);
-        if (!$merchant)
-            throw new ValidateException('商户不存在');
-        if (!$merchant['status'])
-            throw new ValidateException('商户已被锁定');
+//        $merchantRepository = app()->make(MerchantRepository::class);
+//        $merchant = $merchantRepository->get($adminInfo->mer_id);
+//        if (!$merchant)
+//            throw new ValidateException('商户不存在');
+//        if (!$merchant['status'])
+//            throw new ValidateException('商户已被锁定');
 
         $adminInfo->last_time = date('Y-m-d H:i:s');
         $adminInfo->last_ip = app('request')->ip();
@@ -281,7 +264,7 @@ class MerchantAdminRepository extends BaseRepository
     {
         $service = new JwtTokenService();
         $exp = intval(Config::get('admin.token_exp', 3));
-        $token = $service->createToken($admin->merchant_admin_id, 'mer', strtotime("+ {$exp}hour"));
+        $token = $service->createToken($admin->merchant_admin_id, 'mer', strtotime("+ {$exp}hour"), ['mer_id' => $admin->mer_id]);
         $this->cacheToken($token['token'], $token['out']);
         return $token;
     }
@@ -377,6 +360,37 @@ class MerchantAdminRepository extends BaseRepository
         if (isset($data['roles']))
             $data['roles'] = implode(',', $data['roles']);
         return $this->dao->update($id, $data);
+    }
+
+    public function updateRelation(int $merchantAdminId, int $mer_id, array $data){
+        if (isset($data['roles']))
+            $data['roles'] = implode(',', $data['roles']);
+        return MerchantAdminRelationModel::getDB()->where(['merchant_admin_id', $merchantAdminId, 'mer_id' => $mer_id])
+            ->update($data);
+    }
+
+    public function merchantList($merchantAdminId){
+        return Merchant::getDB()
+            ->alias('m')
+            ->join('merchant_admin_relation r', 'r.mer_id = m.id')
+            ->where([
+                'r.merchant_admin_id' => $merchantAdminId,
+                'r.status' => 1,
+                'r.is_del' => 0,
+                'm.status' => 1,
+                ''
+            ])
+            ->field("m.mer_id, m.mer_name, m.real_name, m.mer_phone, m.address, m.mer_keyword, m.mer_avatar, m.mer_banner, m.mini_banner, m.mer_info, m.service_phone")
+            ->select();
+
+    }
+
+    public function updateMerchantToken($merchantAdminId, $mer_id){
+        $service = new JwtTokenService();
+        $exp = intval(Config::get('admin.token_exp', 3));
+        $token = $service->createToken($merchantAdminId, 'mer', strtotime("+ {$exp}hour"), ['mer_id' => $mer_id]);
+        $this->cacheToken($token['token'], $token['out']);
+        return $token;
     }
 
 }

@@ -92,6 +92,9 @@ class MerchantHandler
         if (!$admin['status'])
             return app('json')->fail('账号已被禁用');
 
+        if(isset($payload->mer_id)){
+            $admin->mer_id = $payload->mer_id;
+        }
         /**
          * @var MerchantRepository $merchantRepository
          */

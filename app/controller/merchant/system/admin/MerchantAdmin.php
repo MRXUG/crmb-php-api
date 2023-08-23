@@ -85,7 +85,7 @@ class MerchantAdmin extends BaseController
         $status = $this->request->param('status');
         if (!$this->repository->exists($id, $this->merId, 1))
             return app('json')->fail('数据不存在');
-        $this->repository->update($id, ['status' => $status == 1 ? 1 : 0]);
+        $this->repository->updateRelation($id, $this->merId, ['status' => $status == 1 ? 1 : 0]);
         return app('json')->success('编辑成功');
     }
 
@@ -149,7 +149,8 @@ class MerchantAdmin extends BaseController
         if ($data['pwd'] !== $data['againPassword'])
             return app('json')->fail('两次密码输入不一致');
         unset($data['againPassword']);
-        if ($this->repository->merFieldExists($this->merId, 'account', $data['account']))
+        // 新增的账号可以重复于其他名，这样如果存在账号可以绑定多商户。但是修改不可以重复。目前是使用account。TODO 未来会考虑换到phone,增加安全性和可靠性以及合理性。
+        if ($this->repository->accountExists($this->merId, 'account', $data['account']))
             return app('json')->fail('账号已存在');
         $data['pwd'] = $this->repository->passwordEncode($data['pwd']);
         $data['mer_id'] = $this->merId;
@@ -176,14 +177,24 @@ class MerchantAdmin extends BaseController
     {
         $data = $this->request->params(['account', 'phone', 'real_name', ['roles', []], ['status', 0]]);
         $validate->isUpdate()->check($data);
-        if ($this->repository->merFieldExists($this->merId, 'account', $data['account'], $id))
+        if ($this->repository->fieldExists('account', $data['account'], $id))
             return app('json')->fail('账号已存在');
 
         $check = app()->make(RoleRepository::class)->checkRole($data['roles'],$this->merId);
         if (!$check ) {
             return app('json')->fail('未开启或者不存在的身份不能添加');
         }
-        $this->repository->update($id, $data);
+        $relation = [
+            'roles' => $data['roles'],
+            'status' => $data['status'],
+        ];
+        $adminInfo = [
+            'account' => $data['account'],
+            'phone' => $data['phone'],
+            'real_name' => $data['real_name'],
+        ];
+        $this->repository->updateRelation($id,  $this->merId, $relation);
+        $this->repository->update($id, $adminInfo);
 
         return app('json')->success('编辑成功');
     }
@@ -223,7 +234,7 @@ class MerchantAdmin extends BaseController
     {
         if (!$this->repository->exists($id, $this->merId, 1))
             return app('json')->fail('数据不存在');
-        $this->repository->update($id, ['is_del' => 1]);
+        $this->repository->updateRelation($id, $this->merId, ['is_del' => 1]);
         return app('json')->success('删除成功');
     }
 
@@ -284,6 +295,17 @@ class MerchantAdmin extends BaseController
     public function editPasswordForm()
     {
         return app('json')->success(formToData($this->repository->passwordForm($this->request->adminId(), 3)));
+    }
+
+    public function merchantList(){
+        $merchantAdminId = $this->request->adminId();
+        return app('json')->success($this->repository->merchantList($merchantAdminId));
+    }
+
+    public function updateMerchantToken(){
+        $mer_id = $this->request->param('mer_id');
+        $merchantAdminId = $this->request->adminId();
+        return app('json')->success($this->repository->updateMerchantToken($merchantAdminId, $mer_id));
     }
 
 }

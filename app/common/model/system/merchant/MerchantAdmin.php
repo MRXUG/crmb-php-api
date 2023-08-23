@@ -16,6 +16,7 @@ namespace app\common\model\system\merchant;
 
 use app\common\model\BaseModel;
 use app\common\model\system\auth\Role;
+use think\db\BaseQuery;
 
 class MerchantAdmin extends BaseModel
 {
@@ -73,4 +74,13 @@ class MerchantAdmin extends BaseModel
         $roleNames = Role::getDB()->whereIn('role_id', $this->roles)->column('role_name');
         return $isArray ? $roleNames : implode(',', $roleNames);
     }
+
+    public function merchantRelation(){
+        /**
+         * roles,is_del,status,level 可以删除
+         *
+         */
+        return $this->hasMany(MerchantAdminRelationModel::class, 'merchant_admin_id', 'merchant_admin_id');
+    }
+
 }

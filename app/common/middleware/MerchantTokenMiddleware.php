@@ -65,6 +65,9 @@ class MerchantTokenMiddleware extends BaseMiddleware
             if (!$admin['status'])
                 throw new AuthException('账号已被禁用');
 
+            if(isset($payload->mer_id)){
+                $admin->mer_id = $payload->mer_id;
+            }
             /**
              * @var MerchantRepository $merchantRepository
              */

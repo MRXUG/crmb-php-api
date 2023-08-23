@@ -16,6 +16,7 @@ namespace app\common\dao\system\merchant;
 
 use app\common\dao\BaseDao;
 use app\common\model\system\merchant\MerchantAdmin;
+use app\common\model\system\merchant\MerchantAdminRelationModel;
 use think\db\BaseQuery;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
@@ -42,6 +43,8 @@ class MerchantAdminDao extends BaseDao
         return MerchantAdmin::class;
     }
 
+    const ALL_ADMIN_INFO_FIELD = 'account, real_name, phone,mar.*';
+
     /**
      * @param int $merId
      * @param array $where
@@ -52,20 +55,21 @@ class MerchantAdminDao extends BaseDao
      */
     public function search(int $merId, array $where = [], ?int $level = null)
     {
-        $query = MerchantAdmin::getDB()->where('is_del', 0)->where('mer_id', $merId)
+        $query = MerchantAdmin::getDB()
+            ->alias('a')
+            ->leftJoin('merchant_admin_relation mar', 'mar.merchant_admin_id = a.merchant_admin_id and mar.is_del = 0 and mar.mer_id = '.$merId)
             ->when(isset($where['date']) && $where['date'] !== '', function ($query) use ($where) {
-                getModelTime($query, $where['date']);
+                getModelTime($query, $where['date'], 'mar.create_time');
+            })
+            ->when(!is_null($level), function ($query) use ($level) {
+                $query->where('mar.level', $level);
+            })
+            ->when(isset($where['keyword']) && $where['keyword'] !== '', function ($query) use ($where) {
+                $query->whereLike('a.real_name|a.account', '%' . $where['keyword'] . '%');
+            })
+            ->when(isset($where['status']) && $where['status'] !== '', function ($query) use ($where) {
+                $query->where('mar.status', intval($where['status']));
             });
-
-        if (!is_null($level)) $query->where('level', $level);
-
-        if (isset($where['keyword']) && $where['keyword'] !== '') {
-            $query = $query->whereLike('real_name|account', '%' . $where['keyword'] . '%');
-        }
-
-        if (isset($where['status']) && $where['status'] !== '') {
-            $query = $query->where('status', intval($where['status']));
-        }
 
         return $query;
     }
@@ -78,7 +82,11 @@ class MerchantAdminDao extends BaseDao
      */
     public function merIdByAccount(int $merId): string
     {
-        return MerchantAdmin::getDB()->where('mer_id', $merId)->where('level', 0)->value('account');
+        return MerchantAdmin::getDB()
+            ->alias('a')
+            ->join('merchant_admin_relation mar', 'mar.merchant_admin_id = a.merchant_admin_id and mar.is_del = 0 and mar.mer_id = '.$merId)
+            ->where('mar.level', 0)
+            ->value('account');
     }
 
     /**
@@ -92,24 +100,12 @@ class MerchantAdminDao extends BaseDao
      */
     public function merIdByAdmin(int $merId)
     {
-        return MerchantAdmin::getDB()->where('mer_id', $merId)->where('level', 0)->find();
-    }
-
-    /**
-     * @param string $account
-     * @param int $merId
-     * @return array|Model|null
-     * @throws DataNotFoundException
-     * @throws DbException
-     * @throws ModelNotFoundException
-     * @author xaboy
-     * @day 2020-04-20
-     */
-    public function accountByAdmin(string $account, int $merId)
-    {
-        return MerchantAdmin::getInstance()->where('account', $account)
-            ->where('is_del', 0)->where('mer_id', $merId)
-            ->field(['account', 'pwd', 'real_name', 'login_count', 'merchant_admin_id', 'status', 'mer_id'])
+        return MerchantAdmin::getInstance()
+            ->alias('a')
+            ->leftJoin('merchant_admin_relation mar', 'mar.merchant_admin_id = a.merchant_admin_id and mar.is_del = 0 and mar.mer_id = '.$merId)
+            ->where('mar.level', 0)
+            ->where('mar.mer_id', $merId)
+            ->field(self::ALL_ADMIN_INFO_FIELD)
             ->find();
     }
 
@@ -124,9 +120,13 @@ class MerchantAdminDao extends BaseDao
      */
     public function accountByTopAdmin(string $account)
     {
-        return MerchantAdmin::getInstance()->where('account', $account)
-            ->where('is_del', 0)->where('level', 0)
-            ->field(['account', 'pwd', 'real_name', 'login_count', 'merchant_admin_id', 'status', 'mer_id'])
+        return MerchantAdmin::getInstance()
+            ->alias('a')
+            ->join('merchant_admin_relation mar', 'mar.merchant_admin_id = a.merchant_admin_id and mar.is_del = 0')
+            ->where('a.account', $account)
+            ->where('a.status', 1)
+            ->field(self::ALL_ADMIN_INFO_FIELD)
+            ->order('mar.last_time desc')
             ->find();
     }
 
@@ -166,9 +166,15 @@ class MerchantAdminDao extends BaseDao
      */
     public function exists(int $id, int $merId = 0, ?int $level = null)
     {
-        $query = MerchantAdmin::getDB()->where($this->getPk(), $id)->where('is_del', 0);
-        if ($merId) $query->where('mer_id', $merId);
-        if (!is_null($level)) $query->where('level', $level);
+        $query = MerchantAdmin::getDB()
+            ->alias('a')
+            ->join('merchant_admin_relation mar', 'mar.merchant_admin_id = a.merchant_admin_id and mar.is_del = 0 and mar.mer_id = '.$merId)
+            ->where('mar.is_del', 0)
+            ->where('a.merchant_admin_id', $id)
+            ->where('mar.mer_id', $merId)
+            ->when(!is_null($level), function ($query) use ($level){
+                $query->where('mar.level', $level);
+            });
         return $query->count() > 0;
     }
 
@@ -186,6 +192,43 @@ class MerchantAdminDao extends BaseDao
         $query = MerchantAdmin::getDB()->where($field, $value)->where('mer_id', $merId);
         if (!is_null($except)) $query->where($this->getPk(), '<>', $except);
         return $query->count() > 0;
+    }
+
+    public function accountExists(int $merId, $account, $except){
+        $query = MerchantAdmin::getDB()
+            ->alias('a')
+            ->join('merchant_admin_relation mar', 'mar.merchant_admin_id = a.merchant_admin_id and mar.is_del = 0 and mar.mer_id = '.$merId)
+            ->where('a.account', $account)
+            ->where('mar.mer_id', $merId)
+            ->when(!is_null($except), function ($query) use ($except){
+                $query->where('mar.merchant_admin_id', '<>', $except);
+            });
+        return $query->count() > 0;
+    }
+
+    public function create($data){
+        $merAdmin = [
+            'account' => $data['account'],
+            'phone' => $data['phone'],
+            'pwd' => $data['pwd'],
+            'real_name' => $data['real_name'],
+            'mer_id' => $data['mer_id'],
+        ];
+
+        $merAdminRelation = [
+            'roles' => $data['roles'],
+            'mer_id' => $data['mer_id'],
+            'level' => $data['level'],
+        ];
+
+        Db::transaction(function ($merAdmin) use ($merAdminRelation) {
+            if($id = MerchantAdmin::getDB()->where('account', $merAdmin['account'])->value('merchant_admin_id')){
+                $merAdminRelation['merchant_admin_id'] = $id;
+            }else{
+                $merAdminRelation['merchant_admin_id'] = $this->getModelObj()->insertGetId($merAdmin);
+            }
+            MerchantAdminRelationModel::getDB()->insert($merAdminRelation);
+        });
     }
 
     /**
@@ -208,7 +251,7 @@ class MerchantAdminDao extends BaseDao
      */
     public function merchantIdByTopAdminId(int $merId)
     {
-        return MerchantAdmin::getDB()->where('mer_id', $merId)->where('is_del', 0)->where('level', 0)->value('merchant_admin_id');
+        return MerchantAdminRelationModel::getDB()->where('mer_id', $merId)->where('is_del', 0)->where('level', 0)->value('merchant_admin_id');
     }
 
     public function deleteMer($merId)
