@@ -562,6 +562,9 @@ class UserRepository extends BaseRepository
         if(isset($user->unionid)){
             $param['unionid'] = $user->unionid;
         }
+        if (isset($user->openid)){
+            $param['openid'] = $user->openid;
+        }
         $token = $service->createToken($user->uid, 'user', strtotime("+ {$exp}day"),$param);
         $this->cacheToken($token['token'], $token['out']);
         return $token;

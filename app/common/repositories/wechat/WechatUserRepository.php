@@ -395,8 +395,20 @@ class WechatUserRepository extends BaseRepository
             } else {
                 $wechatUser = $this->dao->create($routineInfo);
             }
-            // 异步同步用户-小程序关系
-            Queue::push(WechatUserRelationJob::class,['openid'=>$routineInfo['routine_openid'],'unionid'=>$routineInfo['unionid']??'','appid'=>$appid,'wechat_user_id'=>$wechatUser->wechat_user_id]);
+            $userOpenidRelationData = [
+                'routine_openid' => $routineInfo['routine_openid'],
+                'unionid'        => $routineInfo['unionid']??'',
+                'appid'          => $appid,
+                'wechat_user_id' => $wechatUser->wechat_user_id,
+                'create_time' =>date('Y-m-d H:i:s',time()),
+            ];
+            (new UserOpenIdRelationDao())->createOrUpdate(
+                [
+                    'routine_openid' => $routineInfo['routine_openid'],
+                    'appid'          => $appid,
+                ],
+                $userOpenidRelationData
+            );
             /** @var UserRepository $userRepository */
             $userRepository = app()->make(UserRepository::class);
             $user = $userRepository->syncWechatUser($wechatUser, 'routine');
