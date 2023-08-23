@@ -145,9 +145,11 @@ class OrderRefundListen extends TimerService implements ListenerInterface
         // 获取商户配置
         $make   = WechatService::getMerPayObj($merId, $item->getAttr('app_id'));
         // 查询回退结果 原始逻辑
-        // 分账作为押金属性，会由售后押款统一回退 此处不需要重复回退，直接查询即可  ProfitSharing::createRefundTask
-        return $make->profitSharing()
-            ->profitSharingReturnResult($orderSn, $orderSn);
+        if($info['profit_sharing_status'] != DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS_PART){
+            // 分账作为押金属性，会由售后押款统一回退 此处不需要重复回退，直接查询即可  ProfitSharing::createRefundTask
+            return $make->profitSharing()
+                ->profitSharingReturnResult($orderSn, $orderSn);
+        }
 
         /** @var DeliveryProfitSharingStatusPart $profitSharingPartRepos */
         $profitSharingPartRepos = app()->make(DeliveryProfitSharingStatusPartRepository::class);
