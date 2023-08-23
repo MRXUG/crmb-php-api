@@ -51,7 +51,7 @@ class Client extends BaseClient
             'attach' => $order['attach'],
             'notify_url' => $this->app['config']['service_payment']['notify_url'],
             'amount' => [
-                'total' => $order['total_fee'] * 100, //单位 分
+                'total' => intval($order['total_fee'] * 100), //单位 分
                 'currency' => 'CNY'
             ],
             'scene_info' => [
