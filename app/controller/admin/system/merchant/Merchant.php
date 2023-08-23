@@ -245,7 +245,6 @@ class Merchant extends BaseController
         $adminInfo = $adminRepository->merIdByAdmin($id);
         $tokenInfo = $adminRepository->createToken($adminInfo);
         $admin = $adminInfo->toArray();
-        unset($admin['pwd']);
         $data = [
             'token' => $tokenInfo['token'],
             'exp' => $tokenInfo['out'],

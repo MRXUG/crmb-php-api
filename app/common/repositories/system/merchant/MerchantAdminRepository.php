@@ -178,9 +178,8 @@ class MerchantAdminRepository extends BaseRepository
      */
     public function login(string $account, string $password)
     {
-        event('admin.merLogin.before',compact('account', 'password'));
-        $accountInfo = explode('@', $account, 2);
-        $adminInfo = $this->dao->accountByTopAdmin($accountInfo[0]);
+        //event('admin.merLogin.before',compact('account', 'password'));
+        $adminInfo = $this->dao->accountByTopAdmin($account);
 
         if (!$adminInfo || !password_verify($password, $adminInfo->pwd)){
             $key = 'mer_login_failuree_'.$account;
@@ -204,7 +203,7 @@ class MerchantAdminRepository extends BaseRepository
         $adminInfo->last_ip = app('request')->ip();
         $adminInfo->login_count++;
         $adminInfo->save();
-        event('admin.merLogin',compact('adminInfo'));
+        //event('admin.merLogin',compact('adminInfo'));
         return $adminInfo;
     }
 

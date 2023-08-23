@@ -91,7 +91,7 @@ class MerchantAdminDao extends BaseDao
 
     /**
      * @param int $merId
-     * @return array|Model|null
+     * @return MerchantAdmin|null
      * @throws DataNotFoundException
      * @throws DbException
      * @throws ModelNotFoundException
