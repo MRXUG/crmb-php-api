@@ -234,22 +234,41 @@ return [
   "pages": [
     "pages/index/index",
     "pages/user/index",
-    "pages/goods_cate/goods_cate",
-    "pages/news_list/index",
-    "pages/news_details/index",
     "pages/auth/index",
-    "pages/order_pay_status/index",
     "pages/error/index",
-    "pages/order_pay_back/index"
   ],
   "subPackages": [
     {
       "root": "pages/goods_details",
       "pages": [
-        "index"
+        "index",
+        "goodsBack"
       ],
       "name": "goods_details"
     },
+    {
+			"root": "pages/news",
+			"pages": [
+        "news_list/index",
+        "news_details/index"
+			],
+      "name": "news",
+		},
+		{
+			"root": "pages/confirm",
+			"pages": [
+        "order_confirm/index"
+			],
+      "name": "confirm",
+		},
+		{
+			"root": "pages/pay_order",
+			"pages": [
+        "order_pay_status/index",
+        "order_pay_back/index"
+			],
+      "name": "pay_order",
+		},
     {
       "root": "pages/order_details",
       "pages": [
@@ -296,7 +315,6 @@ return [
         "user_modify_pwd/index",
         "user_payment/index",
         "user_pwd_edit/index",
-        "order_confirm/index",
         "goods_details_store/index",
         "promoter-list/index",
         "promoter-order/index",
@@ -475,6 +493,8 @@ return [
       "provider": "wxf3f436ba9bd4be7b"
     }
   },
+  "lazyCodeLoading": "requiredComponents",
+
   "usingComponents": {
     "send-coupon": "plugin://sendCoupon/send-coupon",
     "skeleton": "/components/skeleton/index",
