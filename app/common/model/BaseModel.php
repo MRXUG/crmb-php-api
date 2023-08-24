@@ -27,6 +27,14 @@ abstract class BaseModel extends Model
 {
     protected $updateTime = false;
 
+
+
+    const STATUS_OPEN = 1;//账户正常开启
+    const STATUS_CLOSE = 0;//账户关闭
+
+    const DELETED_YES = 1; //已经删除
+    const DELETED_NO = 0; // 未删除
+
     /**
      * @return string
      * @author xaboy

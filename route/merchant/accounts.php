@@ -245,6 +245,19 @@ Route::group(function () {
     ]);
 
 
+    //用户多商户
+    Route::group('merchants',function(){
+        Route::get('list','/merchantList')->name('AdminUserMerchantList')->option([
+            '_alias' => '列表',
+        ]);
+        Route::get('select','/updateMerchantToken')->name('AdminUserMerchantSelect')->option([
+            '_alias' => '选择商户',
+        ]);
+    })->prefix('merchant.system.admin.MerchantAdmin')->option([
+        '_path' => '/systemForm/applyments',
+        '_auth' => true,
+    ]);
+
 
 
 
