@@ -149,8 +149,7 @@ class MerchantAdmin extends BaseController
         if ($data['pwd'] !== $data['againPassword'])
             return app('json')->fail('两次密码输入不一致');
         unset($data['againPassword']);
-        // 新增的账号可以重复于其他名，这样如果存在账号可以绑定多商户。但是修改不可以重复。目前是使用account。TODO 未来会考虑换到phone,增加安全性和可靠性以及合理性。
-        if ($this->repository->accountExists($this->merId, 'account', $data['account']))
+        if ($this->repository->accountExists($this->merId, $data['account'],null))
             return app('json')->fail('账号已存在');
         $data['pwd'] = $this->repository->passwordEncode($data['pwd']);
         $data['mer_id'] = $this->merId;
@@ -307,7 +306,7 @@ class MerchantAdmin extends BaseController
         $merchantAdminId = $this->request->adminId();
 
         if (!$mer_id || !$this->repository->exists($merchantAdminId,$mer_id))
-            return app('json')->fail('数据不存在');
+            return app('json')->fail('商户不存在');
         $token = $this->repository->updateMerchantToken($merchantAdminId, $mer_id);
         return app('json')->success(['token' => $token]);
     }

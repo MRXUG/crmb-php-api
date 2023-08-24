@@ -361,6 +361,14 @@ class MerchantAdminRepository extends BaseRepository
         return $this->dao->update($id, $data);
     }
 
+    /**
+     * 更新relation 表
+     * @param int $merchantAdminId
+     * @param int $mer_id
+     * @param array $data
+     * @return int
+     * @throws DbException
+     */
     public function updateRelation(int $merchantAdminId, int $mer_id, array $data){
         if (isset($data['roles']))
             $data['roles'] = implode(',', $data['roles']);
@@ -368,6 +376,11 @@ class MerchantAdminRepository extends BaseRepository
             ->update($data);
     }
 
+    /**
+     * 获取用户可以管理的商户列表
+     * @param $merchantAdminId
+     * @return mixed
+     */
     public function merchantList($merchantAdminId){
         return Merchant::getDB()
             ->alias('m')
@@ -383,12 +396,46 @@ class MerchantAdminRepository extends BaseRepository
 
     }
 
+    /**
+     * 选择商户后 拿到新的token
+     * @param $merchantAdminId
+     * @param $mer_id
+     * @return mixed
+     */
     public function updateMerchantToken($merchantAdminId, $mer_id){
+//        $this->init();
         $service = new JwtTokenService();
         $exp = intval(Config::get('admin.token_exp', 3));
         $token = $service->createToken($merchantAdminId, 'mer', strtotime("+ {$exp}hour"), ['mer_id' => $mer_id]);
         $this->cacheToken($token['token'], $token['out']);
         return $token['token'];
+    }
+
+    public function init(){
+        //同步merchant_admin表到relation
+        $admin = MerchantAdmin::getDB()
+            ->select();
+        foreach($admin as $a){
+            $relation = MerchantAdminRelationModel::getDB()
+                ->where(['mer_id' => $a->mer_id, 'merchant_admin_id'=> $a->merchant_admin_id])
+                ->find();
+            $update = [
+                'roles' => $a->roles,
+                'is_del' => $a->is_del,
+                'status' => $a->status,
+                'login_count' => $a->login_count,
+                'level' => $a->level,
+                'last_ip' => $a->last_ip,
+                'last_time' => $a->last_time,
+            ];
+            if($relation){
+                $relation->update($update);
+            }else{
+                $update['mer_id'] = $a->mer_id;
+                $update['merchant_admin_id'] = $a->merchant_admin_id;
+                MerchantAdminRelationModel::insert($update);
+            }
+        }
     }
 
 }

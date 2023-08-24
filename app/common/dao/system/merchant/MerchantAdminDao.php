@@ -15,6 +15,7 @@ namespace app\common\dao\system\merchant;
 
 
 use app\common\dao\BaseDao;
+use app\common\model\BaseModel;
 use app\common\model\system\merchant\MerchantAdmin;
 use app\common\model\system\merchant\MerchantAdminRelationModel;
 use think\db\BaseQuery;
@@ -43,7 +44,7 @@ class MerchantAdminDao extends BaseDao
         return MerchantAdmin::class;
     }
 
-    const ALL_ADMIN_INFO_FIELD = 'account, real_name, phone,mar.*';
+    const ALL_ADMIN_INFO_FIELD = 'a.account, a.real_name, a.phone,mar.*';
 
     /**
      * @param int $merId
@@ -75,6 +76,7 @@ class MerchantAdminDao extends BaseDao
     }
 
     /**
+     * 查询level=0 账户 目前level=0 只有一个,后台添加的都是level=1
      * @param int $merId
      * @return string
      * @author xaboy
@@ -90,6 +92,7 @@ class MerchantAdminDao extends BaseDao
     }
 
     /**
+     * 平台后台通过mer_id直接登录
      * @param int $merId
      * @return MerchantAdmin|null
      * @throws DataNotFoundException
@@ -110,6 +113,8 @@ class MerchantAdminDao extends BaseDao
     }
 
     /**
+     * 商户后台登录，通过account查询是否有账号
+     * 默认登录最近一次的开启的商户
      * @param string $account
      * @return array|Model|null
      * @throws DataNotFoundException
@@ -123,26 +128,20 @@ class MerchantAdminDao extends BaseDao
         return MerchantAdmin::getInstance()
             ->alias('a')
             ->join('merchant_admin_relation mar', 'mar.merchant_admin_id = a.merchant_admin_id and mar.is_del = 0')
+            ->join('merchant m', 'm.mer_id = mar.mer_id')
             ->where('a.account', $account)
-            ->where('a.status', 1)
+            ->where('mar.status', BaseModel::STATUS_OPEN)
+            ->where('mar.is_del', BaseModel::DELETED_NO)
+            ->where('m.status', BaseModel::STATUS_OPEN)
+            ->where('m.is_del', BaseModel::DELETED_NO)
             ->field(self::ALL_ADMIN_INFO_FIELD)
             ->order('mar.last_time desc')
             ->find();
     }
 
-    /**
-     * @param string $account
-     * @return mixed
-     * @author xaboy
-     * @day 2020-04-20
-     */
-    public function accountByMerchantId(string $account)
-    {
-        return MerchantAdmin::getInstance()->where('account', $account)->value('mer_id');
-    }
-
 
     /**
+     * 获取账号基本信息 可考虑废弃 暂时不动
      * @param int $id
      * @return array|Model|null
      * @throws DataNotFoundException
@@ -157,6 +156,24 @@ class MerchantAdminDao extends BaseDao
     }
 
     /**
+     * 通过merchant_admin_id 和商户id获取对应账号信息
+     * @param $merchant_admin_id
+     * @param $merId
+     * @return mixed
+     */
+    public function getByIdAndMerId($merchant_admin_id, $merId){
+        return MerchantAdmin::getInstance()
+            ->alias('a')
+            ->join('merchant_admin_relation mar', 'mar.merchant_admin_id = a.merchant_admin_id and mar.is_del = 0')
+            ->where('a.merchant_admin_id', $merchant_admin_id)
+            ->where('mar.mer_id', $merId)
+            ->where('mar.is_del', BaseModel::DELETED_NO)
+            ->field(self::ALL_ADMIN_INFO_FIELD)
+            ->find();
+    }
+
+    /**
+     * 检查账户 id 等是否存在
      * @param int $id
      * @param int $merId
      * @param int|null $level
@@ -194,6 +211,14 @@ class MerchantAdminDao extends BaseDao
         return $query->count() > 0;
     }
 
+    /**
+     * 新增的账号可以重复于其他名，这样如果存在账号可以绑定多商户。但是修改不可以重复。目前是使用account
+     * TODO 未来会考虑换到phone,增加安全性,可靠性以及合理性。
+     * @param int $merId
+     * @param $account
+     * @param $except
+     * @return bool
+     */
     public function accountExists(int $merId, $account, $except){
         $query = MerchantAdmin::getDB()
             ->alias('a')
@@ -206,6 +231,11 @@ class MerchantAdminDao extends BaseDao
         return $query->count() > 0;
     }
 
+    /**
+     * 商户后台创建账号 MerchantAdmin & relation 同步创建
+     * @param array $data
+     * @return BaseDao|Model|void
+     */
     public function create($data){
         $merAdmin = [
             'account' => $data['account'],
@@ -221,7 +251,7 @@ class MerchantAdminDao extends BaseDao
             'level' => $data['level'],
         ];
 
-        Db::transaction(function ($merAdmin) use ($merAdminRelation) {
+        Db::transaction(function () use ($merAdmin, $merAdminRelation) {
             if($id = MerchantAdmin::getDB()->where('account', $merAdmin['account'])->value('merchant_admin_id')){
                 $merAdminRelation['merchant_admin_id'] = $id;
             }else{
@@ -232,16 +262,17 @@ class MerchantAdminDao extends BaseDao
     }
 
     /**
+     * 未调用 可删除
      * @param int $id
      * @return bool
      * @author xaboy
      * @day 2020-04-18
      */
-    public function topExists(int $id)
-    {
-        $query = MerchantAdmin::getDB()->where($this->getPk(), $id)->where('is_del', 0)->where('level', 0);
-        return $query->count() > 0;
-    }
+//    public function topExists(int $id)
+//    {
+//        $query = MerchantAdmin::getDB()->where($this->getPk(), $id)->where('is_del', 0)->where('level', 0);
+//        return $query->count() > 0;
+//    }
 
     /**
      * @param int $merId

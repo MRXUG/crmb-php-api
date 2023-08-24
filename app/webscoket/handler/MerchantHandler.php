@@ -86,15 +86,15 @@ class MerchantHandler
         if ('mer' != $payload->jti[1])
             return app('json')->fail('无效的 token');
 
-        $admin = $repository->get($payload->jti[0]);
+        if(!isset($payload->mer_id)){
+            return app('json')->fail('系统已经升级 请重新登录');
+        }
+        $admin = $repository->getByIdAndMerId($payload->jti[0], $payload->mer_id);
         if (!$admin)
             return app('json')->fail('账号不存在');
         if (!$admin['status'])
             return app('json')->fail('账号已被禁用');
 
-        if(isset($payload->mer_id)){
-            $admin->mer_id = $payload->mer_id;
-        }
         /**
          * @var MerchantRepository $merchantRepository
          */
