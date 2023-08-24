@@ -3134,13 +3134,16 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     $i = 0;
                     $settingDiscount = 0;
                     foreach ($multistep_discount as $v){
-                        if($v['switch'] ?? false){
-                            if($i == $index){
+                        // step 对应 配置的顺序， 仅判断 switch 是否开启以及金额是否正确
+                        if($i == $index){
+                            if($v['switch'] ?? false){
                                 $settingDiscount = $v['backflow_amount'] ?? 0;
-                                break;
                             }else{
-                                $i++;
+                                $hasError = true;
                             }
+                            break;
+                        }else{
+                            $i++;
                         }
                     }
                     if($marketingDiscountAmount && $settingDiscount != $marketingDiscountAmount){
@@ -3390,13 +3393,16 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     $i = 0;
                     $settingDiscount = 0;
                     foreach ($multistep_discount as $v){
-                        if($v['switch'] ?? false){
-                            if($i == $index){
+                        // step 对应 配置的顺序， 仅判断 switch 是否开启以及金额是否正确
+                        if($i == $index){
+                            if($v['switch'] ?? false){
                                 $settingDiscount = $v['backflow_amount'] ?? 0;
-                                break;
                             }else{
-                                $i++;
+                                $hasError = true;
                             }
+                            break;
+                        }else{
+                            $i++;
                         }
                     }
                     if($marketingDiscountAmount && $settingDiscount != $marketingDiscountAmount){
