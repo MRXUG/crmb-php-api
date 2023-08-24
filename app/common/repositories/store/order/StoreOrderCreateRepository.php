@@ -3130,11 +3130,11 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 case 52:
                     //1
                     $index = $step - 50;
-                    $multistep_discount = json_decode($adInfo['multistep_discount'], true);
+                    $multistep_discount = is_string($adInfo['multistep_discount']) ? json_decode($adInfo['multistep_discount'], true) : $adInfo['multistep_discount'];
                     $i = 0;
                     $settingDiscount = 0;
                     foreach ($multistep_discount as $v){
-                        if($v['switch'] ?? false == true){
+                        if($v['switch'] ?? false){
                             if($i == $index){
                                 $settingDiscount = $v['backflow_amount'] ?? 0;
                                 break;
@@ -3386,11 +3386,11 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 case 52:
                     //1
                     $index = $step - 50;
-                    $multistep_discount = json_decode($adInfo['multistep_discount'], true);
+                $multistep_discount = is_string($adInfo['multistep_discount']) ? json_decode($adInfo['multistep_discount'], true) : $adInfo['multistep_discount'];
                     $i = 0;
                     $settingDiscount = 0;
                     foreach ($multistep_discount as $v){
-                        if($v['switch'] ?? false == true){
+                        if($v['switch'] ?? false){
                             if($i == $index){
                                 $settingDiscount = $v['backflow_amount'] ?? 0;
                                 break;
