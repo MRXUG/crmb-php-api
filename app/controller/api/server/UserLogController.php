@@ -25,10 +25,10 @@ class UserLogController extends BaseController
     {
         $params = $this->request->param();
         $params['ip'] = $this->request->ip();
-        if(!method_exists($this->request, 'userInfo')){
+        try{
+            $params['uid'] = $this->request->uid();
+        }catch (\Exception $e){
             $params['uid'] = 0;
-        }else{
-            $params['uid'] = $this->request->userInfo()->uid;
         }
         $params['user_type'] = UserVisitLogValidate::$WxAppletUserType;
 

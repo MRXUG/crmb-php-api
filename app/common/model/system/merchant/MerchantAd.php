@@ -68,6 +68,6 @@ class MerchantAd extends BaseModel
 
     public function getMultistepDiscountAttr($value)
     {
-        return $value ? json_decode($value) : [];
+        return $value ? json_decode($value, true) : [];
     }
 }
