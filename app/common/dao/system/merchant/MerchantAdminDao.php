@@ -237,23 +237,32 @@ class MerchantAdminDao extends BaseDao
      * @return BaseDao|Model|void
      */
     public function create($data){
+        if(isset($data['roles']) && is_array($data['roles'])){
+            $data['roles'] = implode(',', $data['roles']);
+        }
         $merAdmin = [
             'account' => $data['account'],
             'phone' => $data['phone'],
             'pwd' => $data['pwd'],
             'real_name' => $data['real_name'],
             'mer_id' => $data['mer_id'],
+            'level' => $data['level'],
         ];
 
         $merAdminRelation = [
-            'roles' => $data['roles'],
+            'roles' => $data['roles'] ?? '',
             'mer_id' => $data['mer_id'],
             'level' => $data['level'],
         ];
 
         Db::transaction(function () use ($merAdmin, $merAdminRelation) {
             if($id = MerchantAdmin::getDB()->where('account', $merAdmin['account'])->value('merchant_admin_id')){
+                //account 唯一
                 $merAdminRelation['merchant_admin_id'] = $id;
+                unset($merAdmin['mer_id']);
+                unset($merAdmin['level']); //主表level不变
+                MerchantAdmin::getDB()->where('merchant_admin_id', $id)
+                    ->update($merAdmin);
             }else{
                 $merAdminRelation['merchant_admin_id'] = $this->getModelObj()->insertGetId($merAdmin);
             }
