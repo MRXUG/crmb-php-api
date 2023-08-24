@@ -184,7 +184,7 @@ class SpuRepository extends BaseRepository
             //     unset($list[$k]);
             //     continue;
             // }
-            $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
+            $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : $item['price'];
             $item['coupon'] = !empty($couponInfo['coupon']) ? $couponInfo['coupon'] : [];
 
             $newList[] = $item;
