@@ -235,14 +235,14 @@ return [
     "pages/index/index",
     "pages/user/index",
     "pages/auth/index",
-    "pages/error/index",
+    "pages/error/index"
   ],
   "subPackages": [
     {
       "root": "pages/goods_details",
       "pages": [
         "index",
-        "goodsBack"
+        "transform"
       ],
       "name": "goods_details"
     },
@@ -252,14 +252,14 @@ return [
         "news_list/index",
         "news_details/index"
 			],
-      "name": "news",
+      "name": "news"
 		},
 		{
 			"root": "pages/confirm",
 			"pages": [
         "order_confirm/index"
 			],
-      "name": "confirm",
+      "name": "confirm"
 		},
 		{
 			"root": "pages/pay_order",
@@ -267,7 +267,7 @@ return [
         "order_pay_status/index",
         "order_pay_back/index"
 			],
-      "name": "pay_order",
+      "name": "pay_order"
 		},
     {
       "root": "pages/order_details",
