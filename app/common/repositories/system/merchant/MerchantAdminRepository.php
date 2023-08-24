@@ -371,15 +371,14 @@ class MerchantAdminRepository extends BaseRepository
     public function merchantList($merchantAdminId){
         return Merchant::getDB()
             ->alias('m')
-            ->join('merchant_admin_relation r', 'r.mer_id = m.id')
+            ->join('merchant_admin_relation r', 'r.mer_id = m.mer_id')
             ->where([
                 'r.merchant_admin_id' => $merchantAdminId,
                 'r.status' => 1,
                 'r.is_del' => 0,
                 'm.status' => 1,
-                ''
             ])
-            ->field("m.mer_id, m.mer_name, m.real_name, m.mer_phone, m.address, m.mer_keyword, m.mer_avatar, m.mer_banner, m.mini_banner, m.mer_info, m.service_phone")
+            ->field("r.id, m.mer_id, m.mer_name, m.real_name, m.mer_phone, m.mer_address, m.mer_keyword, m.mer_avatar, m.mer_banner, m.mini_banner, m.mer_info, m.service_phone")
             ->select();
 
     }
@@ -389,7 +388,7 @@ class MerchantAdminRepository extends BaseRepository
         $exp = intval(Config::get('admin.token_exp', 3));
         $token = $service->createToken($merchantAdminId, 'mer', strtotime("+ {$exp}hour"), ['mer_id' => $mer_id]);
         $this->cacheToken($token['token'], $token['out']);
-        return $token;
+        return $token['token'];
     }
 
 }

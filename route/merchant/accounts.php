@@ -247,10 +247,10 @@ Route::group(function () {
 
     //用户多商户
     Route::group('merchants',function(){
-        Route::post('list','/list')->name('AdminMerchantList')->option([
+        Route::get('list','/merchantList')->name('AdminUserMerchantList')->option([
             '_alias' => '列表',
         ]);
-        Route::post('select','/updateToken')->name('AdminMerchantSelect')->option([
+        Route::get('select','/updateMerchantToken')->name('AdminUserMerchantSelect')->option([
             '_alias' => '选择商户',
         ]);
     })->prefix('merchant.system.admin.MerchantAdmin')->option([

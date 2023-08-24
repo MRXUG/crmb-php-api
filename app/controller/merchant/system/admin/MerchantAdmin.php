@@ -305,7 +305,11 @@ class MerchantAdmin extends BaseController
     public function updateMerchantToken(){
         $mer_id = $this->request->param('mer_id');
         $merchantAdminId = $this->request->adminId();
-        return app('json')->success($this->repository->updateMerchantToken($merchantAdminId, $mer_id));
+
+        if (!$mer_id || !$this->repository->exists($merchantAdminId,$mer_id))
+            return app('json')->fail('数据不存在');
+        $token = $this->repository->updateMerchantToken($merchantAdminId, $mer_id);
+        return app('json')->success(['token' => $token]);
     }
 
 }
