@@ -90,7 +90,7 @@ class Login extends BaseController
             'exp' => $tokenInfo['out'],
             'admin' => $admin
         ];
-        Cache::delete($key);
+//        Cache::delete($key);
         return app('json')->success($data);
     }
 
