@@ -45,10 +45,10 @@ class Login extends BaseController
      */
     public function ajCaptchaStatus()
     {
-        $data = $this->request->params(['account']);
-        $key = 'mer_login_failuree_'.$data['account'];
-        $numb = (Cache::get($key) ?? 0);
-        return app('json')->success(['status' => $numb > 2 ]);
+//        $data = $this->request->params(['account']);
+//        $key = 'mer_login_failuree_'.$data['account'];
+//        $numb = (Cache::get($key) ?? 0);
+        return app('json')->success(['status' => false ]);
     }
 
     /**
@@ -70,17 +70,17 @@ class Login extends BaseController
 //            return app('json')->fail('账号或密码错误次数太多，请稍后在尝试');
 //        $this->repository->checkCode($data['key'], $data['code']);
 
-        $key = 'mer_login_failuree_'.$data['account'];
-        $numb = (Cache::get($key) ?? 0);
-        if($numb > 2){
-            if (!$data['captchaType'] || !$data['captchaVerification'])
-                return app('json')->fail('请滑动滑块验证');
-            try {
-                aj_captcha_check_two($data['captchaType'], $data['captchaVerification']);
-            } catch (\Throwable $e) {
-                return app('json')->fail($e->getMessage());
-            }
-        }
+//        $key = 'mer_login_failuree_'.$data['account'];
+//        $numb = (Cache::get($key) ?? 0);
+//        if($numb > 2){
+//            if (!$data['captchaType'] || !$data['captchaVerification'])
+//                return app('json')->fail('请滑动滑块验证');
+//            try {
+//                aj_captcha_check_two($data['captchaType'], $data['captchaVerification']);
+//            } catch (\Throwable $e) {
+//                return app('json')->fail($e->getMessage());
+//            }
+//        }
         $adminInfo = $this->repository->login($data['account'], $data['password']);
         $tokenInfo = $this->repository->createToken($adminInfo);
         $admin = $adminInfo->toArray();

@@ -183,10 +183,10 @@ class MerchantAdminRepository extends BaseRepository
         $adminInfo = $this->dao->accountByTopAdmin($account);
 
         if (!$adminInfo || !password_verify($password, $adminInfo->pwd)){
-            $key = 'mer_login_failuree_'.$account;
-            $numb = Cache::get($key) ?? 0;
-            $numb++;
-            Cache::set($key,$numb,15*60);
+//            $key = 'mer_login_failuree_'.$account;
+//            $numb = Cache::get($key) ?? 0;
+//            $numb++;
+//            Cache::set($key,$numb,15*60);
             throw new ValidateException('账号或密码错误');
         }
         if ($adminInfo->status != BaseModel::STATUS_OPEN)
