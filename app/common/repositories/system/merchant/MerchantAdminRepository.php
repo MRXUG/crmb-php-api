@@ -369,9 +369,7 @@ class MerchantAdminRepository extends BaseRepository
      * @throws DbException
      */
     public function updateRelation(int $merchantAdminId, int $mer_id, array $data){
-        if (isset($data['roles']))
-            $data['roles'] = implode(',', $data['roles']);
-        return MerchantAdminRelationModel::getDB()->where(['merchant_admin_id', $merchantAdminId, 'mer_id' => $mer_id])
+        return MerchantAdminRelationModel::getDB()->where(['merchant_admin_id' => $merchantAdminId, 'mer_id' => $mer_id])
             ->update($data);
     }
 

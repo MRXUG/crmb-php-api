@@ -40,6 +40,6 @@ class MerchantAdminRelationModel extends BaseModel
     
     public function setRolesAttr($value)
     {
-        return implode(',', $value);
+        return is_array($value) ? implode(',', $value) : $value;
     }
 }
