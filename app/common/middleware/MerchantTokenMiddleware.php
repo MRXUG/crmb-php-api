@@ -60,9 +60,8 @@ class MerchantTokenMiddleware extends BaseMiddleware
                 throw new AuthException('无效的 token');
 
             if(!isset($payload->mer_id)){
-//                throw new AuthException('系统已经升级 请重新登录');
+                throw new AuthException('系统已经升级 请重新登录');
             }
-            $payload->mer_id = 10;
             $admin = $repository->getByIdAndMerId($payload->jti[0], $payload->mer_id);
             if (!$admin)
                 throw new AuthException('账号不存在');

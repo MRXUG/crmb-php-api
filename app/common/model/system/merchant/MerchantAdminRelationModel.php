@@ -35,7 +35,7 @@ class MerchantAdminRelationModel extends BaseModel
 
     public function getRolesAttr($value)
     {
-        return array_map('intval', explode(',', $value));
+        return $value ? array_map('intval', explode(',', $value)) : $value;
     }
     
     public function setRolesAttr($value)

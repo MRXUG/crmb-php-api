@@ -403,7 +403,13 @@ class MerchantAdminRepository extends BaseRepository
      * @return mixed
      */
     public function updateMerchantToken($merchantAdminId, $mer_id){
-//        $this->init();
+        MerchantAdminRelationModel::getDB()
+            ->where(['mer_id' =>$mer_id, 'merchant_admin_id'=> $merchantAdminId])
+            ->update([
+                'last_ip' => app('request')->ip(),
+                'last_time' => date('Y-m-d H:i:s'),
+                'login_count' => ['INC', 1]
+            ]);
         $service = new JwtTokenService();
         $exp = intval(Config::get('admin.token_exp', 3));
         $token = $service->createToken($merchantAdminId, 'mer', strtotime("+ {$exp}hour"), ['mer_id' => $mer_id]);
@@ -411,7 +417,7 @@ class MerchantAdminRepository extends BaseRepository
         return $token['token'];
     }
 
-    public function init(){
+    protected function init(){
         //同步merchant_admin表到relation
         $admin = MerchantAdmin::getDB()
             ->select();
@@ -429,7 +435,7 @@ class MerchantAdminRepository extends BaseRepository
                 'last_time' => $a->last_time,
             ];
             if($relation){
-                $relation->update($update);
+                MerchantAdminRelationModel::update($update, ['id' => $relation->id]);
             }else{
                 $update['mer_id'] = $a->mer_id;
                 $update['merchant_admin_id'] = $a->merchant_admin_id;
