@@ -42,8 +42,7 @@ class AutoOrderProfitsharingListen extends TimerService implements ListenerInter
                 [
                     'change_time',
                     '<',
-                    // date('Y-m-d H:i:s', time() - 86400),
-                    date('Y-m-d H:i:s', time() - 300), // 临时改为5分钟
+                     date('Y-m-d H:i:s', time() - 86400),//24小时
                 ],
             ];
             // 查询已发货的订单

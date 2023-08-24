@@ -31,7 +31,7 @@ class FinishOrderListen extends TimerService implements ListenerInterface
 
             $app   = app()->make(StoreOrderRepository::class);
             //date('Y-m-d H:i:s', time() - 86400 * 15)
-            $task = OrderFinishTask::getDB()->where([['finish_at','<',time()-60*5],['status','=',0]])->select()->toArray();
+            $task = OrderFinishTask::getDB()->where([['finish_at','<',date('Y-m-d H:i:s', time() - 86400 * 15)],['status','=',0]])->select()->toArray();
             $orderIds = array_column($task,'order_id');
             if(empty($orderIds)){
                 return;
