@@ -44,7 +44,7 @@ class MerchantAdminDao extends BaseDao
         return MerchantAdmin::class;
     }
 
-    const ALL_ADMIN_INFO_FIELD = 'a.account, a.real_name, a.phone,mar.*';
+    const ALL_ADMIN_INFO_FIELD = 'a.account, a.real_name, a.phone,a.status as admin_status, a.is_del as admin_is_del,mar.*';
 
     /**
      * @param int $merId
@@ -130,12 +130,12 @@ class MerchantAdminDao extends BaseDao
             ->join('merchant_admin_relation mar', 'mar.merchant_admin_id = a.merchant_admin_id and mar.is_del = 0')
             ->join('merchant m', 'm.mer_id = mar.mer_id')
             ->where('a.account', $account)
-            ->where('mar.status', BaseModel::STATUS_OPEN)
+            ->where('a.is_del', BaseModel::DELETED_NO)
             ->where('mar.is_del', BaseModel::DELETED_NO)
             ->where('m.status', BaseModel::STATUS_OPEN)
             ->where('m.is_del', BaseModel::DELETED_NO)
-            ->field(self::ALL_ADMIN_INFO_FIELD)
-            ->order('mar.last_time desc')
+            ->field(self::ALL_ADMIN_INFO_FIELD.', a.pwd') //加入密码用于校验登录
+            ->order('mar.status desc, mar.last_time desc')
             ->find();
     }
 
@@ -186,7 +186,7 @@ class MerchantAdminDao extends BaseDao
         $query = MerchantAdmin::getDB()
             ->alias('a')
             ->join('merchant_admin_relation mar', 'mar.merchant_admin_id = a.merchant_admin_id and mar.is_del = 0 and mar.mer_id = '.$merId)
-            ->where('mar.is_del', 0)
+            ->where('mar.is_del', BaseModel::DELETED_NO)
             ->where('a.merchant_admin_id', $id)
             ->where('mar.mer_id', $merId)
             ->when(!is_null($level), function ($query) use ($level){
@@ -282,9 +282,14 @@ class MerchantAdminDao extends BaseDao
      */
     public function merchantIdByTopAdminId(int $merId)
     {
-        return MerchantAdminRelationModel::getDB()->where('mer_id', $merId)->where('is_del', 0)->where('level', 0)->value('merchant_admin_id');
+        return MerchantAdminRelationModel::getDB()->where('mer_id', $merId)->where('is_del', BaseModel::DELETED_NO)->where('level', 0)->value('merchant_admin_id');
     }
 
+    /**
+     * 此处删除的是整个账户
+     * @param $merId
+     * @throws DbException
+     */
     public function deleteMer($merId)
     {
         MerchantAdmin::getDB()->where('mer_id', $merId)->update(['account' => Db::raw('CONCAT(`account`,\'$del\')')]);

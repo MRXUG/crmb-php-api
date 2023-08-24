@@ -17,6 +17,7 @@ namespace app\common\repositories\system\merchant;
 use app\common\dao\BaseDao;
 use app\common\dao\system\merchant\MerchantAdminDao;
 use app\common\dao\system\merchant\MerchantAdminRelationDao;
+use app\common\model\BaseModel;
 use app\common\model\system\merchant\Merchant;
 use app\common\model\system\merchant\MerchantAdmin;
 use app\common\model\system\merchant\MerchantAdminRelationModel;
@@ -188,16 +189,14 @@ class MerchantAdminRepository extends BaseRepository
             Cache::set($key,$numb,15*60);
             throw new ValidateException('账号或密码错误');
         }
+        if ($adminInfo->status != BaseModel::STATUS_OPEN)
+            throw new ValidateException('账号已关闭');
+        if ($adminInfo->admin_status != BaseModel::STATUS_OPEN)
+            throw new ValidateException('账号已被平台关闭');
 
         /**
-         * @var MerchantRepository $merchantRepository 此处不再校验商户状态 返回商户列表
+         * 此处不再校验商户状态 返回商户列表
          */
-//        $merchantRepository = app()->make(MerchantRepository::class);
-//        $merchant = $merchantRepository->get($adminInfo->mer_id);
-//        if (!$merchant)
-//            throw new ValidateException('商户不存在');
-//        if (!$merchant['status'])
-//            throw new ValidateException('商户已被锁定');
 
         $adminInfo->last_time = date('Y-m-d H:i:s');
         $adminInfo->last_ip = app('request')->ip();
@@ -415,33 +414,6 @@ class MerchantAdminRepository extends BaseRepository
         $token = $service->createToken($merchantAdminId, 'mer', strtotime("+ {$exp}hour"), ['mer_id' => $mer_id]);
         $this->cacheToken($token['token'], $token['out']);
         return $token['token'];
-    }
-
-    protected function init(){
-        //同步merchant_admin表到relation
-        $admin = MerchantAdmin::getDB()
-            ->select();
-        foreach($admin as $a){
-            $relation = MerchantAdminRelationModel::getDB()
-                ->where(['mer_id' => $a->mer_id, 'merchant_admin_id'=> $a->merchant_admin_id])
-                ->find();
-            $update = [
-                'roles' => $a->roles,
-                'is_del' => $a->is_del,
-                'status' => $a->status,
-                'login_count' => $a->login_count,
-                'level' => $a->level,
-                'last_ip' => $a->last_ip,
-                'last_time' => $a->last_time,
-            ];
-            if($relation){
-                MerchantAdminRelationModel::update($update, ['id' => $relation->id]);
-            }else{
-                $update['mer_id'] = $a->mer_id;
-                $update['merchant_admin_id'] = $a->merchant_admin_id;
-                MerchantAdminRelationModel::insert($update);
-            }
-        }
     }
 
 }

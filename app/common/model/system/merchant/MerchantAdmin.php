@@ -77,7 +77,8 @@ class MerchantAdmin extends BaseModel
 
     public function merchantRelation(){
         /**
-         * roles,is_del,status,level 可以删除
+         * is_del,status,level 可以留存，作为整个账户的状态,暂时未用到
+         * roles可以删除
          *
          */
         return $this->hasMany(MerchantAdminRelationModel::class, 'merchant_admin_id', 'merchant_admin_id');
