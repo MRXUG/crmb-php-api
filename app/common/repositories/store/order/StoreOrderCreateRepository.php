@@ -3146,7 +3146,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     if($marketingDiscountAmount && $settingDiscount != $marketingDiscountAmount){
                         $hasError = true;
                     }
-                    $discountTotal = $adMarketingDiscountAmount;
+                    $discountTotal = $settingDiscount;
                     break;
                 case 6:
                     $maxCurrentDiscount = $adMarketingDiscountAmount;
@@ -3402,7 +3402,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     if($marketingDiscountAmount && $settingDiscount != $marketingDiscountAmount){
                         $hasError = true;
                     }
-                    $discountTotal = $adMarketingDiscountAmount;
+                    $discountTotal = $settingDiscount;
                     break;
                 case 6:
                     $maxCurrentDiscount = $adMarketingDiscountAmount;
