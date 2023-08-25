@@ -42,6 +42,8 @@ class StdLog implements LogHandlerInterface
         $request = \think\facade\Request::instance();
         $requestParams = [
             'url'=>$request->url(),
+            'host'=>$request->host(),
+            'env' => env('app_name', 'unknown'). '@' . env('app_server.run_server', 'unknown'),
             'params'=>$request->param(),
             'mvc'=>$request->controller() . '.' . $request->action() . '@' . $request->method()
         ];

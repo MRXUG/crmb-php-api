@@ -14,8 +14,10 @@ namespace app\common\middleware;
 
 use app\Request;
 use crmeb\interfaces\MiddlewareInterface;
+use crmeb\services\ApiResponseService;
 use think\facade\Log;
 use think\Response;
+use think\response\Json;
 
 class AccessMiddleware implements MiddlewareInterface
 {
@@ -42,24 +44,31 @@ class AccessMiddleware implements MiddlewareInterface
             if (is_null($responseData) || !is_array($responseData)) {
                 $responseData = [$responseData];
             }
+            $returnBody = [];
+            if(isset($responseData['status'])){
+                if($responseData['status'] == ApiResponseService::DEFAULT_SUCCESS_CODE){
+                    unset($responseData['data']);
+                }
+                $returnBody = $responseData;
+            }
 
-            Log::info('[API-Request]'.json_encode([
+            Log::info('[API-Request-Return]'.json_encode([
                 'url'         => $request->url(),
                 'method'      => $request->method(),
                 'header'      => self::cutHeaderLog($headers),
                 'params'      => $request->param(),
-                //'return_code' => $response->getStatusCode(),
-                // 'return_body' => $responseData['data'] ?? [],
-            ]));
+                'return_code' => method_exists($response, 'getCode') ? $response->getCode() : 0,
+                'return_body' => $returnBody,
+            ], JSON_UNESCAPED_UNICODE));
 
         } catch (\Exception $exception) {
 
-            Log::debug('[API-Request]'.json_encode([
+            Log::debug('[API-Request-Error]'.json_encode([
                 'url'    => $request->url(),
                 'method' => $request->method(),
                 'header' => $request->header(),
                 'params' => $request->param(),
-            ]));
+            ], JSON_UNESCAPED_UNICODE));
         }
         return $response;
     }
