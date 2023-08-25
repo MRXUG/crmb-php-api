@@ -14,6 +14,7 @@ use think\db\exception\DataNotFoundException;
 use think\db\exception\ModelNotFoundException;
 use app\validate\admin\PlatformMerchantValidate;
 use app\common\dao\system\merchant\PlatformMerchantDao;
+use app\common\model\system\config\MerchantPayConf;
 use app\common\repositories\system\config\ConfigValueRepository;
 use app\common\repositories\system\merchant\PlatformMerchantRepository;
 
@@ -78,6 +79,31 @@ class PlatformMerchant extends BaseController
             'key_path|证书'  => 'require',
         ]);
         $this->repository->checkMerchantId($data['merchant_id']);
+        $cert     = file_get_contents(app()->getRootPath() . 'resources/certs/' . $data['cert_path']);
+        $cert_key = file_get_contents(app()->getRootPath() . 'resources/certs/' . $data['key_path']);
+ 
+        $res = MerchantPayConf::getDB()->where('merchant_id',$data['merchant_id'])->find();
+        if (!$res){
+            MerchantPayConf::getDB()->insert([
+                'mch_id'        => $data['merchant_id'],
+                'pemkey'        => $cert_key,
+                'pemcert'       => $cert,
+                'serial_no'     => $data['serial_no'],
+                'api_secret'    => $data['key'],
+                'mch_name'      => $data['mer_name'],
+                'apiv3_secret'  => $data['v3_key'],
+            ]);
+        } else{
+            MerchantPayConf::getDB()->save([
+             'mch_id'        => $data['merchant_id'],
+             'pemkey'        => $cert_key,
+             'pemcert'       => $cert,
+             'serial_no'     => $data['serial_no'],
+             'api_secret'    => $data['key'],
+             'mch_name'      => $data['mer_name'],
+             'apiv3_secret'  => $data['v3_key'],
+            ]);
+        }
 
         $this->repository->create($data);
         return app('json')->success('保存成功');
@@ -127,7 +153,33 @@ class PlatformMerchant extends BaseController
         ]);
        $this->repository->checkMerchantId($data['merchant_id'], $id);
 
+      
         try {
+            $cert     = file_get_contents(app()->getRootPath() . 'resources/certs/' . $data['cert_path']);
+            $cert_key = file_get_contents(app()->getRootPath() . 'resources/certs/' . $data['key_path']);
+     
+            $res = MerchantPayConf::getDB()->where('merchant_id',$data['merchant_id'])->find();
+            if (!$res){
+                MerchantPayConf::getDB()->insert([
+                    'mch_id'        => $data['merchant_id'],
+                    'pemkey'        => $cert_key,
+                    'pemcert'       => $cert,
+                    'serial_no'     => $data['serial_no'],
+                    'api_secret'    => $data['key'],
+                    'mch_name'      => $data['mer_name'],
+                    'apiv3_secret'  => $data['v3_key'],
+                ]);
+            } else{
+                MerchantPayConf::getDB()->save([
+                 'mch_id'        => $data['merchant_id'],
+                 'pemkey'        => $cert_key,
+                 'pemcert'       => $cert,
+                 'serial_no'     => $data['serial_no'],
+                 'api_secret'    => $data['key'],
+                 'mch_name'      => $data['mer_name'],
+                 'apiv3_secret'  => $data['v3_key'],
+                ]);
+            }
             $this->repository->save($id, $data);
         } catch (DbException $e) {
             return app('json')->fail('修改失败');

@@ -42,7 +42,7 @@ class MerchantPayConf extends BaseModel
      */
     public static function tablePk(): string
     {
-        return 'mer_id';
+        return 'mch_id';
     }
 
     /**
