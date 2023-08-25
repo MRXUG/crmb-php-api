@@ -37,7 +37,7 @@ class CityAreaRepository extends BaseRepository
 
         $cityInfo = $this->search(['pid' => $pid])->find();
 
-        if ($cityInfo["level"] == 3){
+        if ($cityInfo && $cityInfo["level"] == 3){
 
             foreach ($list as $k=>$v){
                 $list[$k]['snum'] = 0;
