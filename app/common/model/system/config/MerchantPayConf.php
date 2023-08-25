@@ -24,15 +24,15 @@ class MerchantPayConf extends BaseModel
 {
 
     protected $schema = [
-        'mer_id' => 'int',
-        'mch_id'      => 'string',
-        'pemkey'      => 'string',
-        'pemcert'      => 'string',
-        'serial_no'           => 'string',
-        'api_secret'           => 'string',
-        'mch_name'=>'string',
-        'platform_cert'          => 'string',
-        'apiv3_secret'     => 'string',
+        'mer_id'        => 'int',
+        'mch_id'        => 'string',
+        'pemkey'        => 'string',
+        'pemcert'       => 'string',
+        'serial_no'     => 'string',
+        'api_secret'    => 'string',
+        'mch_name'      => 'string',
+        'platform_cert' => 'string',
+        'apiv3_secret'  => 'string',
     ];
 
     /**

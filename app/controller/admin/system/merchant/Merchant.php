@@ -15,6 +15,7 @@ namespace app\controller\admin\system\merchant;
 use app\common\dao\system\config\MerchantPayConfigDao;
 use app\common\dao\system\config\SystemConfigValueDao;
 use app\common\dao\system\merchant\MerchantDao;
+use app\common\model\system\config\MerchantPayConf;
 use app\common\repositories\store\product\ProductCopyRepository;
 use app\common\repositories\system\merchant\MerchantAdminRepository;
 use app\common\repositories\system\merchant\MerchantCategoryRepository;
@@ -28,6 +29,7 @@ use think\App;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
+use think\facade\Log;
 use think\facade\Queue;
 
 /**
@@ -382,17 +384,31 @@ class Merchant extends BaseController
         $cert     = file_get_contents(app()->getRootPath() . 'resources/certs/' . $params['pay_routine_client_cert']);
         $cert_key = file_get_contents(app()->getRootPath() . 'resources/certs/' . $params['pay_routine_client_key']);
         $mer = (new MerchantDao())->get($id);
+        $res = MerchantPayConf::getDB()->where('mer_id',$id)->find();
+        if (!$res){
+            MerchantPayConf::getDB()->insert([
+                'mer_id'        => $id,
+                'mch_id'        => $params['pay_routine_mchid'],
+                'pemkey'        => $cert_key,
+                'pemcert'       => $cert,
+                'serial_no'     => $params['pay_routine_serial_no'],
+                'api_secret'    => $params['pay_routine_key'],
+                'mch_name'      => $mer->mer_name,
+                'apiv3_secret'  => $params['pay_routine_v3_key'],
+            ]);
+        } else{
+            MerchantPayConf::getDB()->save([
+                'mer_id'        => $id,
+                'mch_id'        => $params['pay_routine_mchid'],
+                'pemkey'        => $cert_key,
+                'pemcert'       => $cert,
+                'serial_no'     => $params['pay_routine_serial_no'],
+                'api_secret'    => $params['pay_routine_key'],
+                'mch_name'      => $mer->mer_name,
+                'apiv3_secret'  => $params['pay_routine_v3_key'],
+            ]);
+        }
 
-        $s = (new MerchantPayConfigDao())->createOrUpdate(['mer_id' => $id], [
-            'mer_id'        => $id,
-            'mch_id'        => $params['pay_routine_mchid'],
-            'pemkey'        => $cert_key,
-            'pemcert'       => $cert,
-            'serial_no'     => $params['pay_routine_serial_no'],
-            'api_secret'    => $params['pay_routine_key'],
-            'mch_name'      => $mer->mer_name,
-            'apiv3_secret'  => $params['pay_routine_v3_key'],
-        ]);
         app()->make(PlatformMerchantRepository::class)->checkMerchantId($params['pay_routine_mchid'], $id);
 
         foreach ($params as $k => $v) {
