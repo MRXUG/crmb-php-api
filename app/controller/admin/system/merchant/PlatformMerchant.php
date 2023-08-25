@@ -158,7 +158,7 @@ class PlatformMerchant extends BaseController
             $cert     = file_get_contents(app()->getRootPath() . 'resources/certs/' . $data['cert_path']);
             $cert_key = file_get_contents(app()->getRootPath() . 'resources/certs/' . $data['key_path']);
      
-            $res = MerchantPayConf::getDB()->where('merchant_id',$data['merchant_id'])->find();
+            $res = MerchantPayConf::getDB()->where('mch_id',$data['merchant_id'])->find();
             if (!$res){
                 MerchantPayConf::getDB()->insert([
                     'mch_id'        => $data['merchant_id'],
@@ -182,7 +182,7 @@ class PlatformMerchant extends BaseController
             }
             $this->repository->save($id, $data);
         } catch (DbException $e) {
-            return app('json')->fail('修改失败');
+            return app('json')->fail('修改失败'.$e->getMessage());
         }
         return app('json')->success('修改成功');
     }
