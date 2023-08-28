@@ -145,7 +145,7 @@ Route::group(function () {
         '_auth' => true,
     ]);
 
-    //运费模板
+    //运费模板 已废弃
     Route::group('store/shipping', function () {
         Route::get('lst', '/lst')->name('merchantStoreShippingTemplateLst')->option([
             '_alias' => '列表',
@@ -168,6 +168,29 @@ Route::group(function () {
         ]);
     })->prefix('merchant.store.shipping.ShippingTemplate')->option([
         '_path' => '/config/freight/shippingTemplates',
+        '_auth' => true,
+    ]);
+
+
+    //运费模板V2 简化模板
+    Route::group('store/shippingTemplate', function () {
+        Route::get('list', '/getList')->name('merchantStoreShippingTemplateV2List')->option([
+            '_alias' => '列表 ',
+        ]);
+        Route::post('create', '/create')->name('merchantStoreShippingTemplateV2Create')->option([
+            '_alias' => '添加 ',
+        ]);
+        Route::post('update/:id', '/update')->name('merchantStoreShippingTemplateV2Update')->option([
+            '_alias' => '编辑',
+        ]);
+        Route::get('detail/:id', '/detail')->name('merchantStoreShippingTemplateV2Detail')->option([
+            '_alias' => '详情',
+        ]);
+        Route::delete('delete/:id', '/delete')->name('merchantStoreShippingTemplateV2Delete')->option([
+            '_alias' => '删除',
+        ]);
+    })->prefix('merchant.store.shipping.ShippingTemplateController')->option([
+        '_path' => '/config/freight/shippingTemplatesV2',
         '_auth' => true,
     ]);
 
