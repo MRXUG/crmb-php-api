@@ -142,6 +142,7 @@ class CouponStocksUserRepository extends BaseRepository
             'start_time'  => $start,
             'end_time'    => $end,
             'mer_id'      => $stockInfo['mer_id'], // 建券的mer_id
+            'coupon_id'   => $stockInfo['id'], 
         ];
 
         $this->dao->createOrUpdate(['coupon_code' => $couponCode], $insertData);
