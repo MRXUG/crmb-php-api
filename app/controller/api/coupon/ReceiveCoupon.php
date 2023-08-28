@@ -91,6 +91,7 @@ class ReceiveCoupon extends BaseController
             }
             $data = [
                 'mer_id'      => $stockInfo['mer_id'] ?? 0,
+                'coupon_id'   => $stockInfo['id'] ?? 0,
                 'ad_id'       => $item['ad_id'] ?? 0,
                 'uid'         => $uid,
                 'coupon_code' => $item['coupon_code'],
