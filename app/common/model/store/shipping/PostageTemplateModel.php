@@ -34,7 +34,7 @@ class PostageTemplateModel extends BaseModel
         return 'postage_template';
     }
 
-    public function rules(string $model, string $foreignKey = '', string $localKey = ''): HasMany
+    public function rules()
     {
         return $this->hasMany(PostageTemplateRuleModel::class, 'template_id', 'template_id');
     }

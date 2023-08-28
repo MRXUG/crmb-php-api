@@ -76,6 +76,7 @@ class ShippingTemplateController extends BaseController
         $data = $this->checkParams($validate);
         if(!$this->repository->merExists($this->request->merId(),$id))
             return app('json')->fail('数据不存在');
+        $data['mer_id'] = $this->request->merId();
         $this->repository->update($id,$data);
 
         return app('json')->success('编辑成功');

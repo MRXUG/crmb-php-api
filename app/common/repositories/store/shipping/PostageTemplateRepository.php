@@ -35,7 +35,7 @@ class PostageTemplateRepository extends BaseRepository
     public function getProductUse(int $merId ,int $id)
     {
         return Product::getDB()->where('mer_id', $merId)
-            ->where('postage_template_id', $merId)
+            ->where('temp_id', $id) //使用老字段
             ->count() > 0;
     }
 
@@ -95,23 +95,25 @@ class PostageTemplateRepository extends BaseRepository
             $this->dao->update($templateData, [$this->dao->getPk() => $id]);
 
             /** @var PostageTemplateRuleModel $roleModel */
-            $roleModel = app()->make(PostageTemplateRuleModel::class);
-            $exitsRules = $roleModel->where([$this->dao->getPk() => $id])->column('id');
-            $exitsRules = array_column($exitsRules, 'id', 'id');
+            $roleModel = app()->make(PostageTemplateRuleModel::class)->getModel();
+            $exitsRules = $roleModel->where([$this->dao->getPk() => $id])->column('id', 'id');
             $insert = [];
             foreach ($data['rules'] as $rule){
-                if(isset($rule['rule_id'])){
+                $rule['mer_id'] = $data['mer_id'];
+                $rule['area_name'] = '';
+                if(!isset($rule['template_id'])){
+                    $rule['template_id'] = $id;
+                }
+                if(isset($rule['id'])){
                     //update
-                    $ruleId = $rule['rule_id'];
-                    unset($rule['rule_id']);
-                    unset($exitsRules[$ruleId]);
-                    $roleModel->where([$roleModel->getPk() => $ruleId])->update($rule);
+                    unset($exitsRules[$rule['id']]);
+                    $roleModel->update($rule, [$roleModel->getPk() => $rule['id']]);
                 }else{
                     $insert[] = $rule;
                 }
             }
             if(!empty($insert)){
-                $roleModel->insertAll($insert);
+                $roleModel->saveAll($insert);
             }
             if(!empty($exitsRules)){
                 $roleModel->whereIn($roleModel->getPk(), array_values($exitsRules))->delete();
@@ -141,6 +143,8 @@ class PostageTemplateRepository extends BaseRepository
             ];
             $template = $this->dao->create($templateData);
             $rules = [];
+            /** @var PostageTemplateRuleModel $ruleModel */
+            $ruleModel = app()->make(PostageTemplateRuleModel::class);
             foreach ($data['rules'] as $v){
                 $rules[] = [
                     'template_id' => $template['template_id'],
@@ -149,14 +153,15 @@ class PostageTemplateRepository extends BaseRepository
                     'keep_unit' => $v['keep_unit'],
                     'keep_amount' => $v['keep_amount'],
                     'area_ids' => $v['area_ids'],
+                    'area_name' => '',
                     'not_area_ids' => '',
                     'free_on' => $v['free_on'],
                     'free_unit' => $v['free_unit'],
                     'free_num' => $v['free_num'],
-                    'mer_id' => $v['mer_id'],
+                    'mer_id' => $data['mer_id'],
                 ];
-                app()->make(PostageTemplateRuleModel::class)->insertAll($rules);
             }
+            $ruleModel->getModel()->saveAll($rules);
         });
     }
 

@@ -174,7 +174,7 @@ Route::group(function () {
 
     //运费模板V2 简化模板
     Route::group('store/shippingTemplate', function () {
-        Route::get('list', '/getList')->name('merchantStoreShippingTemplateV2List')->option([
+        Route::get('list', '/list')->name('merchantStoreShippingTemplateV2List')->option([
             '_alias' => '列表 ',
         ]);
         Route::post('create', '/create')->name('merchantStoreShippingTemplateV2Create')->option([
