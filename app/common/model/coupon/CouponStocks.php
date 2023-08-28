@@ -55,6 +55,7 @@ class CouponStocks extends BaseModel
         'type'                        => 'tinyint', //分类:1=商城优惠券，2=回流优惠券
         'type_date'                   => 'tinyint', //使用有效期,1==立即生效，2=时间段，2=N天后
         'wait_days_after_receive'     => 'smallint', //领取后N天开始生效
+        'goods_range'                 => 'varchar', // 商品使用范围
 
     ];
 
