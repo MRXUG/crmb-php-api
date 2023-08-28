@@ -24,7 +24,12 @@ abstract class BaseAdsEvent
         'wx4e8a0659d2f00321'=>1201311302,
         'wx31ca8abdbb995b8a'=>1201311305,
         'wxacf55f4e68ef8ec7'=>1201311307,
-        'wx913a8e8f208e2096'=>1201311308
+        'wx913a8e8f208e2096'=>1201311308,
+        'wxff91ca74c5e5b5e5'=>1201628366,
+        'wxac1b0966d19d8eac'=>1201628359,
+        'wx2f5bd44ef7b124b2'=>1201628358,
+        'wxfdf7d1cb15bd704b'=>1201628353,
+        'wx7a5eca186a5c3b5a'=>1201628344,
     ];
 
     protected $reuestParams = [
