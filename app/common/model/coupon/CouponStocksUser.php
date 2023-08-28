@@ -3,7 +3,6 @@
 namespace app\common\model\coupon;
 
 use app\common\model\BaseModel;
-use app\common\model\store\coupon\StoreCouponIssueUser;
 use app\common\model\user\User;
 use think\model\relation\HasOne;
 
@@ -16,6 +15,7 @@ class CouponStocksUser extends BaseModel
         'coupon_code' => 'varchar', //券编码
         'create_time' => 'timestamp', //
         'end_at'      => 'timestamp', //结束时间
+        'coupon_id'   => 'int',
         'is_del'      => 'tinyint', //删除状态：0=未删除，1=已删除
         'mch_id'      => 'int', //领券商户 id
         'mer_id'      => 'int', //建券商户主键
@@ -28,7 +28,6 @@ class CouponStocksUser extends BaseModel
         'written_off' => 'tinyint', //是否核销：0=未核销，1=已核销
 
     ];
-    
 
     public static function tablePk(): ?string
     {
