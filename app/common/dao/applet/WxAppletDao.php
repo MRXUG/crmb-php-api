@@ -109,6 +109,7 @@ class WxAppletDao extends BaseDao
             ->where('health_status', WxAppletModel::APPLET_HEALTHY)
             ->where('is_release', WxAppletModel::IS_RELEASE_YES)
             ->where('is_del', 0)
+            ->where('id',38)
             ->select()->toArray();
 
         return !empty($healthApplet) ? $healthApplet[array_rand($healthApplet, 1)] : [];
