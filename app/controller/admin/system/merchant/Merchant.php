@@ -24,6 +24,8 @@ use app\common\repositories\system\merchant\PlatformMerchantRepository;
 use app\validate\admin\MerchantValidate;
 use crmeb\basic\BaseController;
 use crmeb\jobs\ChangeMerchantStatusJob;
+use crmeb\jobs\Merchant\UpdateWeChatComplaintUrlJob;
+use crmeb\services\WechatService;
 use FormBuilder\Exception\FormBuilderException;
 use think\App;
 use think\db\exception\DataNotFoundException;
@@ -381,10 +383,15 @@ class Merchant extends BaseController
             'pay_routine_client_cert|密钥' => 'require',
             'pay_routine_client_key|证书'  => 'require',
         ]);
+
+        app()->make(PlatformMerchantRepository::class)->checkMerchantId($params['pay_routine_mchid'], $id);
+
         $cert     = file_get_contents(app()->getRootPath() . 'resources/certs/' . $params['pay_routine_client_cert']);
         $cert_key = file_get_contents(app()->getRootPath() . 'resources/certs/' . $params['pay_routine_client_key']);
         $mer = (new MerchantDao())->get($id);
         $res = MerchantPayConf::getDB()->where('mer_id',$id)->find();
+        $oldMerchantConfig = [];
+        $action = '';
         if (!$res){
             MerchantPayConf::getDB()->insert([
                 'mer_id'        => $id,
@@ -396,7 +403,12 @@ class Merchant extends BaseController
                 'mch_name'      => $mer->mer_name,
                 'apiv3_secret'  => $params['pay_routine_v3_key'],
             ]);
+            $action = UpdateWeChatComplaintUrlJob::ActionCreate;
         } else{
+            if($params['pay_routine_mchid'] != $res->mch_id){
+                $oldMerchantConfig = WechatService::getV3PayConfig($id);
+                $action = UpdateWeChatComplaintUrlJob::ActionUpdate;
+            }
             MerchantPayConf::getDB()->save([
                 'mer_id'        => $id,
                 'mch_id'        => $params['pay_routine_mchid'],
@@ -409,7 +421,6 @@ class Merchant extends BaseController
             ]);
         }
 
-        app()->make(PlatformMerchantRepository::class)->checkMerchantId($params['pay_routine_mchid'], $id);
 
         foreach ($params as $k => $v) {
             $data = [
@@ -422,6 +433,10 @@ class Merchant extends BaseController
                 'mer_id'     => $id,
             ];
             $this->systemConfigValueDao->createOrUpdate($where, $data);
+        }
+        // 检查是否需要更新回调地址
+        if($action){
+            Queue::push(UpdateWeChatComplaintUrlJob::class, compact('oldMerchantConfig', 'action', 'id'));
         }
         return app('json')->success('保存成功');
     }
