@@ -21,7 +21,7 @@ class AdminValidate extends Validate
     protected $failException = true;
 
     protected $rule = [
-        'account|账号' => 'require|max:16|min:4',
+        'account|账号' => 'require|isPhone',
         'pwd|密码' => 'require|max:16|min:6',
         'phone|联系电话' => 'isPhone',
         'againPassword|确认密码' => 'require|max:16|min:6',
