@@ -34,7 +34,7 @@ class MerchantComplaintRepository extends BaseRepository
     const WeChatMediaImageCachePrefix = "WechatMediaImage:";
     const WeChatComplaintDetailHistoryCachePrefix = "WechatComplaintDetailHistory:";
 
-    public function notify(string $action, int $mer_id, array $header, string $url, $param, $content){
+    public function notify($action, int $mer_id, array $header, string $url, $param, $content){
         $logInfo = [
             'mer_id' => $mer_id,
             'param' => json_encode($param, true),
