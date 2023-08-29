@@ -69,4 +69,9 @@ class RedisKey
      */
      const MERCHANT_MENU_ROUTES = 'all_menu_relevance_routes:';
      const MERCHANT_MENU_ROUTES_TIMEOUT = 24*3600;
+
+    /**
+     * 运费规则
+     */
+     const POSTAGE_TEMPLATE_RULE = 'postage_template_rule:';
 }

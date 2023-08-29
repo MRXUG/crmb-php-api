@@ -85,7 +85,7 @@ class StoreOrder extends BaseController
         if (!($count = count($cartId)) || $count != count($cartRepository->validIntersection($cartId, $uid)))
             return app('json')->fail('数据无效');
 
-        $orderInfo = $orderCreateRepository->v2CartIdByOrderInfo($user, $cartId, $takes, $couponIds, $useIntegral, $addressId, false, $marketingDiscount,$clipCoupons);
+        $orderInfo = $orderCreateRepository->v2CartIdByOrderInfo2($user, $cartId, $takes, $couponIds, $useIntegral, $addressId, false, $marketingDiscount, [], $clipCoupons);
         $orderInfo['auto_check_purchase_protection'] = (int)(systemConfig('auto_check_purchase_protection') ?? 0);
         return app('json')->success($orderInfo);
     }
@@ -182,9 +182,9 @@ class StoreOrder extends BaseController
         //     return app('json')->fail('请选择地址');
 
         $groupOrder = app()->make(LockService::class)->exec('order.create', function () use ($orderCreateRepository, $receipt_data, $mark, $extend, $cartId, $payType, $takes, $couponIds, $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query, $order_scenario) {
-            return $orderCreateRepository->v2CreateOrder(array_search($payType, StoreOrderRepository::PAY_TYPE),
+            return $orderCreateRepository->v2CreateOrder2(array_search($payType, StoreOrderRepository::PAY_TYPE),
                 $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds, $useIntegral,
-                $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query, $order_scenario);
+                $addressId, $post, $marketingDiscount, [], $clipCoupons,$ad_type,$ad_query, $order_scenario);
         });
 
         if ($groupOrder['pay_price'] == 0) {
@@ -265,17 +265,10 @@ class StoreOrder extends BaseController
         $groupOrder = app()->make(LockService::class)->exec('order.create', function () use ($orderCreateRepository,
             $receipt_data, $mark, $extend, $cartId, $payType, $takes, $couponIds, $useIntegral, $addressId,
             $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query, $order_scenario) {
-            if (count($refluxCoil) === 0) {
-                // $marketing_discount['refluxCoil'] 为空对象
-                return $orderCreateRepository->v2CreateOrder(array_search($payType, StoreOrderRepository::PAY_TYPE),
-                    $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds,
-                    $useIntegral, $addressId, $post, $marketingDiscount,$clipCoupons,$ad_type,$ad_query, $order_scenario);
-            } else {
-                return $orderCreateRepository->v2CreateOrder2(array_search($payType, StoreOrderRepository::PAY_TYPE),
-                    $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds,
-                    $useIntegral, $addressId, $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query,
-                    $order_scenario);
-            }
+            return $orderCreateRepository->v2CreateOrder2(array_search($payType, StoreOrderRepository::PAY_TYPE),
+                $this->request->userInfo(), $cartId, $extend, $mark, $receipt_data, $takes, $couponIds,
+                $useIntegral, $addressId, $post, $marketingDiscount, $refluxCoil, $clipCoupons,$ad_type,$ad_query,
+                $order_scenario);
         });
 
         $nowUnixTime = time();

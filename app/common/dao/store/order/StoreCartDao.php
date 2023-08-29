@@ -80,31 +80,14 @@ class StoreCartDao extends BaseDao
         return $query;
     }
 
-    public function cartIbByData(array $ids, int $uid, ?UserAddress $address)
+    public function cartIbByData(array $ids, int $uid)
     {
         return StoreCart::getDb()->where('uid', $uid)->with([
-            'product' => function (Relation $query) use ($address) {
-                $query->field('product_id,cate_id,image,store_name,is_show,status,is_del,unit_name,price,mer_status,temp_id,give_coupon_ids,is_gift_bag,is_used,product_type,old_product_id,integral_rate,delivery_way,delivery_free,type,extend,pay_limit,once_max_count,once_min_count,mer_svip_status,svip_price_type');
-                if ($address) {
-                    $cityIds = array_filter([$address->province_id, $address->city_id, $address->district_id, $address->street_id]);
-                    $query->with(['temp' => ['region' => function (Relation $query) use ($cityIds) {
-                        $query->where(function ($query) use ($cityIds) {
-                            foreach ($cityIds as $v) {
-                                $query->whereOr('city_id', 'like', "%/{$v}/%");
-                            }
-                            $query->whereOr('city_id', '0');
-                        })->order('shipping_template_region_id DESC')->withLimit(1);
-                    }, 'undelives' => function ($query) use ($cityIds) {
-                        foreach ($cityIds as $v) {
-                            $query->whereOr('city_id', 'like', "%/{$v}/%");
-                        }
-                    }, 'free' => function (Relation $query) use ($cityIds) {
-                        foreach ($cityIds as $v) {
-                            $query->whereOr('city_id', 'like', "%/{$v}/%");
-                        }
-                        $query->order('shipping_template_free_id DESC')->withLimit(1);
-                    }]]);
-                }
+            'product' => function (Relation $query) {
+                $query->field('product_id,cate_id,image,store_name,is_show,status,is_del,unit_name,price,mer_status,temp_id,
+                test_shipping_template_id,
+                give_coupon_ids,is_gift_bag,is_used,product_type,old_product_id,integral_rate,delivery_way,delivery_free,type,
+                extend,pay_limit,once_max_count,once_min_count,mer_svip_status,svip_price_type');
             },
             'productAttr' => function (Relation $query) {
                 $query->field('image,extension_one,extension_two,product_id,stock,price,unique,sku,volume,weight,ot_price,cost,svip_price')

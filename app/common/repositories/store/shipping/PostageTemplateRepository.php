@@ -4,9 +4,11 @@ namespace app\common\repositories\store\shipping;
 
 use app\common\model\store\product\Product;
 use app\common\model\store\shipping\PostageTemplateRuleModel;
+use app\common\RedisKey;
 use app\common\repositories\BaseRepository;
 use app\common\model\store\shipping\PostageTemplateModel;
 use think\db\Query;
+use think\facade\Cache;
 use think\facade\Db;
 
 class PostageTemplateRepository extends BaseRepository
@@ -125,6 +127,7 @@ class PostageTemplateRepository extends BaseRepository
                 $roleModel->whereIn($roleModel->getPk(), array_values($exitsRules))->delete();
             }
         });
+        $this->deleteCache($id);
     }
 
     /**
@@ -134,6 +137,12 @@ class PostageTemplateRepository extends BaseRepository
     {
         $this->dao->where($this->dao->getPk(), $id)->delete();
         app()->make(PostageTemplateRuleModel::class)->where($this->dao->getPk(), $id)->delete();
+        $this->deleteCache($id);
+    }
+
+    private function deleteCache($id){
+        $cacheKey = RedisKey::POSTAGE_TEMPLATE_RULE . $id;
+        Cache::delete($cacheKey);
     }
 
     /**
