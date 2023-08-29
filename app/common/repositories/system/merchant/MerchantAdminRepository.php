@@ -107,8 +107,8 @@ class MerchantAdminRepository extends BaseRepository
                 return $options;
             })->multiple(true),
             Elm::input('real_name', '管理员姓名'),
-            Elm::input('account', '账号')->required(),
-            Elm::input('phone', ' 联系电话'),
+            Elm::input('account', '手机账号')->required(),
+//            Elm::input('phone', ' 联系电话'),
         ];
         if (!$id) {
             $rules[] = Elm::password('pwd', '密码')->required();

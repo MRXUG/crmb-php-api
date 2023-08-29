@@ -41,9 +41,9 @@ class DataCenterDashboardController extends BaseController
         $mer_id = $this->request->merId();
         $info = $this->repository->main($mer_id, $params);
         if(isset($params['last_info']) && !empty($params['last_info'])){
-            $lastDayEnd = $params['start_date'];
-            $dayCount = date('j', strtotime($params['end_date']) - strtotime($params['start_date']));
-            $lastDayStart = date('Y-m-d', strtotime("-{$dayCount} day", strtotime($lastDayEnd)));
+            $time = strtotime($params['end_date']) - strtotime($params['start_date']);
+            $lastDayEnd = date('Y-m-d', strtotime($params['start_date']) - 1);
+            $lastDayStart = date('Y-m-d', strtotime($params['start_date']) - $time - 1);
             $lastInfo = $this->repository->main($mer_id, ['start_date' => $lastDayStart, 'end_date' => $lastDayEnd]);
             return app('json')->success(['info' => $info, 'last_info' => $lastInfo]);
         }

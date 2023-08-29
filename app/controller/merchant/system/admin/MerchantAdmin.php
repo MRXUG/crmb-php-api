@@ -144,6 +144,7 @@ class MerchantAdmin extends BaseController
     public function create(AdminValidate $validate)
     {
         $data = $this->request->params(['account', 'phone', 'pwd', 'againPassword', 'real_name', ['roles', []], ['status', 0]]);
+        $data['phone'] = $data['account'] ?? '';
         $validate->check($data);
 
         if ($data['pwd'] !== $data['againPassword'])
