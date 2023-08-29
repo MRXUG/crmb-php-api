@@ -80,6 +80,12 @@ class PostageTemplateRepository extends BaseRepository
         return compact('count', 'list');
     }
 
+
+    public function getList(int $merId)
+    {
+        return $this->dao->where(['mer_id' => $merId])->field('template_id as shipping_template_id,name')->order('create_time DESC')->select();
+    }
+
     /**
      * @param int $id
      * @param array $data
