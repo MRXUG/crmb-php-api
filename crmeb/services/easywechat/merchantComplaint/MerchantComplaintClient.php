@@ -260,6 +260,7 @@ class MerchantComplaintClient extends BaseClient
         $headers = [
             "Authorization: ".$this->getAuthorization($uri, 'GET', ''),
             "Wechatpay-Serial: ".$this->app->certficates->get()['serial_no'],
+            "User-Agent: curl",
         ];
         curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "GET");

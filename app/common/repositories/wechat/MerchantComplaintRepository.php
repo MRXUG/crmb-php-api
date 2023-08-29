@@ -34,7 +34,7 @@ class MerchantComplaintRepository extends BaseRepository
     const WeChatMediaImageCachePrefix = "WechatMediaImage:";
     const WeChatComplaintDetailHistoryCachePrefix = "WechatComplaintDetailHistory:";
 
-    public function notify(string $action, int $mer_id, array $header, string $url, $param, $content){
+    public function notify($action, int $mer_id, array $header, string $url, $param, $content){
         $logInfo = [
             'mer_id' => $mer_id,
             'param' => json_encode($param, true),
@@ -345,7 +345,7 @@ class MerchantComplaintRepository extends BaseRepository
                     'offset' => $wxData['offset'] ?? 0,
                     'total_count' => $wxData['total_count'] ?? 0
                 ];
-                $cacheService->set(self::WeChatComplaintDetailHistoryCachePrefix.$mer_id.':'.$id, json_encode($weHistory), 600);
+                $cacheService->set(self::WeChatComplaintDetailHistoryCachePrefix.$mer_id.':'.$id, json_encode($weHistory), 60);
             }
             $detail->wxHistory = $weHistory['data'];
             $detail->wxHistory_limit = $weHistory['limit'];

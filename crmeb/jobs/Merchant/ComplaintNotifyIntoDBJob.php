@@ -23,7 +23,7 @@ class ComplaintNotifyIntoDBJob implements JobInterface
         $repos = app()->make(MerchantComplaintRepository::class);
 
         $res = $repos->notifyIntoDb($data);
-        $id = $data['id'];
+        $id = $data['request_db_id'];
         if(isset($res['error'])){
             Log::info('微信支付商户投诉request job 失败:'.$res['error']);
             MerchantComplaintRequestLog::where('id', $id)->update(['queue_status' => 2]);
