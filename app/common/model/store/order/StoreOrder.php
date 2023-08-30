@@ -310,7 +310,7 @@ class StoreOrder extends BaseModel
     }
 
     public static function onAfterInsert($order){
-        Queue::push(OrderInsertJob::class, $order);
+        Queue::push(OrderInsertJob::class, $order->toArray());
     }
 
 

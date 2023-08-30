@@ -25,9 +25,12 @@ class OrderInElasticSearchRepository extends BaseRepository
         $this->dao = $dao;
     }
 
-    public function create(StoreOrder $order){
-        $orderArray = $this->floatToInt($order->toArray());
-        $this->es->create(StoreOrderValidate::$tableIndexName, $orderArray, $order->order_id);
+    public function create($order){
+        if(is_object($order) && method_exists($order, 'toArray')){
+            $order = $order->toArray();
+        }
+        $orderArray = $this->floatToInt($order);
+        $this->es->create(StoreOrderValidate::$tableIndexName, $orderArray, $order['order_id']);
     }
 
     /**
