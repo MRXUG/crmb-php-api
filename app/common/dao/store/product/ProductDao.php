@@ -567,6 +567,7 @@ class ProductDao extends BaseDao
                         'image' => $item['image'],
                         'status' => $status,
                         'temp_id' => $item['temp_id'],
+                        'postage_temp_id' => $item['postage_temp_id'],
                         'store_name' => $item['store_name'],
                         'product_type' => $item['product_type'],
                     ];

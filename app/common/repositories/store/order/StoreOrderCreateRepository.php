@@ -353,7 +353,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 if ($cart['product']['delivery_free']) {
                     continue;
                 }
-                $tempId = $cart['product']['temp_id'];
+                $tempId = $cart['product']['postage_template_id'];
                 if(!$isTake){
                     $cart['postage_price'] = $this->calculatePostagePrice($tempId, $address, $cart['cart_num'], $price);
                     $postage_price = bcadd($postage_price, $cart['postage_price'], 2);

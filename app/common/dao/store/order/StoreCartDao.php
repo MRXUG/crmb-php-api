@@ -85,7 +85,7 @@ class StoreCartDao extends BaseDao
         return StoreCart::getDb()->where('uid', $uid)->with([
             'product' => function (Relation $query) {
                 $query->field('product_id,cate_id,image,store_name,is_show,status,is_del,unit_name,price,mer_status,temp_id,
-                test_shipping_template_id,
+                postage_template_id,
                 give_coupon_ids,is_gift_bag,is_used,product_type,old_product_id,integral_rate,delivery_way,delivery_free,type,
                 extend,pay_limit,once_max_count,once_min_count,mer_svip_status,svip_price_type');
             },

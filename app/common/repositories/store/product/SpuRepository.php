@@ -95,6 +95,7 @@ class SpuRepository extends BaseRepository
             'status'    => 0,
             'rank'      => $param['rank'] ?? 0,
             'temp_id'   => $param['temp_id'],
+            'postage_template_id' => $param['postage_template_id'],
             'sort'      => $param['sort'] ?? 0,
             'mer_labels' =>  $param['mer_labels'] ?? '',
         ];

@@ -35,6 +35,7 @@ class Spu extends BaseModel
         'rank' => 'int',//排序
         'create_time' => 'datetime',//
         'temp_id' => 'int',//运费模板
+        'postage_template_id' => 'int',//新运费模板
         'sort' => 'int',//商户排序
         'star' => 'int',//星级
         'image' => 'varchar',//主图
