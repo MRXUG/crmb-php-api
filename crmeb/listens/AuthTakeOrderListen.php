@@ -36,7 +36,7 @@ class AuthTakeOrderListen extends TimerService implements ListenerInterface
             $storeOrderRepository = app()->make(StoreOrderRepository::class);
             request()->clearCache();
             $timer = ((int)systemConfig('auto_take_order_timer')) ?: 15;
-            $time = date('Y-m-d H:i:s', strtotime("- $timer minutes")); // change debug for test,should be day
+            $time = date('Y-m-d H:i:s', strtotime("- $timer day")); // change debug for test,should be day
             $ids = $storeOrderStatusRepository->getTimeoutDeliveryOrder($time);
             Log::info('本轮 自动收货 任务 查询到需要处理的订单ID: [' . implode(",", $ids) . "]");
 
