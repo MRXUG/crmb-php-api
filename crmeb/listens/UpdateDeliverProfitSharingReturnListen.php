@@ -23,7 +23,7 @@ class UpdateDeliverProfitSharingReturnListen extends TimerService implements Lis
 
     public function handle($event): void
     {
-        $this->tick(1000*60*5, function () {
+        $this->tick(1000*60*1, function () {
             request()->clearCache();
             // 获取分账处理中 和分账回退处理中状态
             $data = DeliveryProfitSharingStatus::getDB()->whereIn('profit_sharing_status', [
