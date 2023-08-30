@@ -92,7 +92,7 @@ class SpuRepository extends BaseRepository
             'keyword'   => $param['keyword'] ?? '',
             'image'     => $param['image'],
             'price'     => $param['price'],
-            'status'    => 0,
+            'status'    => $param['status']??0,
             'rank'      => $param['rank'] ?? 0,
             'temp_id'   => $param['temp_id'],
             'sort'      => $param['sort'] ?? 0,
