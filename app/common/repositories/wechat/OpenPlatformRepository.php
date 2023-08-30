@@ -169,11 +169,14 @@ class OpenPlatformRepository extends BaseRepository
             }
             $msg = '小程序审核通知'.$params['appid'] . $desc;
             Log::info($msg);
-            sendMessageToWorkBot([
-                'msg' => $msg,
-                'file' => __FILE__,
-                'line' => __LINE__
-            ]);
+            if (!empty($updateData)){
+                sendMessageToWorkBot([
+                    'msg' => $msg,
+                    'file' => __FILE__,
+                    'line' => __LINE__
+                ]);
+            }
+            
 
         } catch (\Exception $e) {
             $msg = '小程序审核error'.$params['appid'].$e->getMessage();
