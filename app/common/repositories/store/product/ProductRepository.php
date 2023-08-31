@@ -1764,6 +1764,9 @@ class ProductRepository extends BaseRepository
 
         $this->dao->update($id, [$field => $status]);
         app()->make(SpuRepository::class)->changeStatus($id, 0);
+
+        $redisKey = sprintf(RedisKey::GOODS_DETAIL, $id);
+        Cache::store('redis')->handler()->del($redisKey);
     }
 
     public function batchSwitchShow($id, $status, $field, $merId = 0)
@@ -1793,6 +1796,10 @@ class ProductRepository extends BaseRepository
 
         }
         $this->dao->updates($id, [$field => $status]);
+        foreach ($id as $one){
+            $redisKey = sprintf(RedisKey::GOODS_DETAIL, $one);
+            Cache::store('redis')->handler()->del($redisKey);
+        }
         Queue::push(ChangeSpuStatusJob::class, ['id' => $id, 'product_type' => 0]);
     }
 
@@ -1820,6 +1827,8 @@ class ProductRepository extends BaseRepository
             ],
         ], $product['mer_id']);
         app()->make(SpuRepository::class)->changeStatus($id, $product_type);
+        $redisKey = sprintf(RedisKey::GOODS_DETAIL, $id);
+        Cache::store('redis')->handler()->del($redisKey);
     }
 
     /**
@@ -1846,6 +1855,10 @@ class ProductRepository extends BaseRepository
             ], $product['mer_id']);
         }
         $this->dao->updates($id, $data);
+        foreach ($id as $one){
+            $redisKey = sprintf(RedisKey::GOODS_DETAIL, $one);
+            Cache::store('redis')->handler()->del($redisKey);
+        }
         Queue(ChangeSpuStatusJob::class, ['id' => $id, 'product_type' => $product['product_type']]);
         event('product.status', compact('id', 'data'));
     }

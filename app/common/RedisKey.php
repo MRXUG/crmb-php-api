@@ -44,7 +44,7 @@ class RedisKey
      */
 
      const GOODS_DETAIL = 'goods_detail:%s';
-     const GOODS_DETAIL_TIMEOUT = 86400;
+     const GOODS_DETAIL_TIMEOUT = 600;
      const GOODS_DETAIL_WithUid_TIMEOUT = 600;
 
     /**
