@@ -98,7 +98,7 @@ class StoreOrderDao extends BaseDao
         });
 
         $query->when(($sysDel !== null), function ($query) use ($sysDel) {
-            $query->where('is_system_del', $sysDel);
+            $query->where('StoreOrder.is_system_del', $sysDel);
         })
             ->when(isset($where['order_type']) && $where['order_type'] >= 0 && $where['order_type'] !== '', function ($query) use ($where) {
                 if ($where['order_type'] == 2) {
