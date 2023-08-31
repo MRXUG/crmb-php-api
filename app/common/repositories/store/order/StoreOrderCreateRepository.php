@@ -320,7 +320,6 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 $cart['svip_coupon_merge'] = 1;
                 $valid_total_price = bcadd($valid_total_price, $_price, 2);
                 $cart['allow_price'] = $_price;
-                $cart['temp_number'] = 0;
 
                 if (!isset($product_cart[$cart['product_id']]))
                     $product_cart[$cart['product_id']] = [$cart['cart_id']];
@@ -330,11 +329,6 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 if ($_price > 0) {
                     $product_price[$cart['product_id']] = bcadd($product_price[$cart['product_id']] ?? 0, $_price, 2);
                 }
-
-
-                $number = $this->productByTempNumber($cart);
-                if ($number <= 0) continue;
-                $cart['temp_number'] = $number;
 
                 if ($order_model || ($cart['product_type'] == 10 && $cart['productDiscount']['free_shipping'])) {
                     continue;
