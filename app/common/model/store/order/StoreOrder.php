@@ -124,9 +124,11 @@ class StoreOrder extends BaseModel
      */
     const TENCENT_AD = 1;
     const TRILL_AD = 2;
+    const TENCENT_VIDEO_AD = 4;
     const AD_CHANNEL = [
         self::TENCENT_AD => '腾讯广告',
-        self::TRILL_AD => '抖音广告'
+        self::TRILL_AD => '抖音广告',
+        self::TENCENT_VIDEO_AD => '腾讯视频号广告',
     ];
     public static function tablePk(): ?string
     {
