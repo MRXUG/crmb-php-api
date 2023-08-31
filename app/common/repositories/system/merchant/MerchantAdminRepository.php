@@ -31,6 +31,7 @@ use FormBuilder\Form;
 use think\db\exception\DataNotFoundException;
 use think\db\exception\DbException;
 use think\db\exception\ModelNotFoundException;
+use think\db\Query;
 use think\exception\ValidateException;
 use think\facade\Cache;
 use think\facade\Config;
@@ -378,10 +379,11 @@ class MerchantAdminRepository extends BaseRepository
     /**
      * 获取用户可以管理的商户列表
      * @param $merchantAdminId
+     * @param array $where
      * @return mixed
      */
-    public function merchantList($merchantAdminId){
-        return Merchant::getDB()
+    public function merchantList($merchantAdminId, array $where){
+        return Merchant::getModel()
             ->alias('m')
             ->join('merchant_admin_relation r', 'r.mer_id = m.mer_id')
             ->where([
@@ -390,6 +392,9 @@ class MerchantAdminRepository extends BaseRepository
                 'r.is_del' => 0,
                 'm.status' => 1,
             ])
+            ->when(isset($where['keyword']) && $where['keyword'] != '', function (Query $query) use ($where){
+                $query->whereLike('m.mer_name|m.real_name|m.mer_keyword|m.mer_address|m.mer_info', "%{$where['keyword']}%");
+            })
             ->field("r.id, m.mer_id, m.mer_name, m.real_name, m.mer_phone, m.mer_address, m.mer_keyword, m.mer_avatar, m.mer_banner, m.mini_banner, m.mer_info, m.service_phone")
             ->select();
 

@@ -299,7 +299,8 @@ class MerchantAdmin extends BaseController
 
     public function merchantList(){
         $merchantAdminId = $this->request->adminId();
-        return app('json')->success($this->repository->merchantList($merchantAdminId));
+        $where = $this->request->params(['keyword']);
+        return app('json')->success($this->repository->merchantList($merchantAdminId, $where));
     }
 
     public function updateMerchantToken(){

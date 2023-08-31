@@ -31,6 +31,7 @@ class UserLogController extends BaseController
             $params['uid'] = 0;
         }
         $params['user_type'] = UserVisitLogValidate::$WxAppletUserType;
+        $params['visit_time'] = date('Y-m-d H:i:s'); //使用服务器时间
 
         app()->make(UserVisitLogValidate::class)->check($params);
         // use QUEUE

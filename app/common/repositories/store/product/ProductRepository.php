@@ -292,6 +292,9 @@ class ProductRepository extends BaseRepository
             foreach ($attrval as $item) {
                 app()->make(ProductAttrValueRepository::class)->insertAll($item);
             }
+            app()->make(SpuRepository::class)->baseUpdate($data, $id, 0, 0);
+    
+            app()->make(SpuRepository::class)->changeStatus($id, 0);
             return $this->dao->update($id, $data);
         });
         $redisKey = sprintf(RedisKey::GOODS_DETAIL, $id);

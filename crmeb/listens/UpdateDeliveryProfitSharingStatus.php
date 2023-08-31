@@ -29,7 +29,7 @@ class UpdateDeliveryProfitSharingStatus extends TimerService implements Listener
 
     public function handle($event): void
     {
-        $this->tick(1000 * 60 * 1, function () {
+        $this->tick(1000 * 60 * 5, function () {
             $cache = Cache::store('redis')->handler()->get(__CLASS__);
             \think\facade\Log::info($this->name.'_start：'.date('Y-m-d H:i:s').'lock:'.$cache);
             if ($cache) {
