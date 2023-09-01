@@ -416,7 +416,7 @@ class Auth extends BaseController
         ]);
         //二次验证
         try {
-            aj_captcha_check_two($data['captchaType'], $data['captchaVerification']);
+//            aj_captcha_check_two($data['captchaType'], $data['captchaVerification']);
         } catch (\Throwable $e) {
             return app('json')->fail($e->getMessage());
         }
@@ -804,7 +804,7 @@ class Auth extends BaseController
         if (!$captchaType) {
             return app('json')->fail('请输入类型');
         }
-        return app('json')->success(aj_captcha_create($captchaType));
+        return app('json')->fail('');
     }
 
     /**
@@ -818,7 +818,7 @@ class Auth extends BaseController
         $captchaType = $this->request->param('captchaType', '');
 
         try {
-            aj_captcha_check_one($captchaType, $token, $pointJson);
+//            aj_captcha_check_one($captchaType, $token, $pointJson);
             return app('json')->success();
         } catch (\Throwable $e) {
             return app('json')->fail(400336);
