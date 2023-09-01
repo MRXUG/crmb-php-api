@@ -325,9 +325,9 @@ class StoreOrderDao extends BaseDao
             ->when(isset($where['sku_code']) && $where['sku_code'] != '', function ($query) use ($where) {
                 $orderId = StoreOrderProduct::alias('op')
                     ->join('storeProduct sp','op.product_id = sp.product_id')
-                    ->join('store_product_attr_value sku','sku.product_id = sp.product_id')
+                    ->join('store_product_attr_value sku','sku.product_id = sp.product_id and sku.unique = op.product_sku')
                     ->where(function ($query) use ($where){
-                        $query->where('sku.bar_code|sku.unique|sku.sku', $where['sku_code']);
+                        $query->where('sku.unique|sku.sku', $where['sku_code']);
                     })
                     ->column('order_id');
                 $query->whereIn('order_id',$orderId ?: '' );
