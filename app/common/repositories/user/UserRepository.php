@@ -18,6 +18,7 @@ use app\common\dao\user\UserDao;
 use app\common\model\black\UserBlackLog;
 use app\common\model\user\User;
 use app\common\model\wechat\WechatUser;
+use app\common\RedisKey;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\community\CommunityRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
@@ -581,6 +582,7 @@ class UserRepository extends BaseRepository
         $user->last_time = date('Y-m-d H:i:s', time());
         $user->last_ip = request()->ip();
         $user->save();
+        $this->removeLogoutStatus($user->uid);
     }
 
 
@@ -592,7 +594,7 @@ class UserRepository extends BaseRepository
      */
     public function cacheToken(string $token, int $exp)
     {
-        Cache::store('file')->set('user_' . $token, time() + $exp, $exp);
+        Cache::store('redis')->set('user_' . $token, time() + $exp, $exp);
     }
 
 
@@ -603,7 +605,7 @@ class UserRepository extends BaseRepository
      */
     public function checkToken(string $token)
     {
-        $cache = Cache::store('file');
+        $cache = Cache::store('redis');
         $has = $cache->has('user_' . $token);
         if (!$has)
             throw new AuthException('无效的token');
@@ -620,7 +622,7 @@ class UserRepository extends BaseRepository
      */
     public function updateToken(string $token)
     {
-        Cache::store('file')->set('user_' . $token, time(), intval(Config::get('admin.user_token_valid_exp', 15)) * 24 * 60 * 60);
+        Cache::store('redis')->set('user_' . $token, time(), intval(Config::get('admin.user_token_valid_exp', 15)) * 24 * 60 * 60);
     }
 
 
@@ -631,9 +633,18 @@ class UserRepository extends BaseRepository
      */
     public function clearToken(string $token)
     {
-        Cache::delete('user_' . $token);
+        Cache::store('redis')->delete('user_' . $token);
     }
 
+    /**
+     * 小程序退出登录 不清除token 只是记录状态
+     * @param $uid
+     * @throws \Psr\SimpleCache\InvalidArgumentException
+     */
+    public function miniLogout($uid){
+        $logoutStatus = RedisKey::MINI_PROGRAMS_LOGOUT_UID . $uid;
+        Cache::store('redis')->set($logoutStatus, 1, RedisKey::MINI_PROGRAMS_LOGOUT_TIMEOUT);
+    }
     /**
      * @param string $key
      * @param string $code
@@ -1488,5 +1499,12 @@ class UserRepository extends BaseRepository
     public function cancelUserCoupon($uid){
         $make = app()->make(PlatformCouponRepository::class);
         $make->cancelPlatformUserCoupon($uid);
+    }
+
+    public function removeLogoutStatus($uid){
+        $logoutStatus = RedisKey::MINI_PROGRAMS_LOGOUT_UID . $uid;
+        if(Cache::has($logoutStatus)){
+            Cache::delete($logoutStatus);
+        }
     }
 }

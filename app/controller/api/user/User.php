@@ -201,6 +201,7 @@ class User extends BaseController
             $data = ['account' => $data['phone'], 'phone' => $data['phone']];
         }
         $this->repository->update($this->request->uid(), $data);
+        $this->repository->removeLogoutStatus($this->request->uid());
         return app('json')->success('绑定成功');
     }
 

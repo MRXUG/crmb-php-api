@@ -18,6 +18,7 @@ use app\common\dao\user\UserOpenIdRelationDao;
 use app\common\model\platform\PlatformCouponReceive;
 use app\common\model\store\RefundTask;
 use app\common\model\wechat\WechatUser;
+use app\common\RedisKey;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
 use app\common\repositories\store\order\StoreRefundOrderRepository;
@@ -196,6 +197,11 @@ class Auth extends BaseController
             'total_integral'
         ]);
         $data = $user->toArray();
+        $logoutStatus = RedisKey::MINI_PROGRAMS_LOGOUT_UID . $user['uid'];
+        if(Cache::has($logoutStatus)){
+            $data['nickname'] = '';
+            $data['avatar'] = '';
+        }
         $data['total_consume'] = $user['pay_price'];
         $data['extension_status'] = systemConfig('extension_status');
         if (systemConfig('member_status')) {
@@ -249,7 +255,7 @@ class Auth extends BaseController
      */
     public function logout(UserRepository $repository)
     {
-        $repository->clearToken($this->request->token());
+        $repository->miniLogout($this->request->uid());
         return app('json')->success('退出登录');
     }
 
