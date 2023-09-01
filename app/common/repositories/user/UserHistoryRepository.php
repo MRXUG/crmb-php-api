@@ -42,12 +42,8 @@ class UserHistoryRepository extends BaseRepository
         $count = $query->count();
         $data = $query->page($page,$limit)->select();
         $res = [];
-        $make = app()->make(StoreActivityRepository::class);
         $couponStockRep = app()->make(CouponStocksRepository::class);
         foreach ($data as $item) {
-
-            $act = $make->getActivityBySpu(StoreActivityRepository::ACTIVITY_TYPE_BORDER,$item["spu"]['spu_id'],0,$item["spu"]['mer_id']);
-            $item['border_pic'] = $act['pic'] ?? '';
             $couponInfo = $couponStockRep->getRecommendCoupon($item["spu"]['product_id']);
             $item['couponSubPrice'] = !empty($couponInfo) ? $couponInfo['sub'] : 0;
             $item['coupon'] = !empty($couponInfo) ? $couponInfo['coupon'] : [];

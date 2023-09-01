@@ -308,7 +308,7 @@ class StoreOrder extends BaseModel
     }
 
     public static function onAfterUpdate($order){
-        Queue::push(OrderUpdateJob::class, ['orderIds' => $order->order_id, 'updateColumn' => $order->toArray()]);
+        Queue::push(OrderUpdateJob::class, ['orderIds' => [$order->order_id], 'updateColumn' => $order->toArray()]);
     }
 
     public static function onAfterInsert($order){
