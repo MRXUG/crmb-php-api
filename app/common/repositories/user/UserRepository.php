@@ -499,16 +499,15 @@ class UserRepository extends BaseRepository
         $request = request();
 
         if ($user) {
-//            if ($wechatUser['nickname'] == '微信用户') {
-//                unset($wechatUser['nickname'],$wechatUser['headimgurl']);
-//            }
-            $user->save(array_filter([
-                'nickname' => $wechatUser['nickname'] ?? '',
-                'avatar' => $wechatUser['headimgurl'] ?? '',
-                'sex' => $wechatUser['sex'] ?? 0,
-                'last_time' => date('Y-m-d H:i:s'),
-                'last_ip' => $request->ip(),
-            ]));
+            if(isset($wechatUser['nickname'])){
+                $user->nickname = $wechatUser['nickname'];
+            }
+            if(isset($wechatUser['headimgurl'])){
+                $user->avatar = $wechatUser['headimgurl'];
+            }
+            if(isset($wechatUser['sex'])){
+                $user->sex = $wechatUser['sex'];
+            }
         } else {
             $user = $this->create($userType, [
                 'account' => 'wx' . $wechatUser->wechat_user_id . time(),

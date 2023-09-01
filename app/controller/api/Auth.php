@@ -879,9 +879,8 @@ class Auth extends BaseController
 
         $jscode2session =  $openPlatformRepository->thirdpartyCode2Session($appid,$js_code);
 
-        if (!isset($jscode2session['session_key']))return app('json')->status(400,'登陆失败');
-        if (!isset($jscode2session['unionid']))return app('json')->status(400,'登陆失败');
-        if (!isset($jscode2session['openid']))return app('json')->status(400,'登陆失败');
+        if (!isset($jscode2session['session_key']) || !isset($jscode2session['unionid']) || !isset($jscode2session['openid']))
+            return app('json')->status(400,'登陆失败');
 
         /** @var WechatUserRepository $make */
         $make = app()->make(WechatUserRepository::class);
@@ -889,8 +888,8 @@ class Auth extends BaseController
         if (!$user) {
             throw new ValidateException('授权失败');
         }
+        /** @var UserRepository $userRepository */
         $userRepository = app()->make(UserRepository::class);
-        $user = $users[1] ?? $userRepository->wechatUserIdBytUser($wechatUser['wechat_user_id']);
         $user->unionid = $wechatUser->unionid;
         $user->openid = $jscode2session['openid'];
         $tokenInfo = $userRepository->createToken($user);
