@@ -69,6 +69,8 @@ class ElasticSearchService
             'class' => __CLASS__,
             'func' => __FUNCTION__,
             'index' => $index,
+            'param' => $param,
+            'id' => $id,
         ]));
         if(!$id){
             $machineId = 1;
@@ -91,6 +93,7 @@ class ElasticSearchService
             'class' => __CLASS__,
             'func' => __FUNCTION__,
             'index' => $index,
+            'param' => $param,
             'id' => $id,
         ]));
         $this->client->update(['index' => $index, 'body' => ['doc' => $param], 'id' => $id]);
