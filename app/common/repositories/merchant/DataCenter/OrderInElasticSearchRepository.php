@@ -88,7 +88,7 @@ class OrderInElasticSearchRepository extends BaseRepository
                     'doc' => $v
                 ];
             }
-            echo json_encode($esData);
+//            echo json_encode($esData);
             $this->es->bulk($esData, StoreOrderValidate::$tableIndexName);
 
         }
