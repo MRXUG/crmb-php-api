@@ -526,6 +526,7 @@ class User extends BaseController
             $data['avatar'] = $avatar;
         }
         $this->repository->updateBaseInfo($data,$user);
+        $this->repository->removeLogoutStatus($user->uid);
         return app('json')->success('修改成功');
     }
 }
