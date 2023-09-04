@@ -48,16 +48,17 @@ class StdLog implements LogHandlerInterface
             'params'=>$request->param(),
             'mvc'=>$request->controller() . '.' . $request->action() . '@' . $request->method()
         ];
-        if($request->url() == 'swoole' || !$request->controller()){
-            // log more
-            $requestParams['argv'] = $_SERVER['argv'] ?? [];
-            $requestParams['trace'] = debug_backtrace();
-        }
         //新增
         foreach ($log as $type => $val) {
             // if ($type == "sql") {
             //     continue;
             // }
+            $requestParams['argv'] = $requestParams['trace'] = [];
+            if($type == 'error' && ($request->url() == 'swoole' || !$request->controller())){
+                // log more
+                $requestParams['argv'] = $_SERVER['argv'] ?? [];
+                $requestParams['trace'] = debug_backtrace();
+            }
             foreach ($val as $msg) {
                 if (!is_string($msg)) {
                     $msg = var_export($msg, true);
