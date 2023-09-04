@@ -44,7 +44,7 @@ class RedisKey
      */
 
      const GOODS_DETAIL = 'goods_detail:%s';
-     const GOODS_DETAIL_TIMEOUT = 86400;
+     const GOODS_DETAIL_TIMEOUT = 600;
      const GOODS_DETAIL_WithUid_TIMEOUT = 600;
 
     /**
@@ -74,4 +74,11 @@ class RedisKey
      * 运费规则
      */
      const POSTAGE_TEMPLATE_RULE = 'postage_template_rule:';
+
+    /**
+     * 
+     * 小程序用户退出登录状态
+     */
+     const MINI_PROGRAMS_LOGOUT_UID = 'mini_programs_logout:';
+     const MINI_PROGRAMS_LOGOUT_TIMEOUT = 24*3600;
 }

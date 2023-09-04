@@ -13,6 +13,7 @@
 namespace app\common\model\user;
 
 use app\common\model\BaseModel;
+use app\common\model\store\product\Product;
 use app\common\model\store\product\Spu;
 
 class UserHistory extends BaseModel
@@ -36,11 +37,6 @@ class UserHistory extends BaseModel
     public static function tableName(): string
     {
         return 'user_history';
-    }
-
-    public function getUpdateTimeAttr($value)
-    {
-        return date('Y-m-d H:i:s', $value);
     }
 
     public function getStopTimeAttr()
@@ -67,7 +63,7 @@ class UserHistory extends BaseModel
 
     public function spu()
     {
-        return $this->hasOne(Spu::class, 'spu_id', 'res_id');
+        return $this->hasOne(Product::class, 'product_id', 'res_id');
     }
 
     public function searchUidAttr($query, $value)

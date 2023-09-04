@@ -33,13 +33,6 @@ class ElasticSearchService
      * @return array
      */
     final public function get(array $param, $returnId = true, $returnSort = false){
-        Log::info(json_encode([
-            'class' => __CLASS__,
-            'func' => __FUNCTION__,
-            'param' => $param,
-            'returnId' => $returnId,
-            'returnSort' => $returnSort
-        ]));
         $data   = $this->client->search($param);
         $nList  = [];
         foreach ($data['hits']['hits'] ?? [] as $v) {
@@ -59,11 +52,6 @@ class ElasticSearchService
      * @return array
      */
     final public function aggregationsSearch(array $param){
-        Log::info(json_encode([
-            'class' => __CLASS__,
-            'func' => __FUNCTION__,
-            'param' => $param,
-        ]));
         $data   = $this->client->search($param);
         return $data['aggregations'];
     }
@@ -80,7 +68,9 @@ class ElasticSearchService
         Log::info(json_encode([
             'class' => __CLASS__,
             'func' => __FUNCTION__,
+            'index' => $index,
             'param' => $param,
+            'id' => $id,
         ]));
         if(!$id){
             $machineId = 1;
@@ -102,6 +92,7 @@ class ElasticSearchService
         Log::info(json_encode([
             'class' => __CLASS__,
             'func' => __FUNCTION__,
+            'index' => $index,
             'param' => $param,
             'id' => $id,
         ]));

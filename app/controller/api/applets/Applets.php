@@ -1,21 +1,12 @@
 <?php
 
-// +----------------------------------------------------------------------
-// | CRMEB [ CRMEB赋能开发者，助力企业发展 ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2016~2022 https://www.crmeb.com All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed CRMEB并不是自由软件，未经许可不能去掉CRMEB相关版权
-// +----------------------------------------------------------------------
-// | Author: CRMEB Team <admin@crmeb.com>
-// +----------------------------------------------------------------------
-
 namespace app\controller\api\applets;
 
 use app\common\model\applet\AppletsTx;
 use crmeb\basic\BaseController;
-use crmeb\services\ads\Action\ViewContent;
+use crmeb\jobs\AdvertisingReportingViewJob;
 use think\App;
+use think\facade\Queue;
 
 class Applets extends BaseController
 {
@@ -41,16 +32,11 @@ class Applets extends BaseController
             ]);
             return app('json')->success([]);
         }
-        $result = (new ViewContent($this->request->header('appid'), $unionid, $gdt_vid))->handle();
-        if ($result['code'] != 0) {
-            sendMessageToWorkBot([
-                'module' => '广告落地页',
-                'type'   => 'error',
-                'msg'    => '回传失败' . json_encode($result),
-            ]);
-        }
+        $param = ['appid' => $appid, 'unionid' => $unionid, 'gdt_vid' => $gdt_vid, 'timestamp' => time()];
 
-        return app('json')->success($result);
+        Queue::push(AdvertisingReportingViewJob::class, $param);
+
+        return app('json')->success(['code' => 0, 'message' => 'queue send success']);
     }
 
     //腾讯点击监测接口数据保存

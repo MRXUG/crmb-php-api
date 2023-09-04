@@ -18,6 +18,7 @@ use app\common\dao\user\UserOpenIdRelationDao;
 use app\common\model\platform\PlatformCouponReceive;
 use app\common\model\store\RefundTask;
 use app\common\model\wechat\WechatUser;
+use app\common\RedisKey;
 use app\common\repositories\coupon\CouponStocksRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
 use app\common\repositories\store\order\StoreRefundOrderRepository;
@@ -196,6 +197,11 @@ class Auth extends BaseController
             'total_integral'
         ]);
         $data = $user->toArray();
+        $logoutStatus = RedisKey::MINI_PROGRAMS_LOGOUT_UID . $user['uid'];
+        if(Cache::has($logoutStatus)){
+            $data['nickname'] = '';
+            $data['avatar'] = '';
+        }
         $data['total_consume'] = $user['pay_price'];
         $data['extension_status'] = systemConfig('extension_status');
         if (systemConfig('member_status')) {
@@ -249,7 +255,7 @@ class Auth extends BaseController
      */
     public function logout(UserRepository $repository)
     {
-        $repository->clearToken($this->request->token());
+        $repository->miniLogout($this->request->uid());
         return app('json')->success('退出登录');
     }
 
@@ -416,7 +422,7 @@ class Auth extends BaseController
         ]);
         //二次验证
         try {
-            aj_captcha_check_two($data['captchaType'], $data['captchaVerification']);
+//            aj_captcha_check_two($data['captchaType'], $data['captchaVerification']);
         } catch (\Throwable $e) {
             return app('json')->fail($e->getMessage());
         }
@@ -804,7 +810,7 @@ class Auth extends BaseController
         if (!$captchaType) {
             return app('json')->fail('请输入类型');
         }
-        return app('json')->success(aj_captcha_create($captchaType));
+        return app('json')->fail('');
     }
 
     /**
@@ -818,7 +824,7 @@ class Auth extends BaseController
         $captchaType = $this->request->param('captchaType', '');
 
         try {
-            aj_captcha_check_one($captchaType, $token, $pointJson);
+//            aj_captcha_check_one($captchaType, $token, $pointJson);
             return app('json')->success();
         } catch (\Throwable $e) {
             return app('json')->fail(400336);
@@ -873,9 +879,8 @@ class Auth extends BaseController
 
         $jscode2session =  $openPlatformRepository->thirdpartyCode2Session($appid,$js_code);
 
-        if (!isset($jscode2session['session_key']))return app('json')->status(400,'登陆失败');
-        if (!isset($jscode2session['unionid']))return app('json')->status(400,'登陆失败');
-        if (!isset($jscode2session['openid']))return app('json')->status(400,'登陆失败');
+        if (!isset($jscode2session['session_key']) || !isset($jscode2session['unionid']) || !isset($jscode2session['openid']))
+            return app('json')->status(400,'登陆失败');
 
         /** @var WechatUserRepository $make */
         $make = app()->make(WechatUserRepository::class);
@@ -883,8 +888,8 @@ class Auth extends BaseController
         if (!$user) {
             throw new ValidateException('授权失败');
         }
+        /** @var UserRepository $userRepository */
         $userRepository = app()->make(UserRepository::class);
-        $user = $users[1] ?? $userRepository->wechatUserIdBytUser($wechatUser['wechat_user_id']);
         $user->unionid = $wechatUser->unionid;
         $user->openid = $jscode2session['openid'];
         $tokenInfo = $userRepository->createToken($user);

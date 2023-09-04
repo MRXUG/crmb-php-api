@@ -98,7 +98,7 @@ class StoreOrderDao extends BaseDao
         });
 
         $query->when(($sysDel !== null), function ($query) use ($sysDel) {
-            $query->where('is_system_del', $sysDel);
+            $query->where('StoreOrder.is_system_del', $sysDel);
         })
             ->when(isset($where['order_type']) && $where['order_type'] >= 0 && $where['order_type'] !== '', function ($query) use ($where) {
                 if ($where['order_type'] == 2) {
@@ -325,9 +325,9 @@ class StoreOrderDao extends BaseDao
             ->when(isset($where['sku_code']) && $where['sku_code'] != '', function ($query) use ($where) {
                 $orderId = StoreOrderProduct::alias('op')
                     ->join('storeProduct sp','op.product_id = sp.product_id')
-                    ->join('store_product_attr_value sku','sku.product_id = sp.product_id')
+                    ->join('store_product_attr_value sku','sku.product_id = sp.product_id and sku.unique = op.product_sku')
                     ->where(function ($query) use ($where){
-                        $query->where('sku.bar_code|sku.unique|sku.sku', $where['sku_code']);
+                        $query->where('sku.unique|sku.sku', $where['sku_code']);
                     })
                     ->column('order_id');
                 $query->whereIn('order_id',$orderId ?: '' );
