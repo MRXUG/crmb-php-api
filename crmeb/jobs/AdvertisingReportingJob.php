@@ -28,7 +28,9 @@ class AdvertisingReportingJob implements JobInterface
         Log::info("gdt-order-queue".json_encode($data));
         $gdt_param = json_decode($data['gdt_params'],1);
         //['gdt_params'=>$order->ad_query,'order_id'=>$order->order_id,'pay_price'=>$order->pay_price]
-        $result = (new CompleteOrder($gdt_param['appid'],$gdt_param['unionid'],$gdt_param['gdt_vid']??$gdt_param['qz_gdt'],$data['pay_price']))->handle();
+        $result = (new CompleteOrder($gdt_param['appid'],$gdt_param['unionid'],$gdt_param['gdt_vid']??$gdt_param['qz_gdt'],$data['pay_price']))
+            ->setTimestamp($data['timestamp'])
+            ->handle();
         if ($result['code'] != 0) {
             sendMessageToWorkBot([
                 'module' => '广告订单回传',

@@ -19,6 +19,8 @@ abstract class BaseAdsEvent
 
     protected $click_id= '';
 
+    protected string $timestamp = '';
+
     private $data_source_map = [
         'wx7d575dcfbee5d0c5'=>1201311297,
         'wx4e8a0659d2f00321'=>1201311302,
@@ -100,6 +102,11 @@ abstract class BaseAdsEvent
             ]);
             return [];
         }
+    }
+
+    public function setTimestamp(string $time){
+        $this->timestamp = $time;
+        return $this;
     }
 }
 
