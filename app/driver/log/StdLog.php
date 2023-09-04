@@ -39,6 +39,7 @@ class StdLog implements LogHandlerInterface
         $time = DateTime::createFromFormat('0.u00 U',
             microtime())->setTimezone(new \DateTimeZone(date_default_timezone_get()))->format($this->config['time_format']);
 
+        /** @var Request $request */
         $request = \think\facade\Request::instance();
         $requestParams = [
             'url'=>$request->url(),
@@ -47,6 +48,11 @@ class StdLog implements LogHandlerInterface
             'params'=>$request->param(),
             'mvc'=>$request->controller() . '.' . $request->action() . '@' . $request->method()
         ];
+        if($request->url() == 'swoole' || !$request->controller()){
+            // log more
+            $requestParams['argv'] = $_SERVER['argv'] ?? [];
+            $requestParams['trace'] = debug_backtrace();
+        }
         //新增
         foreach ($log as $type => $val) {
             // if ($type == "sql") {
