@@ -24,6 +24,7 @@ return [
     'close'        => false,
     // 全局日志处理 支持闭包
     'processor'    => null,
+    'record_trace' => true, 
 
     // 日志通道列表
     'channels'     => [
