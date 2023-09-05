@@ -19,7 +19,7 @@ class CompleteOrder extends BaseAdsEvent {
             $this->timestamp = time();
         }
         return [
-            ['action_type'=>'COMPLETE_ORDER','action_time'=>$this->timestamp,'action_param'=>['value'=>intval($this->value*100)]],
+            ['action_type'=>'COMPLETE_ORDER','action_time'=>$this->timestamp,'action_param'=>['value'=>intval($this->value)]],
         ];
     }
     

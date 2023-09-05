@@ -1948,6 +1948,7 @@ class ProductRepository extends BaseRepository
     {
         $productNum = $productNum ?? $cart['product_num'];
         Db::transaction(function () use ($order, $cart, $productNum) {
+            /** @var ProductAttrValueRepository $productAttrValueRepository */
             $productAttrValueRepository = app()->make(ProductAttrValueRepository::class);
             if ($cart['product_type'] == '1') {
                 $oldId = $cart['cart_info']['product']['old_product_id'];
@@ -1972,7 +1973,11 @@ class ProductRepository extends BaseRepository
                     $productAttrValueRepository->incSkuStock($oldId, $cart['cart_info']['productAttr']['sku'], $productNum);
                     $this->dao->incStock($oldId, $productNum);
                 } else {
-                    $productAttrValueRepository->incStock($cart['product_id'], $cart['cart_info']['productAttr']['unique'], $productNum);
+                    if($cart['cart_info']['productAttr']['unique'] ?? ''){
+                        $productAttrValueRepository->incStock($cart['product_id'], $cart['cart_info']['productAttr']['unique'], $productNum);
+                    }elseif($cart['cart_info']['productAttr']['sku_id'] ?? ''){// TODO 兼容go版本 临时解决方案
+                        $productAttrValueRepository->incStockBySkuId($cart['product_id'], $cart['cart_info']['productAttr']['sku_id'], $productNum);
+                    }
                     $this->dao->incStock($cart['product_id'], $productNum);
                 }
                 if ($cart->integral > 0) {

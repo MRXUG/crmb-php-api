@@ -188,6 +188,20 @@ class ProductAttrValueDao extends BaseDao
 
     /**
      * @param int $productId
+     * @param string $unique
+     * @param int $inc
+     * @throws DbException
+     * @author xaboy
+     * @day 2020/6/8
+     */
+    public function incStockBySkuId(int $productId, int $skuId, int $inc)
+    {
+        model::getDB()->where('product_id', $productId)->where('sku_id', $skuId)->inc('stock', $inc)->update();
+        model::getDB()->where('product_id', $productId)->where('sku_id', $skuId)->where('sales', '>=', $inc)->dec('sales', $inc)->update();
+    }
+
+    /**
+     * @param int $productId
      * @param string $sku
      * @param int $inc
      * @throws DbException

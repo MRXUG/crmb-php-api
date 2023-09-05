@@ -53,12 +53,6 @@ class StdLog implements LogHandlerInterface
             // if ($type == "sql") {
             //     continue;
             // }
-            $requestParams['argv'] = $requestParams['trace'] = [];
-            if($type == 'error' && ($request->url() == 'swoole' || !$request->controller())){
-                // log more
-                $requestParams['argv'] = $_SERVER['argv'] ?? [];
-                $requestParams['trace'] = debug_backtrace();
-            }
             foreach ($val as $msg) {
                 if (!is_string($msg)) {
                     $msg = var_export($msg, true);
