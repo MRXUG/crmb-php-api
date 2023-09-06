@@ -185,7 +185,8 @@ class FinishOrderListen extends TimerService implements ListenerInterface
             'status'=>1,
             'err_msg'=>$update['profit_sharing_error']
         ]);
-        if($update['profit_sharing_status']== DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS){
+        if($update['profit_sharing_status'] == DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS ||
+        $update['profit_sharing_status'] == DeliveryProfitSharingStatus::PROFIT_SHARING_STATUS_RETURN_SUCCESS_PART){
             if($order['platform_source'] != StoreOrder::PLATFORM_SOURCE_NATURE){
                 app()->make(OrderFlowRepository::class)->create([
                     'order_sn'    => $order['order_sn'],

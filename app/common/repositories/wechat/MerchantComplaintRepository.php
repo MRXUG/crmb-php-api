@@ -199,8 +199,8 @@ class MerchantComplaintRepository extends BaseRepository
             ->when(isset($param['transaction_id']) && $param['transaction_id'] !== '', function ($query) use ($param) {
                 $query->where('co.transaction_id', '=', $param['transaction_id']);
             })
-            ->when(isset($param['out_trade_no']) && $param['out_trade_no'] !== '', function ($query) use ($param) {
-                $query->where('out_trade_no', '=', $param['out_trade_no']);
+            ->when(isset($param['out_trade_no']) && $param['out_trade_no'] !== '', function (Query $query) use ($param) {
+                $query->whereLike('out_trade_no', "%".$param['out_trade_no']."%");
             })
             ->when(isset($param['problem_type']) && (int)$param['problem_type'] !== 0, function ($query) use ($param) {
                 $query->where('problem_type', '=', $param['problem_type']);
