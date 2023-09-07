@@ -19,6 +19,7 @@ use app\common\model\store\Guarantee;
 use app\common\model\store\GuaranteeTemplate;
 use app\common\model\store\GuaranteeValue;
 use app\common\model\store\parameter\ParameterValue;
+use app\common\model\store\shipping\PostageTemplateModel;
 use app\common\model\store\shipping\ShippingTemplate;
 use app\common\model\store\StoreBrand;
 use app\common\model\store\StoreCategory;
@@ -100,6 +101,7 @@ class Product extends BaseModel
         'svip_price'            => 'decimal', //会员价
         'svip_price_type'       => 'tinyint', //0不参加，1默认比例，2自定义
         'temp_id'               => 'int', //运费模板ID
+        'postage_template_id'   => 'int', //新运费模板ID
         'type'                  => 'tinyint', //0.实体商品，1.虚拟商品
         'unit_name'             => 'varchar', //单位名/废弃
         'video_link'            => 'varchar', //主图视频链接/废弃
@@ -342,8 +344,14 @@ class Product extends BaseModel
         return $this->hasOne(ProductContent::class,'product_id','product_id');
     }
     protected function temp()
-    {
+    {//老运费模板 可废弃
         return $this->hasOne(ShippingTemplate::class,'shipping_template_id','temp_id');
+    }
+
+    //新运费模板
+    protected function postageTemplate()
+    {
+        return $this->hasOne(PostageTemplateModel::class,'id','postage_template_id');
     }
     public function storeCategory()
     {
@@ -604,6 +612,6 @@ class Product extends BaseModel
     }
     public function searchTempIdAttr($query, $value)
     {
-        $query->whereIn('Product.temp_id',$value);
+        $query->whereIn('Product.postage_temp_id',$value);
     }
 }

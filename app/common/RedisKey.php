@@ -71,6 +71,12 @@ class RedisKey
      const MERCHANT_MENU_ROUTES_TIMEOUT = 24*3600;
 
     /**
+     * 运费规则
+     */
+     const POSTAGE_TEMPLATE_RULE = 'postage_template_rule:';
+
+    /**
+     * 
      * 小程序用户退出登录状态
      */
      const MINI_PROGRAMS_LOGOUT_UID = 'mini_programs_logout:';

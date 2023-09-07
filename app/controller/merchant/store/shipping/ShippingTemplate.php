@@ -12,6 +12,7 @@
 
 namespace app\controller\merchant\store\shipping;
 
+use app\common\repositories\store\shipping\PostageTemplateRepository;
 use think\App;
 use crmeb\basic\BaseController;
 use app\validate\merchant\ShippingTemplateValidate as validate;
@@ -46,13 +47,12 @@ class ShippingTemplate extends BaseController
     }
 
     /**
-     * @Author:Qinii
-     * @Date: 2020/5/18
+     * 简化模板 用新表数据
      * @return mixed
      */
     public function getList()
     {
-        return app('json')->success($this->repository->getList($this->request->merId()));
+         return app('json')->success($this->repository->getList($this->request->merId()));
     }
 
     /**

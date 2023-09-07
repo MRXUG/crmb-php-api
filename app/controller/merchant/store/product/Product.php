@@ -16,6 +16,7 @@ use app\common\repositories\store\order\StoreCartRepository;
 use app\common\repositories\store\product\ProductAttrValueRepository;
 use app\common\repositories\store\product\ProductStockSetRepository;
 use app\common\repositories\store\product\SpuRepository;
+use app\common\repositories\store\shipping\PostageTemplateRepository;
 use app\common\repositories\store\shipping\ShippingTemplateRepository;
 use app\common\repositories\store\StoreCategoryRepository;
 use crmeb\services\UploadService;
@@ -319,7 +320,7 @@ class Product extends BaseController
         if (empty($ids)) return app('json')->fail('请选择商品');
         if (empty($data['temp_id'])) return app('json')->fail('请选择运费模板');
         if (!$this->repository->merInExists($this->request->merId(), $ids)) return app('json')->fail('请选择您自己商品');
-        $make = app()->make(ShippingTemplateRepository::class);
+        $make = app()->make(PostageTemplateRepository::class);
         if (!$make->merInExists($this->request->merId(), [$data['temp_id']]))
             return app('json')->fail('请选择您自己的运费模板');
         $data['delivery_free'] = 0;

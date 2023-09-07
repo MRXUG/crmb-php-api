@@ -492,25 +492,6 @@ class StoreOrderRepository extends BaseRepository
         return $orderId;
     }
 
-    /**
-     * @param $cart
-     * @return string
-     * @author xaboy
-     * @day 2020/6/9
-     */
-    public function productByTempNumber($cart)
-    {
-        $type = $cart['product']['temp']['type'];
-        $cartNum = $cart['cart_num'];
-        if (!$type)
-            return $cartNum;
-        else if ($type == 2) {
-            return bcmul($cartNum, $cart['productAttr']['volume'], 2);
-        } else {
-            return bcmul($cartNum, $cart['productAttr']['weight'], 2);
-        }
-    }
-
     public function cartByPrice($cart)
     {
         if ($cart['product_type'] == '2') {

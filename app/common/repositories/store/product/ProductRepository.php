@@ -15,6 +15,7 @@ namespace app\common\repositories\store\product;
 use app\common\dao\coupon\CouponStocksDao;
 use app\common\dao\store\product\ProductDao as dao;
 use app\common\model\store\product\ProductLabel;
+use app\common\model\store\shipping\PostageTemplateRuleModel;
 use app\common\model\user\User;
 use app\common\RedisKey;
 use app\common\repositories\BaseRepository;
@@ -27,6 +28,7 @@ use app\common\repositories\store\GuaranteeValueRepository;
 use app\common\repositories\store\order\StoreCartRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
 use app\common\repositories\store\parameter\ParameterValueRepository;
+use app\common\repositories\store\shipping\PostageTemplateRepository;
 use app\common\repositories\store\shipping\ShippingTemplateRepository;
 use app\common\repositories\store\StoreActivityRepository;
 use app\common\repositories\store\StoreBrandRepository;
@@ -165,7 +167,7 @@ class ProductRepository extends BaseRepository
      */
     public function merShippingExists(int $merId, int $id)
     {
-        $make = app()->make(ShippingTemplateRepository::class);
+        $make = app()->make(PostageTemplateRepository::class);
         return $make->merExists($merId, $id);
     }
 
@@ -447,6 +449,7 @@ class ProductRepository extends BaseRepository
      */
     public function setProduct(array $data)
     {
+        $tempId = $data['delivery_free'] ? 0 : ($data['temp_id'] ?? 0);
         $result = [
             'store_name'            => $data['store_name'],
             'mer_id'                => $data['mer_id'],
@@ -460,7 +463,8 @@ class ProductRepository extends BaseRepository
             'is_show'               => $data['is_show'] ?? 0,
             'is_used'               => (isset($data['status']) && $data['status'] == 1) ? 1 : 0,
             'is_good'               => $data['is_good'] ?? 0,
-            'temp_id'               => $data['delivery_free'] ? 0 : ($data['temp_id'] ?? 0),
+            'temp_id'               => $tempId,
+            'postage_template_id'   => $tempId, //使用新运费模板id
             'status'                => $data['status'] ?? 0,
             'mer_status'            => $data['mer_status'],
             'guarantee_template_id' => $data['guarantee_template_id'] ?? 0,
@@ -2386,7 +2390,8 @@ class ProductRepository extends BaseRepository
             $product['guaranteeTemplate'] = app()->make(GuaranteeRepository::class)->getSearch(['status' => 1, 'is_del' => 0])->where('guarantee_id', 'in', $guarantee_id)->select();
         }
         if (isset($data['temp_id'])) {
-            $product['temp'] = app()->make(ShippingTemplateRepository::class)->getSearch(['shipping_template_id' => $data['temp_id']])->find();
+//            $product['temp'] = app()->make(ShippingTemplateRepository::class)->getSearch(['shipping_template_id' => $data['temp_id']])->find();
+            $product['temp'] = app()->make(PostageTemplateRuleModel::class)->getModel()->where(['id' => $data['temp_id']])->with(['rules'])->find();
         }
 
         $ret = array_merge($product, $settleParams);
@@ -2485,7 +2490,7 @@ class ProductRepository extends BaseRepository
             $data['once_max_count'] = 0;
         }
         // delivery_way 不包邮选择模版
-        if (isset($data['delivery_way']) && $data['delivery_way'] == 2 && !$this->merShippingExists($merId, $data['temp_id'])) {
+        if (isset($data['delivery_free']) && $data['delivery_free'] == 0 && !$this->merShippingExists($merId, $data['temp_id'])) {
             throw new ValidateException('运费模板不存在');
         }
 
