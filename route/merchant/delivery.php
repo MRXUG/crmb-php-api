@@ -180,16 +180,16 @@ Route::group(function () {
         Route::get('allList', '/allList')->name('merchantStoreShippingTemplateV2AllList')->option([
             '_alias' => '列表 ',
         ]);
-        Route::post('create', '/create')->name('merchantStoreShippingTemplateV2Create')->option([
+        Route::put('', '/create')->name('merchantStoreShippingTemplateV2Create')->option([
             '_alias' => '添加 ',
         ]);
-        Route::post('update/:id', '/update')->name('merchantStoreShippingTemplateV2Update')->option([
+        Route::post(':id', '/update')->name('merchantStoreShippingTemplateV2Update')->option([
             '_alias' => '编辑',
         ]);
-        Route::get('detail/:id', '/detail')->name('merchantStoreShippingTemplateV2Detail')->option([
+        Route::get(':id', '/detail')->name('merchantStoreShippingTemplateV2Detail')->option([
             '_alias' => '详情',
         ]);
-        Route::delete('delete/:id', '/delete')->name('merchantStoreShippingTemplateV2Delete')->option([
+        Route::delete(':id', '/delete')->name('merchantStoreShippingTemplateV2Delete')->option([
             '_alias' => '删除',
         ]);
     })->prefix('merchant.store.shipping.ShippingTemplateController')->option([
