@@ -169,7 +169,7 @@ class MerchantGoodsPaymentRepository extends BaseRepository
                 'settlement_status'  => MerchantGoodsPayment::SETTLE_STATUS_AFTER_SALE_REFUND,
                 'service_fee_status' => $this->tellServiceFeeStatus((int)$merchantSource, MerchantGoodsPayment::SETTLE_STATUS_AFTER_SALE_REFUND),
                 'mer_received_money' => $this->calculateReceivedMoney($merchantSource,
-                    MerchantGoodsPayment::SETTLE_STATUS_ALL, $record['goods_money'],
+                    MerchantGoodsPayment::SETTLE_STATUS_AFTER_SALE_REFUND, $record['goods_money'],
                     0),
                 'update_time'        => date('Y-m-d H:i:s')
             ];
