@@ -31,6 +31,7 @@ class StoreProductValidate extends Validate
         "attrValue|商品属性" => "require|array|productAttrValue",
         'once_min_count|最小限购' => 'min:0',
         'pay_limit|是否限购' => 'require|in:0,1,2|payLimit',
+        'guarantee_type|购物保障' => 'in:0,1',
     ];
 
     protected function payLimit($value,$rule,$data)
