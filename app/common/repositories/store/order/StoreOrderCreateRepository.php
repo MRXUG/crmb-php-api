@@ -73,8 +73,19 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         return [$storeCouponDiscountByCode, $productCouponDiscountByCode];
     }
 
+    /**
+     * 计算运费价格 新模板ID postageTemplate
+     * @param $tempId
+     * @param UserAddress|null $address
+     * @param $productNum
+     * @param $price
+     * @return int|mixed|string
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
     public static function calculatePostagePrice($tempId, ?UserAddress $address, $productNum, $price){
-        $tempId = 8;
+//        $tempId = 8;
         $cacheKey = RedisKey::POSTAGE_TEMPLATE_RULE . $tempId;
         if($rules = Cache::get($cacheKey)){
             $rules = json_decode($rules, true);

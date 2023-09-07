@@ -37,6 +37,16 @@ class ShippingTemplateController extends BaseController
     }
 
     /**
+     * 简化模板 用新表数据
+     * @return mixed
+     */
+    public function allList()
+    {
+        $list = $this->repository->getList($this->request->merId());
+        return app('json')->success($list);
+    }
+
+    /**
      * @api mer/store/shippingTemplate/create
      * @param PostageTemplateValidate $validate
      * @return mixed

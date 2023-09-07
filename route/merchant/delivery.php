@@ -177,6 +177,9 @@ Route::group(function () {
         Route::get('list', '/list')->name('merchantStoreShippingTemplateV2List')->option([
             '_alias' => '列表 ',
         ]);
+        Route::get('allList', '/allList')->name('merchantStoreShippingTemplateV2AllList')->option([
+            '_alias' => '列表 ',
+        ]);
         Route::post('create', '/create')->name('merchantStoreShippingTemplateV2Create')->option([
             '_alias' => '添加 ',
         ]);

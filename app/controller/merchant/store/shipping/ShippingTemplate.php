@@ -52,9 +52,7 @@ class ShippingTemplate extends BaseController
      */
     public function getList()
     {
-        // return app('json')->success($this->repository->getList($this->request->merId()));
-        $list = app()->make(PostageTemplateRepository::class)->getList($this->request->merId());
-        return app('json')->success($list);
+         return app('json')->success($this->repository->getList($this->request->merId()));
     }
 
     /**
