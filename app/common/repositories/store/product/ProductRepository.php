@@ -78,7 +78,7 @@ class ProductRepository extends BaseRepository
         ["is_show",0],//立即上架传入1
 
         "guarantee_template_id", //服务保障模版ID
-        "guarantee",//购物保障：0-不展示，1-展示
+        "guarantee_type",//购物保障：0-不展示，1-展示
         ["attrValue", []], //attrValue.[0].['image','price','bar_code','detail'],
         ["attr", []], //attr.[0].['value','detail']
 
