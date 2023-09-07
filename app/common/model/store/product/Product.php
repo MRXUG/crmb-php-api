@@ -612,6 +612,6 @@ class Product extends BaseModel
     }
     public function searchTempIdAttr($query, $value)
     {
-        $query->whereIn('Product.postage_temp_id',$value);
+        $query->whereIn('Product.postage_template_id',$value);
     }
 }
