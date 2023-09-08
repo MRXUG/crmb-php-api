@@ -1980,7 +1980,7 @@ class ProductRepository extends BaseRepository
                     if($cart['cart_info']['productAttr']['unique'] ?? ''){
                         $productAttrValueRepository->incStock($cart['product_id'], $cart['cart_info']['productAttr']['unique'], $productNum);
                     }elseif($cart['sku_id'] ?? ''){// TODO 兼容go版本 临时解决方案
-                        $productAttrValueRepository->incStockBySkuId($cart['product_id'], $cart['cart_info']['productAttr']['sku_id'], $productNum);
+                        $productAttrValueRepository->incStockBySkuId($cart['product_id'], $cart['sku_id'], $productNum);
                     }
                     $this->dao->incStock($cart['product_id'], $productNum);
                 }
