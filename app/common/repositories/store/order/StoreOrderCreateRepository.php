@@ -389,7 +389,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     continue;
                 }
                 //判断是否不可配送区域
-                if(!$this->isAreaSupportPostage($merchantCart['mer_id'], $address)){
+                if($address && !$this->isAreaSupportPostage($merchantCart['mer_id'], $address)){
                     throw new ValidateException('您的收货地址暂不支持配送');
                 }
                 if ($cart['product']['delivery_free']) {
