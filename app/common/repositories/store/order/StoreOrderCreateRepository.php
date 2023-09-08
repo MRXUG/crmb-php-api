@@ -4,6 +4,7 @@ namespace app\common\repositories\store\order;
 
 use app\common\dao\system\merchant\MerchantAdDao;
 use app\common\model\coupon\CouponStocks;
+use app\common\model\store\CityArea;
 use app\common\model\store\order\StoreCart;
 use app\common\model\store\order\StoreOrder;
 use app\common\model\store\shipping\PostageTemplateRuleModel;
@@ -91,6 +92,9 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $rules = json_decode($rules, true);
         }else{
             $rules = PostageTemplateRuleModel::getModel()->where('template_id', $tempId)->select()->toArray();
+            foreach ($rules as &$rule){
+                $rule['area_id_info'] = CityArea::getModel()->where('id in ('.$rule['area_ids'].')')->column('id,level');
+            }
             Cache::set($cacheKey, json_encode($rules), 3600);
         }
         $findRule = [];
@@ -99,11 +103,11 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 break;
             }
             //寻址
-            foreach ($rule['area_ids'] as $v){
+            foreach ($rule['area_id_info'] as $v){
                 if(
-                (count($v) == 3 && $v[2] == $address->district_id) || //三级地域匹配
-                (count($v) == 2 && $v[1] == $address->city_id) || //二级地域匹配
-                (count($v) == 1 && $v[0] == $address->province_id) //一级地域匹配
+                    ($v['level'] == 3 && $v['id'] ==  $address->district_id) || //三级地域匹配
+                    ($v['level'] == 2 && $v['id'] ==  $address->city_id) || //二级地域匹配
+                    ($v['level'] == 1 && $v['id'] ==  $address->province_id) //一级地域匹配
                 ){
                     $findRule = $rule;
                     break;
@@ -130,6 +134,35 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         }
         return $postage_price;
 
+    }
+
+    /**
+     * 地区是否支持配送
+     * @param $merId
+     * @param UserAddress|null $address
+     * @return bool
+     */
+    public static function isAreaSupportPostage($merId, ?UserAddress $address){
+        $cacheKey = RedisKey::POSTAGE_TEMPLATE_RULE_NOT . $merId;
+        if($rules = Cache::get($cacheKey)){
+            $areaInfo = json_decode($rules, true);
+        }else{
+            $area = PostageTemplateRuleModel::getModel()->where('template_id', 0)
+                ->where('mer_id', $merId)->value('not_area_ids');
+            $areaInfo = CityArea::getModel()->where("id in ($area)")->column('id,level');
+            Cache::set($cacheKey, json_encode($rules), 3600);
+        }
+
+        foreach ($areaInfo as $v){
+            if(
+                ($v['level'] == 3 && $v['id'] ==  $address->district_id) || //三级地域匹配
+                ($v['level'] == 2 && $v['id'] ==  $address->city_id) || //二级地域匹配
+                ($v['level'] == 1 && $v['id'] ==  $address->province_id) //一级地域匹配
+            ){
+                return false;
+            }
+        }
+        return true;
     }
 
     public function v2CartIdByOrderInfo2($user, array $cartId, array $takes = null, array $useCoupon = null, bool $useIntegral = false, int $addressId = null, $createOrder = false, $marketingDiscount = [], $refluxCoil = [] ,$clipCoupons = 1)
@@ -355,11 +388,17 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                     $noDeliver = true;
                     continue;
                 }
+                //判断是否不可配送区域
+                if(!$this->isAreaSupportPostage($merchantCart['mer_id'], $address)){
+                    throw new ValidateException('您的收货地址暂不支持配送');
+                }
                 if ($cart['product']['delivery_free']) {
                     continue;
                 }
                 $tempId = $cart['product']['postage_template_id'];
                 if(!$isTake){
+
+                    //计算邮费
                     $cart['postage_price'] = $this->calculatePostagePrice($tempId, $address, $cart['cart_num'], $price);
                     $postage_price = bcadd($postage_price, $cart['postage_price'], 2);
                 }

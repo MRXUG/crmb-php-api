@@ -19,8 +19,13 @@ class PostageTemplateValidate extends Validate
     protected function rules($value,$rule,$data)
     {
         foreach ($value as $k => $v){
-            if (empty($v['area_ids']))
+            if (empty($v['area_ids']) || !is_array($v['area_ids']))
                 return '配送城市信息不能为空';
+            foreach ($v['area_ids'] as $id){
+                if(intval($id) != $id){
+                    return '城市id格式不正确';
+                }
+            }
             if (!$this->filter($v['first_unit'], FILTER_VALIDATE_INT) || $v['first_unit'] <= 0)
                 return '首件条件不能小0';
             if (!$this->filter($v['first_amount'], FILTER_VALIDATE_FLOAT) || $v['first_amount'] < 0)

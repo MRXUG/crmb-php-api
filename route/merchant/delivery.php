@@ -192,6 +192,12 @@ Route::group(function () {
         Route::delete(':id', '/delete')->name('merchantStoreShippingTemplateV2Delete')->option([
             '_alias' => '删除',
         ]);
+        Route::post('not_ship/detail', '/notShipDetail')->name('merchantStoreShippingTemplateV2notShipDetail')->option([
+            '_alias' => '非配送区域详情',
+        ]);
+        Route::post('not_ship/update', '/notShipUpdate')->name('merchantStoreShippingTemplateV2notShipUpdate')->option([
+            '_alias' => '非配送区域编辑',
+        ]);
     })->prefix('merchant.store.shipping.ShippingTemplateController')->option([
         '_path' => '/config/freight/shippingTemplatesV2',
         '_auth' => true,

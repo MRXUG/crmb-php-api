@@ -48,39 +48,37 @@ class PostageTemplateRuleModel extends BaseModel
 
     public function setAreaIdsAttr($value)
     {
-        $res = '';
-        foreach ($value as $v){
-            $res .= '/'.( implode('/',$v)).'/,';
-        }
-        return rtrim($res, ',');
+        return implode(',', $value);
     }
 
     public function getAreaIdsAttr($value)
     {
-        $value = explode(',', $value);
-        $res = [];
-        foreach ($value as $v){
-            $res[] = explode('/', trim($v, '/'));
-        }
-        return $res;
+        return explode(',', $value);
     }
 
     public function setAreaNameAttr($value, $data){
         $city_id = [];
         $areaIds = $data['area_ids'];
         foreach ($areaIds as $area){
-            foreach ($area as $city){
-                $city_id[] = $city;
-            }
+            $city_id[] = $area;
         }
 
-        $areaMap = app()->make(CityAreaRepository::class)->search([])->where('id','in',$city_id)->column('id,name');
-        $areaMap = array_column($areaMap, 'name', 'id');
+        $areaMap = app()->make(CityAreaRepository::class)->search([])->where('id','in',$city_id)->column('id,path,level,name');
+        $areaMap = array_column($areaMap, null, 'id');
         $result = '';
-        foreach ($areaIds as $area){
-            foreach ($area as $city){
-                $result.= ($areaMap[$city] ?? '') . ',';
+        $totalParentId = [];
+        foreach ($areaMap as &$v){
+            $v['parent'] = explode('/',trim($v['path'], '/'));
+            $totalParentId = array_merge($totalParentId, $v['parent']);
+        }
+        $parentMap = app()->make(CityAreaRepository::class)->search([])->where('id','in',$totalParentId)->column('id,name');
+
+        foreach ($areaIds as $id){
+            $area = $areaMap[$id] ?? [];
+            foreach ($area['parent']??[] as $pid){
+                $result .= $parentMap[$pid] ?? '';
             }
+            $result .= ',';
         }
         $result = rtrim($result, ',');
         return strlen($result) > 255 ? mb_substr($result, 0, 252).'...' : $result;

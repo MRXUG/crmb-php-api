@@ -76,6 +76,11 @@ class RedisKey
      const POSTAGE_TEMPLATE_RULE = 'postage_template_rule:';
 
     /**
+     * 运费规则非配送区域 商家id
+     */
+     const POSTAGE_TEMPLATE_RULE_NOT = 'merchant_postage_template_rule_NOT:';
+
+    /**
      * 
      * 小程序用户退出登录状态
      */

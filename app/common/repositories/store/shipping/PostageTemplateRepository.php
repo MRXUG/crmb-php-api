@@ -71,6 +71,7 @@ class PostageTemplateRepository extends BaseRepository
     {
         $query = $this->dao
             ->where(['mer_id' => $merId])
+            ->where('template_id <> 0')
             ->when(isset($where['name']) && $where['name'] != '', function (Query $query) use ($where){
                 $query->whereLike('name', "%{$where['name']}%");
             })
@@ -85,7 +86,8 @@ class PostageTemplateRepository extends BaseRepository
 
     public function getList(int $merId)
     {
-        return $this->dao->where(['mer_id' => $merId])->field('template_id as shipping_template_id,name')->order('create_time DESC')->select();
+        return $this->dao->where(['mer_id' => $merId])
+            ->where('template_id <> 0')->field('template_id as shipping_template_id,name')->order('create_time DESC')->select();
     }
 
     /**
@@ -178,6 +180,45 @@ class PostageTemplateRepository extends BaseRepository
             }
             $ruleModel->getModel()->saveAll($rules);
         });
+    }
+
+    public function notShipDetail($merId){
+        /** @var PostageTemplateRuleModel $ruleModel */
+        $ruleModel = app()->make(PostageTemplateRuleModel::class);
+        $notAreaIds = $ruleModel->getModel()->where('template_id', 0)
+            ->where('mer_id', $merId)->value('not_area_ids');
+        if(!$notAreaIds){
+            $ruleModel->save([
+                'template_id' => 0,
+                'first_unit' => 0,
+                'first_amount' => 0,
+                'keep_unit' => 0,
+                'keep_amount' => 0,
+                'area_ids' => [],
+                'area_name' => '',
+                'not_area_ids' => '',
+                'free_on' => 0,
+                'free_unit' => 0,
+                'free_num' => 0,
+                'mer_id' => $merId,
+            ]);
+            return [];
+        }
+        return $notAreaIds;
+    }
+
+    public function notShipUpdate($merId, array $notAreaIds){
+        /** @var PostageTemplateRuleModel $ruleModel */
+        $ruleModel = app()->make(PostageTemplateRuleModel::class);
+        $notAreaIds = implode(',', $notAreaIds);
+        $ruleModel->getModel()->where('template_id', 0)
+            ->where('mer_id', $merId)
+            ->update(['not_area_ids' => $notAreaIds]);
+
+        $cacheKey = RedisKey::POSTAGE_TEMPLATE_RULE_NOT . $merId;
+        Cache::delete($cacheKey);
+
+        return $notAreaIds;
     }
 
 }

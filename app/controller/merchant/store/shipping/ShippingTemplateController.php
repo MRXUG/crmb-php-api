@@ -47,7 +47,8 @@ class ShippingTemplateController extends BaseController
     }
 
     /**
-     * @api mer/store/shippingTemplate/create
+     * @api mer/store/shippingTemplate
+     * @method POST
      * @param PostageTemplateValidate $validate
      * @return mixed
      */
@@ -60,7 +61,8 @@ class ShippingTemplateController extends BaseController
     }
 
     /**
-     * @api mer/store/shippingTemplate/detail
+     * @api mer/store/shippingTemplate/{id}
+     * @method GET
      * @param $id
      * @return mixed
      * @throws \think\db\exception\DataNotFoundException
@@ -75,7 +77,8 @@ class ShippingTemplateController extends BaseController
     }
 
     /**
-     * @api mer/store/shippingTemplate/update
+     * @api mer/store/shippingTemplate/{id}
+     * @method PUT
      * @param $id
      * @param PostageTemplateValidate $validate
      * @return mixed
@@ -93,7 +96,8 @@ class ShippingTemplateController extends BaseController
     }
 
     /**
-     * @api mer/store/shippingTemplate/delete
+     * @api mer/store/shippingTemplate
+     * @method DELETE
      * @param $id
      * @return mixed
      * @throws \think\db\exception\DbException
@@ -117,5 +121,28 @@ class ShippingTemplateController extends BaseController
         $data = $this->request->params(['name','type','rules']);
         $validate->check($data);
         return $data;
+    }
+
+    /**
+     * @api mer/store/shippingTemplate/not_ship/detail
+     * @method POST
+     * @return mixed
+     */
+    public function notShipDetail(){
+        return app('json')->success($this->repository->notShipDetail($this->request->merId()));
+    }
+
+    /**
+     * @api mer/store/shippingTemplate/not_ship/update
+     * @method POST
+     * @return mixed
+     */
+    public function notShipUpdate(){
+        $notAreaIds = $this->request->param('not_area_ids');
+        if(!is_array($notAreaIds)){
+            return app('json')->fail('参数错误');
+        }
+        $this->repository->notShipUpdate($this->request->merId(), $notAreaIds);
+        return app('json')->success('编辑成功');
     }
 }
