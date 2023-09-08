@@ -33,9 +33,9 @@ return [
             \crmeb\listens\LiveStatusCheckListen::class, // 心跳检测
             \crmeb\listens\GoodsWatchListen::class,//商品围观数据缓存
             /** 「订单」「分账」 **/
-            \crmeb\listens\AutoOrderProfitsharingListen::class, //发货后进行分账
-            \crmeb\listens\FinishOrderListen::class,// 收货15天后分账回退,
-            \crmeb\listens\UpdateDeliverProfitSharingReturnListen::class, // 同步分账回退/分账结果 状态同步
+//            \crmeb\listens\AutoOrderProfitsharingListen::class, //发货后进行分账
+//            \crmeb\listens\FinishOrderListen::class,// 收货15天后分账回退,
+//            \crmeb\listens\UpdateDeliverProfitSharingReturnListen::class, // 同步分账回退/分账结果 状态同步
             \crmeb\listens\OrderRefundListen::class, // 用户退款 分账回退
             \crmeb\listens\RefundOrderAgreeListen::class, // 自动退款
             \crmeb\listens\AuthTakeOrderListen::class, // 自动收货
