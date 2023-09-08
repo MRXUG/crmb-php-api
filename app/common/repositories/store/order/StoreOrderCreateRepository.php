@@ -148,12 +148,12 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $areaInfo = json_decode($rules, true);
         }else{
             $area = PostageTemplateRuleModel::getModel()->where('template_id', 0)
-                ->where('mer_id', $merId)->value('not_area_ids');
+                ->where('mer_id', $merId)->value('not_area_ids') ?? 0;
             $areaInfo = CityArea::getModel()->where("id in ($area)")->column('id,level');
-            Cache::set($cacheKey, json_encode($rules), 3600);
+            Cache::set($cacheKey, json_encode($areaInfo), 3600);
         }
 
-        foreach ($areaInfo as $v){
+        foreach ($areaInfo ?? [] as $v){
             if(
                 ($v['level'] == 3 && $v['id'] ==  $address->district_id) || //三级地域匹配
                 ($v['level'] == 2 && $v['id'] ==  $address->city_id) || //二级地域匹配
