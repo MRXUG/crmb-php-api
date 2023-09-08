@@ -307,6 +307,7 @@ class StoreRefundOrderRepository extends BaseRepository
             //计算可退金额
             if ($product['product_price'] > 0) {
                 $refundPrice = bcsub($product['product_price'], bcsub($productRefundPrice['refund_price'] ?? 0, $productRefundPrice['refund_postage'] ?? 0, 2), 2);
+                $refundPrice = bcsub($refundPrice, $product['coupon_price'], 2);
             }
             $platform_refund_price = 0;
             //计算退的平台优惠券金额
