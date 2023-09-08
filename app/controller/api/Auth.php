@@ -890,7 +890,7 @@ class Auth extends BaseController
         }
         /** @var UserRepository $userRepository */
         $userRepository = app()->make(UserRepository::class);
-        $user->unionid = $wechatUser->unionid;
+        $user->unionid = $jscode2session['unionid'];
         $user->openid = $jscode2session['openid'];
         $tokenInfo = $userRepository->createToken($user);
         $userRepository->loginAfter($user);
