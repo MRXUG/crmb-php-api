@@ -148,8 +148,8 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $areaInfo = json_decode($rules, true);
         }else{
             $area = PostageTemplateRuleModel::getModel()->where('template_id', 0)
-                ->where('mer_id', $merId)->value('not_area_ids') ?? 0;
-            $areaInfo = CityArea::getModel()->where("id in ($area)")->column('id,level');
+                ->where('mer_id', $merId)->value('not_area_ids');
+            $areaInfo = $area ? CityArea::getModel()->where("id in ($area)")->column('id,level') : [];
             Cache::set($cacheKey, json_encode($areaInfo), 3600);
         }
 
