@@ -68,11 +68,12 @@ class PostageTemplateRuleModel extends BaseModel
         $result = '';
         $totalParentId = [];
         foreach ($areaMap as &$v){
-            $v['parent'] = explode('/',trim($v['path'], '/'));
+            $v['parent'] = explode('/',trim($v['path'].$v['id'], '/'));
             $totalParentId = array_merge($totalParentId, $v['parent']);
         }
         $parentMap = app()->make(CityAreaRepository::class)->search([])->where('id','in',$totalParentId)->column('id,name');
 
+        $parentMap = array_column($parentMap, 'name', 'id');
         foreach ($areaIds as $id){
             $area = $areaMap[$id] ?? [];
             foreach ($area['parent']??[] as $pid){
