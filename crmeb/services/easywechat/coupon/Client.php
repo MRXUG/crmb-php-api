@@ -519,12 +519,7 @@ class Client extends BaseClient
      */
     public function getCallback($mchId)
     {
-        $params = [
-            "mchid" => $mchId,
-        ];
-
-        $jsonBody = json_encode($params);
-        $result = $this->request('/v3/marketing/busifavor/callbacks', 'GET', ['sign_body' => $jsonBody]);
+        $result = $this->request('/v3/marketing/busifavor/callbacks?mchid='.$mchId, 'GET');
         if (!empty($result['code'])) {
             throw new WechatException($this->wechatError($result));
         }

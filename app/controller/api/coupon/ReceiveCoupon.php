@@ -105,6 +105,7 @@ class ReceiveCoupon extends BaseController
             ];
 
             $couponStocksUserRepository->createUpdate($where, $data);
+            $buildCouponRepository->incField($stockInfo['id'], 'sended');
         }
         //调用黑名单规则
         /**

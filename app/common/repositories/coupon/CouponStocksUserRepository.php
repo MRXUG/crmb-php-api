@@ -147,7 +147,7 @@ class CouponStocksUserRepository extends BaseRepository
 
         $this->dao->createOrUpdate(['coupon_code' => $couponCode], $insertData);
         // 修改发券数量
-        $buildCouponRepository->dao->incField($stockInfo->id, 'sended');
+        $buildCouponRepository->dao->incField($stockInfo['id'], 'sended');
     }
 
     /**
