@@ -53,7 +53,15 @@ class PostageTemplateRuleModel extends BaseModel
 
     public function getAreaIdsAttr($value)
     {
-        return explode(',', $value);
+        $valueArray = explode(',', $value);
+        $res = [];
+        $areaMap = app()->make(CityAreaRepository::class)->search([])->where('id','in',$valueArray)->column('id,path');
+        $areaMap = array_column($areaMap, 'path', 'id');
+        foreach ($valueArray as $id){
+            $path = $areaMap[$id].$id;
+            $res[] = array_map('intval', explode('/', trim($path, '/')));
+        }
+        return $res;
     }
 
     public function setAreaNameAttr($value, $data){
