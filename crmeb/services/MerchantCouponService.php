@@ -73,7 +73,7 @@ class MerchantCouponService
         if ($eventType == 'COUPON.SEND') {
             // 领券
             try {
-                $pem = $this->coupon()->decrypt($rawCallbackData['resource']);
+                $pem = $this->coupon()->decrypt($rawCallbackData['resource'], 1);
                 $callbackData = json_decode($pem, true);
                 /**
                  * @var CouponStocksUserRepository $couponStocksUserRepository
@@ -82,7 +82,7 @@ class MerchantCouponService
                 $couponStocksUserRepository->callback($callbackData);
                 $result = ["code" => "SUCCESS","message" => "成功"];
             } catch (\Exception $e) {
-                Log::error('处理领券回调异常,' . $e->getMessage() . ',参数' . json_encode($callbackData));
+                Log::error('处理领券回调异常,' . $e->getMessage() . ',参数' . $e->getFile().$e->getLine());
                 $result = ["code" => "fail","message" => "失败"];
             }
             return $result;

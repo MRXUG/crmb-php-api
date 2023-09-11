@@ -4,6 +4,7 @@ namespace app\common\repositories\coupon;
 
 use app\common\dao\coupon\CouponStocksUserDao;
 use app\common\dao\coupon\StockProductDao;
+use app\common\model\coupon\CouponStocks;
 use app\common\repositories\BaseRepository;
 use app\common\repositories\user\UserRepository;
 use app\common\repositories\wechat\WechatUserRepository;
@@ -97,8 +98,7 @@ class CouponStocksUserRepository extends BaseRepository
         $unionId = $callbackData['unionid'];
         $stockId = $callbackData['stock_id'];
         $couponCode = $callbackData['coupon_code'];
-
-        [$appId, $mchId] = explode( '_', $callbackData['send_req_no']);
+        [$appId, $mchId, $timestamp, $ad_id] = explode( '_', $callbackData['send_req_no']);
         /**
          * @var WechatUserRepository $wechatUserRepository
          */
@@ -113,7 +113,7 @@ class CouponStocksUserRepository extends BaseRepository
          * @var UserRepository $userRepository
          */
         $userRepository = app()->make(UserRepository::class);
-        $user = $userRepository->getUseByWechatUserId(['wechat_user_id' => $wechatUser->wechat_user_id]);
+        $user = $userRepository->wechatUserIdBytUser($wechatUser->wechat_user_id);
         if(empty($user)) {
             // 错误
             throw new ValidateException('用户不存在,unionid:' . $unionId);
@@ -136,11 +136,12 @@ class CouponStocksUserRepository extends BaseRepository
             'uid'         => $user->uid,
             'mch_id'      => $mchId,
             'appid'       => $appId,
+            'ad_id'       => $ad_id,
             'unionid'     => $unionId,
             'stock_id'    => $stockId,
             'coupon_code' => $couponCode,
-            'start_time'  => $start,
-            'end_time'    => $end,
+            'start_at'  => $start,
+            'end_at'    => $end,
             'mer_id'      => $stockInfo['mer_id'], // 建券的mer_id
             'coupon_id'   => $stockInfo['id'], 
         ];
@@ -224,25 +225,33 @@ class CouponStocksUserRepository extends BaseRepository
      * @return array [$start,$end] datetime.
      */
     public function calculateCouponAvailableTime(array $stockInfo){
-        // 券开始核销时间
-        $availableTime = $stockInfo['start_at'];
-        // 券停止核销时间
-        $unAvailableTime = $stockInfo['end_at'];
         // 领取并且生效后N天内有效 1表示当天内有效 终点
         $availableDayAfterReceive = (int)$stockInfo['available_day_after_receive'] ?: 0;
         // 领取第N天后生效 0表示当天开始有效，1表示第二天开始，以此类推。与available_day_after_receive 构成区间,起点
         $waitDaysAfterReceive = (int)$stockInfo['wait_days_after_receive'] ?: 0;
 
-        // 开始
-        $startTime = date('Y-m-d', strtotime("+$waitDaysAfterReceive day")).' 00:00:00';
-        $start = max($startTime, $availableTime);
-
-        // 结束 区间计算终点临界值减1，例如 1(第二天开始生效==第一天后生效) + 2 （两天内有效） - 1  = 2 （+1天到达第二天）
-        $delay = $waitDaysAfterReceive + $availableDayAfterReceive - 1;
-        $endTime = date('Y-m-d', strtotime("+$delay day")).' 23:59:59';
-        $end = $availableDayAfterReceive == 0 ? $unAvailableTime : min($endTime, $unAvailableTime);
-
+        switch ($stockInfo['type_date']){
+            case CouponStocks::DATE_NOW://1.立即生效
+            case CouponStocks::DATE_N://3.N天后
+            $start = date('Y-m-d', strtotime("+$waitDaysAfterReceive day")).' 00:00:00';
+            // 结束 区间计算终点临界值减1，例如 1(第二天开始生效==第一天后生效) + 2 （两天内有效） - 1  = 2 （+1天到达第二天）
+                $delay = $waitDaysAfterReceive + $availableDayAfterReceive - 1;
+                $end = date('Y-m-d', strtotime("+$delay day")).' 23:59:59';
+                break;
+            case CouponStocks::DATE_H://4.领券时间内均可用
+                $start = $stockInfo['start_at'];// 券开始核销时间
+                $end =  $stockInfo['end_at'];// 券停止核销时间
+                break;
+            case CouponStocks::DATE_RANGE://2.自定义时间段
+                $dateRange = json_decode($stockInfo['date_range'] ?? '[]', true);
+                $start = date('Y-m-d H:i:s', strtotime($dateRange[0]));
+                $end = date('Y-m-d H:i:s', strtotime($dateRange[1]));
+                break;
+            default:
+                throw new ValidateException('券核销类型异常');
+        }
         return [$start, $end];
+
     }
 
     /**
