@@ -133,17 +133,18 @@ class CouponStocksUserRepository extends BaseRepository
         list($start, $end) = $this->calculateCouponAvailableTime($stockInfo);
         // 入库
         $insertData = [
-            'uid'         => $user->uid,
-            'mch_id'      => $mchId,
-            'appid'       => $appId,
+            'mer_id'      => $stockInfo['mer_id'], // 建券的mer_id
             'ad_id'       => $ad_id,
+            'coupon_id'   => $stockInfo['id'],
+            'uid'         => $user->uid,
+            'coupon_code' => $couponCode,
             'unionid'     => $unionId,
             'stock_id'    => $stockId,
-            'coupon_code' => $couponCode,
             'start_at'  => $start,
             'end_at'    => $end,
-            'mer_id'      => $stockInfo['mer_id'], // 建券的mer_id
-            'coupon_id'   => $stockInfo['id'], 
+            'appid'       => $appId,
+            'mch_id'      => $mchId,
+            'create_time' => date('Y-m-d H:i:s'),
         ];
 
         $this->dao->createOrUpdate(['coupon_code' => $couponCode], $insertData);
