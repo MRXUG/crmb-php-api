@@ -70,6 +70,7 @@ class Attachment extends BaseController
     {
         $file = $this->request->file($field);
         $ueditor = $this->request->param('ueditor');
+        $file_path = $this->request->param('file_path');
         if (!$file)
             return app('json')->fail('请上传图片');
         $file = is_array($file) ? $file[0] : $file;
@@ -85,6 +86,9 @@ class Attachment extends BaseController
                 'enname' => env('APP_NAME') . "/" . date("Ymd") ,
                 'id' => 0
             ];
+        }
+        if ($file_path!=""){
+            $info['enname'] = $file_path;
         }
         validate(["$field|图片" => [
             'fileSize' => config('upload.filesize'),
