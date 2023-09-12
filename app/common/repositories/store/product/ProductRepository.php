@@ -27,13 +27,10 @@ use app\common\repositories\store\GuaranteeTemplateRepository;
 use app\common\repositories\store\GuaranteeValueRepository;
 use app\common\repositories\store\order\StoreCartRepository;
 use app\common\repositories\store\order\StoreOrderRepository;
-use app\common\repositories\store\parameter\ParameterValueRepository;
 use app\common\repositories\store\shipping\PostageTemplateRepository;
-use app\common\repositories\store\shipping\ShippingTemplateRepository;
 use app\common\repositories\store\StoreActivityRepository;
 use app\common\repositories\store\StoreBrandRepository;
 use app\common\repositories\store\StoreCategoryRepository;
-use app\common\repositories\store\StoreSeckillActiveRepository;
 use app\common\repositories\store\StoreSeckillTimeRepository;
 use app\common\repositories\user\UserRelationRepository;
 use app\common\repositories\user\UserVisitRepository;
@@ -71,14 +68,15 @@ class ProductRepository extends BaseRepository
         "image", //入口封面图
         "slider_image", //商品轮播图
         "goods_desc", //商品详情
+        "detail_hight", // 详情图片累计高度
         //设置比例待定-暂时不处理
-        ["delivery_free",0], //全国包邮金额 统一邮费的话就填写邮费金额
+        ["delivery_free", 0], //全国包邮金额 统一邮费的话就填写邮费金额
         "temp_id", //邮费模版ID
 
-        ["is_show",0],//立即上架传入1
+        ["is_show", 0], //立即上架传入1
 
         "guarantee_template_id", //服务保障模版ID
-        "guarantee_type",//购物保障：0-不展示，1-展示
+        "guarantee_type", //购物保障：0-不展示，1-展示
         ["attrValue", []], //attrValue.[0].['image','price','bar_code','detail'],
         ["attr", []], //attr.[0].['value','detail']
 
@@ -240,7 +238,7 @@ class ProductRepository extends BaseRepository
             }
         }
         $data['price'] = $price;
-        $product = $this->setProduct($data);
+        $product       = $this->setProduct($data);
         return Db::transaction(function () use ($data, $productType, $conType, $product) {
             $result    = $this->dao->create($product);
             $attrValue = $this->setAttrValue($data, $result->product_id, $productType, 0);
@@ -267,20 +265,20 @@ class ProductRepository extends BaseRepository
      */
     public function edit(int $id, array $data, int $merId, int $productType, $conType = 0)
     {
-       // event('product.update.before', compact('id', 'data', 'merId', 'productType', 'conType'));
-       $price = $data['attrValue'][0]['price'];
-       // 计算最低到手价格
-       foreach ($data['attrValue'] as $item) {
-           if ($item['price'] < $price) {
-               $price = $item['price'];
-           }
-       }
-       $data['price'] = $price;
-       $attrValue = $this->setAttrValue($data, $id, $productType, 0);
-       $attr      = $this->setAttr($data['attr'], $id);
-       $data = $this->setProduct($data);
-       
-        Db::transaction(function () use ($id, $data, $attrValue,$attr) {
+        // event('product.update.before', compact('id', 'data', 'merId', 'productType', 'conType'));
+        $price = $data['attrValue'][0]['price'];
+        // 计算最低到手价格
+        foreach ($data['attrValue'] as $item) {
+            if ($item['price'] < $price) {
+                $price = $item['price'];
+            }
+        }
+        $data['price'] = $price;
+        $attrValue     = $this->setAttrValue($data, $id, $productType, 0);
+        $attr          = $this->setAttr($data['attr'], $id);
+        $data          = $this->setProduct($data);
+
+        Db::transaction(function () use ($id, $data, $attrValue, $attr) {
 
             (app()->make(ProductAttrRepository::class))->clearAttr($id);
             (app()->make(ProductAttrValueRepository::class))->clearAttr($id);
@@ -293,7 +291,7 @@ class ProductRepository extends BaseRepository
                 app()->make(ProductAttrValueRepository::class)->insertAll($item);
             }
             app()->make(SpuRepository::class)->baseUpdate($data, $id, 0, 0);
-    
+
             app()->make(SpuRepository::class)->changeStatus($id, 0);
             return $this->dao->update($id, $data);
         });
@@ -474,6 +472,7 @@ class ProductRepository extends BaseRepository
             'pay_limit'             => $data['pay_limit'] ?? 0,
             'guarantee'             => $data['guarantee_type'] ?? 0,
             'price'                 => $data['price'] ?? 0,
+            'detail_hight'          => $data['detail_hight'] ?? 0,
             'type'                  => 0,
             'ficti'                 => mt_rand(300, 1000),
         ];
@@ -545,7 +544,7 @@ class ProductRepository extends BaseRepository
                 if (isset($value['detail']) && !empty($value['detail']) && is_array($value['detail'])) {
                     $sku = implode(',', $value['detail']);
                 }
-                $unique = $this->setUnique($productId, $sku, $productType);
+                $unique                = $this->setUnique($productId, $sku, $productType);
                 $result['attrValue'][] = [
                     'detail'     => json_encode($value['detail'] ?? ''),
                     "bar_code"   => $value["bar_code"] ?? '',
@@ -554,7 +553,7 @@ class ProductRepository extends BaseRepository
                     "product_id" => $productId,
                     "type"       => 0,
                     "sku"        => $sku,
-                    'unique'=>$unique
+                    'unique'     => $unique,
                 ];
             }
         } catch (\Exception $exception) {
@@ -1088,14 +1087,14 @@ class ProductRepository extends BaseRepository
      */
     public function detail(int $id, $userInfo)
     {
-        $res   = $this->productDetail($id);
-        if(!$res){
+        $res = $this->productDetail($id);
+        if (!$res) {
             return $res;
         }
 
         $watch = Cache::store('redis')->get(RedisKey::GOODS_DETAIL_WATCH);
         if ($watch != '') {
-            $watch =json_decode($watch, 1);
+            $watch = json_decode($watch, 1);
             shuffle($watch);
             $res['watch'] = $watch;
         } else {
@@ -1115,7 +1114,7 @@ class ProductRepository extends BaseRepository
             }
 
             /** @var CouponStocksUserRepository $couponUser */
-            $couponUser = app()->make(CouponStocksUserRepository::class);
+            $couponUser                    = app()->make(CouponStocksUserRepository::class);
             $res['getUserBeforeOneCoupon'] = $couponUser->best($userInfo['uid'], $res['mer_id'],
                 ['price' => $res['price'], 'goods_id' => $id], $res['price']);
         }
@@ -1149,7 +1148,7 @@ class ProductRepository extends BaseRepository
             return [];
         }
 
-        $res['sales'] = $res['sales']+$res['ficti'];
+        $res['sales'] = $res['sales'] + $res['ficti'];
 
         switch ($res['product_type']) {
             case 0:
@@ -1258,10 +1257,10 @@ class ProductRepository extends BaseRepository
     {
 
         $redisKey = sprintf(RedisKey::GOODS_DETAIL, $where['product_id']);
-        if($userInfo){//此方法用于预售等活动 可能会废弃或需要移出userInfo
-            $redisKey.= ':uid:'.$userInfo['uid'];
+        if ($userInfo) { //此方法用于预售等活动 可能会废弃或需要移出userInfo
+            $redisKey .= ':uid:' . $userInfo['uid'];
         }
-        $data     = Cache::store('redis')->handler()->get($redisKey);
+        $data = Cache::store('redis')->handler()->get($redisKey);
         if ($data) {
             return json_decode($data, true);
         }
@@ -1800,7 +1799,7 @@ class ProductRepository extends BaseRepository
 
         }
         $this->dao->updates($id, [$field => $status]);
-        foreach ($id as $one){
+        foreach ($id as $one) {
             $redisKey = sprintf(RedisKey::GOODS_DETAIL, $one);
             Cache::store('redis')->handler()->del($redisKey);
         }
@@ -1859,7 +1858,7 @@ class ProductRepository extends BaseRepository
             ], $product['mer_id']);
         }
         $this->dao->updates($id, $data);
-        foreach ($id as $one){
+        foreach ($id as $one) {
             $redisKey = sprintf(RedisKey::GOODS_DETAIL, $one);
             Cache::store('redis')->handler()->del($redisKey);
         }
@@ -1977,9 +1976,9 @@ class ProductRepository extends BaseRepository
                     $productAttrValueRepository->incSkuStock($oldId, $cart['cart_info']['productAttr']['sku'], $productNum);
                     $this->dao->incStock($oldId, $productNum);
                 } else {
-                    if($cart['cart_info']['productAttr']['unique'] ?? ''){
+                    if ($cart['cart_info']['productAttr']['unique'] ?? '') {
                         $productAttrValueRepository->incStock($cart['product_id'], $cart['cart_info']['productAttr']['unique'], $productNum);
-                    }elseif($cart['sku_id'] ?? ''){// TODO 兼容go版本 临时解决方案
+                    } elseif ($cart['sku_id'] ?? '') { // TODO 兼容go版本 临时解决方案
                         $productAttrValueRepository->incStockBySkuId($cart['product_id'], $cart['sku_id'], $productNum);
                     }
                     $this->dao->incStock($cart['product_id'], $productNum);
