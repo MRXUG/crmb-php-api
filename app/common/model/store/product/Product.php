@@ -105,6 +105,7 @@ class Product extends BaseModel
         'type'                  => 'tinyint', //0.实体商品，1.虚拟商品
         'unit_name'             => 'varchar', //单位名/废弃
         'video_link'            => 'varchar', //主图视频链接/废弃
+        'detail_hight'         =>'detail_hight',
 
     ];
     
