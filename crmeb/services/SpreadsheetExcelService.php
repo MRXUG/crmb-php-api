@@ -13,6 +13,7 @@
 namespace crmeb\services;
 
 
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use think\exception\ValidateException;
 
 class SpreadsheetExcelService
@@ -310,7 +311,7 @@ class SpreadsheetExcelService
 
     /**
      * TODO
-     * @param $filePath 文件路径
+     * @param $filePath string 文件路径
      * @param array $sql  需要入库的字段 => excel表的列  例 [order_sn => 'B']
      * @param array $where  每条入库的条件 同上
      * @param int $startRow 有效数据从第几行开始
@@ -321,7 +322,7 @@ class SpreadsheetExcelService
     public function _import($filePath,array $sql,$where = [],$startRow = 1)
     {
         if(!file_exists($filePath)) return ;
-        $ext = ucfirst(pathinfo($filePath, PATHINFO_EXTENSION));
+        $ext = IOFactory::READER_XLSX;
         $ret = [];
         if (in_array($ext, ['Xlsx', 'Xls'])) {
             $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($ext);
@@ -370,7 +371,7 @@ class SpreadsheetExcelService
      */
     public function checkImport($filePath,$check = [])
     {
-        $ext = ucfirst(pathinfo($filePath, PATHINFO_EXTENSION));
+        $ext = IOFactory::READER_XLSX;
         $reader = \PhpOffice\PhpSpreadsheet\IOFactory::createReader($ext);
         $spreadsheet = $reader->load($filePath);
         $sheet = $spreadsheet->getActiveSheet();

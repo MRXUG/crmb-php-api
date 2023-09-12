@@ -63,6 +63,7 @@ use crmeb\services\printer\Printer;
 use crmeb\services\QrcodeService;
 use crmeb\services\SpreadsheetExcelService;
 use crmeb\services\SwooleTaskService;
+use crmeb\services\UploadService;
 use Exception;
 use FormBuilder\Factory\Elm;
 use FormBuilder\Form;
@@ -1315,6 +1316,7 @@ class StoreOrderRepository extends BaseRepository
         $order = $this->dao->get($id);
         if ($order['is_virtual'] && $data['delivery_type'] != 3)
             throw new ValidateException('虚拟商品只能虚拟发货');
+        /** @var StoreOrderStatusRepository $statusRepository */
         $statusRepository = app()->make(StoreOrderStatusRepository::class);
         switch ($data['delivery_type']) {
             case 1:
@@ -2232,17 +2234,25 @@ class StoreOrderRepository extends BaseRepository
 
     /**
      * TODO 导入发货信息
-     * @param array $data
+     * @param array $array
      * @param $merId
      * @author Qinii
      * @day 3/16/21
      */
-    public function setWhereDeliveryStatus(array $arrary, $merId)
+    public function setWhereDeliveryStatus(array $array, $merId)
     {
+        if(isset($array['upload_type']) && $array['upload_type'] != UploadService::TYPE_LOCAL){
+            $tempfile = tempnam(sys_get_temp_dir(), 'delivery__');
+            $fhandle = fopen($tempfile, "w");
+            fwrite($fhandle, file_get_contents($array['path']));
+            fclose($fhandle);
+            $array['path'] = $tempfile;
+        }
+
         //读取excel
-        $data = SpreadsheetExcelService::instance()->_import($arrary['path'], $arrary['sql'], $arrary['where'], 4);
+        $data = SpreadsheetExcelService::instance()->_import($array['path'], $array['sql'], $array['where'], 4);
         if (!$data) return;
-        $import_id = $arrary['import_id'];
+        $import_id = $array['import_id'];
         Db::transaction(function () use ($data, $merId, $import_id) {
             $result = [];
             $num = 0;
@@ -2291,7 +2301,7 @@ class StoreOrderRepository extends BaseRepository
             $_status = ($count == $num) ? 1 : (($num < 1) ? -1 : 10);
             app()->make(StoreImportRepository::class)->update($import_id, ['count' => $count, 'success' => $num, 'status' => $_status]);
         });
-        if (file_exists($arrary['path'])) unlink($arrary['path']);
+        if (file_exists($array['path'])) unlink($array['path']);
     }
 
     /**

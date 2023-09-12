@@ -21,6 +21,7 @@ use crmeb\services\upload\Upload;
  */
 class UploadService
 {
+    const TYPE_LOCAL = 1;
 
     /**
      * @param $type

@@ -83,26 +83,28 @@ class StoreImport extends BaseController
         $file = is_array($file) ? $file[0] : $file;
         validate(["file|文件" => ['fileExt' => 'xlsx,xls',]])->check(['file' => $file]);
 
-        $upload = UploadService::create(1);
-        $ret = $upload->to('excel')->move('file');
+        $uploadType = (int)systemConfig('upload_type') ?: UploadService::TYPE_LOCAL;
+        $upload = UploadService::create($uploadType);
+        $ret = $upload->to("batch_upload_{$type}_excel/".date('Ymd'))->move('file', false);
         if ($ret === false) return app('json')->fail($upload->getError());
         $res = $upload->getUploadInfo();
-        $path = rtrim(public_path(),'/').$res['dir'];
+        $path = $uploadType == (UploadService::TYPE_LOCAL ? rtrim(public_path(),'/') : '') . $res['dir'];
         $data = [];
         switch ($type){
              case 'delivery' :
-                 SpreadsheetExcelService::instance()->checkImport($path,['D3' => '物流单号']);
+                 SpreadsheetExcelService::instance()->checkImport($file->getRealPath(),['D3' => '物流单号']);
                  $data = [
                      'mer_id' => $this->request->merId(),
                      'data' => [
                          'path' => $path,
+                         'upload_type' => $uploadType,
                          'sql' => ['delivery_name' => 'B', 'delivery_id' => 'D',],
                          'where' => ['order_sn' => 'A',],
                     ]
                  ];
                 break;
             default:
-                $data = SpreadsheetExcelService::instance()->_import($path,[],[],0);
+                $data = SpreadsheetExcelService::instance()->_import($file->getRealPath(),[],[],0);
                 break;
         }
         if(!empty($data)){
