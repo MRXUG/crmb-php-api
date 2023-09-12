@@ -22,6 +22,7 @@ class ImportSpreadsheetExcelJob implements JobInterface
 
     public function fire($job, $data)
     {
+        Log::info('批量上传发货:'.$data['mer_id'].json_encode($data));
         try{
             app()->make(StoreOrderRepository::class)->setWhereDeliveryStatus($data['data'],$data['mer_id']);
         }catch (\Exception $e){

@@ -88,7 +88,7 @@ class StoreImport extends BaseController
         $ret = $upload->to("batch_upload_{$type}_excel/".date('Ymd'))->move('file', false);
         if ($ret === false) return app('json')->fail($upload->getError());
         $res = $upload->getUploadInfo();
-        $path = $uploadType == (UploadService::TYPE_LOCAL ? rtrim(public_path(),'/') : '') . $res['dir'];
+        $path = ($uploadType == UploadService::TYPE_LOCAL ? rtrim(public_path(),'/') : '') . $res['dir'];
         $data = [];
         switch ($type){
              case 'delivery' :
