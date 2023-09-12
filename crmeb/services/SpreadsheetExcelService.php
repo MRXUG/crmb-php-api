@@ -14,6 +14,9 @@ namespace crmeb\services;
 
 
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use think\exception\ValidateException;
 
 class SpreadsheetExcelService
@@ -21,8 +24,10 @@ class SpreadsheetExcelService
     //
     private static $instance = null;
     //PHPSpreadsheet实例化对象
+    /** @var Spreadsheet */
     private static $spreadsheet = null;
     //sheet实例化对象
+    /** @var Worksheet */
     private static $sheet = null;
     private static $createsheet = null;
     //表头计数
@@ -75,7 +80,7 @@ class SpreadsheetExcelService
     {
         if (self::$instance === null) {
             self::$instance = new self();
-            self::$spreadsheet = $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+            self::$spreadsheet = $spreadsheet = new Spreadsheet();
         }
         return self::$instance;
     }
@@ -251,6 +256,7 @@ class SpreadsheetExcelService
                     self::$sheet->setCellValue($span . $column, $value);
                     $span++;
                 }
+                self::$sheet->getRowDimension($column)->setRowHeight(25);
                 $column++;
             }
             $span = chr(ord($span) -1);
@@ -303,7 +309,7 @@ class SpreadsheetExcelService
         $root_path = app()->getRootPath().'public/'.$save_path;
         if(!is_dir($root_path)) mkdir($root_path, 0755,true);
         $spreadsheet = self::$spreadsheet;
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+        $writer = new Xlsx($spreadsheet);
         $writer->save($root_path.'/'.$fileName.'.'.$suffix);
 
         return $save_path.'/'.$fileName.'.'.$suffix;
@@ -384,4 +390,21 @@ class SpreadsheetExcelService
         return true;
     }
 
+    /**
+     * @param $titlename
+     * @return string
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function downloadEnd()
+    {
+//        ob_end_clean();
+        ob_start();
+        $writer = new Xlsx(self::$spreadsheet);
+        $writer->save('php://output');
+        $imageData = ob_get_contents();
+        ob_end_clean();
+        return $imageData;
+
+    }
 }

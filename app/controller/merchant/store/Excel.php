@@ -13,10 +13,12 @@
 namespace app\controller\merchant\store;
 
 use app\common\repositories\store\ExcelRepository;
+use app\common\repositories\store\shipping\ExpressRepository;
 use crmeb\exceptions\UploadException;
 use crmeb\services\ExcelService;
 use think\App;
 use crmeb\basic\BaseController;
+use think\response\File;
 
 class Excel extends BaseController
 {
@@ -57,10 +59,14 @@ class Excel extends BaseController
     {
         try{
             if($id == 'express'){
-                $file['name'] = 'express';
-                $path = app()->getRootPath().'extend/express.xlsx';
-                if(!$file || !file_exists($path)) return app('json')->fail('文件不存在');
-                return download($path,$file['name']);
+                /** @var ExpressRepository $repos */
+                $repos = app()->make(ExpressRepository::class);
+                $content = $repos->exportToDownload();
+                /** @var File $file */
+                $file = app(File::class, [$content]);
+                return $file->isContent()
+                    ->name('express.xlsx')
+                    ->mimeType('application/octet-stream');
             }
 
             $file = $this->repository->getWhere(['excel_id' => $id,'mer_id' => $this->request->merId()]);

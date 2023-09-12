@@ -15,6 +15,7 @@ namespace app\common\repositories\store\shipping;
 use app\common\repositories\BaseRepository;
 use app\common\dao\store\shipping\ExpressDao as dao;
 use crmeb\services\CrmebServeServices;
+use crmeb\services\SpreadsheetExcelService;
 use FormBuilder\Factory\Elm;
 use think\exception\ValidateException;
 use think\facade\Db;
@@ -246,5 +247,24 @@ class ExpressRepository extends BaseRepository
                 $make->create($data);
             }
         });
+    }
+
+    /**
+     * @return string
+     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     * @throws \think\db\exception\DataNotFoundException
+     * @throws \think\db\exception\DbException
+     * @throws \think\db\exception\ModelNotFoundException
+     */
+    public function exportToDownload(){
+        $data = $this->dao->getSearch([])->field('id, code,name')->select()->toArray();
+        $header = ['序号', '快递公司代码', '物流公司'];
+        $title = ['title' => 'title', 'sheets' => 'sheets'];
+        return SpreadsheetExcelService::instance()
+            ->createOrActive()
+            ->setExcelHeader($header, 1)
+            ->setExcelContent($data)
+            ->downloadEnd();
     }
 }
