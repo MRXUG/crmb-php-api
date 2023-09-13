@@ -198,6 +198,9 @@ Route::group(function () {
         Route::post('not_ship/update', '/notShipUpdate')->name('merchantStoreShippingTemplateV2notShipUpdate')->option([
             '_alias' => '非配送区域编辑',
         ]);
+        Route::get('area/all', '/allArea')->name('merchantStoreShippingTemplateV2AllArea')->option([
+            '_alias' => '所有区域',
+        ]);
     })->prefix('merchant.store.shipping.ShippingTemplateController')->option([
         '_path' => '/config/freight/shippingTemplatesV2',
         '_auth' => true,

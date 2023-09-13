@@ -145,4 +145,8 @@ class ShippingTemplateController extends BaseController
         $this->repository->notShipUpdate($this->request->merId(), $notAreaIds);
         return app('json')->success('编辑成功');
     }
+
+    public function allArea(){
+        return app('json')->success($this->repository->allArea());
+    }
 }

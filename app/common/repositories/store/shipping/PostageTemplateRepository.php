@@ -2,6 +2,7 @@
 
 namespace app\common\repositories\store\shipping;
 
+use app\common\model\store\CityArea;
 use app\common\model\store\product\Product;
 use app\common\model\store\shipping\PostageTemplateRuleModel;
 use app\common\RedisKey;
@@ -219,6 +220,17 @@ class PostageTemplateRepository extends BaseRepository
         Cache::delete($cacheKey);
 
         return $notAreaIds;
+    }
+
+    public function allArea(){
+        $cacheKey = RedisKey::ALL_AREA_TREE;
+        if($allArea = Cache::get($cacheKey)){
+            return json_decode($allArea, true);
+        }
+        $list = CityArea::getModel()->where('level in (1,2,3)')->field('id, parent_id, level, name, path,type')->select()->toArray();
+        $allArea = formatCategory($list, 'id', 'parent_id', 'children');
+        Cache::set($cacheKey, json_encode($allArea), 86400);
+        return $allArea;
     }
 
 }

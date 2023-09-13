@@ -79,6 +79,10 @@ class RedisKey
      * 运费规则非配送区域 商家id
      */
      const POSTAGE_TEMPLATE_RULE_NOT = 'merchant_postage_template_rule_NOT:';
+    /**
+     * 运费规则非配送区域 商家id
+     */
+     const ALL_AREA_TREE = 'all_area_tree';
 
     /**
      * 
