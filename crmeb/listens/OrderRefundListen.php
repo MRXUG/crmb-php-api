@@ -39,6 +39,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
             # 查询获取任务信息·
             //** @var RefundTask[] $task */
             $task                = RefundTask::getDB()->where('status', 0)->select();
+            /** @var DeliveryProfitSharingStatusRepository $profitSharingStatus */
             $profitSharingStatus = app()->make(DeliveryProfitSharingStatusRepository::class);
             foreach ($task as $item) {
                 try {
