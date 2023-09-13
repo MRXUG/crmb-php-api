@@ -878,6 +878,15 @@ class StoreRefundOrderRepository extends BaseRepository
             $refundOrder->save();
             # 重新发布退款
             ProfitSharing::createRefundTask($id);
+
+            # 退款记录
+            /** @var StoreRefundStatusRepository $statusRepository */
+            $statusRepository = app()->make(StoreRefundStatusRepository::class);
+            $statusRepository->status(
+                $id,
+                $statusRepository::REFUND_AGAIN,
+                "管理员重新发起退款"
+            );
         });
     }
 

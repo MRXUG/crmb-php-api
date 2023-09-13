@@ -34,6 +34,8 @@ class StoreRefundStatusRepository extends BaseRepository
     const CONFIRMATION_OF_RECEIPT_OF_RETURNED_GOODS = 'confirmation_of_receipt_of_returned_goods';
     // 退款失败
     const REFUND_FAILED = 'refund_failed';
+    //重新发起退款
+    const REFUND_AGAIN = 'refund_again';
     //创建退款单
     const CHANGE_CREATE = 'create';
     //删除记录

@@ -122,6 +122,8 @@ class ProfitSharing
     {
         $isready = RefundTask::getDB()->where('refund_order_id', $refundOrderId)->find();
         if (!empty($isready)) {
+            $isready->status = 0;
+            $isready->save();
             return;
         }
         # 获取退款订单信息
