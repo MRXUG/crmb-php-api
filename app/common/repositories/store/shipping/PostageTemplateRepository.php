@@ -205,7 +205,7 @@ class PostageTemplateRepository extends BaseRepository
             ]);
             return [];
         }
-        return $notAreaIds;
+        return $notAreaIds ? explode(',', $notAreaIds) : [];
     }
 
     public function notShipUpdate($merId, array $notAreaIds){
