@@ -23,6 +23,7 @@ use Swoole\Websocket\Frame;
 use think\Config;
 use think\Event;
 use think\facade\Cache;
+use think\facade\Log;
 use think\Request;
 use think\response\Json;
 use think\swoole\Websocket;
@@ -187,6 +188,11 @@ class Manager extends Websocket
     {
         $info = Cache::get('_ws_f_' . $frame->fd);
         $result = json_decode($frame->data, true) ?: [];
+
+        if(!$result){
+            Log::info("获取Frame为空:".__CLASS__.':'.__FUNCTION__.':fd:'.$frame->fd.':data:'.$frame->data.':trace:'.json_encode(debug_backtrace()));
+            return true;
+        }
 
         if (!isset($result['type']) || !$result['type']) return true;
         $this->refresh($info['type'], $frame->fd, $info['uid']);
