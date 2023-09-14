@@ -188,7 +188,7 @@ class PostageTemplateRepository extends BaseRepository
         $ruleModel = app()->make(PostageTemplateRuleModel::class);
         $notAreaIds = $ruleModel->getModel()->where('template_id', 0)
             ->where('mer_id', $merId)->value('not_area_ids');
-        if(!$notAreaIds){
+        if(is_null($notAreaIds)){
             $ruleModel->save([
                 'template_id' => 0,
                 'first_unit' => 0,
