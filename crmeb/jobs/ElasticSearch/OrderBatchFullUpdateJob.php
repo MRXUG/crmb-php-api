@@ -23,7 +23,8 @@ class OrderBatchFullUpdateJob implements JobInterface
     {
         /** @var OrderInElasticSearchRepository $repository */
         $repository = app()->make(OrderInElasticSearchRepository::class);
-        $beginDate = date('Y-m-d H:i:s', strtotime('-1 day'));
+        $timeQueue = $data['time_queue'] ?? "-1 day";
+        $beginDate = date('Y-m-d H:i:s', strtotime($timeQueue));
         try {
             $repository->bulk($beginDate);
         } catch (\Exception $e) {

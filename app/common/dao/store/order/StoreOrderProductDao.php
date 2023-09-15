@@ -54,7 +54,7 @@ class StoreOrderProductDao extends BaseDao
     {
         return StoreOrderProduct::getDB()->where('uid', $uid)->where('order_product_id', $id)->with(['orderInfo' => function (Relation $query) {
             $query->field('order_id,mer_id')->where('status', 2);
-        }])->find();
+        }, 'productAttrValue'])->find();
     }
 
     /**

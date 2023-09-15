@@ -16,6 +16,7 @@ namespace app\common\model\store\order;
 
 use app\common\model\BaseModel;
 use app\common\model\store\product\Product;
+use app\common\model\store\product\ProductAttrValue;
 use app\common\model\store\product\Spu;
 use app\common\model\user\User;
 
@@ -50,6 +51,11 @@ class StoreOrderProduct extends BaseModel
     public function product()
     {
         return $this->hasOne(Product::class,'product_id','product_id');
+    }
+
+    public function productAttrValue()
+    {
+        return $this->hasOne(ProductAttrValue::class,'sku_id','sku_id');
     }
 
     public function spu()
