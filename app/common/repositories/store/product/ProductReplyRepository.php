@@ -238,7 +238,7 @@ class ProductReplyRepository extends BaseRepository
         $data['product_id'] = $orderProduct['product_id'];
         $data['unique'] = $orderProduct['productAttrValue']['unique'];
         $data['mer_id'] = $orderProduct->orderInfo['mer_id'];
-        $data['product_type'] = $orderProduct['cart_info']['product']['product_type'];
+        $data['product_type'] = $orderProduct['product']['product_type'];
         $data['rate'] = ($data['product_score'] + $data['service_score'] + $data['postage_score']) / 3;
         Db::transaction(function () use ($data, $orderProduct, $storeOrderProductRepository) {
             $this->dao->create($data);
