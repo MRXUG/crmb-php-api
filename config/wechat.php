@@ -205,12 +205,12 @@ return [
      */
     "modify_domain_setting" => [
         "action" => "set",
-        "requestdomain" => ["https://" . $url],
+        "requestdomain" => ["https://" . $url,"https://api.wanduitec.com"],
         "wsrequestdomain" => ["wss://" . $url],
-        "uploaddomain" => ["https://" . $url],
+        "uploaddomain" => ["https://" . $url,"https://api.wanduitec.com"],
         "downloaddomain" => [
             "https://" . $url,
-            "",
+            "https://api.wanduitec.com",
             ""
         ],
         "udpdomain" => [
