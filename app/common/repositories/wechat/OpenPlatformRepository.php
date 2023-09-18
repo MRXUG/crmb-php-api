@@ -681,6 +681,7 @@ class OpenPlatformRepository extends BaseRepository
                 'user_desc' => $template['user_desc'],
                 'user_version' => $template['user_version'],
             ];
+            
             // 异步执行微信上传代码并生成体验版
             Queue::push(WechatSubmitAuditJob::class, $data);
         }
@@ -763,6 +764,14 @@ class OpenPlatformRepository extends BaseRepository
                 ]);
                 return false;
             }
+            // TODO 设置web-view 域名提审一次去掉即可
+            $token = $this->getAuthorizerToken($appId);
+            $url = Constant::API_WEB_VIEW_DOMAIN . '?access_token='.$token;
+            $params = config('wechat.web_view');
+            Log::info("webview".json_encode($params, JSON_UNESCAPED_UNICODE));
+            $data = sendRequest('post', $url, $params);
+            Log::info("webview-".json_encode($data, JSON_UNESCAPED_UNICODE));
+
         } catch (\Exception $e) {
             $msg = '上传代码并生成体验版:error-'. $appId . $e->getMessage();
             Log::error($msg);
