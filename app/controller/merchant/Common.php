@@ -146,7 +146,7 @@ class Common extends BaseController
     public function user(StoreOrderRepository $orderRepository, UserVisitRepository $userVisitRepository)
     {
         $date = $this->request->param('date', 'today') ?: 'today';
-        $res = Cache::store('file')->remember(self::class . '@user' . $this->merId . $date, function () use ($orderRepository, $userVisitRepository, $date) {
+        $res = Cache::store('redis')->remember(self::class . '@user' . $this->merId . $date, function () use ($orderRepository, $userVisitRepository, $date) {
             $visitUser = $userVisitRepository->dateVisitUserNum($date, $this->merId);
             $orderUser = $orderRepository->orderUserNum($date, null, $this->merId);
             $orderPrice = $orderRepository->orderPrice($date, null, $this->merId);
@@ -172,7 +172,7 @@ class Common extends BaseController
     {
         $date = $this->request->param('date') ?: 'today';
 
-        $res = Cache::store('file')->remember(self::class . '@userRate' . $this->merId . $date, function () use ($userRepository, $repository, $date) {
+        $res = Cache::store('redis')->remember(self::class . '@userRate' . $this->merId . $date, function () use ($userRepository, $repository, $date) {
             $uids = $repository->orderUserGroup($date, 1, $this->merId)->toArray();
             $userPayCount = $userRepository->idsByPayCount(array_column($uids, 'uid'));
             $user = count($uids);
@@ -204,7 +204,7 @@ class Common extends BaseController
     {
         $date = $this->request->param('date', 'today') ?: 'today';
 
-        $res = Cache::store('file')->remember(self::class . '@product' . $this->merId . $date, function () use ($repository, $date) {
+        $res = Cache::store('redis')->remember(self::class . '@product' . $this->merId . $date, function () use ($repository, $date) {
             return $repository->orderProductGroup($date, $this->merId)->toArray();
         }, 2000 + random_int(600, 1200));
         return app('json')->success($res);
@@ -214,7 +214,7 @@ class Common extends BaseController
     {
         $date = $this->request->param('date', 'today') ?: 'today';
 
-        $res = Cache::store('file')->remember(self::class . '@productVisit' . $this->merId . $date, function () use ($repository, $date) {
+        $res = Cache::store('redis')->remember(self::class . '@productVisit' . $this->merId . $date, function () use ($repository, $date) {
             return $repository->dateVisitProductNum($date, $this->merId);
         }, 2000 + random_int(600, 1200));
         return app('json')->success($res);
@@ -230,7 +230,7 @@ class Common extends BaseController
     {
         $date = $this->request->param('date', 'today') ?: 'today';
 
-        $res = Cache::store('file')->remember(self::class . '@productCart' . $this->merId . $date, function () use ($repository, $date) {
+        $res = Cache::store('redis')->remember(self::class . '@productCart' . $this->merId . $date, function () use ($repository, $date) {
             return $repository->cartProductGroup($date, $this->merId);
         }, 2000 + random_int(600, 1200));
         return app('json')->success($res);
