@@ -42,6 +42,8 @@ class Constant
 
     // 配置服务器域名
     const API_WXA_MODIFY_DOMAIN = 'https://api.weixin.qq.com/wxa/modify_domain';
+    // 配置业务域名
+    const API_WEB_VIEW_DOMAIN = 'https://api.weixin.qq.com/wxa/setwebviewdomain';
 
     // 插件管理
     const API_WXA_PLUGIN = 'https://api.weixin.qq.com/wxa/plugin';

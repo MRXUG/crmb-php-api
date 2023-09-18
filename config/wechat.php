@@ -227,6 +227,13 @@ return [
         ]
     ],
     /*
+     * 服务器域名配置
+     */
+    "web_view" => [
+      "action" => "set",
+      "webviewdomain"=> ["api.wanduitec.com"]
+  ],
+    /*
      * 小程序配置
      */
     "ext_json" => <<<EOD

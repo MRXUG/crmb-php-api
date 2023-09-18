@@ -93,6 +93,8 @@ class OpenPlatformRepository extends BaseRepository
                 $this->setPrivacySetting($data['AuthorizerAppid']);
                 // 配置服务器域名
                 $this->setModifyDomainSetting($data['AuthorizerAppid']);
+                // 配置业务域名
+                $this->setwebViewDomainSetting($data['AuthorizerAppid']);
                 // 配置类目
                 $this->setCategorySetting($data['AuthorizerAppid']);
                 // 配置插件
@@ -431,6 +433,41 @@ class OpenPlatformRepository extends BaseRepository
         Log::info("配置服务器域名:data-$authorizerAppid".json_encode($params, JSON_UNESCAPED_UNICODE));
         $data = sendRequest('post', $url, $params);
         Log::info("配置服务器域名:data-$authorizerAppid".json_encode($data, JSON_UNESCAPED_UNICODE));
+        if($data['errcode'] == 0){
+            // 配置服务器域名成功，更新状态
+            $this->appletDao->createOrUpdate(
+                [
+                    'original_appid' => $authorizerAppid
+                ],
+                [
+                    'original_appid' => $authorizerAppid,
+                    'modify_domain_status' => 1
+                ]
+            );
+        }else{
+            $msg = "配置服务器域名:error-$authorizerAppid".json_encode($data, JSON_UNESCAPED_UNICODE);
+            Log::error($msg);
+            sendMessageToWorkBot([
+                'msg' => $msg,
+                'file' => __FILE__,
+                'line' => __LINE__
+            ]);
+        }
+    }
+    /**
+     * 配置业务域名
+     * @param $authorizerAppid
+     * @throws GuzzleException|DbException
+     * @author  wzq
+     * @date    2023/3/2 20:59
+     */
+    private function setwebViewDomainSetting($authorizerAppid){
+        $token = $this->getAuthorizerToken($authorizerAppid);
+        $url = Constant::API_WEB_VIEW_DOMAIN . '?access_token='.$token;
+        $params = config('wechat.web_view');
+        Log::info("配置业务域名:data-$authorizerAppid".json_encode($params, JSON_UNESCAPED_UNICODE));
+        $data = sendRequest('post', $url, $params);
+        Log::info("配置业务域名:data-$authorizerAppid".json_encode($data, JSON_UNESCAPED_UNICODE));
         if($data['errcode'] == 0){
             // 配置服务器域名成功，更新状态
             $this->appletDao->createOrUpdate(
