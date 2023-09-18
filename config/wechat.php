@@ -231,7 +231,7 @@ return [
      */
     "web_view" => [
       "action" => "set",
-      "webviewdomain"=> ["api.wanduitec.com"]
+      "webviewdomain"=> ["https://api.wanduitec.com"]
   ],
     /*
      * 小程序配置
