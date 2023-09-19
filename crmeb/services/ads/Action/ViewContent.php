@@ -18,7 +18,7 @@ class ViewContent extends BaseAdsEvent {
         return [
             ['action_type'=>'VIEW_CONTENT','action_time'=>$this->timestamp,'action_param'=>['object'=>'product']],
             ['action_type'=>'AD_CLICK','action_time'=>$this->timestamp],
-            ['action_type'=>'AD_IMPRESSION','action_time'=>$this->timestamp]
+            //['action_type'=>'AD_IMPRESSION','action_time'=>$this->timestamp]
         ];
     }
     
