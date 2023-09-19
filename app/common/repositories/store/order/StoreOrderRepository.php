@@ -1518,7 +1518,7 @@ class StoreOrderRepository extends BaseRepository
         //追加查询
         $query = $this->dao->merchantGetListAppendQuery($query, $where);
         $count = $query->count();
-        $list = $query->page($page, $limit)->field('MA.ad_account_id,MA.ad_cid')->select()->append(['refund_extension_one', 'refund_extension_two'])
+        $list = $query->page($page, $limit)->field('MA.ad_account_id,MA.ad_channel_id as ad_cid')->select()->append(['refund_extension_one', 'refund_extension_two'])
             ->each(function($item){
                 // 1:退款中 2:部分退款 3 = 全退
                 $refunding = 0;
