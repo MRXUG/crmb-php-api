@@ -215,6 +215,9 @@ class User extends BaseController
         $code = $this->request->param('code');
         $iv = $this->request->param('iv');
         $encryptedData = $this->request->param('encryptedData');
+        if(!$code || !$iv || !$encryptedData){
+            return app('json')->fail('缺少参数');
+        }
         $miniProgramService = MiniProgramService::create();
         $userInfoCong = $miniProgramService->getUserInfo($code);
         $session_key = $userInfoCong['session_key'];
