@@ -1539,7 +1539,7 @@ class StoreOrderRepository extends BaseRepository
             // 订单来源
             $order['merchant_source'] = $order['merchant_source'] > 0 ? StoreOrder::MERCHANT_SOURCE_TEXT[$order['merchant_source']] : '无';
             // 广告渠道
-            $order['ad_channel_name'] = $order['ad_channel_id'] > 0 ? StoreOrder::AD_CHANNEL[$order['ad_cid']] : '无';
+            $order['ad_channel_name'] = $order['ad_cid'] > 0 ? StoreOrder::AD_CHANNEL[$order['ad_cid']] : '无';
             // 平台订单来源
             $order['platform_source_name'] = $order['platform_source'] > 0 ? StoreOrder::PLATFORM_SOURCE_TEXT[$order['platform_source']] : '无';
             //小程序名称
