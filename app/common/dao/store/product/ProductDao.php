@@ -10,13 +10,11 @@
 // | Author: CRMEB Team <admin@crmeb.com>
 // +----------------------------------------------------------------------
 
-
 namespace app\common\dao\store\product;
 
 use app\common\dao\BaseDao;
 use app\common\model\store\product\Product as model;
 use app\common\repositories\store\product\SpuRepository;
-use app\common\repositories\store\StoreCategoryRepository;
 use think\db\BaseQuery;
 use think\db\exception\DbException;
 use think\facade\Db;
@@ -73,19 +71,19 @@ class ProductDao extends BaseDao
     public function merFieldExists(?int $merId, $field, $value, $except = null)
     {
         return model::withTrashed()->when($except, function ($query, $except) use ($field) {
-                $query->where($field, '<>', $except);
-            })->when($merId, function ($query, $merId) {
-                $query->where('mer_id', $merId);
-            })->where($field, $value)->count() > 0;
+            $query->where($field, '<>', $except);
+        })->when($merId, function ($query, $merId) {
+            $query->where('mer_id', $merId);
+        })->where($field, $value)->count() > 0;
     }
 
     public function apiFieldExists(int $merId, $field, $value, $except = null)
     {
         return ($this->getModel())::getDB()->when($except, function ($query, $except) use ($field) {
-                $query->where($field, '<>', $except);
-            })->when($merId, function ($query, $merId) {
-                $query->where('mer_id', $merId);
-            })->where(['status' => 1])->where($field, $value)->count() > 0;
+            $query->where($field, '<>', $except);
+        })->when($merId, function ($query, $merId) {
+            $query->where('mer_id', $merId);
+        })->where(['status' => 1])->where($field, $value)->count() > 0;
     }
 
     /**
@@ -110,24 +108,24 @@ class ProductDao extends BaseDao
     {
         $keyArray = $whereArr = [];
         unset($where['type']);
-        $out = ['soft', 'us_status', 'mer_labels', 'sys_labels', 'order', 'hot_type','pid'];
+        $out = ['soft', 'us_status', 'mer_labels', 'sys_labels', 'order', 'hot_type', 'pid'];
         foreach ($where as $key => $item) {
             if ($item !== '' && !in_array($key, $out)) {
-                $keyArray[] = $key;
+                $keyArray[]     = $key;
                 $whereArr[$key] = $item;
             }
         }
         $query = isset($where['soft']) ? model::onlyTrashed()->alias('Product') : model::alias('Product');
 //        if (isset($where['is_trader']) && $where['is_trader'] !== '') {
-//            $query->hasWhere('merchant', function ($query) use ($where) {
-//                $query->where('merchant.is_trader', $where['is_trader']);
-//            });
-//        }
+        //            $query->hasWhere('merchant', function ($query) use ($where) {
+        //                $query->where('merchant.is_trader', $where['is_trader']);
+        //            });
+        //        }
         $query->withSearch($keyArray, $whereArr);
         $query->Join('StoreSpu U', 'Product.product_id = U.product_id')
             ->leftJoin('eb_merchant M', 'Product.mer_id = M.mer_id')
             ->leftJoin('eb_merchant_category MC', 'M.category_id = MC.merchant_category_id')
-            ->when(isset($where['merchant_category_id']) && $where['merchant_category_id'] != '', fn (BaseQuery $query) =>
+            ->when(isset($where['merchant_category_id']) && $where['merchant_category_id'] != '', fn(BaseQuery $query) =>
                 $query->where("M.category_id", '=', $where['merchant_category_id'])
             )
             ->when((isset($where['is_trader']) && $where['is_trader'] !== ''), function ($query) use ($where) {
@@ -142,36 +140,39 @@ class ProductDao extends BaseDao
                 $query->where('Product.mer_id', $merId);
             })
             ->when(isset($where['hot_type']) && $where['hot_type'] !== '', function ($query) use ($where) {
-                if ($where['hot_type'] == 'new')
+                if ($where['hot_type'] == 'new') {
                     $query->where('is_new', 1);
-                else if ($where['hot_type'] == 'hot')
+                } else if ($where['hot_type'] == 'hot') {
                     $query->where('is_hot', 1);
-                else if ($where['hot_type'] == 'best')
+                } else if ($where['hot_type'] == 'best') {
                     $query->where('Product.is_best', 1);
-                else if ($where['hot_type'] == 'good')
+                } else if ($where['hot_type'] == 'good') {
                     $query->where('is_benefit', 1);
+                } else if ($where['hot_type'] == 're_good') {
+                    $query->where('is_good', 1);
+                }
+
             })
 
             ->when(isset($where['discount_num']) && $where['discount_num'] !== '', function ($query) use ($where) {
                 $query->leftJoin('eb_coupon_stocks CS', 'CS.mer_id = M.mer_id');
                 $query->leftJoin('eb_stock_goods SG', 'SG.coupon_stocks_id = CS.id');
                 $newDate = date("Y-m-d H:i:s");
-                $query->where( [
+                $query->where([
                     ['CS.scope', '=', 1],
                     ['CS.is_del', '=', 0],
                     ['CS.discount_num', '=', $where['discount_num']],
                     ['CS.end_at', '>', $newDate],
-                    ['CS.status', 'in', [1, 2]]
+                    ['CS.status', 'in', [1, 2]],
                 ]);
-
 
             })
 
-            // ->when(isset($where['pid']) && $where['pid'] !== '', function ($query) use ($where) {
-            //     $storeCategoryRepository = app()->make(StoreCategoryRepository::class);
-            //     $ids = array_merge($storeCategoryRepository->findChildrenId((int)$where['pid']), [(int)$where['pid']]);
-            //     if (count($ids)) $query->whereIn('Product.cate_id', $ids);
-            // })
+        // ->when(isset($where['pid']) && $where['pid'] !== '', function ($query) use ($where) {
+        //     $storeCategoryRepository = app()->make(StoreCategoryRepository::class);
+        //     $ids = array_merge($storeCategoryRepository->findChildrenId((int)$where['pid']), [(int)$where['pid']]);
+        //     if (count($ids)) $query->whereIn('Product.cate_id', $ids);
+        // })
             ->when(isset($where['us_status']) && $where['us_status'] !== '', function ($query) use ($where) {
                 if ($where['us_status'] == 0) {
                     $query->where('Product.is_show', 0)->where('Product.is_used', 1)->where('Product.status', 1);
@@ -233,12 +234,12 @@ class ProductDao extends BaseDao
                 ->where('end_time', '<=', $where['end_time']);
         });
         $query->where([
-            'Product.is_show' => 1,
-            'Product.status' => 1,
-            'Product.is_used' => 1,
-            'Product.mer_status' => 1,
+            'Product.is_show'      => 1,
+            'Product.status'       => 1,
+            'Product.is_used'      => 1,
+            'Product.mer_status'   => 1,
             'Product.product_type' => 1,
-            'Product.is_gift_bag' => 0,
+            'Product.is_gift_bag'  => 0,
         ])
             ->when(isset($where['mer_id']) && $where['mer_id'] !== '', function ($query) use ($where) {
                 $query->where('Product.mer_id', $where['mer_id']);
@@ -331,7 +332,6 @@ class ProductDao extends BaseDao
         return model::getDB()->where('product_id', $id)->value('mer_id');
     }
 
-
     /**
      * @param int $productId
      * @param int $desc
@@ -344,7 +344,7 @@ class ProductDao extends BaseDao
     {
         return model::getDB()->where('product_id', $productId)->update([
             'stock' => Db::raw('stock-' . $desc),
-            'sales' => Db::raw('sales+' . $desc)
+            'sales' => Db::raw('sales+' . $desc),
         ]);
     }
 
@@ -365,7 +365,7 @@ class ProductDao extends BaseDao
     public function descIntegral(int $productId, $integral_total, $integral_price_total)
     {
         return model::getDB()->where('product_id', $productId)->update([
-            'integral_total' => Db::raw('integral_total-' . $integral_total),
+            'integral_total'       => Db::raw('integral_total-' . $integral_total),
             'integral_price_total' => Db::raw('integral_price_total-' . $integral_price_total),
         ]);
     }
@@ -382,8 +382,8 @@ class ProductDao extends BaseDao
             ->when($date, function ($query, $date) {
                 getModelTime($query, $date, 'B.create_time');
             })->when($merId, function ($query, $merId) {
-                $query->where('A.mer_id', $merId);
-            })->where('B.type', 1)->group('A.product_id')->limit($limit)->order('total DESC')->select();
+            $query->where('A.mer_id', $merId);
+        })->where('B.type', 1)->group('A.product_id')->limit($limit)->order('total DESC')->select();
     }
 
     public function cartProductGroup($date, $merId = null, $limit = 7)
@@ -393,8 +393,8 @@ class ProductDao extends BaseDao
             ->when($date, function ($query, $date) {
                 getModelTime($query, $date, 'B.create_time');
             })->when($merId, function ($query, $merId) {
-                $query->where('A.mer_id', $merId);
-            })->where('B.product_type', 0)->where('B.is_pay', 0)->where('B.is_del', 0)
+            $query->where('A.mer_id', $merId);
+        })->where('B.product_type', 0)->where('B.is_pay', 0)->where('B.is_del', 0)
             ->where('B.is_new', 0)->where('B.is_fail', 0)->group('A.product_id')->limit($limit)->order('total DESC')->select();
     }
 
@@ -434,12 +434,12 @@ class ProductDao extends BaseDao
     public function productShow()
     {
         return [
-            'is_show' => 1,
-            'status' => 1,
-            'is_used' => 1,
+            'is_show'      => 1,
+            'status'       => 1,
+            'is_used'      => 1,
             'product_type' => 0,
-            'mer_status' => 1,
-            'is_gift_bag' => 0,
+            'mer_status'   => 1,
+            'is_gift_bag'  => 0,
         ];
     }
 
@@ -452,12 +452,12 @@ class ProductDao extends BaseDao
     public function bagShow()
     {
         return [
-            'is_show' => 1,
-            'status' => 1,
-            'is_used' => 1,
-            'mer_status' => 1,
+            'is_show'      => 1,
+            'status'       => 1,
+            'is_used'      => 1,
+            'mer_status'   => 1,
             'product_type' => 0,
-            'is_gift_bag' => 1,
+            'is_gift_bag'  => 1,
         ];
     }
 
@@ -470,12 +470,12 @@ class ProductDao extends BaseDao
     public function seckillShow()
     {
         return [
-            'is_show' => 1,
-            'status' => 1,
-            'is_used' => 1,
-            'mer_status' => 1,
+            'is_show'      => 1,
+            'status'       => 1,
+            'is_used'      => 1,
+            'mer_status'   => 1,
             'product_type' => 1,
-            'is_gift_bag' => 0,
+            'is_gift_bag'  => 0,
         ];
     }
 
@@ -498,7 +498,6 @@ class ProductDao extends BaseDao
     {
         return model::withTrashed()->where($this->getPk(), $id);
     }
-
 
     /**
      * TODO 获取各种有效时间内的活动
@@ -542,10 +541,9 @@ class ProductDao extends BaseDao
                 break;
         }
         $data = $query->select()->toArray();
-        $ret = $this->commandChangeProductStatus($data);
+        $ret  = $this->commandChangeProductStatus($data);
         return $ret;
     }
-
 
     public function commandChangeProductStatus($data)
     {
@@ -555,88 +553,103 @@ class ProductDao extends BaseDao
             $status = 0;
             switch ($item['product_type']) {
                 case 0:
-                    if ($item['is_show'] && $item['is_used']) $status = 1;
+                    if ($item['is_show'] && $item['is_used']) {
+                        $status = 1;
+                    }
+
                     $ret[] = [
-                        'activity_id' => 0,
-                        'product_id' => $item['product_id'],
-                        'mer_id' => $item['mer_id'],
-                        'keyword' => $item['keyword'],
-                        'price' => $item['price'],
-                        'rank' => $item['rank'],
-                        'sort' => $item['sort'],
-                        'image' => $item['image'],
-                        'status' => $status,
-                        'temp_id' => $item['temp_id'],
+                        'activity_id'         => 0,
+                        'product_id'          => $item['product_id'],
+                        'mer_id'              => $item['mer_id'],
+                        'keyword'             => $item['keyword'],
+                        'price'               => $item['price'],
+                        'rank'                => $item['rank'],
+                        'sort'                => $item['sort'],
+                        'image'               => $item['image'],
+                        'status'              => $status,
+                        'temp_id'             => $item['temp_id'],
                         'postage_template_id' => $item['postage_template_id'],
-                        'store_name' => $item['store_name'],
-                        'product_type' => $item['product_type'],
+                        'store_name'          => $item['store_name'],
+                        'product_type'        => $item['product_type'],
                     ];
                     break;
                 case 1:
-                    if ($item['is_show'] && $item['is_used'] && $item['status'] && ($item['end_time'] > time())) $status = 1;
+                    if ($item['is_show'] && $item['is_used'] && $item['status'] && ($item['end_time'] > time())) {
+                        $status = 1;
+                    }
+
                     $ret[] = [
-                        'activity_id' => $item['seckill_active_id'],
-                        'product_id' => $item['product_id'],
-                        'mer_id' => $item['mer_id'],
-                        'keyword' => $item['keyword'],
-                        'price' => $item['price'],
-                        'rank' => $item['rank'],
-                        'sort' => $item['sort'],
-                        'image' => $item['image'],
-                        'status' => $status,
-                        'temp_id' => $item['temp_id'],
-                        'store_name' => $item['store_name'],
+                        'activity_id'  => $item['seckill_active_id'],
+                        'product_id'   => $item['product_id'],
+                        'mer_id'       => $item['mer_id'],
+                        'keyword'      => $item['keyword'],
+                        'price'        => $item['price'],
+                        'rank'         => $item['rank'],
+                        'sort'         => $item['sort'],
+                        'image'        => $item['image'],
+                        'status'       => $status,
+                        'temp_id'      => $item['temp_id'],
+                        'store_name'   => $item['store_name'],
                         'product_type' => $item['product_type'],
                     ];
                     break;
                 case 2:
-                    if ($item['is_show'] && $item['action_status'] && $item['status'] && $item['product_status']) $status = 1;
+                    if ($item['is_show'] && $item['action_status'] && $item['status'] && $item['product_status']) {
+                        $status = 1;
+                    }
+
                     $ret[] = [
-                        'activity_id' => $item['product_presell_id'],
-                        'product_id' => $item['product_id'],
-                        'mer_id' => $item['mer_id'],
-                        'keyword' => $item['keyword'],
-                        'price' => $item['price'],
-                        'rank' => $item['rank'],
-                        'sort' => $item['sort'],
-                        'image' => $item['image'],
-                        'status' => $status,
-                        'temp_id' => $item['temp_id'],
-                        'store_name' => $item['store_name'],
+                        'activity_id'  => $item['product_presell_id'],
+                        'product_id'   => $item['product_id'],
+                        'mer_id'       => $item['mer_id'],
+                        'keyword'      => $item['keyword'],
+                        'price'        => $item['price'],
+                        'rank'         => $item['rank'],
+                        'sort'         => $item['sort'],
+                        'image'        => $item['image'],
+                        'status'       => $status,
+                        'temp_id'      => $item['temp_id'],
+                        'store_name'   => $item['store_name'],
                         'product_type' => $item['product_type'],
                     ];
                     break;
                 case 3:
-                    if ($item['is_show'] && $item['action_status'] && $item['status'] && $item['product_status']) $status = 1;
+                    if ($item['is_show'] && $item['action_status'] && $item['status'] && $item['product_status']) {
+                        $status = 1;
+                    }
+
                     $ret[] = [
-                        'activity_id' => $item['product_assist_id'],
-                        'product_id' => $item['product_id'],
-                        'mer_id' => $item['mer_id'],
-                        'keyword' => $item['keyword'],
-                        'price' => $item['price'],
-                        'rank' => $item['rank'],
-                        'sort' => $item['sort'],
-                        'image' => $item['image'],
-                        'status' => $status,
-                        'temp_id' => $item['temp_id'],
-                        'store_name' => $item['store_name'],
+                        'activity_id'  => $item['product_assist_id'],
+                        'product_id'   => $item['product_id'],
+                        'mer_id'       => $item['mer_id'],
+                        'keyword'      => $item['keyword'],
+                        'price'        => $item['price'],
+                        'rank'         => $item['rank'],
+                        'sort'         => $item['sort'],
+                        'image'        => $item['image'],
+                        'status'       => $status,
+                        'temp_id'      => $item['temp_id'],
+                        'store_name'   => $item['store_name'],
                         'product_type' => $item['product_type'],
                     ];
                     break;
                 case 4:
-                    if ($item['is_show'] && $item['action_status'] && $item['status'] && $item['product_status']) $status = 1;
+                    if ($item['is_show'] && $item['action_status'] && $item['status'] && $item['product_status']) {
+                        $status = 1;
+                    }
+
                     $ret[] = [
-                        'activity_id' => $item['product_group_id'],
-                        'product_id' => $item['product_id'],
-                        'mer_id' => $item['mer_id'],
-                        'keyword' => $item['keyword'],
-                        'price' => $item['price'],
-                        'rank' => $item['rank'],
-                        'sort' => $item['sort'],
-                        'image' => $item['image'],
-                        'status' => $status,
-                        'temp_id' => $item['temp_id'],
-                        'store_name' => $item['store_name'],
+                        'activity_id'  => $item['product_group_id'],
+                        'product_id'   => $item['product_id'],
+                        'mer_id'       => $item['mer_id'],
+                        'keyword'      => $item['keyword'],
+                        'price'        => $item['price'],
+                        'rank'         => $item['rank'],
+                        'sort'         => $item['sort'],
+                        'image'        => $item['image'],
+                        'status'       => $status,
+                        'temp_id'      => $item['temp_id'],
+                        'store_name'   => $item['store_name'],
                         'product_type' => $item['product_type'],
                     ];
                     break;
@@ -685,7 +698,10 @@ class ProductDao extends BaseDao
     public function getMerIdFormProductId(int $productId): ?int
     {
         $v = $this->getModel()::getDb()->where('product_id', $productId)->value('mer_id');
-        if (empty($v)) return null;
-        return (int)$v;
+        if (empty($v)) {
+            return null;
+        }
+
+        return (int) $v;
     }
 }

@@ -314,7 +314,7 @@ class StoreProduct extends BaseController
     public function batchHot()
     {
         $ids = $this->request->param('ids');
-        $data = $this->request->params([['is_hot',0],['is_benefit',0],['is_best',0],['is_new',0]]);
+        $data = $this->request->params([['is_hot',0],['is_benefit',0],['is_best',0],['is_new',0],['is_good',0]]);
         if (empty($ids)) return app('json')->fail('请选择商品');
         $this->repository->updates($ids,$data);
         return app('json')->success('修改成功');

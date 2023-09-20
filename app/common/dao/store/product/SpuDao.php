@@ -161,6 +161,7 @@ class SpuDao extends  BaseDao
                 else if ($where['hot_type'] == 'hot') $query->where('P.is_hot', 1);
                 else if ($where['hot_type'] == 'best') $query->where('P.is_best', 1);
                 else if ($where['hot_type'] == 'good') $query->where('P.is_benefit', 1);
+                else if ($where['hot_type'] == 're_good') $query->where('P.is_good', 1);
             })
             ->when(isset($where['svip']) && $where['svip'] !== '',function($query)use($where){
                 $query->where('svip_price_type','>',0)->where('mer_svip_status',1);
