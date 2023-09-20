@@ -38,7 +38,7 @@ use think\Model;
  */
 class StoreOrderDao extends BaseDao
 {
-    //订单状态（0：待发货；1：待收货；2：待评价；3：已完成； 9: 拼团中 10:  待付尾款 11:尾款超时未付 -1：已退款）
+    //订单状态（0：待发货；1：待收货；2：待评价；3：已完成； 4.退款中 5.退款失败 9: 拼团中 10:  待付尾款 11:尾款超时未付 -1：已退款）
     const ORDER_STATUS_BE_SHIPPED = 0;
     const ORDER_STATUS_BE_RECEIVE = 1;
     const ORDER_STATUS_REPLY = 2;

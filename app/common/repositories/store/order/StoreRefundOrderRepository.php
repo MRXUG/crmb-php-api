@@ -55,7 +55,7 @@ use think\Model;
 class StoreRefundOrderRepository extends BaseRepository
 {
 
-    //状态 0:待审核 -1:审核未通过 1:待退货 2:待收货 3:已退款 -10 取消
+    //状态 0:待审核 -1:审核未通过 1:待退货 2:待收货 3:已退款 4.退款中 5.退款失败 -2 用户取消
     public const REFUND_STATUS_WAIT = 0;
     public const REFUND_STATUS_BACK = 1;
     public const REFUND_STATUS_THEGOODS = 2;
