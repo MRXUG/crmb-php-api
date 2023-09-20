@@ -177,7 +177,7 @@ class StoreProduct extends BaseController
      */
     public function checkParams(validate $validate)
     {
-        $data = $this->request->params(['is_hot','is_best','is_benefit','is_new','store_name','content','rank','star']);
+        $data = $this->request->params(['is_hot','is_best','is_benefit','is_new','store_name','content','rank','star','is_good']);
         $validate->check($data);
         return $data;
     }
