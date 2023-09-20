@@ -14,6 +14,7 @@
 namespace app\common\repositories\store\order;
 
 
+use app\common\dao\store\order\StoreOrderDao;
 use app\common\dao\store\order\StoreRefundOrderDao;
 use app\common\model\store\order\StoreGroupOrder;
 use app\common\model\store\order\StoreOrder;
@@ -353,6 +354,8 @@ class StoreRefundOrderRepository extends BaseRepository
                 $product->is_refund = 1;
                 $product->save();
             }
+            $order->status = StoreOrderDao::ORDER_STATUS_REDUNDING;
+            $order->save();
             $statusRepository = app()->make(StoreRefundStatusRepository::class);
             $statusRepository->status($refund->refund_order_id, $statusRepository::CHANGE_CREATE, '创建批量退款单');
             app()->make(StoreRefundProductRepository::class)->insertAll($refundProduct);
@@ -475,6 +478,8 @@ class StoreRefundOrderRepository extends BaseRepository
             $product->refund_num -= $num;
             $product->is_refund = 1;
             $product->save();
+            $order->status = StoreOrderDao::ORDER_STATUS_REDUNDING;
+            $order->save();
             $statusRepository = app()->make(StoreRefundStatusRepository::class);
             $statusRepository->status(
                 $refund->refund_order_id,
