@@ -44,6 +44,7 @@ class RedisKey
      */
 
      const GOODS_DETAIL = 'goods_detail:%s';
+     const GOODS_DETAIL_V2 = 'goods_detail_v2:%s';
      const GOODS_DETAIL_TIMEOUT = 600;
      const GOODS_DETAIL_WithUid_TIMEOUT = 600;
 

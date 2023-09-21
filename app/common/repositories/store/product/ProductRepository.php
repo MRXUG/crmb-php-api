@@ -297,6 +297,7 @@ class ProductRepository extends BaseRepository
         });
         $redisKey = sprintf(RedisKey::GOODS_DETAIL, $id);
         Cache::store('redis')->handler()->del($redisKey);
+        Cache::store('redis')->handler()->del(sprintf(RedisKey::GOODS_DETAIL_V2, $id));
     }
 
     public function freeTrial(int $id, array $data, int $merId)
@@ -1770,6 +1771,7 @@ class ProductRepository extends BaseRepository
 
         $redisKey = sprintf(RedisKey::GOODS_DETAIL, $id);
         Cache::store('redis')->handler()->del($redisKey);
+        Cache::store('redis')->handler()->del(sprintf(RedisKey::GOODS_DETAIL_V2, $id));
     }
 
     public function batchSwitchShow($id, $status, $field, $merId = 0)
@@ -1802,6 +1804,7 @@ class ProductRepository extends BaseRepository
         foreach ($id as $one) {
             $redisKey = sprintf(RedisKey::GOODS_DETAIL, $one);
             Cache::store('redis')->handler()->del($redisKey);
+            Cache::store('redis')->handler()->del(sprintf(RedisKey::GOODS_DETAIL_V2, $id));
         }
         Queue::push(ChangeSpuStatusJob::class, ['id' => $id, 'product_type' => 0]);
     }
@@ -1832,6 +1835,7 @@ class ProductRepository extends BaseRepository
         app()->make(SpuRepository::class)->changeStatus($id, $product_type);
         $redisKey = sprintf(RedisKey::GOODS_DETAIL, $id);
         Cache::store('redis')->handler()->del($redisKey);
+        Cache::store('redis')->handler()->del(sprintf(RedisKey::GOODS_DETAIL_V2, $id));
     }
 
     /**
@@ -1861,6 +1865,7 @@ class ProductRepository extends BaseRepository
         foreach ($id as $one) {
             $redisKey = sprintf(RedisKey::GOODS_DETAIL, $one);
             Cache::store('redis')->handler()->del($redisKey);
+            Cache::store('redis')->handler()->del(sprintf(RedisKey::GOODS_DETAIL_V2, $id));
         }
         Queue(ChangeSpuStatusJob::class, ['id' => $id, 'product_type' => $product['product_type']]);
         event('product.status', compact('id', 'data'));
