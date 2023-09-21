@@ -41,7 +41,7 @@ class FeedBack extends BaseController
      */
     public function lst()
     {
-        $where = $this->request->params(['keyword', 'type', 'status','realname','order_sn',['is_del',0]]);
+        $where = $this->request->params(['keyword', 'type', 'mer_id', 'status','realname','order_sn',['is_del',0]]);
         [$page, $limit] = $this->getPage();
         return app('json')->success($this->repository->getList($where, $page, $limit));
     }

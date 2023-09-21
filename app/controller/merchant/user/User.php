@@ -35,4 +35,15 @@ class User extends BaseController
         [$page, $limit] = $this->getPage();
         return app('json')->success($this->repository->merList($keyword, $page, $limit));
     }
+
+
+    /**
+     * @return mixed
+     * @author Qinii
+     */
+    public function feedBack()
+    {
+        //TODO
+        return app('json')->success();
+    }
 }

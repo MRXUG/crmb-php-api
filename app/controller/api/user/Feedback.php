@@ -39,7 +39,7 @@ class Feedback extends BaseController
      */
     public function feedback(FeedbackValidate $validate)
     {
-        $data = $this->request->params(['type', 'order_id', 'order_sn', 'content', ['images', []], 'realname', 'contact',['status',0]]);
+        $data = $this->request->params(['type', 'order_id', 'order_sn', 'content','mer_id', ['images', []], 'realname', 'contact',['status',0]]);
         $validate->check($data);
         $data['uid'] = $this->request->uid();
         $FeedBack = $this->repository->create($data);

@@ -21,6 +21,7 @@ class FeedbackValidate extends Validate
 
     protected $rule = [
         'type|类型' => 'require',
+        'mer_id|商户id' => 'integer',
         'images|图片' => 'array|max:6',
         'realname|姓名' => 'alphaNum|max:24',
         'contact|联系方式' => 'checkContact',

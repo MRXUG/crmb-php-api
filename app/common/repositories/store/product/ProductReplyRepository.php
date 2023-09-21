@@ -236,7 +236,7 @@ class ProductReplyRepository extends BaseRepository
         if ($orderProduct->is_reply)
             throw new ValidateException('该商品已评价');
         $data['product_id'] = $orderProduct['product_id'];
-        $data['unique'] = $orderProduct['productAttrValue']['unique'];
+        $data['unique'] = isset($orderProduct['cart_info']['productAttr']['unique']) ? $orderProduct['cart_info']['productAttr']['unique'] : $orderProduct['productAttrValue']['unique'];
         $data['mer_id'] = $orderProduct->orderInfo['mer_id'];
         $data['product_type'] = $orderProduct['product']['product_type'];
         $data['rate'] = ($data['product_score'] + $data['service_score'] + $data['postage_score']) / 3;
