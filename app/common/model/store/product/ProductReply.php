@@ -74,7 +74,7 @@ class ProductReply extends BaseModel
      * @author Qinii
      * @day 2022/11/28\
      */
-    public function getNicnameAttr($value)
+    public function getNicknameAttr($value)
     {
         if (strlen($value) > 1) {
             $str = mb_substr($value,0,1) . '*';

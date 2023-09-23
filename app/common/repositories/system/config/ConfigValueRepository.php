@@ -24,6 +24,7 @@ use app\validate\admin\ProfitSharingSettingValidate;
 use crmeb\jobs\SyncProductTopJob;
 use crmeb\services\DownloadImageService;
 use think\exception\ValidateException;
+use think\facade\Cache;
 use think\facade\Db;
 use think\facade\Queue;
 
@@ -162,8 +163,15 @@ class ConfigValueRepository extends BaseRepository
                     ]);
             }
         });
+        // 清除缓存
+        foreach ($formData as $key => $value){
+            Cache::delete($this->getCacheKey($merId, $key));
+        }
     }
 
+    public function getCacheKey(int $merId, string $configKey){
+        return sprintf("system_config:%d_%s", $merId, $configKey);
+    }
 
     public function getMerSetting($merId): array
     {
