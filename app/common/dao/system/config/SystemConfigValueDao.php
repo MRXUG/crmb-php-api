@@ -49,7 +49,7 @@ class SystemConfigValueDao extends BaseDao
      */
     public function merUpdate(int $merId, string $key, array $data)
     {
-        if (isset($data['value'])) $data['value'] = json_encode($data['value'], JSON_UNESCAPED_UNICODE);
+        if (isset($data['value'])) $data['value'] = json_encode($data['value'], JSON_UNESCAPED_SLASHES + JSON_UNESCAPED_UNICODE);
         return SystemConfigValue::getDB()->where('mer_id', $merId)->where('config_key', $key)->update($data);
     }
 
