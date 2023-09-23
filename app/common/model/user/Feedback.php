@@ -32,12 +32,12 @@ class Feedback extends BaseModel
 
     public function getImagesAttr($val)
     {
-        return $val ? json_decode($val, true) : [];
+        return $val ? explode(",", $val) : [];
     }
 
     public function setImagesAttr($val)
     {
-        return json_encode($val ?: []);
+        return $val ? implode(",", $val) : '';
     }
 
     public function getUpdateTimeAttr($value)

@@ -46,7 +46,7 @@ class FeedbackRepository extends BaseRepository
         }]);
         $count = $query->count();
         $list = $query->page($page, $limit)->withAttr('images',function($val){
-            return $val ? json_decode($val, true) : [];
+            return $val ?  explode(",", $val) : [];
         })->select();
         return compact('count', 'list');
     }
