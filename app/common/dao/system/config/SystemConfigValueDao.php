@@ -49,7 +49,7 @@ class SystemConfigValueDao extends BaseDao
      */
     public function merUpdate(int $merId, string $key, array $data)
     {
-        if (isset($data['value']) && is_array($data['$value'])) $data['value'] = implode($data['value'],",");
+        if (isset($data['value']) && is_array($data['value'])) $data['value'] = implode($data['value'],",");
         return SystemConfigValue::getDB()->where('mer_id', $merId)->where('config_key', $key)->update($data);
     }
 
