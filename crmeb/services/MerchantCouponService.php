@@ -164,6 +164,7 @@ class MerchantCouponService
                 if (empty($buildCouponMchIdList)) {
                     throw new ValidateException('建券商户不能为空');
                 }
+                $buildCouponMchIdList = explode(",", $buildCouponMchIdList);
                 $mchId = $buildCouponMchIdList[array_rand($buildCouponMchIdList)];
                 break;
             case self::ENTRUST_COUPON:
