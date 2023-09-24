@@ -93,7 +93,7 @@ class SystemConfigValueDao extends BaseDao
     public function value(string $key, int $merId)
     {
         $value = SystemConfigValue::getDB()->where('config_key', $key)->where('mer_id', $merId)->value('value');
-        return $value;
+        return explode(",",$value);
     }
 
     /**
