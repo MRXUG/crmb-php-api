@@ -270,12 +270,13 @@ class Merchant extends BaseModel
 
     public function getMerCertificateAttr()
     {
-        return merchantConfig($this->mer_id, 'mer_certificate');
+        $str = merchantConfig($this->mer_id, 'mer_certificate');
+        return $str == ""? [] : explode(",", $str);
     }
 
     public function getIssetCertificateAttr()
     {
-        return count(merchantConfig($this->mer_id, 'mer_certificate') ?: []) > 0;
+        return merchantConfig($this->mer_id, 'mer_certificate') == '';
     }
 
     public function searchMerIdsAttr($query, $value)

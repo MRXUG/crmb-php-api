@@ -354,6 +354,9 @@ class Common extends BaseController
         $sys_login_banner = systemConfig('sys_login_banner');
         $beian_sn = systemConfig('beian_sn');
         $login_banner = [];
+        if(!is_array($sys_login_banner)){
+            $sys_login_banner = explode(",", $sys_login_banner);
+        }
         foreach ($sys_login_banner as $item) {
             $login_banner[] = [
                 'pic' => $item,
