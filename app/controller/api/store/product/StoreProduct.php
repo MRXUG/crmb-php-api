@@ -216,6 +216,7 @@ class StoreProduct extends BaseController
      */
     public function adDetail($id)
     {
+        $id = (int)$id;
         if (!$this->adRepository->adExists($id))
             return app('json')->fail('数据不存在');
         return app('json')->success($this->adRepository->getInfo($id));
