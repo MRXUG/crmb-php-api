@@ -181,6 +181,7 @@ class MerchantCouponService
                 if (empty($sendCouponMchIdList)) {
                     throw new ValidateException('发券商户不能为空');
                 }
+                $sendCouponMchIdList = explode(",", $sendCouponMchIdList);
                 $mchId = $sendCouponMchIdList[array_rand($sendCouponMchIdList)];
                 break;
             case self::USE_COUPON:
