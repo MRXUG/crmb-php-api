@@ -59,7 +59,7 @@ class SystemConfigValue extends BaseModel
      */
     public function getValueAttr($value)
     {
-        return json_decode($value, true);
+        return explode(",",$value);
     }
 
     /**
@@ -70,7 +70,7 @@ class SystemConfigValue extends BaseModel
      */
     public function setValueAttr($value)
     {
-        return json_encode($value);
+        return is_array($value) ? implode($value,",") : $value;
     }
 
     /**

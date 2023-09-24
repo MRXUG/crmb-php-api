@@ -201,7 +201,7 @@ class PlatformMerchantRepository  extends BaseRepository
         // 非平台商户
         $merId = $this->systemConfigValueDao->getValue([
             'config_key' => "pay_routine_mchid",
-            'value'      => json_encode($merchantId),
+            'value'      => is_array($merchantId) ? implode($merchantId,","):$merchantId,
         ], 'mer_id');
         if (($plMerId && $plMerId != $id) || $merId && ($merId != $id) || ($plMerId && $merId)) {
             throw new ValidateException('该商户号已绑定过其它商户！');

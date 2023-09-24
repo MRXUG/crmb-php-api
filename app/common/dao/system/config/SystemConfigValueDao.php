@@ -49,7 +49,7 @@ class SystemConfigValueDao extends BaseDao
      */
     public function merUpdate(int $merId, string $key, array $data)
     {
-        if (isset($data['value'])) $data['value'] = json_encode($data['value'], JSON_UNESCAPED_SLASHES + JSON_UNESCAPED_UNICODE);
+        if (isset($data['value']) && is_array($data['$value'])) $data['value'] = implode($data['value'],",");
         return SystemConfigValue::getDB()->where('mer_id', $merId)->where('config_key', $key)->update($data);
     }
 
@@ -62,11 +62,9 @@ class SystemConfigValueDao extends BaseDao
      */
     public function fields(array $keys, int $merId)
     {
-        $result = SystemConfigValue::getDB()->whereIn('config_key', $keys)->where('mer_id', $merId)->withAttr('value', function ($val, $data) {
-            return json_decode($val, true);
-        })->column('value', 'config_key');
+        $result = SystemConfigValue::getDB()->whereIn('config_key', $keys)->where('mer_id', $merId)->column('value', 'config_key');
         foreach ($result as $k => $val) {
-            $result[$k] = json_decode($val, true);
+            $result[$k] = $val;
         }
         return $result;
     }
@@ -95,7 +93,6 @@ class SystemConfigValueDao extends BaseDao
     public function value(string $key, int $merId)
     {
         $value = SystemConfigValue::getDB()->where('config_key', $key)->where('mer_id', $merId)->value('value');
-        $value = is_null($value) ? null : json_decode($value, true);
         return $value;
     }
 

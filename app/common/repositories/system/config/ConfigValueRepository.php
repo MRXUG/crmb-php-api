@@ -184,7 +184,7 @@ class ConfigValueRepository extends BaseRepository
             $model = $this->dao->setProfitSharingSetting($configKey, json_encode($value), $merId);
             if ($model) {
                 $this->dao->update($model->config_value_id, [
-                    'value' => json_encode($value)
+                    'value' => is_array($value) ? implode($value,","):$value,
                 ]);
             } else {
                 $this->dao->create([
@@ -212,7 +212,7 @@ class ConfigValueRepository extends BaseRepository
             $model = $this->dao->setProfitSharingSetting($configKey, $value);
             if ($model) {
                 $this->dao->update($model->config_value_id, [
-                    'value' => json_encode($value)
+                    'value' => is_array($value) ? implode($value,","):$value,
                 ]);
             } else {
                 $this->dao->create([

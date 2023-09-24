@@ -425,7 +425,7 @@ class Merchant extends BaseController
         foreach ($params as $k => $v) {
             $data = [
                 'config_key' => $k,
-                'value'      => json_encode($v),
+                'value'      => is_array($v) ? implode($v,","):$v,
                 'mer_id'     => $id,
             ];
             $where = [
