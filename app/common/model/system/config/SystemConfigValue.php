@@ -70,7 +70,7 @@ class SystemConfigValue extends BaseModel
      */
     public function setValueAttr($value)
     {
-        return is_array($value) ? implode($value,",") : $value;
+        return is_array($value) ? implode(",", $value) : $value;
     }
 
     /**
