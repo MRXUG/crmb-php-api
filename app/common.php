@@ -1158,6 +1158,7 @@ if (!function_exists('getCreateCouponMerchant')) {
         if (empty($stockId)) {
             // 随机获取一个制券商户
             $buildCouponMchIdList = systemConfig(['build_bonds_merchant'])['build_bonds_merchant'];
+            $buildCouponMchIdList = explode(",", $buildCouponMchIdList);
             $mchId = $buildCouponMchIdList[array_rand($buildCouponMchIdList)];
         } else {
             // 获取指定批次券的制券商户
@@ -1192,6 +1193,7 @@ if (!function_exists('getSendCouponMerchant')) {
         if (empty($stockId)) {
             // 随机获取一个制券商户
             $buildCouponMchIdList = systemConfig(['issue_bonds_merchant'])['issue_bonds_merchant'];
+            $buildCouponMchIdList = explode(",", $buildCouponMchIdList);
             $mchId = $buildCouponMchIdList[array_rand($buildCouponMchIdList)];
         } elseif ($stockId && empty($couponCode)) {
             // 获取指定批次券的发券商户
