@@ -134,7 +134,7 @@ class CouponStocksUserRepository extends BaseRepository
         // 入库
         $insertData = [
             'mer_id'      => $stockInfo['mer_id'], // 建券的mer_id
-            'ad_id'       => $ad_id,
+//            'ad_id'       => $ad_id,
             'coupon_id'   => $stockInfo['id'],
             'uid'         => $user->uid,
             'coupon_code' => $couponCode,
