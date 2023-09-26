@@ -92,9 +92,6 @@ class StoreOrderCreateRepository extends StoreOrderRepository
             $rules = json_decode($rules, true);
         }else{
             $rules = PostageTemplateRuleModel::getModel()->where('template_id', $tempId)->select()->toArray();
-            foreach ($rules as &$rule){
-                $rule['area_id_info'] = CityArea::getModel()->where('id in ('.$rule['area_ids'].')')->column('id,level');
-            }
             Cache::set($cacheKey, json_encode($rules), 3600);
         }
         $findRule = [];
@@ -103,11 +100,11 @@ class StoreOrderCreateRepository extends StoreOrderRepository
                 break;
             }
             //寻址
-            foreach ($rule['area_id_info'] as $v){
+            foreach ($rule['area_ids'] as $v){
                 if(
-                    ($v['level'] == 3 && $v['id'] ==  $address->district_id) || //三级地域匹配
-                    ($v['level'] == 2 && $v['id'] ==  $address->city_id) || //二级地域匹配
-                    ($v['level'] == 1 && $v['id'] ==  $address->province_id) //一级地域匹配
+                    (count($v) == 3 && $v[2] ==  $address->district_id) || //三级地域匹配
+                    (count($v) == 2 && $v[1] ==  $address->city_id) || //二级地域匹配
+                    (count($v) == 1 && $v[0] ==  $address->province_id) //一级地域匹配
                 ){
                     $findRule = $rule;
                     break;
