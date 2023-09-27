@@ -104,7 +104,7 @@ class ExpressService
     {
         $has = Cache::has('express_' . $sn);
         if ($has) {
-            $result = Cache::get('express_' . $sn);
+            $result = json_decode(Cache::get('express_' . $sn), true);
         } else {
             $suffix = '';
             $is_shunfeng  = strtoupper(substr($sn,0,2));
@@ -114,7 +114,7 @@ class ExpressService
             $com = app()->make(ExpressRepository::class)->getSearch(['name' => $name])->value('code');
             $result = self::query($sn.$suffix, $com, ['phone' => $phone]);
             if(!empty($result['list'])){
-                Cache::set('express_' . $sn, $result['list'], $result['cacheTime']);
+                Cache::set('express_' . $sn, json_encode($result['list'], JSON_UNESCAPED_UNICODE), $result['cacheTime']);
                 $result  =  $result['list'];
             }
         }
