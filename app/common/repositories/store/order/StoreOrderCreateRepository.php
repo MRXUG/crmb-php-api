@@ -91,7 +91,7 @@ class StoreOrderCreateRepository extends StoreOrderRepository
         if($rules = Cache::get($cacheKey)){
             $rules = json_decode($rules, true);
         }else{
-            $rules = PostageTemplateRuleModel::getModel()->where('template_id', $tempId)->select()->toArray();
+            $rules = PostageTemplateRuleModel::getModel()->where('template_id', $tempId)->where("template_id != 0")->select()->toArray();
             Cache::set($cacheKey, json_encode($rules), 3600);
         }
         $findRule = [];
