@@ -473,7 +473,7 @@ class ProductRepository extends BaseRepository
             'pay_limit'             => $data['pay_limit'] ?? 0,
             'guarantee'             => $data['guarantee_type'] ?? 0,
             'price'                 => $data['price'] ?? 0,
-            'detail_hight'          => $data['detail_hight'] ?? json_encode($data['detail_hight']),
+            'detail_hight'          => isset($data['detail_hight']) ? json_encode($data['detail_hight']) : "",
             'type'                  => 0,
             'ficti'                 => mt_rand(300, 1000),
         ];
