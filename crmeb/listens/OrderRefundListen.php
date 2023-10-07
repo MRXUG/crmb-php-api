@@ -34,7 +34,7 @@ class OrderRefundListen extends TimerService implements ListenerInterface
     public function handle($event): void
     {
         # 每半分钟检测一次
-        $this->tick(1000*60*5, function () {
+        $this->tick(1000*60*1, function () {
             request()->clearCache();
             # 查询获取任务信息·
             //** @var RefundTask[] $task */
