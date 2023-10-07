@@ -515,7 +515,7 @@ class StoreRefundOrderRepository extends BaseRepository
      */
     public function getList(array $where, int $page, int $limit)
     {
-        $query = $this->dao->search($where)->where('is_system_del', 0)->where('status','<>',-2)->with([
+        $query = $this->dao->search($where)->where('is_system_del', 0)->with([
             'order' => function ($query) {
                 $query->field('order_id,order_sn,activity_type,real_name,user_address,status,order_type,is_del');
             },
@@ -562,7 +562,7 @@ class StoreRefundOrderRepository extends BaseRepository
 
     public function getAdminList(array $where, int $page, int $limit)
     {
-        $query = $this->dao->search($where)->where('status','<>',-2)->with(['order' => function ($query) {
+        $query = $this->dao->search($where)->with(['order' => function ($query) {
             $query->field('order_id,order_sn,activity_type');
         }, 'refundProduct.product', 'user' => function ($query) {
             $query->field('uid,nickname,phone');
