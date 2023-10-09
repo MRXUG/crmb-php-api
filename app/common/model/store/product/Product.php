@@ -106,6 +106,7 @@ class Product extends BaseModel
         'unit_name'             => 'varchar', //单位名/废弃
         'video_link'            => 'varchar', //主图视频链接/废弃
         'detail_hight'          => 'text',
+        'image_hw'              => 'tinyint',
 
     ];
 

@@ -69,6 +69,7 @@ class ProductRepository extends BaseRepository
         "slider_image", //商品轮播图
         "goods_desc", //商品详情
         "detail_hight", // 详情图片累计高度
+        "image_hw", //主图比例
         //设置比例待定-暂时不处理
         ["delivery_free", 0], //全国包邮金额 统一邮费的话就填写邮费金额
         "temp_id", //邮费模版ID
@@ -474,6 +475,7 @@ class ProductRepository extends BaseRepository
             'guarantee'             => $data['guarantee_type'] ?? 0,
             'price'                 => $data['price'] ?? 0,
             'detail_hight'          => isset($data['detail_hight']) ? json_encode($data['detail_hight']) : "",
+            'image_hw'              => $data['image_hw'] ?? 1,
             'type'                  => 0,
             'ficti'                 => mt_rand(300, 1000),
         ];
