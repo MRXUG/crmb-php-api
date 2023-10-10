@@ -11,7 +11,7 @@ class ApiRequest extends BaseApi implements ServeHttp
 {
     public function request($serveHttp, $params): array
     {
-        return Client::post($serveHttp, Util::getParams($this->getConfig()['app_Secret'], $params));
+        return Client::post($serveHttp, Util::getParams($this->getConfig()['app_secret'], $params));
     }
 
 }

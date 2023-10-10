@@ -11,19 +11,23 @@ class Auth extends BaseApi
     /**
      * 生成授权链接
      * @fun createUrl
+     * @param $state
+     * @return string
      */
-    public function createUrl(): string
+    public function createUrl($state): string
     {
         $data = [
-            'app_key' => $this->getConfig()['app_Key'],
+            'app_key' => $this->getConfig()['app_key'],
             'timestamp' => time(),
-            'charset' => $this->getConfig()['charset']
+            'charset' => $this->getConfig()['charset'],
+            'state' => $state,
         ];
-        $sign = Util::getSign($this->getConfig()['app_Secret'],$data);
+        $sign = Util::getSign($this->getConfig()['app_secret'],$data);
         return $this->getConfig()['authUrl'] .
             '?app_key=' . $data['app_key'] .
             '&timestamp=' . $data['timestamp'] .
             '&charset=' . $data['charset'] .
+            '&state=' . $data['state'] .
             '&sign=' . $sign;
     }
 
@@ -37,13 +41,13 @@ class Auth extends BaseApi
     public function getAccessToken($code): array
     {
         $data = [
-            'app_key' => $this->getConfig()['app_Key'],
+            'app_key' => $this->getConfig()['app_key'],
             'timestamp' => time(),
             'grant_type' => 'authorization_code',
             'charset' => $this->getConfig()['charset'],
             'code' => $code,
         ];
-        $data['sign'] = Util::getSign($this->getConfig()['app_Secret'],$data);
+        $data['sign'] = Util::getSign($this->getConfig()['app_secret'],$data);
         return Client::post($this->getAccessTokenUrl, $data);
     }
 
@@ -56,7 +60,7 @@ class Auth extends BaseApi
     public function refreshToken($refresh_token): array
     {
         $data = [
-            'app_key' => $this->getConfig()['app_Key'],
+            'app_key' => $this->getConfig()['app_key'],
             'timestamp' => time(),
             'grant_type' => 'refresh_token',
             'charset' => $this->getConfig()['charset'],
@@ -64,7 +68,7 @@ class Auth extends BaseApi
             'scope' => 'all',
         ];
 
-        $data['sign'] = Util::getSign($this->getConfig()['app_Secret'],$data);
+        $data['sign'] = Util::getSign($this->getConfig()['app_secret'],$data);
         return Client::post($this->refreshTokenUrl, $data);
     }
 }

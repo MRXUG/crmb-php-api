@@ -2,7 +2,9 @@
 
 namespace crmeb\services\erp\JuShuiTan;
 
+use app\common\model\erp\JuShuiTanAuthorizeConfig;
 use GuzzleHttp\Client;
+use think\Exception;
 
 class JuShuiTan
 {
@@ -12,10 +14,10 @@ class JuShuiTan
      */
     protected array $config = [
         'authUrl' => 'https://openweb.jushuitan.com/auth',
-        'baseUrl' => '',
+        'base_url' => '',
         'access_token' => '',
-        'app_Key' => '',
-        'app_Secret' => '',
+        'app_key' => '',
+        'app_secret' => '',
         'version' => 2,
         'charset' => 'utf-8'
     ];
@@ -67,11 +69,11 @@ class JuShuiTan
      */
     public function setConfig(array $config): JuShuiTan
     {
-        if (isset($config['app_Key'], $config['app_Secret'], $config['baseUrl'],$config['access_token'])) {
+        if (isset($config['app_key'], $config['app_secret'], $config['base_url'],$config['access_token'])) {
             $this->config['access_token'] = $config['access_token'];
-            $this->config['baseUrl'] = $config['baseUrl'];
-            $this->config['app_Key'] = $config['app_Key'];
-            $this->config['app_Secret'] = $config['app_Secret'];
+            $this->config['base_url'] = $config['base_url'];
+            $this->config['app_key'] = $config['app_key'];
+            $this->config['app_secret'] = $config['app_secret'];
         }
         return $this;
     }
@@ -90,9 +92,9 @@ class JuShuiTan
      */
     public function setPublicRequestParams(): JuShuiTan
     {
-        if (isset($this->getConfig()['app_Key'], $this->getConfig()['access_token'])){
+        if (isset($this->getConfig()['app_key'], $this->getConfig()['access_token'])){
             $this->publicRequestParams = [
-               'app_key' => $this->config['app_Key'],
+               'app_key' => $this->config['app_key'],
                'access_token' =>  $this->config['access_token'],
                'timestamp' => time(),
                'charset' => $this->config['charset'],
