@@ -7,7 +7,6 @@ namespace app\controller\admin\Erp;
 use app\common\model\erp\JuShuiTanAuthorizeConfig;
 use crmeb\basic\BaseController;
 use crmeb\services\erp\JuShuiTan\Auth\Auth;
-use Darabonba\GatewaySpi\Models\InterceptorContext\response;
 use think\facade\Log;
 
 class JuShuiTanController extends BaseController
@@ -65,6 +64,9 @@ class JuShuiTanController extends BaseController
             ->where("app_key", $param["app_key"])
             ->Where("mer_id", $param['state'])
             ->find();
+        if(!$model){
+            return app('json')->fail($param);
+        }
         $service = new Auth($model->toArray());
         $url = $service->createUrl($param['state']);
         return app('json')->success(["url" => $url]);
