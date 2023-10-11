@@ -31,6 +31,27 @@ Route::group(function () {
             '_form' => 'AuthorizeCallback',
         ]);
 
+        Route::any('deliverySyncCallback', '/deliverySyncCallback')->name('JuShuiTanDeliverySyncCallback')->option([
+            '_alias' => '物流同步',
+            '_auth' => false,
+            '_form' => 'deliverySyncCallback',
+        ]);
+        Route::any('cancelOrderSyncCallback', '/cancelOrderSyncCallback')->name('JuShuiTanCancelOrderSyncCallback')->option([
+            '_alias' => '取消订单',
+            '_auth' => false,
+            '_form' => 'cancelOrderSyncCallback',
+        ]);
+        Route::any('stockSyncCallback', '/stockSyncCallback')->name('JuShuiTanStockSyncCallback')->option([
+            '_alias' => '库存同步',
+            '_auth' => false,
+            '_form' => 'stockSyncCallback',
+        ]);
+        Route::any('shippingSyncCallback', '/shippingSyncCallback')->name('JuShuiTanShippingSyncCallback')->option([
+            '_alias' => '售后发货',
+            '_auth' => false,
+            '_form' => 'shippingSyncCallback',
+        ]);
+
     })->prefix('admin.Erp.JuShuiTanController')->option([
         '_path' => '/Erp/JuShuiTan',
         '_auth' => true,

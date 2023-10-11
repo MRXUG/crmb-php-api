@@ -7,6 +7,7 @@ namespace app\controller\admin\Erp;
 use app\common\model\erp\JuShuiTanAuthorizeConfig;
 use crmeb\basic\BaseController;
 use crmeb\services\erp\JuShuiTan\Auth\Auth;
+use Darabonba\GatewaySpi\Models\InterceptorContext\response;
 use think\facade\Log;
 
 class JuShuiTanController extends BaseController
@@ -67,6 +68,74 @@ class JuShuiTanController extends BaseController
         $service = new Auth($model->toArray());
         $url = $service->createUrl($param['state']);
         return app('json')->success(["url" => $url]);
+    }
+
+    /**
+     * 物流同步
+     *
+     */
+    public function deliverySyncCallback(){
+        //TODO
+        $param = [
+            'header' => $this->request->header(),
+            'getContent' => $this->request->getContent(),
+            'get' => $this->request->get(),
+            'post' =>  $this->request->post(),
+            'method' => $this->request->method(),
+        ];
+        Log::info("deliverySyncCallback:".json_encode($param));
+        return response(['code' => 0, 'msg' => '执行成功'], 200, [], 'json');
+    }
+
+    /**
+     * 取消订单
+     *
+     */
+    public function cancelOrderSyncCallback(){
+        //TODO
+        $param = [
+            'header' => $this->request->header(),
+            'getContent' => $this->request->getContent(),
+            'get' => $this->request->get(),
+            'post' =>  $this->request->post(),
+            'method' => $this->request->method(),
+        ];
+        Log::info("cancelOrderSyncCallback:".json_encode($param));
+        return response(['code' => 0, 'msg' => '执行成功'], 200, [], 'json');
+    }
+
+    /**
+     * 库存同步
+     *
+     */
+    public function stockSyncCallback(){
+        //TODO
+        $param = [
+            'header' => $this->request->header(),
+            'getContent' => $this->request->getContent(),
+            'get' => $this->request->get(),
+            'post' =>  $this->request->post(),
+            'method' => $this->request->method(),
+        ];
+        Log::info("stockSyncCallback:".json_encode($param));
+        return response(['code' => 0, 'msg' => '执行成功'], 200, [], 'json');
+    }
+
+    /**
+     * 售后发货
+     *
+     */
+    public function shippingSyncCallback(){
+        //TODO
+        $param = [
+            'header' => $this->request->header(),
+            'getContent' => $this->request->getContent(),
+            'get' => $this->request->get(),
+            'post' =>  $this->request->post(),
+            'method' => $this->request->method(),
+        ];
+        Log::info("shippingSyncCallback:".json_encode($param));
+        return response(['code' => 0, 'msg' => '执行成功'], 200, [], 'json');
     }
 
 }
