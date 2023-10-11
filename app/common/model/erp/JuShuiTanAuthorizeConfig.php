@@ -17,7 +17,6 @@ class JuShuiTanAuthorizeConfig extends BaseModel
         'charset' => 'varchar',//utf-8
         'state' => 'varchar',//授权商家信息，mer_id
         'mer_id' => 'int',//商户id
-        'base_url' => 'varchar',//
         'access_token' => 'varchar',//
         'refresh_token' => 'varchar',//刷新token，必须在access_token过期前刷新，否则需要重新授权
         'access_token_expire_at' => 'datetime',//access_token过期时间

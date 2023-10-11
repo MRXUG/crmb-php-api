@@ -18,20 +18,20 @@ class JuShuiTanController extends BaseController
             "state" =>  $this->request->get('state'),
             "sign" =>  $this->request->get('sign'),
         ];
+        Log::info("聚水潭授权回调参数:".json_encode($param));
         if($param['code'] != "" && $param["app_key"] != ""){
             $model = JuShuiTanAuthorizeConfig::getInstance()
                 ->where("app_key", $param["app_key"])
-                ->Where("mer_id", $param['state'])
+//                ->Where("mer_id", $param['state'])
                 ->find();
             if(!$model){
-                Log::error("聚水潭授权回调错误:".json_encode($param));
+                Log::error("聚水潭授权回调错误");
                 return response(["code" => 0], 200, [], 'json');
             }
             $service = new Auth($model->toArray());
             $res = $service->getAccessToken($param['code']);
             //更新
             if(!isset($res['code']) || $res['code'] != 0){
-                echo json_encode($res);
                 Log::error("聚水潭授权获取token错误:".json_encode($param).":".json_encode($res));
                 return response(["code" => 0], 200, [], 'json');
             }
@@ -57,7 +57,7 @@ class JuShuiTanController extends BaseController
      */
     public function createUrl(){
         $param = [
-            "app_key" =>  $this->request->get('app_key'),
+            "app_key" => config("erp.jushuitan.app_key"),
             "state" =>  $this->request->get('mer_id'),
         ];
         $model = JuShuiTanAuthorizeConfig::getInstance()

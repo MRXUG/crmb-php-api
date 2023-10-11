@@ -14,7 +14,7 @@ class JuShuiTan
      */
     protected array $config = [
         'authUrl' => 'https://openweb.jushuitan.com/auth',
-        'base_url' => '',
+        'base_url' => 'https://openweb.jushuitan.com',
         'access_token' => '',
         'app_key' => '',
         'app_secret' => '',
@@ -69,11 +69,17 @@ class JuShuiTan
      */
     public function setConfig(array $config): JuShuiTan
     {
-        if (isset($config['app_key'], $config['app_secret'], $config['base_url'],$config['access_token'])) {
+        if (isset($config['app_key'], $config['app_secret'],$config['access_token'])) {
             $this->config['access_token'] = $config['access_token'];
-            $this->config['base_url'] = $config['base_url'];
             $this->config['app_key'] = $config['app_key'];
             $this->config['app_secret'] = $config['app_secret'];
+        }
+        if(isDebug()){
+            $this->config['base_url'] = 'https://dev-api.jushuitan.com';
+            $this->config['app_key'] = 'b0b7d1db226d4216a3d58df9ffa2dde5';
+            $this->config['app_secret'] = '99c4cef262f34ca882975a7064de0b87';
+            //企业版token:b7e3b1e24e174593af8ca5c397e53dad, 专业版:8db141b6d724211b28d2eff2c93fe918
+            $this->config['access_token'] = 'b7e3b1e24e174593af8ca5c397e53dad';
         }
         return $this;
     }
