@@ -20,37 +20,18 @@ Route::group(function () {
 
     //配置分类
     Route::group('erp/jushuitan', function () {
-        Route::get('AuthorizeCallback', '/AuthorizeCallback')->name('JuShuiTanCallback')->option([
-            '_alias' => '授权回调',
-            '_auth' => false,
-            '_form' => 'AuthorizeCallback',
-        ]);
         Route::get('createUrl', '/createUrl')->name('JuShuiTanCreateUrl')->option([
             '_alias' => '授权回调',
             '_auth' => false,
             '_form' => 'AuthorizeCallback',
         ]);
 
-        Route::any('deliverySyncCallback', '/deliverySyncCallback')->name('JuShuiTanDeliverySyncCallback')->option([
-            '_alias' => '物流同步',
-            '_auth' => false,
-            '_form' => 'deliverySyncCallback',
-        ]);
-        Route::any('cancelOrderSyncCallback', '/cancelOrderSyncCallback')->name('JuShuiTanCancelOrderSyncCallback')->option([
-            '_alias' => '取消订单',
-            '_auth' => false,
-            '_form' => 'cancelOrderSyncCallback',
-        ]);
-        Route::any('stockSyncCallback', '/stockSyncCallback')->name('JuShuiTanStockSyncCallback')->option([
-            '_alias' => '库存同步',
-            '_auth' => false,
-            '_form' => 'stockSyncCallback',
-        ]);
-        Route::any('shippingSyncCallback', '/shippingSyncCallback')->name('JuShuiTanShippingSyncCallback')->option([
-            '_alias' => '售后发货',
-            '_auth' => false,
-            '_form' => 'shippingSyncCallback',
-        ]);
+        Route::get('AuthorizeCallback', '/AuthorizeCallback')->name('JuShuiTanCallback');
+        
+        Route::any('deliverySyncCallback', '/deliverySyncCallback')->name('JuShuiTanDeliverySyncCallback');
+        Route::any('cancelOrderSyncCallback', '/cancelOrderSyncCallback')->name('JuShuiTanCancelOrderSyncCallback');
+        Route::any('stockSyncCallback', '/stockSyncCallback')->name('JuShuiTanStockSyncCallback');
+        Route::any('shippingSyncCallback', '/shippingSyncCallback')->name('JuShuiTanShippingSyncCallback');
 
     })->prefix('admin.Erp.JuShuiTanController')->option([
         '_path' => '/Erp/JuShuiTan',
@@ -58,5 +39,4 @@ Route::group(function () {
     ]);
 
 
-})->middleware(AllowOriginMiddleware::class)
-    ->middleware(LogMiddleware::class);
+})->middleware(AllowOriginMiddleware::class);
