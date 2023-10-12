@@ -315,5 +315,26 @@ class StoreOrder extends BaseModel
         Queue::push(OrderInsertJob::class, $order->toArray());
     }
 
+    public static function getPayment(int $pay_type):string {
+        switch ($pay_type){
+            case 0:
+                return "余额";
+            case 1:
+                return "微信";
+            case 2:
+                return "小程序";
+            case 3:
+                return "h5";
+            case 4:
+                return "支付宝";
+            case 5:
+                return "支付宝扫码";
+            case 6:
+                return "微信扫码";
+            default:
+                return $pay_type;
+        }
+
+    }
 
 }

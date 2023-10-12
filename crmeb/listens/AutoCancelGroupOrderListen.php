@@ -28,6 +28,7 @@ class AutoCancelGroupOrderListen extends TimerService implements ListenerInterfa
     public function handle($event): void
     {
         $this->tick(60000, function () {
+            /** @var StoreGroupOrderRepository $storeGroupOrderRepository */
             $storeGroupOrderRepository = app()->make(StoreGroupOrderRepository::class);
             request()->clearCache();
             $timer = ((int)systemConfig('auto_close_order_timer')) ?: 15;

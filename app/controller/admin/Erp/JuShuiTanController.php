@@ -6,6 +6,7 @@ namespace app\controller\admin\Erp;
 
 use app\common\model\erp\JuShuiTanAuthorizeConfig;
 use crmeb\basic\BaseController;
+use crmeb\jobs\Erp\JushuiTan\OrderPutJob;
 use crmeb\services\erp\JuShuiTan\Auth\Auth;
 use think\facade\Log;
 
@@ -136,7 +137,8 @@ class JuShuiTanController extends BaseController
             'post' =>  $this->request->post(),
             'method' => $this->request->method(),
         ];
-        Log::info("shippingSyncCallback:".json_encode($param));
+        OrderPutJob::deal();
+//        Log::info("shippingSyncCallback:".json_encode($param));
         return response(['code' => 0, 'msg' => '执行成功'], 200, [], 'json');
     }
 
